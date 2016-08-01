@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/SessionFileStore.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Session store using files."""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> threading
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+<span class="PY_KEYWORD">from</span> SessionStore <span class="PY_KEYWORD">import</span> SessionStore
+
+
+<span class="PY_KEYWORD">class</span> SessionFileStore(SessionStore):
+    <span class="PY_STRING">"""A session file store.
+
+    Stores the sessions on disk in the Sessions/ directory,
+    one file per session.
+
+    This is useful for various situations:
+      1. Using the OneShot adapter
+      2. Doing development (so that restarting the app server won't
+         lose session information).
+      3. Fault tolerance
+      4. Clustering
+
+    Note that the last two are not yet supported by WebKit.
+
+    """</span>
+
+    _extension = <span class="PY_STRING">'.ses'</span>
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, app, restoreFiles=True):
+        <span class="PY_STRING">"""Initialize the session file store.
+
+        If restoreFiles is true, and sessions have been saved to file,
+        the store will be initialized from these files.
+
+        """</span>
+        SessionStore.__init__(self, app)
+        self._sessionDir = app._sessionDir
+        self._lock = threading.RLock()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> restoreFiles:
+            self.clear()
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_STRING">"""Return the number of sessions in the store."""</span>
+        <span class="PY_KEYWORD">return</span> len(self.keys())
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, key):
+        <span class="PY_STRING">"""Get a session item, loading it from the session file."""</span>
+        filename = self.filenameForKey(key)
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                sessionFile = open(filename, <span class="PY_STRING">'rb'</span>)
+            <span class="PY_KEYWORD">except</span> IOError:
+                <span class="PY_KEYWORD">raise</span> KeyError(key) <span class="PY_COMMENT"># session file not found</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    value = self.decoder()(sessionFile)
+                <span class="PY_KEYWORD">finally</span>:
+                    sessionFile.close()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error loading session from disk:"</span>, key
+                self.application().handleException()
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># remove the session file because it is corrupt</span>
+                    os.remove(filename)
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">raise</span> KeyError(key)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+        <span class="PY_KEYWORD">return</span> value
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, key, value):
+        <span class="PY_STRING">"""Set a session item, saving it to a session file."""</span>
+        dirty = value.isDirty()
+        <span class="PY_KEYWORD">if</span> self._alwaysSave <span class="PY_KEYWORD">or</span> dirty:
+            filename = self.filenameForKey(key)
+            self._lock.acquire()
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> dirty:
+                    value.setDirty(False)
+                <span class="PY_KEYWORD">try</span>:
+                    sessionFile = open(filename, <span class="PY_STRING">'wb'</span>)
+                    <span class="PY_KEYWORD">try</span>:
+                        <span class="PY_KEYWORD">try</span>:
+                            self.encoder()(value, sessionFile)
+                        <span class="PY_KEYWORD">finally</span>:
+                            sessionFile.close()
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_COMMENT"># remove the session file because it is corrupt</span>
+                        os.remove(filename)
+                        <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># raise original exception</span>
+                <span class="PY_KEYWORD">except</span> Exception: <span class="PY_COMMENT"># error pickling the session</span>
+                    <span class="PY_KEYWORD">if</span> dirty:
+                        value.setDirty()
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error saving session to disk:"</span>, key
+                    self.application().handleException()
+            <span class="PY_KEYWORD">finally</span>:
+                self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, key):
+        <span class="PY_STRING">"""Delete a session item, removing its session file."""</span>
+        filename = self.filenameForKey(key)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(filename):
+            <span class="PY_KEYWORD">raise</span> KeyError(key)
+        session = self[key]
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> session.isExpired():
+            session.expiring()
+        <span class="PY_KEYWORD">try</span>:
+            os.remove(filename)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, key):
+        <span class="PY_STRING">"""Check whether the session store has a file for the given key."""</span>
+        <span class="PY_KEYWORD">return</span> os.path.exists(self.filenameForKey(key))
+
+    <span class="PY_KEYWORD">def</span> __iter__(self):
+        <span class="PY_STRING">"""Return an iterator over the stored session keys."""</span>
+        ext = self._extension
+        pos = -len(ext)
+        <span class="PY_COMMENT"># note that iglob is slower here, since it's based on listdir</span>
+        <span class="PY_KEYWORD">for</span> filename <span class="PY_KEYWORD">in</span> os.listdir(self._sessionDir):
+            <span class="PY_KEYWORD">if</span> filename.endswith(ext):
+                <span class="PY_KEYWORD">yield</span> filename[:pos]
+
+    <span class="PY_KEYWORD">def</span> removeKey(self, key):
+        <span class="PY_STRING">"""Remove the session file for the given key."""</span>
+        filename = self.filenameForKey(key)
+        <span class="PY_KEYWORD">try</span>:
+            os.remove(filename)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> keys(self):
+        <span class="PY_STRING">"""Return a list with the keys of all the stored sessions."""</span>
+        <span class="PY_KEYWORD">return</span> [key <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self]
+
+    <span class="PY_KEYWORD">def</span> clear(self):
+        <span class="PY_STRING">"""Clear the session file store, removing all of the session files."""</span>
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self:
+            self.removeKey(key)
+
+    <span class="PY_KEYWORD">def</span> setdefault(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else default (also setting it)."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> self[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                self[key] = default
+                <span class="PY_KEYWORD">return</span> default
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> pop(self, key, default=NoDefault):
+        <span class="PY_STRING">"""Return value if key available, else default (also remove key)."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+                value = self[key]
+                self.removeKey(key)
+                <span class="PY_KEYWORD">return</span> value
+            <span class="PY_KEYWORD">elif</span> key <span class="PY_KEYWORD">in</span> self:
+                <span class="PY_KEYWORD">return</span> self[key]
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> default
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+
+    <span class="PY_COMMENT">## Application support ##</span>
+
+    <span class="PY_KEYWORD">def</span> storeSession(self, session):
+        <span class="PY_STRING">"""Save session, writing it to the session file now."""</span>
+        <span class="PY_KEYWORD">if</span> self._alwaysSave <span class="PY_KEYWORD">or</span> session.isDirty():
+            self[session.identifier()] = session
+
+    <span class="PY_KEYWORD">def</span> storeAllSessions(self):
+        <span class="PY_STRING">"""Permanently save all sessions in the store."""</span>
+        <span class="PY_KEYWORD">pass</span> <span class="PY_COMMENT"># sessions have all been saved to files already</span>
+
+
+    <span class="PY_COMMENT">## Self utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> filenameForKey(self, key):
+        <span class="PY_STRING">"""Return the name of the session file for the given key."""</span>
+        <span class="PY_KEYWORD">return</span> os.path.join(self._sessionDir, key + self._extension)
+</pre>
+<!--footer-->
+
+</body>
+</html>

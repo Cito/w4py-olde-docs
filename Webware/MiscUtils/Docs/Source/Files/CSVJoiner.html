@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/CSVJoiner.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""CSVJoiner.py
+
+A helper function for joining CSV fields.
+
+"""</span>
+
+
+<span class="PY_KEYWORD">def</span> joinCSVFields(fields):
+    <span class="PY_STRING">"""Create a CSV record by joining its fields.
+
+    Returns a CSV record (e.g. a string) from a sequence of fields.
+    Fields containing commands (,) or double quotes (") are quoted,
+    and double quotes are escaped ("").
+    The terminating newline is *not* included.
+
+    """</span>
+    newFields = []
+    <span class="PY_KEYWORD">for</span> field <span class="PY_KEYWORD">in</span> fields:
+        <span class="PY_KEYWORD">assert</span> isinstance(field, basestring)
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'"'</span> <span class="PY_KEYWORD">in</span> field:
+            newField = <span class="PY_STRING">'"%s"'</span> % field.replace(<span class="PY_STRING">'"'</span>, <span class="PY_STRING">'""'</span>)
+        <span class="PY_KEYWORD">elif</span> <span class="PY_STRING">','</span> <span class="PY_KEYWORD">in</span> field <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'\n'</span> <span class="PY_KEYWORD">in</span> field <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'\r'</span> <span class="PY_KEYWORD">in</span> field:
+            newField = <span class="PY_STRING">'"%s"'</span> % field
+        <span class="PY_KEYWORD">else</span>:
+            newField = field
+        newFields.append(newField)
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">','</span>.join(newFields)
+</pre>
+<!--footer-->
+
+</body>
+</html>

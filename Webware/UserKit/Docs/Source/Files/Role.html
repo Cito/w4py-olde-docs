@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/Role.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The basic Role class."""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> positiveId
+
+
+<span class="PY_KEYWORD">class</span> Role(object):
+    <span class="PY_STRING">"""Used in conjuction with RoleUser to provide role-based security.
+
+    All roles have a name and a description and respond to playsRole().
+
+    RoleUser also responds to playsRole() and is the more popular entry point
+    for programmers. Application code may then do something along the lines of:
+
+    if user.playsRole('admin'):
+        self.displayAdminMenuItems()
+
+    See also:
+      * class HierRole
+      * class RoleUser
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, name, description=None):
+        self._name = name
+        self._description = description
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> self.name()
+
+
+    <span class="PY_COMMENT">## Attributes ##</span>
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> setName(self, name):
+        self._name = name
+
+    <span class="PY_KEYWORD">def</span> description(self):
+        <span class="PY_KEYWORD">return</span> self._description
+
+    <span class="PY_KEYWORD">def</span> setDescription(self, description):
+        self._description = description
+
+
+    <span class="PY_COMMENT">## As strings ##</span>
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> str(self._name)
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;%s %r instance at %x&gt;'</span> % (
+            self.__class__, self._name, positiveId(self))
+
+
+    <span class="PY_COMMENT">## The big question ##</span>
+
+    <span class="PY_KEYWORD">def</span> playsRole(self, role):
+        <span class="PY_STRING">"""Return true if the receiving role plays the role passed in.
+
+        For Role, this is simply a test of equality. Subclasses may override
+        this method to provide richer semantics (such as hierarchical roles).
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> isinstance(role, Role)
+        <span class="PY_KEYWORD">return</span> self == role
+</pre>
+<!--footer-->
+
+</body>
+</html>

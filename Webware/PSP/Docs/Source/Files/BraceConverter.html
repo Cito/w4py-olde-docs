@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/BraceConverter.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""BraceConverter.py
+
+Contributed 2000-09-04 by Dave Wallace (dwallace@delanet.com)
+
+Converts Brace-blocked Python into normal indented Python.
+Brace-blocked Python is non-indentation aware and blocks are
+delimited by ':{' and '}' pairs.
+
+Thus:
+    for x in range(10) :{
+        if x%2 :{ print x } else :{ print z }
+    }
+
+Becomes (roughly, barring some spurious newlines):
+    for x in range(10) :
+        if x%2 :
+            print x
+        else :
+            print z
+
+This implementation is fed a line at a time via parseLine(),
+outputs to a PSPServletWriter, and tracks the current quotation
+and block levels internally.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> re
+<span class="PY_KEYWORD">import</span> sys
+
+
+<span class="PY_KEYWORD">class</span> BraceConverter(object):
+
+    CSKIP = re.compile(<span class="PY_STRING">"(^[^\"</span>'{}:<span class="PY_COMMENT">#]+)")</span>
+    COLONBRACE = re.compile(<span class="PY_STRING">":\s*{\s*([^\s].*)?$"</span>)
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self.inquote = False
+        self.dictlevel = 0
+
+    <span class="PY_KEYWORD">def</span> parseLine(self, line, writer):
+        <span class="PY_STRING">"""Parse a line.
+
+        The only public method of this class, call with subsequent lines
+        and an instance of PSPServletWriter.
+
+        """</span>
+        self.line = line
+        <span class="PY_KEYWORD">if</span> self.inquote <span class="PY_KEYWORD">and</span> self.line:
+            self.skipquote(writer)
+        self.line = self.line.lstrip()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.line:
+            writer.printChars(<span class="PY_STRING">'\n'</span>)
+            <span class="PY_KEYWORD">return</span>
+        writer.printIndent()
+        <span class="PY_KEYWORD">while</span> self.line:
+            <span class="PY_KEYWORD">while</span> self.inquote <span class="PY_KEYWORD">and</span> self.line:
+                self.skipquote(writer)
+            match = self.CSKIP.search(self.line)
+            <span class="PY_KEYWORD">if</span> match:
+                writer.printChars(self.line[:match.end(1)])
+                self.line = self.line[match.end(1):]
+            <span class="PY_KEYWORD">else</span>:
+                ch = self.line[0]
+                <span class="PY_KEYWORD">if</span> ch == <span class="PY_STRING">"'"</span>:
+                    self.handleQuote(<span class="PY_STRING">"'"</span>, writer)
+                    self.skipquote(writer)
+                <span class="PY_KEYWORD">elif</span> ch == <span class="PY_STRING">'"'</span>:
+                    self.handleQuote(<span class="PY_STRING">'"'</span>, writer)
+                    self.skipquote(writer)
+                <span class="PY_KEYWORD">elif</span> ch == <span class="PY_STRING">'{'</span>:
+                    self.openBrace(writer)
+                <span class="PY_KEYWORD">elif</span> ch == <span class="PY_STRING">'}'</span>:
+                    self.closeBrace(writer)
+                <span class="PY_KEYWORD">elif</span> ch == <span class="PY_STRING">':'</span>:
+                    self.openBlock(writer)
+                <span class="PY_KEYWORD">elif</span> ch == <span class="PY_STRING">'#'</span>:
+                    writer.printChars(self.line)
+                    self.line = <span class="PY_STRING">''</span>
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_COMMENT"># should never get here</span>
+                    <span class="PY_KEYWORD">raise</span> Exception()
+        <span class="PY_KEYWORD">else</span>:
+            writer.printChars(<span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> openBlock(self, writer):
+        <span class="PY_STRING">"""Open a new block."""</span>
+        match = self.COLONBRACE.match(self.line)
+        <span class="PY_KEYWORD">if</span> match <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> self.dictlevel:
+            writer.printChars(<span class="PY_STRING">':'</span>)
+            writer.pushIndent()
+            <span class="PY_KEYWORD">if</span> match.group(1):
+                <span class="PY_COMMENT"># text follows :{, if its a comment leave it on the same line</span>
+                <span class="PY_COMMENT"># else start a new line and leave the text for processing</span>
+                <span class="PY_KEYWORD">if</span> match.group(1)[0] == <span class="PY_STRING">'#'</span>:
+                    writer.printChars(<span class="PY_STRING">' '</span> + match.group(1))
+                    self.line = <span class="PY_STRING">''</span>
+                <span class="PY_KEYWORD">else</span>:
+                    writer.printChars(<span class="PY_STRING">'\n'</span>)
+                    writer.printIndent()
+                    self.line = match.group(1)
+            <span class="PY_KEYWORD">else</span>:
+                self.line = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">else</span>:
+            writer.printChars(<span class="PY_STRING">':'</span>)
+            self.line = self.line[1:]
+
+    <span class="PY_KEYWORD">def</span> openBrace(self, writer):
+        <span class="PY_STRING">"""Open brace encountered."""</span>
+        writer.printChars(<span class="PY_STRING">'{'</span>)
+        self.line = self.line[1:]
+        self.dictlevel += 1
+
+    <span class="PY_KEYWORD">def</span> closeBrace(self, writer):
+        <span class="PY_STRING">"""Close brace encountered."""</span>
+        <span class="PY_KEYWORD">if</span> self.dictlevel:
+            writer.printChars(<span class="PY_STRING">'}'</span>)
+            self.line = self.line[1:]
+            self.dictlevel -= 1
+        <span class="PY_KEYWORD">else</span>:
+            writer.popIndent()
+            self.line = self.line[1:].lstrip()
+            <span class="PY_KEYWORD">if</span> self.line:
+                writer.printChars(<span class="PY_STRING">'\n'</span>)
+                writer.printIndent()
+
+    <span class="PY_KEYWORD">def</span> skipquote(self, writer):
+        <span class="PY_STRING">"""Skip to end of quote.
+
+        Skip over all chars until the line is exhausted
+        or the current non-escaped quote sequence is encountered.
+
+        """</span>
+        pos = self.line.find(self.quotechars)
+        <span class="PY_KEYWORD">if</span> pos &lt; 0:
+            writer.printChars(self.line)
+            self.line = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">elif</span> pos &gt; 0 <span class="PY_KEYWORD">and</span> self.line[pos-1] == <span class="PY_STRING">'\\'</span>:
+            pos += 1
+            writer.printChars(self.line[:pos])
+            self.line = self.line[pos:]
+            self.skipquote(writer)
+        <span class="PY_KEYWORD">else</span>:
+            pos += len(self.quotechars)
+            writer.printChars(self.line[:pos])
+            self.line = self.line[pos:]
+            self.inquote = False
+
+    <span class="PY_KEYWORD">def</span> handleQuote(self, quote, writer):
+        <span class="PY_STRING">"""Check and handle if current pos is a single or triple quote."""</span>
+        self.inquote = True
+        triple = quote*3
+        <span class="PY_KEYWORD">if</span> self.line[0:3] == triple:
+            self.quotechars = triple
+            writer.printChars(triple)
+            self.line = self.line[3:]
+        <span class="PY_KEYWORD">else</span>:
+            self.quotechars = quote
+            writer.printChars(quote)
+            self.line = self.line[1:]
+</pre>
+<!--footer-->
+
+</body>
+</html>

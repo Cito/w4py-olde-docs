@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>COMKit/__init__.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""COMKit
+
+This plug-in for Webware for Python allows COM objects such as ADO to be
+used in free-threading mode in a threaded app server. See Appendix D of
+the fine book Python Programming on Win32 by Mark Hammond and Andy
+Robinson for details.
+
+To use COM, simply set EnableCOM to 1 in your AppServer.config file.
+This causes the app server threads to be configured properly for
+COM free-threading. Then go ahead and use win32com inside your servlets.
+
+"""</span>
+
+__all__ = []
+
+<span class="PY_COMMENT"># This function gets called by the app server during initialization</span>
+<span class="PY_KEYWORD">def</span> InstallInWebKit(appServer):
+    <span class="PY_COMMENT"># See if enabling COM was requested</span>
+    <span class="PY_KEYWORD">if</span> appServer.setting(<span class="PY_STRING">'EnableCOM'</span>, 0):
+
+        <span class="PY_COMMENT"># This must be done BEFORE pythoncom is imported -- see the book mentioned above.</span>
+        <span class="PY_KEYWORD">import</span> sys
+        sys.coinit_flags = 0
+
+        <span class="PY_COMMENT"># Get the win32 extensions</span>
+        <span class="PY_KEYWORD">import</span> pythoncom
+
+        <span class="PY_COMMENT"># Set references to the COM initialize and uninitialize functions</span>
+        appServer._initCOM = pythoncom.COINIT_MULTITHREADED
+        appServer.initCOM = pythoncom.CoInitializeEx
+        appServer.closeCOM = pythoncom.CoUninitialize
+
+        <span class="PY_COMMENT"># Monkey-patch this instance of the appServer</span>
+
+        <span class="PY_COMMENT"># Grab references to the original initThread and delThread bound</span>
+        <span class="PY_COMMENT"># methods, which we will replace</span>
+        appServer.originalInitThread = appServer.initThread
+        appServer.originalDelThread = appServer.delThread
+
+        <span class="PY_COMMENT"># Create new versions of initThread and delThread which will call the</span>
+        <span class="PY_COMMENT"># old versions</span>
+
+        <span class="PY_KEYWORD">def</span> newInitThread(self):
+            <span class="PY_COMMENT"># This must be called at the beginning of any thread that uses COM</span>
+            self.initCOM(self._initCOM)
+            <span class="PY_COMMENT"># Call the original initThread</span>
+            self.originalInitThread()
+
+        <span class="PY_KEYWORD">def</span> newDelThread(self):
+            <span class="PY_COMMENT"># Call the original delThread</span>
+            self.originalDelThread()
+            <span class="PY_COMMENT"># Uninitialize COM</span>
+            self.closeCOM()
+
+        <span class="PY_COMMENT"># Replace the initThread and delThread methods with our new versions</span>
+        <span class="PY_KEYWORD">import</span> new
+        appServer.initThread = new.instancemethod(newInitThread, appServer, appServer.__class__)
+        appServer.delThread = new.instancemethod(newDelThread, appServer, appServer.__class__)
+
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'COM has been enabled.'</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

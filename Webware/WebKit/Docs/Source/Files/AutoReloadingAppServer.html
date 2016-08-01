@@ -1,0 +1,479 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/AutoReloadingAppServer.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""AutoReloadingAppServer
+
+This module defines `AutoReloadingAppServer`, a replacement for `AppServer`
+that adds a file-monitoring and restarting to the AppServer. Used mostly like:
+
+    from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
+
+If `UseImportSpy` is set to False in AppServer.config, or FAM support is
+not available, this requires regular polling. The interval for the polling
+in seconds can be set with `AutoReloadPollInterval` in AppServer.config.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">import</span> errno
+<span class="PY_KEYWORD">import</span> select
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> sleep
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Thread
+
+<span class="PY_KEYWORD">from</span> AppServer <span class="PY_KEYWORD">import</span> AppServer
+
+
+defaultConfig = dict(
+    AutoReload = False,
+    AutoReloadPollInterval = 1, <span class="PY_COMMENT"># in seconds</span>
+    UseImportSpy = True,
+    UseFAMModules = <span class="PY_STRING">'pyinotify gamin _fam'</span>)
+
+
+<span class="PY_KEYWORD">def</span> getFAM(modules):
+    <span class="PY_STRING">"""Get FAM object based on the modules specified.
+
+    Currently supported are
+    pyinotify: http://github.com/seb-m/pyinotify
+    python-gamin (gamin): http://www.gnome.org/~veillard/gamin/
+    python-fam (_fam): http://python-fam.sourceforge.net
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> fam
+
+    <span class="PY_KEYWORD">for</span> module <span class="PY_KEYWORD">in</span> modules:
+
+        <span class="PY_KEYWORD">try</span>:
+            fam = __import__(module)
+        <span class="PY_KEYWORD">except</span> ImportError:
+            fam = None
+        <span class="PY_KEYWORD">except</span> Exception, e:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error loading %s: %s"</span> % (module, str(e))
+            fam = None
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> fam:
+            <span class="PY_KEYWORD">continue</span>
+
+        <span class="PY_KEYWORD">if</span> hasattr(fam, <span class="PY_STRING">'WatchManager'</span>) <span class="PY_KEYWORD">and</span> hasattr(
+                fam, <span class="PY_STRING">'Notifier'</span>) <span class="PY_KEYWORD">and</span> hasattr(fam, <span class="PY_STRING">'IN_MODIFY'</span>):
+
+
+            <span class="PY_KEYWORD">class</span> FAM(object):
+                <span class="PY_STRING">"""Simple File Alteration Monitor based on pyinotify"""</span>
+
+                @staticmethod
+                <span class="PY_KEYWORD">def</span> name():
+                    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">"pyinotify"</span>
+
+                <span class="PY_KEYWORD">def</span> __init__(self):
+                    <span class="PY_STRING">"""Initialize and start monitoring."""</span>
+                    self._wm = fam.WatchManager()
+                    self._mask = fam.IN_MODIFY | fam.IN_CREATE
+                    self._notifier = fam.Notifier(
+                        self._wm, self.callback, timeout=0)
+                    self._files = set()
+                    self._queue = []
+
+                <span class="PY_KEYWORD">def</span> close(self):
+                    <span class="PY_STRING">"""Stop monitoring and close."""</span>
+                    self._files = set()
+                    self._notifier.stop()
+
+                <span class="PY_KEYWORD">def</span> fd(self):
+                    <span class="PY_STRING">"""Get file descriptor for monitor."""</span>
+                    <span class="PY_KEYWORD">return</span> self._wm.get_fd()
+
+                <span class="PY_KEYWORD">def</span> monitorFile(self, filepath):
+                    <span class="PY_STRING">"""Monitor one file."""</span>
+                    <span class="PY_KEYWORD">if</span> filepath <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._files:
+                        self._wm.add_watch(filepath, self._mask)
+                        self._files.add(filepath)
+
+                <span class="PY_KEYWORD">def</span> pending(self):
+                    <span class="PY_STRING">"""Check whether an event is pending."""</span>
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._queue:
+                        <span class="PY_KEYWORD">if</span> self._notifier.check_events():
+                            self._notifier.read_events()
+                        self._notifier.process_events()
+                    <span class="PY_KEYWORD">return</span> self._queue
+
+                <span class="PY_KEYWORD">def</span> nextFile(self):
+                    <span class="PY_STRING">"""Get next file and return whether it has changed."""</span>
+                    <span class="PY_KEYWORD">return</span> self._queue.pop(0)
+
+                <span class="PY_KEYWORD">def</span> callback(self, event):
+                    <span class="PY_STRING">"""Callback function for the Notifier."""</span>
+                    self._queue.append(({fam.IN_MODIFY: <span class="PY_STRING">'changed'</span>,
+                        fam.IN_CREATE: <span class="PY_STRING">'created'</span>,
+                        fam.IN_MOVE_SELF: <span class="PY_STRING">'moved'</span>,
+                        fam.IN_DELETE_SELF: <span class="PY_STRING">'deleted'</span>,
+                        fam.IN_IGNORED: <span class="PY_STRING">'changed'</span>}.get(event.mask),
+                        event.pathname))
+
+
+        <span class="PY_KEYWORD">elif</span> hasattr(fam, <span class="PY_STRING">'GAM_CONNECT'</span>) <span class="PY_KEYWORD">and</span> hasattr(
+                fam, <span class="PY_STRING">'WatchMonitor'</span>) <span class="PY_KEYWORD">and</span> hasattr(fam, <span class="PY_STRING">'GAMChanged'</span>):
+
+
+            <span class="PY_KEYWORD">class</span> FAM(object):
+                <span class="PY_STRING">"""Simple File Alteration Monitor based on python-gamin"""</span>
+
+                @staticmethod
+                <span class="PY_KEYWORD">def</span> name():
+                    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">"python-gamin"</span>
+
+                <span class="PY_KEYWORD">def</span> __init__(self):
+                    <span class="PY_STRING">"""Initialize and start monitoring."""</span>
+                    self._mon = fam.WatchMonitor()
+                    self._watchlist = []
+                    self._files = set()
+
+                <span class="PY_KEYWORD">def</span> close(self):
+                    <span class="PY_STRING">"""Stop monitoring and close."""</span>
+                    watchlist = self._watchlist
+                    <span class="PY_KEYWORD">while</span> watchlist:
+                        self._mon.stop_watch(watchlist.pop())
+                    self._files = set()
+                    self._mon.disconnect()
+
+                <span class="PY_KEYWORD">def</span> fd(self):
+                    <span class="PY_STRING">"""Get file descriptor for monitor."""</span>
+                    <span class="PY_KEYWORD">return</span> self._mon.get_fd()
+
+                <span class="PY_KEYWORD">def</span> monitorFile(self, filepath):
+                    <span class="PY_STRING">"""Monitor one file."""</span>
+                    <span class="PY_KEYWORD">if</span> filepath <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._files:
+                        self._mon.watch_file(filepath, self.callback)
+                        self._watchlist.append(filepath)
+                        self._files.add(filepath)
+
+                <span class="PY_KEYWORD">def</span> pending(self):
+                    <span class="PY_STRING">"""Check whether an event is pending."""</span>
+                    <span class="PY_KEYWORD">return</span> self._mon.event_pending()
+
+                <span class="PY_KEYWORD">def</span> nextFile(self):
+                    <span class="PY_STRING">"""Get next file and return whether it has changed."""</span>
+                    self._mon.handle_one_event()
+                    <span class="PY_KEYWORD">return</span> self._changed, self._filepath
+
+                <span class="PY_KEYWORD">def</span> callback(self, filepath, event):
+                    <span class="PY_STRING">"""Callback function for WatchMonitor."""</span>
+                    self._filepath = filepath
+                    self._changed = {fam.GAMChanged: <span class="PY_STRING">'changed'</span>,
+                        fam.GAMCreated: <span class="PY_STRING">'created'</span>, fam.GAMMoved: <span class="PY_STRING">'moved'</span>,
+                        fam.GAMDeleted: <span class="PY_STRING">'deleted'</span>}.get(event)
+
+        <span class="PY_KEYWORD">elif</span> hasattr(fam, <span class="PY_STRING">'FAMConnection'</span>) <span class="PY_KEYWORD">and</span> hasattr(
+                fam, <span class="PY_STRING">'open'</span>) <span class="PY_KEYWORD">and</span> hasattr(fam, <span class="PY_STRING">'Changed'</span>):
+
+
+            <span class="PY_KEYWORD">class</span> FAM(object):
+                <span class="PY_STRING">"""Simple File Alteration Monitor based on python-fam"""</span>
+
+                @staticmethod
+                <span class="PY_KEYWORD">def</span> name():
+                    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">"python-fam"</span>
+
+                <span class="PY_KEYWORD">def</span> __init__(self):
+                    <span class="PY_STRING">"""Initialize and start monitoring."""</span>
+                    self._fc = fam.open()
+                    self._requests = []
+                    self._files = set()
+
+                <span class="PY_KEYWORD">def</span> close(self):
+                    <span class="PY_STRING">"""Stop monitoring and close."""</span>
+                    requests = self._requests
+                    <span class="PY_KEYWORD">while</span> requests:
+                        requests.pop().cancelMonitor()
+                    self._files = set()
+                    self._fc.close()
+
+                <span class="PY_KEYWORD">def</span> fd(self):
+                    <span class="PY_STRING">"""Get file descriptor for monitor."""</span>
+                    <span class="PY_KEYWORD">return</span> self._fc
+
+                <span class="PY_KEYWORD">def</span> monitorFile(self, filepath):
+                    <span class="PY_STRING">"""Monitor one file."""</span>
+                    <span class="PY_KEYWORD">if</span> filepath <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._files:
+                        self._requests.append(
+                                self._fc.monitorFile(filepath, None))
+                        self._files.add(filepath)
+
+                <span class="PY_KEYWORD">def</span> pending(self):
+                    <span class="PY_STRING">"""Check whether an event is pending."""</span>
+                    <span class="PY_KEYWORD">return</span> self._fc.pending()
+
+                <span class="PY_KEYWORD">def</span> nextFile(self):
+                    <span class="PY_STRING">"""Get next file and return whether it has changed."""</span>
+                    event = self._fc.nextEvent()
+                    <span class="PY_COMMENT"># we can also use event.code2str() here,</span>
+                    <span class="PY_COMMENT"># but then we need to filter the events</span>
+                    changed = {fam.Changed: <span class="PY_STRING">'changed'</span>,
+                        fam.Created: <span class="PY_STRING">'created'</span>, fam.Moved: <span class="PY_STRING">'moved'</span>,
+                        fam.Deleted: <span class="PY_STRING">'deleted'</span>}.get(event.code)
+                    <span class="PY_KEYWORD">return</span> changed, event.filename
+
+        <span class="PY_KEYWORD">else</span>:
+            FAM = None
+
+        <span class="PY_KEYWORD">if</span> FAM:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> FAM()
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error starting %s: %s"</span> % (FAM.name(), str(e))
+            FAM = None
+        fam = None
+
+
+<span class="PY_KEYWORD">class</span> AutoReloadingAppServer(AppServer):
+    <span class="PY_STRING">"""AppServer AutoReloading.
+
+    This class adds functionality to `AppServer`, to notice changes to
+    source files, including servlets, PSPs, templates or changes to the
+    Webware source file themselves, and reload the server as necessary
+    to pick up the changes.
+
+    The server will also be restarted if a file which Webware *tried*
+    to import is modified. This is so that changes to a file containing
+    a syntax error (which would have prevented it from being imported)
+    will also cause the server to restart.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path=None):
+        <span class="PY_STRING">"""Activate AutoReloading."""</span>
+        self._shouldRestart = False
+        self._fileMonitorThread = None
+        AppServer.__init__(self, path)
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> self.isPersistent() <span class="PY_KEYWORD">and</span> self.setting(<span class="PY_STRING">'AutoReload'</span>):
+                self.activateAutoReload()
+        <span class="PY_KEYWORD">except</span>:
+            AppServer.initiateShutdown(self)
+            <span class="PY_KEYWORD">raise</span>
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""Return the default configuration."""</span>
+        conf = AppServer.defaultConfig(self)
+        <span class="PY_COMMENT"># Update with AutoReloadingAppServer specific settings</span>
+        <span class="PY_COMMENT"># as defined in defaultConfig on the module level:</span>
+        conf.update(defaultConfig)
+        <span class="PY_KEYWORD">return</span> conf
+
+    <span class="PY_KEYWORD">def</span> shutDown(self):
+        <span class="PY_STRING">"""Shut down the monitoring thread.
+
+        This is done in addition to the normal shutdown procedure.
+
+        """</span>
+        self.deactivateAutoReload()
+        AppServer.shutDown(self)
+
+
+    <span class="PY_COMMENT">## Activation of AutoReload ##</span>
+
+    <span class="PY_KEYWORD">def</span> activateAutoReload(self):
+        <span class="PY_STRING">"""Start the monitor thread."""</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'UseImportSpy'</span>):
+            self._imp.activateImportSpy()
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'ImportSpy activated.'</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._fileMonitorThread:
+            famModules = self.setting(<span class="PY_STRING">'UseFAMModules'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                famModules = famModules.split()
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">if</span> famModules <span class="PY_KEYWORD">and</span> self._imp._spy:
+                <span class="PY_COMMENT"># FAM will be only used when ImportSpy has been activated,</span>
+                <span class="PY_COMMENT"># since otherwise we need to poll the modules anyway.</span>
+                <span class="PY_KEYWORD">try</span>:
+                    self._fam = getFAM(famModules)
+                    self._pipe = None
+                <span class="PY_KEYWORD">except</span> Exception, e:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error loading FAM: %s"</span> % str(e)
+                    self._fam = None
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._fam:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'FAM not available, fall back to polling.'</span>
+            <span class="PY_KEYWORD">else</span>:
+                self._fam = None
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'AutoReload Monitor started,'</span>,
+            <span class="PY_KEYWORD">if</span> self._fam:
+                self._pollInterval = 0
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'using %s.'</span> % self._fam.name()
+                target = self.fileMonitorThreadLoopFAM
+            <span class="PY_KEYWORD">else</span>:
+                self._pollInterval = self.setting(<span class="PY_STRING">'AutoReloadPollInterval'</span>)
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'polling every %d seconds.'</span> % self._pollInterval
+                target = self.fileMonitorThreadLoop
+            self._runFileMonitor = True
+            self._fileMonitorThread = t = Thread(target=target)
+            t.setName(<span class="PY_STRING">'AutoReloadMonitor'</span>)
+            t.setDaemon(True)
+            t.start()
+
+    <span class="PY_KEYWORD">def</span> deactivateAutoReload(self):
+        <span class="PY_STRING">"""Stop the monitor thread."""</span>
+        <span class="PY_KEYWORD">if</span> self._fileMonitorThread:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Stopping AutoReload Monitor...'</span>
+            <span class="PY_KEYWORD">if</span> self._runFileMonitor:
+                self._runFileMonitor = False
+                <span class="PY_KEYWORD">if</span> self._fam:
+                    <span class="PY_KEYWORD">if</span> self._pipe:
+                        <span class="PY_COMMENT"># Send a message down the pipe to wake up</span>
+                        <span class="PY_COMMENT"># the monitor thread and tell him to quit:</span>
+                        os.write(self._pipe[1], <span class="PY_STRING">'stop'</span>)
+                        os.close(self._pipe[1])
+            sys.stdout.flush()
+            <span class="PY_KEYWORD">if</span> self._fileMonitorThread.isAlive():
+                <span class="PY_KEYWORD">try</span>:
+                    self._fileMonitorThread.join(
+                        max(3, 1.5 * self._pollInterval))
+                    <span class="PY_KEYWORD">if</span> self._fileMonitorThread.isAlive():
+                        <span class="PY_KEYWORD">raise</span> RuntimeError
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Could not stop the AutoReload Monitor thread.'</span>
+            <span class="PY_KEYWORD">if</span> self._fam:
+                <span class="PY_KEYWORD">if</span> self._pipe:
+                    os.close(self._pipe[0])
+                    self._pipe = None
+                self._fam.close()
+                self._fam = None
+
+
+    <span class="PY_COMMENT">## Restart methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> restartIfNecessary(self):
+        <span class="PY_STRING">"""Check if the app server should be restarted.
+
+        This should be called regularly to see if a restart is required.
+        The server can only restart from the main thread, other threads
+        can't do the restart. So this polls to see if `shouldRestart`
+        has been called.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._shouldRestart:
+            self.restart()
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> restart():
+        <span class="PY_STRING">"""Do the actual restart.
+
+        Call `shouldRestart` from outside the class.
+
+        """</span>
+        sys.stdout.flush()
+        sys.stderr.flush()
+        <span class="PY_COMMENT"># calling execve() is problematic, since the file</span>
+        <span class="PY_COMMENT"># descriptors don't get closed by the OS.  This can</span>
+        <span class="PY_COMMENT"># result in leaked database connections.  Instead, we</span>
+        <span class="PY_COMMENT"># exit with a special return code which is recognized</span>
+        <span class="PY_COMMENT"># by the AppServer script, which will restart us upon</span>
+        <span class="PY_COMMENT"># receiving that code.</span>
+        sys.exit(3)
+
+    <span class="PY_KEYWORD">def</span> monitorNewModule(self, filepath, mtime=None):
+        <span class="PY_STRING">"""Add new file to be monitored.
+
+        This is a callback which ImportSpy invokes to notify us of new files
+        to monitor. This is only used when we are using FAM.
+
+        """</span>
+        self._fam.monitorFile(os.path.abspath(filepath))
+
+
+    <span class="PY_COMMENT">## Internal methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> shouldRestart(self):
+        <span class="PY_STRING">"""Tell the main thread to restart the server."""</span>
+        self._shouldRestart = True
+        self._runFileMonitor = False
+
+    <span class="PY_KEYWORD">def</span> fileMonitorThreadLoop(self):
+        <span class="PY_STRING">"""This the the main loop for the monitoring thread.
+
+        Runs in its own thread, polling the files for changes directly
+        (i.e., going through every file that's being used and checking
+        its last-modified time, seeing if it's been changed since it
+        was initially loaded).
+
+        """</span>
+        <span class="PY_KEYWORD">while</span> self._runFileMonitor:
+            sleep(self._pollInterval)
+            f = self._imp.updatedFile()
+            <span class="PY_KEYWORD">if</span> f:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'*** The file'</span>, f, <span class="PY_STRING">'has changed.'</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Restarting AppServer...'</span>
+                self.shouldRestart()
+
+    <span class="PY_KEYWORD">def</span> fileMonitorThreadLoopFAM(self):
+        <span class="PY_STRING">"""Monitoring thread loop, but using the FAM library."""</span>
+        <span class="PY_COMMENT"># For all of the modules which have _already_ been loaded,</span>
+        <span class="PY_COMMENT"># we check to see if they've already been modified:</span>
+        f = self._imp.updatedFile()
+        <span class="PY_KEYWORD">if</span> f:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'*** The file'</span>, f, <span class="PY_STRING">'has changed.'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Restarting AppServer...'</span>
+            self.shouldRestart()
+            <span class="PY_KEYWORD">return</span>
+        files = self._imp.fileList().keys()
+        <span class="PY_COMMENT"># Monitor all modules which will be loaded from now on</span>
+        self._imp.notifyOfNewFiles(self.monitorNewModule)
+        <span class="PY_COMMENT"># Monitor all modules which have already been loaded</span>
+        <span class="PY_KEYWORD">for</span> f <span class="PY_KEYWORD">in</span> files: <span class="PY_COMMENT"># note that files cannot change during this loop</span>
+            self.monitorNewModule(f)
+        <span class="PY_COMMENT"># Create a pipe so that this thread can be notified when the</span>
+        <span class="PY_COMMENT"># server is shutdown. We use a pipe because it needs to be an object</span>
+        <span class="PY_COMMENT"># which will wake up the call to 'select':</span>
+        self._pipe = os.pipe()
+        fds = [self._fam.fd(), self._pipe[0]], [], []
+        <span class="PY_KEYWORD">while</span> self._runFileMonitor:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_COMMENT"># We block here until a file has been changed, or until</span>
+                <span class="PY_COMMENT"># we receive word that we should shutdown (via the pipe).</span>
+                select.select(*fds)
+            <span class="PY_KEYWORD">except</span> select.error, e:
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._runFileMonitor:
+                    <span class="PY_KEYWORD">break</span>
+                <span class="PY_KEYWORD">if</span> e[0] == errno.EINTR:
+                    <span class="PY_KEYWORD">continue</span>
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error:"</span>, e[1]
+                    sys.exit(1)
+            <span class="PY_KEYWORD">while</span> self._runFileMonitor <span class="PY_KEYWORD">and</span> self._fam.pending():
+                c, f = self._fam.nextFile()
+                <span class="PY_KEYWORD">if</span> c <span class="PY_KEYWORD">and</span> self._imp.fileUpdated(f):
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'*** The file %s has been %s.'</span> % (f, c)
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Restarting AppServer...'</span>
+                    self.shouldRestart()
+        self._imp.notifyOfNewFiles(None)
+</pre>
+<!--footer-->
+
+</body>
+</html>

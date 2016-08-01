@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/AppServerService.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""AppServerService.py
+
+For general notes, see `ThreadedAppServer`.
+
+This version of the app server is a threaded app server that runs as
+a Windows NT Service.  This means it can be started and stopped from
+the Control Panel or from the command line using ``net start`` and
+``net stop``, and it can be configured in the Control Panel to
+auto-start when the machine boots.
+
+This requires the pywin32__ package to have been installed.
+
+__ http://starship.python.net/crew/mhammond/win32/Downloads.html
+
+To see the options for installing, removing, starting, and stopping
+the service, just run this program with no arguments.  Typical usage is
+to install the service to run under a particular user account and startup
+automatically on reboot with::
+
+    python AppServerService.py --username mydomain\myusername \
+        --password mypassword --startup auto install
+
+Then, you can start the service from the Services applet in the Control Panel,
+where it will be listed as "WebKit Threaded Application Server".  Or, from
+the command line, it can be started with either of the following commands::
+
+    net start WebKit
+    python AppServerService.py start
+
+The service can be stopped from the Control Panel or with::
+
+    net stop WebKit
+    python AppServerService.py stop
+
+And finally, to uninstall the service, stop it and then run::
+
+    python AppServerService.py remove
+
+You can change several parameters in the top section of this script.
+For instance, by changing the serviceName and serviceDisplayName, you
+can have several instances of this service running on the same system.
+Please note that the AppServer looks for the pid file in the working
+directory, so use different working directories for different services.
+And of course, you have to adapt the respective AppServer.config files
+so that there will be no conflicts in the used ports.
+
+"""</span>
+
+<span class="PY_COMMENT"># FUTURE</span>
+<span class="PY_COMMENT"># * This shares a lot of code with ThreadedAppServer.py and Launch.py.</span>
+<span class="PY_COMMENT">#   Try to consolidate these things. The default settings below in the</span>
+<span class="PY_COMMENT">#   global variables could go completely into AppServer.config.</span>
+<span class="PY_COMMENT"># * Optional NT event log messages on start, stop, and errors.</span>
+<span class="PY_COMMENT"># * Allow the option of installing multiple copies of WebKit with different</span>
+<span class="PY_COMMENT">#   configurations and different service names.</span>
+<span class="PY_COMMENT"># * Allow it to work with wkMonitor, or some other fault tolerance mechanism.</span>
+<span class="PY_COMMENT"># CREDITS</span>
+<span class="PY_COMMENT"># * Contributed to Webware for Python by Geoff Talvola</span>
+<span class="PY_COMMENT"># * Changes by Christoph Zwerschke</span>
+
+
+<span class="PY_COMMENT">## Options ##</span>
+
+<span class="PY_COMMENT"># You can change the following parameters:</span>
+
+<span class="PY_COMMENT"># The path to the app server working directory, if you do not</span>
+<span class="PY_COMMENT"># want to use the directory containing this script:</span>
+workDir = None
+
+<span class="PY_COMMENT"># The path to the Webware root directory; by default this will</span>
+<span class="PY_COMMENT"># be the parent directory of the directory containing this script:</span>
+webwareDir = None
+
+<span class="PY_COMMENT"># A list of additional directories (usually some libraries)</span>
+<span class="PY_COMMENT"># that you want to include into the search path for modules:</span>
+libraryDirs = []
+
+<span class="PY_COMMENT"># To get profiling going, set runProfile = True (see also</span>
+<span class="PY_COMMENT"># the description in the docstring of Profiler.py):</span>
+runProfile = False
+
+<span class="PY_COMMENT"># The path to the log file, if you want to redirect the</span>
+<span class="PY_COMMENT"># standard output and standard error to a log file:</span>
+logFile = <span class="PY_STRING">'Logs/webkit.log'</span>
+
+<span class="PY_COMMENT"># The default app server to be used:</span>
+appServer = <span class="PY_STRING">'ThreadedAppServer'</span>
+
+<span class="PY_COMMENT"># The service name:</span>
+serviceName = <span class="PY_STRING">'WebKit'</span>
+
+<span class="PY_COMMENT"># The service display name:</span>
+serviceDisplayName = <span class="PY_STRING">'WebKit Application Server'</span>
+
+<span class="PY_COMMENT"># The service descrpition:</span>
+serviceDescription = (<span class="PY_STRING">"This is the threaded application server"</span>
+    <span class="PY_STRING">" that belongs to the WebKit package"</span>
+    <span class="PY_STRING">" of the Webware for Python web framework."</span>)
+
+<span class="PY_COMMENT"># Sequence of service names on which this depends:</span>
+serviceDeps = []
+
+
+<span class="PY_COMMENT">## Win32 Service ##</span>
+
+<span class="PY_KEYWORD">import</span> sys, os, time
+<span class="PY_KEYWORD">import</span> win32service, win32serviceutil
+
+<span class="PY_COMMENT"># The ThreadedAppServer calls signal.signal which is not possible</span>
+<span class="PY_COMMENT"># if it is installed as a service, since signal only works in main thread.</span>
+<span class="PY_COMMENT"># So we sneakily replace signal.signal with a no-op:</span>
+<span class="PY_KEYWORD">def</span> _dummy_signal(*args, **kwargs):
+    <span class="PY_KEYWORD">pass</span>
+<span class="PY_KEYWORD">import</span> signal
+signal.signal = _dummy_signal
+
+
+<span class="PY_KEYWORD">class</span> AppServerService(win32serviceutil.ServiceFramework):
+
+    _svc_name_ = serviceName
+    _svc_display_name_ = serviceDisplayName
+    _svc_description_ = serviceDescription
+    _svc_deps_ = serviceDeps
+
+    _workDir = workDir <span class="PY_KEYWORD">or</span> os.path.dirname(__file__)
+    _webwareDir = webwareDir
+    _libraryDirs = libraryDirs
+    _runProfile = runProfile
+    _logFile = logFile
+    _appServer = appServer
+
+    <span class="PY_KEYWORD">def</span> __init__(self, args):
+        win32serviceutil.ServiceFramework.__init__(self, args)
+        self._server = None
+
+    <span class="PY_KEYWORD">def</span> SvcStop(self):
+        <span class="PY_COMMENT"># Stop the service:</span>
+        <span class="PY_COMMENT"># Tell the SCM we are starting the stop process:</span>
+        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
+        <span class="PY_KEYWORD">if</span> self._server:
+            <span class="PY_KEYWORD">if</span> self._server._running &gt; 2:
+                self._server.initiateShutdown()
+            <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(30): <span class="PY_COMMENT"># wait at most 3 seconds for shutdown</span>
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._server:
+                    <span class="PY_KEYWORD">break</span>
+                time.sleep(0.1)
+
+    <span class="PY_KEYWORD">def</span> SvcDoRun(self):
+        <span class="PY_COMMENT"># Start the service:</span>
+        self._server = log = None
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_COMMENT"># Figure out the work directory and make it the current directory:</span>
+                workDir = self._workDir
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> workDir:
+                    workDir = os.path.dirname(__file__)
+                os.chdir(workDir)
+                workDir = os.curdir
+                <span class="PY_COMMENT"># Switch the output to the logFile specified above:</span>
+                stdout, stderr = sys.stdout, sys.stderr
+                logFile = self._logFile
+                <span class="PY_KEYWORD">if</span> logFile: <span class="PY_COMMENT"># logFile has been specified</span>
+                    <span class="PY_KEYWORD">if</span> os.path.exists(logFile):
+                        log = open(logFile, <span class="PY_STRING">'a'</span>, 1) <span class="PY_COMMENT"># append line buffered</span>
+                        log.write(<span class="PY_STRING">'\n'</span> + <span class="PY_STRING">'-'</span> * 68 + <span class="PY_STRING">'\n\n'</span>)
+                    <span class="PY_KEYWORD">else</span>:
+                        log = open(logFile, <span class="PY_STRING">'w'</span>, 1) <span class="PY_COMMENT"># write line buffered</span>
+                <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># no logFile</span>
+                    <span class="PY_COMMENT"># Make all output go nowhere. Otherwise, print statements</span>
+                    <span class="PY_COMMENT"># cause the service to crash, believe it or not.</span>
+                    log = open(<span class="PY_STRING">'nul'</span>, <span class="PY_STRING">'w'</span>) <span class="PY_COMMENT"># os.devnull on Windows</span>
+                sys.stdout = sys.stderr = log
+                <span class="PY_COMMENT"># By default, Webware is searched in the parent directory:</span>
+                webwareDir = self._webwareDir
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> webwareDir:
+                    webwareDir = os.pardir
+                <span class="PY_COMMENT"># Remove the package component in the name of this module,</span>
+                <span class="PY_COMMENT"># because otherwise the package path will be used for imports:</span>
+                <span class="PY_KEYWORD">global</span> __name__, __package__
+                __name__ = __name__.rsplit(<span class="PY_STRING">'.'</span>, 1)[-1]
+                __package__ = None
+                <span class="PY_COMMENT"># Check the validity of the Webware directory:</span>
+                sysPath = sys.path <span class="PY_COMMENT"># memorize the standard Python search path</span>
+                sys.path = [webwareDir] <span class="PY_COMMENT"># now include only the Webware directory</span>
+                <span class="PY_COMMENT"># Check whether Webware is really located here</span>
+                <span class="PY_KEYWORD">from</span> Properties <span class="PY_KEYWORD">import</span> name <span class="PY_KEYWORD">as</span> webwareName
+                <span class="PY_KEYWORD">from</span> WebKit.Properties <span class="PY_KEYWORD">import</span> name <span class="PY_KEYWORD">as</span> webKitName
+                <span class="PY_KEYWORD">if</span> webwareName != <span class="PY_STRING">'Webware for Python'</span> <span class="PY_KEYWORD">or</span> webKitName != <span class="PY_STRING">'WebKit'</span>:
+                    <span class="PY_KEYWORD">raise</span> ImportError
+                <span class="PY_COMMENT"># Now assemble a new clean Python search path:</span>
+                path = [] <span class="PY_COMMENT"># the new search path will be collected here</span>
+                webKitDir = os.path.abspath(os.path.join(webwareDir, <span class="PY_STRING">'WebKit'</span>))
+                <span class="PY_KEYWORD">for</span> p <span class="PY_KEYWORD">in</span> [workDir, webwareDir] + self._libraryDirs + sysPath:
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> p:
+                        <span class="PY_KEYWORD">continue</span> <span class="PY_COMMENT"># do not include empty ("current") directory</span>
+                    p = os.path.abspath(p)
+                    <span class="PY_KEYWORD">if</span> p == webKitDir <span class="PY_KEYWORD">or</span> p <span class="PY_KEYWORD">in</span> path <span class="PY_KEYWORD">or</span> <span class="PY_KEYWORD">not</span> os.path.exists(p):
+                        <span class="PY_KEYWORD">continue</span> <span class="PY_COMMENT"># do not include WebKit and duplicates</span>
+                    path.append(p)
+                sys.path = path <span class="PY_COMMENT"># set the new search path</span>
+                <span class="PY_COMMENT"># Import the Profiler:</span>
+                <span class="PY_KEYWORD">from</span> WebKit <span class="PY_KEYWORD">import</span> Profiler
+                Profiler.startTime = time.time()
+                <span class="PY_COMMENT"># Import the AppServer:</span>
+                appServer = self._appServer
+                appServerModule = __import__(<span class="PY_STRING">'WebKit.'</span> + appServer,
+                    None, None, appServer)
+                <span class="PY_KEYWORD">if</span> self._runProfile:
+                    <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'Profiling is on. '</span>
+                        <span class="PY_STRING">'See docstring in Profiler.py for more info.'</span>)
+                    <span class="PY_KEYWORD">print</span>
+                self._server = getattr(appServerModule, appServer)(workDir)
+                sys.stdout = sys.stderr = log <span class="PY_COMMENT"># in case this has been reset</span>
+                <span class="PY_KEYWORD">print</span>
+                sys.stdout.flush()
+                <span class="PY_KEYWORD">if</span> self._runProfile:
+                    <span class="PY_KEYWORD">try</span>:
+                        <span class="PY_KEYWORD">from</span> cProfile <span class="PY_KEYWORD">import</span> Profile
+                    <span class="PY_KEYWORD">except</span> ImportError:
+                        <span class="PY_KEYWORD">from</span> profile <span class="PY_KEYWORD">import</span> Profile
+                    profiler = Profile()
+                    Profiler.profiler = profiler
+                    sys.stdout.flush()
+                    Profiler.runCall(self._server.mainloop)
+                <span class="PY_KEYWORD">else</span>:
+                    self._server.mainloop()
+                sys.stdout = sys.stderr = log <span class="PY_COMMENT"># in case this has been reset</span>
+                <span class="PY_KEYWORD">print</span>
+                sys.stdout.flush()
+                <span class="PY_KEYWORD">if</span> self._server._running:
+                    self._server.initiateShutdown()
+                    self._server._closeThread.join()
+                <span class="PY_KEYWORD">if</span> self._runProfile:
+                    <span class="PY_KEYWORD">print</span>
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Writing profile stats to %s...'</span> % Profiler.statsFilename
+                    Profiler.dumpStats()
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WARNING: Applications run much slower when profiled,'</span>
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'so turn off profiling the service when you are done.'</span>
+            <span class="PY_KEYWORD">except</span> SystemExit, e:
+                <span class="PY_KEYWORD">if</span> log <span class="PY_KEYWORD">and</span> logFile:
+                    <span class="PY_KEYWORD">print</span>
+                    errorlevel = e[0]
+                    <span class="PY_KEYWORD">if</span> errorlevel == 3:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Please switch off AutoReloading in AppServer.Config.'</span>
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'It does currently not work with AppServerSercive.'</span>
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'You have to reload the service manually.'</span>
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The AppServer has been signaled to terminate.'</span>
+                    <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                <span class="PY_KEYWORD">if</span> log <span class="PY_KEYWORD">and</span> logFile:
+                    <span class="PY_KEYWORD">print</span>
+                    <span class="PY_KEYWORD">try</span>:
+                        <span class="PY_KEYWORD">import</span> traceback
+                        traceback.print_exc(file=sys.stderr)
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Service stopped due to above exception.'</span>
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'ERROR:'</span>, e
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cannot print traceback.'</span>
+                    <span class="PY_KEYWORD">print</span>
+                <span class="PY_KEYWORD">raise</span>
+            <span class="PY_KEYWORD">except</span>:
+                <span class="PY_KEYWORD">raise</span>
+        <span class="PY_KEYWORD">finally</span>:
+            <span class="PY_KEYWORD">if</span> self._server <span class="PY_KEYWORD">and</span> self._server._running:
+                self._server.initiateShutdown()
+                self._server._closeThread.join()
+            self._server = None
+            <span class="PY_KEYWORD">if</span> log:
+                sys.stdout, sys.stderr = stdout, stderr
+                log.close()
+
+
+<span class="PY_COMMENT">## Main ##</span>
+
+<span class="PY_KEYWORD">def</span> main():
+    win32serviceutil.HandleCommandLine(AppServerService)
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+    main()
+</pre>
+<!--footer-->
+
+</body>
+</html>

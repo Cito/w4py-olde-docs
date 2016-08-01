@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>KidKit/KidServletFactory.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Servlet factory for Kid templates.
+
+This allows you to run Kid template files directly from within Webware.
+Compiled templates are cached either along with the templates or in the
+KidKit subdirectory of the WebKit Cache directory.
+
+Note that the Kid package itself is not part of Webware; you need to install
+it separately (see http://www.kid-templating.org for more information).
+
+
+CREDITS:
+
+  * Kid has been developed by Ryan Tomayko (rtomayko&lt;at&gt;gmail.com).
+  * KidKit was contributed by Winston Wolff (winstonw&lt;at&gt;stratolab.com).
+    Based on the Cheetah servlet factory. No caching, fixed servlet hook.
+  * Improved version contributed by Christoph Zwerschke (cito&lt;at&gt;online.de).
+    Based on the PSP servlet factory. Supports caching and servlet hooks.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">from</span> glob <span class="PY_KEYWORD">import</span> glob
+<span class="PY_KEYWORD">from</span> WebKit.ServletFactory <span class="PY_KEYWORD">import</span> ServletFactory
+<span class="PY_KEYWORD">from</span> WebKit.Servlet <span class="PY_KEYWORD">import</span> Servlet
+<span class="PY_KEYWORD">from</span> WebKit.Page <span class="PY_KEYWORD">import</span> Page
+
+defaultHook = Page.respond <span class="PY_COMMENT"># the default hook for Kid servlets</span>
+defaultOutput = <span class="PY_STRING">'html'</span> <span class="PY_COMMENT"># the default Kid output method</span>
+defaultFormat = <span class="PY_STRING">'default'</span> <span class="PY_COMMENT"># the default Kid output format</span>
+defaultExtensions = [<span class="PY_STRING">'.kid'</span>] <span class="PY_COMMENT"># the default extensions for Kid templates</span>
+
+<span class="PY_KEYWORD">from</span> kid <span class="PY_KEYWORD">import</span> load_template, output_methods
+<span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># output formatting exists in newer Kid versions only</span>
+    <span class="PY_KEYWORD">from</span> kid.format <span class="PY_KEYWORD">import</span> output_formats
+<span class="PY_KEYWORD">except</span> ImportError:
+    output_formats = None
+<span class="PY_KEYWORD">from</span> kid.compiler <span class="PY_KEYWORD">import</span> KidFile
+
+
+<span class="PY_KEYWORD">def</span> kidClass(module):
+    <span class="PY_STRING">"""Return a WebKit servlet class for a Kid template module."""</span>
+
+    <span class="PY_KEYWORD">try</span>:
+        hook = module.hook
+    <span class="PY_KEYWORD">except</span> AttributeError:
+        hook = defaultHook
+    <span class="PY_KEYWORD">assert</span> type(hook) <span class="PY_KEYWORD">is</span> type(defaultHook)
+    ServletClass = hook.im_class
+    <span class="PY_KEYWORD">assert</span> issubclass(ServletClass, Servlet)
+    writeMethod = hook.__name__
+    <span class="PY_KEYWORD">try</span>:
+        output = module.output
+    <span class="PY_KEYWORD">except</span> AttributeError:
+        output = defaultOutput
+    <span class="PY_KEYWORD">assert</span> output <span class="PY_KEYWORD">in</span> output_methods
+    <span class="PY_KEYWORD">if</span> output_formats <span class="PY_KEYWORD">is</span> None:
+        format = None
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">try</span>:
+            format = module.format
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            format = defaultFormat
+        <span class="PY_KEYWORD">assert</span> format <span class="PY_KEYWORD">in</span> output_formats
+
+    <span class="PY_KEYWORD">class</span> KidServlet(ServletClass):
+        <span class="PY_STRING">"""The base class for a Kid servlet."""</span>
+
+        _module = module
+        _template = module.Template()
+        _output = output
+        _format = format
+
+        <span class="PY_KEYWORD">def</span> writeTemplate(self, *args, **kwargs):
+            self._template.servlet = self
+            response = self._response
+            fragment = response.size() &gt; 0
+            <span class="PY_KEYWORD">if</span> format <span class="PY_KEYWORD">is</span> None:
+                self._template.write(self._response,
+                    fragment=fragment, output=output)
+            <span class="PY_KEYWORD">else</span>:
+                self._template.write(self._response,
+                    fragment=fragment, output=output, format=format)
+
+    setattr(KidServlet, writeMethod, KidServlet.writeTemplate)
+    <span class="PY_KEYWORD">return</span> KidServlet
+
+
+<span class="PY_KEYWORD">class</span> KidServletFactory(ServletFactory):
+    <span class="PY_STRING">"""Servlet factory for Kid templates."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, application):
+        ServletFactory.__init__(self, application)
+        setting = application.setting
+        <span class="PY_KEYWORD">global</span> defaultOutput <span class="PY_COMMENT"># the default Kid output method</span>
+        defaultOutput = setting(<span class="PY_STRING">'KidOutputMethod'</span>, defaultOutput)
+        <span class="PY_KEYWORD">global</span> defaultFormat <span class="PY_COMMENT"># the default Kid output format</span>
+        defaultFormat = setting(<span class="PY_STRING">'KidOutputFormat'</span>, defaultFormat)
+        <span class="PY_KEYWORD">global</span> defaultExtensions <span class="PY_COMMENT"># the default Kid template extensions</span>
+        self._extensions = setting(<span class="PY_STRING">'ExtensionsForKid'</span>, defaultExtensions)
+        defaultExtensions = self._extensions
+        self._cacheTemplates = setting(<span class="PY_STRING">'CacheKidTemplates'</span>, True)
+        self._useCache = setting(<span class="PY_STRING">'UseKidKitCache'</span>, False)
+        <span class="PY_KEYWORD">if</span> self._useCache:
+            self._cacheSource = setting(<span class="PY_STRING">'CacheKidSource'</span>, True)
+            self._clearCache = setting(<span class="PY_STRING">'ClearKidCacheOnStart'</span>, False)
+            self._cacheDir = os.path.join(application._cacheDir, <span class="PY_STRING">'KidKit'</span>)
+            <span class="PY_KEYWORD">if</span> self._clearCache:
+                self.clearFileCache()
+        <span class="PY_KEYWORD">else</span>:
+            self._cacheSource = self._clearCache = False
+            self._cacheDir = None
+        t = [<span class="PY_STRING">'_'</span>] * 256
+        <span class="PY_KEYWORD">from</span> string <span class="PY_KEYWORD">import</span> digits, letters
+        <span class="PY_KEYWORD">for</span> c <span class="PY_KEYWORD">in</span> digits + letters:
+            t[ord(c)] = c
+        self._classNameTrans = <span class="PY_STRING">''</span>.join(t)
+
+    <span class="PY_KEYWORD">def</span> uniqueness(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'file'</span>
+
+    <span class="PY_KEYWORD">def</span> extensions(self):
+        <span class="PY_KEYWORD">return</span> self._extensions
+
+    <span class="PY_KEYWORD">def</span> flushCache(self):
+        <span class="PY_STRING">"""Clean out the cache of classes in memory and on disk."""</span>
+        ServletFactory.flushCache(self)
+        <span class="PY_KEYWORD">if</span> self._clearCache:
+            self.clearFileCache()
+
+    <span class="PY_KEYWORD">def</span> clearFileCache(self):
+        <span class="PY_STRING">"""Clear class files stored on disk."""</span>
+        files = glob(os.path.join(self._cacheDir, <span class="PY_STRING">'*.*'</span>))
+        map(os.remove, files)
+
+    <span class="PY_KEYWORD">def</span> computeClassName(self, pagename):
+        <span class="PY_STRING">"""Generate a (hopefully) unique class/file name for each Kid file.
+
+        Argument: pagename: the path to the Kid template file
+        Returns: a unique name for the class generated fom this Kid file
+
+        """</span>
+        <span class="PY_COMMENT"># Compute class name by taking the path and substituting</span>
+        <span class="PY_COMMENT"># underscores for all non-alphanumeric characters:</span>
+        <span class="PY_KEYWORD">return</span> os.path.splitdrive(pagename)[1].translate(self._classNameTrans)
+
+    <span class="PY_KEYWORD">def</span> loadClass(self, transaction, path):
+        <span class="PY_STRING">"""Load servlet class for the given Kid template."""</span>
+        classname = self.computeClassName(path)
+        <span class="PY_KEYWORD">if</span> self._cacheTemplates <span class="PY_KEYWORD">and</span> self._useCache:
+            <span class="PY_COMMENT"># Cache the compiled templates separately:</span>
+            mtime = os.path.getmtime(path)
+            classfile = os.path.join(self._cacheDir, classname + <span class="PY_STRING">".py"</span>)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._cacheSource:
+                classfile += __debug__ <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'c'</span> <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'o'</span>
+            <span class="PY_KEYWORD">if</span> (<span class="PY_KEYWORD">not</span> os.path.exists(classfile)
+                    <span class="PY_KEYWORD">or</span> os.path.getmtime(classfile) != mtime):
+                kidFile = KidFile(path)
+                <span class="PY_KEYWORD">if</span> self._cacheSource:
+                    kidFile.dump_source(classfile)
+                <span class="PY_KEYWORD">else</span>:
+                    kidFile.dump_code(classfile)
+                <span class="PY_COMMENT"># Set the modification time of the compiled file</span>
+                <span class="PY_COMMENT"># to be the same as the source file;</span>
+                <span class="PY_COMMENT"># that's how we'll know if it needs to be recompiled:</span>
+                os.utime(classfile, (os.path.getatime(classfile), mtime))
+            module = self.importAsPackage(transaction, classfile)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># Let Kid care about the caching:</span>
+            module = load_template(path, cache=self._cacheTemplates)
+        <span class="PY_COMMENT"># Setting __orig_file__ here is already too late,</span>
+        module.__orig_file__ = path
+        <span class="PY_COMMENT"># so we need to tell ImportSpy explicitely about the file:</span>
+        self._imp.watchFile(path)
+        theClass = kidClass(module)
+        theClass._orig_file = path
+        theClass.__name__ = self.computeClassName(path)
+        <span class="PY_KEYWORD">return</span> theClass
+</pre>
+<!--footer-->
+
+</body>
+</html>

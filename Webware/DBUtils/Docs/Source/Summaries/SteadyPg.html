@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of DBUtils.SteadyPg</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of DBUtils.SteadyPg</h2>
+<p>You can also browse the <a href="../Files/SteadyPg.html">complete source file</a>
+or the <a href="../Docs/DBUtils.SteadyPg.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">SteadyPgError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">InvalidConnection</span>(SteadyPgError):</span>
+
+
+<span class="line_class">class <span class="name_class">SteadyPgConnection</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, maxusage=None, setsession=None, closeable=True,</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">reopen</span>(self)</span>
+<span class="line_def">    def <span class="name_def">reset</span>(self)</span>
+<span class="line_def">    def <span class="name_def">begin</span>(self, sql=None)</span>
+<span class="line_def">    def <span class="name_def">end</span>(self, sql=None)</span>
+<span class="line_def">    def <span class="name_def">commit</span>(self, sql=None)</span>
+<span class="line_def">    def <span class="name_def">rollback</span>(self, sql=None)</span>
+<span class="line_def">        def <span class="name_def">tough_method</span>(*args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">__getattr__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__del__</span>(self)</span>
+
+</pre>
+</body>
+</html>

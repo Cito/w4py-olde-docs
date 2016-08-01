@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/FieldStorage.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""FieldStorage.py
+
+This module defines a subclass of the standard Python cgi.FieldStorage class
+with an extra method that will allow a FieldStorage to parse a query string
+even in a POST request.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> cgi, os, urllib
+
+
+<span class="PY_KEYWORD">class</span> FieldStorage(cgi.FieldStorage):
+    <span class="PY_STRING">"""Modified FieldStorage class for POST requests with query strings.
+
+    Parameters in the query string which have not been sent via POST are
+    appended to the field list. This is different from the behavior of
+    Python versions before 2.6 which completely ignored the query string in
+    POST request, but it's also different from the behavior of the later Python
+    versions which append values from the query string to values sent via POST
+    for parameters with the same name. With other words, our FieldStorage class
+    overrides the query string parameters with the parameters sent via POST.
+
+    As recommended by W3C in section B.2.2 of the HTML 4.01 specification,
+    we also support use of ';' in place of '&amp;' as separator in query strings.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, fp=None, headers=None, outerboundary=<span class="PY_STRING">''</span>,
+            environ=os.environ, keep_blank_values=False, strict_parsing=False):
+        method = environ.get(<span class="PY_STRING">'REQUEST_METHOD'</span>, <span class="PY_STRING">'GET'</span>).upper()
+        qs_on_post = method <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'GET'</span>, <span class="PY_STRING">'HEAD'</span>) <span class="PY_KEYWORD">and</span> environ.get(
+            <span class="PY_STRING">'QUERY_STRING'</span>, None) <span class="PY_KEYWORD">or</span> None
+        <span class="PY_KEYWORD">if</span> qs_on_post:
+            environ[<span class="PY_STRING">'QUERY_STRING'</span>] = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">try</span>:
+            cgi.FieldStorage.__init__(self, fp, headers, outerboundary,
+                environ, keep_blank_values, strict_parsing)
+        <span class="PY_KEYWORD">finally</span>:
+            <span class="PY_KEYWORD">if</span> qs_on_post:
+                environ[<span class="PY_STRING">'QUERY_STRING'</span>] = qs_on_post
+        <span class="PY_KEYWORD">if</span> qs_on_post:
+            self.add_qs(qs_on_post)
+
+    <span class="PY_KEYWORD">def</span> add_qs(self, qs):
+        <span class="PY_STRING">"""Add all non-existing parameters from the given query string."""</span>
+        r = {}
+        <span class="PY_KEYWORD">for</span> name_value <span class="PY_KEYWORD">in</span> qs.split(<span class="PY_STRING">'&amp;'</span>):
+            <span class="PY_KEYWORD">for</span> name_value <span class="PY_KEYWORD">in</span> name_value.split(<span class="PY_STRING">';'</span>):
+                nv = name_value.split(<span class="PY_STRING">'='</span>, 2)
+                <span class="PY_KEYWORD">if</span> len(nv) != 2:
+                    <span class="PY_KEYWORD">if</span> self.strict_parsing:
+                        <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'bad query field: %r'</span> % (name_value,))
+                    <span class="PY_KEYWORD">continue</span>
+                name = urllib.unquote(nv[0].replace(<span class="PY_STRING">'+'</span>, <span class="PY_STRING">' '</span>))
+                value = urllib.unquote(nv[1].replace(<span class="PY_STRING">'+'</span>, <span class="PY_STRING">' '</span>))
+                <span class="PY_KEYWORD">if</span> len(value) <span class="PY_KEYWORD">or</span> self.keep_blank_values:
+                    <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> r:
+                        r[name].append(value)
+                    <span class="PY_KEYWORD">else</span>:
+                        r[name] = [value]
+        <span class="PY_KEYWORD">if</span> self.list <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_COMMENT"># This makes sure self.keys() are available, even</span>
+            <span class="PY_COMMENT"># when valid POST data wasn't encountered.</span>
+            self.list = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> r:
+            <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self:
+                <span class="PY_COMMENT"># Only append values that aren't already the FieldStorage;</span>
+                <span class="PY_COMMENT"># this makes POSTed vars override vars on the query string.</span>
+                <span class="PY_KEYWORD">for</span> value <span class="PY_KEYWORD">in</span> r[key]:
+                    self.list.append(cgi.MiniFieldStorage(key, value))
+</pre>
+<!--footer-->
+
+</body>
+</html>

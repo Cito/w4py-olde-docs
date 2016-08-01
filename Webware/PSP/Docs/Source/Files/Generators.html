@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/Generators.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""Generate Python code from PSP templates.
+
+This module holds the classes that generate the Python code resulting
+from the PSP template file. As the parser encounters PSP elements,
+it creates a new Generator object for that type of element.
+Each of these elements is put into a list maintained by the
+ParseEventHandler object. When it comes time to output the source code,
+each generator is called in turn to create its source.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+
+<span class="PY_KEYWORD">import</span> PSPUtils, BraceConverter
+
+<span class="PY_COMMENT"># This is global so that the ParseEventHandler and this module agree:</span>
+ResponseObject = <span class="PY_STRING">'res'</span>
+
+
+<span class="PY_KEYWORD">class</span> GenericGenerator(object):
+    <span class="PY_STRING">"""Base class for all the generators"""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, ctxt=None):
+        self._ctxt = ctxt
+        self.phase = <span class="PY_STRING">'Service'</span>
+
+
+<span class="PY_KEYWORD">class</span> ExpressionGenerator(GenericGenerator):
+    <span class="PY_STRING">"""This class handles expression blocks.
+
+    It simply outputs the (hopefully) python expression within the block
+    wrapped with a _formatter() call.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars):
+        self.chars = chars
+        GenericGenerator.__init__(self)
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        writer.println(<span class="PY_STRING">'res.write(_formatter(%s))'</span>
+            % PSPUtils.removeQuotes(self.chars))
+
+
+<span class="PY_KEYWORD">class</span> CharDataGenerator(GenericGenerator):
+    <span class="PY_STRING">"""This class handles standard character output, mostly HTML.
+
+    It just dumps it out. Need to handle all the escaping of characters.
+    It's just skipped for now.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars):
+        GenericGenerator.__init__(self)
+        self.chars = chars
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        <span class="PY_COMMENT"># Quote any existing backslash so generated Python will not</span>
+        <span class="PY_COMMENT"># interpret it when running.</span>
+        self.chars = self.chars.replace(<span class="PY_STRING">'\\'</span>, r<span class="PY_STRING">'\\'</span>)
+        <span class="PY_COMMENT"># Quote any single quotes so it does not get confused with</span>
+        <span class="PY_COMMENT"># our triple-quotes:</span>
+        self.chars = self.chars.replace(<span class="PY_STRING">'"'</span>, r<span class="PY_STRING">'\"'</span>)
+        self.generateChunk(writer)
+
+    <span class="PY_KEYWORD">def</span> generateChunk(self, writer, start=0, stop=None):
+        writer.printIndent() <span class="PY_COMMENT"># gives one level of indentation</span>
+        writer.printChars(ResponseObject+<span class="PY_STRING">'.write("""'</span>)
+        writer.printChars(self.chars)
+        writer.printChars(<span class="PY_STRING">'""")'</span>)
+        writer.printChars(<span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> mergeData(self, cdGen):
+        self.chars += cdGen.chars
+
+
+<span class="PY_KEYWORD">class</span> ScriptGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Generate scripts."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars, attrs):
+        GenericGenerator.__init__(self)
+        self.chars = chars
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        self.chars = PSPUtils.normalizeIndentation(self.chars)
+        <span class="PY_KEYWORD">if</span> writer._useBraces:
+            <span class="PY_COMMENT"># Send lines to be output by the braces generator:</span>
+            bc = BraceConverter.BraceConverter()
+            lines = PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars))
+            <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+                bc.parseLine(line, writer)
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_COMMENT"># Check for whitespace at the beginning and if less than 2 spaces, remove:</span>
+        <span class="PY_KEYWORD">if</span> self.chars.startswith(<span class="PY_STRING">' '</span>) <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> self.chars.startswith(<span class="PY_STRING">'  '</span>):
+            self.chars = self.chars.lstrip()
+        lines = PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars))
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> lines:
+            <span class="PY_KEYWORD">return</span> <span class="PY_COMMENT"># ignore any empty tag</span>
+        <span class="PY_COMMENT"># userIndent check</span>
+        <span class="PY_KEYWORD">if</span> lines[-1].endswith(<span class="PY_STRING">'$'</span>):
+            lastline = lines[-1] = lines[-1][:-1]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> lastline:
+                lastline = lines[-2] <span class="PY_COMMENT"># handle endscript marker on its own line</span>
+            count = 0
+            <span class="PY_KEYWORD">while</span> lastline[count].isspace():
+                count += 1
+            userIndent = lastline[:count]
+        <span class="PY_KEYWORD">else</span>:
+            userIndent = writer._emptyString
+            lastline = lines[-1]
+        <span class="PY_COMMENT"># Print out code (moved from above):</span>
+        writer._userIndent = writer._emptyString <span class="PY_COMMENT"># reset to none</span>
+        writer.printList(lines)
+        writer.printChars(<span class="PY_STRING">'\n'</span>)
+        <span class="PY_COMMENT"># Check for a block:</span>
+        commentstart = lastline.find(<span class="PY_STRING">'#'</span>) <span class="PY_COMMENT"># @@ this fails if '#' part of string</span>
+        <span class="PY_KEYWORD">if</span> commentstart &gt;= 0:
+            lastline = lastline[:commentstart]
+        blockcheck = lastline.rstrip()
+        <span class="PY_KEYWORD">if</span> blockcheck.endswith(<span class="PY_STRING">':'</span>):
+            writer.pushIndent()
+            writer.println()
+            writer._blockcount = writer._blockcount+1
+            <span class="PY_COMMENT"># Check for end of block, "pass" by itself:</span>
+        <span class="PY_KEYWORD">if</span> self.chars.strip() == <span class="PY_STRING">'pass'</span> <span class="PY_KEYWORD">and</span> writer._blockcount &gt; 0:
+            writer.popIndent()
+            writer.println()
+            writer._blockcount -= 1
+        <span class="PY_COMMENT"># Set userIndent for subsequent HTML:</span>
+        writer._userIndent = userIndent
+
+
+<span class="PY_KEYWORD">class</span> EndBlockGenerator(GenericGenerator):
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        GenericGenerator.__init__(self)
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        <span class="PY_KEYWORD">if</span> writer._blockcount &gt; 0:
+            writer.popIndent()
+            writer.println()
+            writer._blockcount -= 1
+        writer._userIndent = writer._emptyString
+
+
+<span class="PY_KEYWORD">class</span> ScriptFileGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Add Python code at the file/module level."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars, attrs):
+        GenericGenerator.__init__(self)
+        self.phase = <span class="PY_STRING">'psp:file'</span>
+        self.attrs = attrs
+        self.chars = chars
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        writer.println(<span class="PY_STRING">'\n# File level user code'</span>)
+        pySrc = PSPUtils.normalizeIndentation(self.chars)
+        pySrc = PSPUtils.splitLines(PSPUtils.removeQuotes(pySrc))
+        writer.printList(pySrc)
+
+
+<span class="PY_KEYWORD">class</span> ScriptClassGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Add Python code at the class level."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars, attrs):
+        GenericGenerator.__init__(self)
+        self.phase = <span class="PY_STRING">'psp:class'</span>
+        self.attrs = attrs
+        self.chars = chars
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        writer.println(<span class="PY_STRING">'# Class level user code\n'</span>)
+        pySrc = PSPUtils.normalizeIndentation(self.chars)
+        pySrc = PSPUtils.splitLines(PSPUtils.removeQuotes(pySrc))
+        writer.printList(pySrc)
+
+
+<span class="PY_KEYWORD">class</span> MethodGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Generate class methods defined in the PSP page.
+
+    There are two parts to method generation.
+    This class handles getting the method name and parameters set up.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars, attrs):
+        GenericGenerator.__init__(self)
+        self.phase = <span class="PY_STRING">'Declarations'</span>
+        self.attrs = attrs
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        writer.printIndent()
+        writer.printChars(<span class="PY_STRING">'def '</span>)
+        writer.printChars(self.attrs[<span class="PY_STRING">'name'</span>])
+        writer.printChars(<span class="PY_STRING">'('</span>)
+        <span class="PY_COMMENT"># self.attrs['params']</span>
+        writer.printChars(<span class="PY_STRING">'self'</span>)
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'params'</span> <span class="PY_KEYWORD">in</span> self.attrs <span class="PY_KEYWORD">and</span> self.attrs[<span class="PY_STRING">'params'</span>]:
+            writer.printChars(<span class="PY_STRING">', '</span>)
+            writer.printChars(self.attrs[<span class="PY_STRING">'params'</span>])
+        writer.printChars(<span class="PY_STRING">'):\n'</span>)
+        <span class="PY_KEYWORD">if</span> self.attrs[<span class="PY_STRING">'name'</span>] == <span class="PY_STRING">'awake'</span>:
+            writer._awakeCreated = True
+            writer.pushIndent()
+            writer.println(<span class="PY_STRING">'self.initPSP()\n'</span>)
+            writer.popIndent()
+            writer.println()
+
+
+<span class="PY_KEYWORD">class</span> MethodEndGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Part of class method generation.
+
+    After MethodGenerator, MethodEndGenerator actually generates
+    the code for the method body.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, chars, attrs):
+        GenericGenerator.__init__(self)
+        self.phase = <span class="PY_STRING">'Declarations'</span>
+        self.attrs = attrs
+        self.chars = chars
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        writer.pushIndent()
+        writer.printList(PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars)))
+        writer.printChars(<span class="PY_STRING">'\n'</span>)
+        writer.popIndent()
+
+
+<span class="PY_KEYWORD">class</span> IncludeGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Handle psp:include directives.
+
+    This is a new version of this directive that actually
+    forwards the request to the specified page.
+
+    """</span>
+
+    _theFunction = (<span class="PY_STRING">'__pspincludepath = "%s"\n'</span>
+        <span class="PY_STRING">'self.transaction().application().includeURL('</span>
+        <span class="PY_STRING">'self.transaction(), __pspincludepath)'</span>)
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attrs, param, ctxt):
+        GenericGenerator.__init__(self, ctxt)
+        self.attrs = attrs
+        self.param = param
+        self.scriptgen = None
+
+        self.url = attrs.get(<span class="PY_STRING">'path'</span>)
+        <span class="PY_KEYWORD">if</span> self.url <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">raise</span> AttributeError(<span class="PY_STRING">'No path attribute in include'</span>)
+
+        self.scriptgen = ScriptGenerator(self._theFunction % self.url, None)
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        <span class="PY_STRING">"""Just insert theFunction."""</span>
+        self.scriptgen.generate(writer, phase)
+
+
+<span class="PY_KEYWORD">class</span> InsertGenerator(GenericGenerator):
+    <span class="PY_STRING">"""Include files designated by the psp:insert syntax.
+
+    If the attribute 'static' is set to True or 1, we include the file now,
+    at compile time. Otherwise, we use a function added to every PSP page
+    named __includeFile, which reads the file at run time.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attrs, param, ctxt):
+        GenericGenerator.__init__(self, ctxt)
+        self.attrs = attrs
+        self.param = param
+        self.scriptgen = None
+
+        self.page = attrs.get(<span class="PY_STRING">'file'</span>)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.page:
+            <span class="PY_KEYWORD">raise</span> AttributeError(<span class="PY_STRING">'No file attribute in include'</span>)
+        thepath = self._ctxt.resolveRelativeURI(self.page)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(thepath):
+            <span class="PY_KEYWORD">print</span> self.page
+            <span class="PY_KEYWORD">raise</span> IOError(<span class="PY_STRING">'Invalid included file %r'</span> % thepath)
+        self.page = thepath
+
+        self.static = str(attrs.get(<span class="PY_STRING">'static'</span>)).lower() <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'true'</span>, <span class="PY_STRING">'yes'</span>, <span class="PY_STRING">'1'</span>)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.static:
+            self.scriptgen = ScriptGenerator(<span class="PY_STRING">"self.__includeFile('%s')"</span>
+                % thepath.replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'\\\\'</span>), None)
+
+    <span class="PY_KEYWORD">def</span> generate(self, writer, phase=None):
+        <span class="PY_COMMENT"># JSP does this in the servlet. I'm doing it here because</span>
+        <span class="PY_COMMENT"># I have triple quotes. Note: res.write statements inflate</span>
+        <span class="PY_COMMENT"># the size of the resulting classfile when it is cached.</span>
+        <span class="PY_COMMENT"># Cut down on those by using a single res.write on the whole</span>
+        <span class="PY_COMMENT"># file, after escaping any triple-double quotes.</span>
+        <span class="PY_KEYWORD">if</span> self.static:
+            data = open(self.page).read()
+            data = data.replace(<span class="PY_STRING">'"""'</span>, r<span class="PY_STRING">'\"""'</span>)
+            writer.println(<span class="PY_STRING">'res.write("""'</span> + data + <span class="PY_STRING">'""")'</span>)
+            writer.println()
+        <span class="PY_KEYWORD">else</span>:
+            self.scriptgen.generate(writer, phase)
+</pre>
+<!--footer-->
+
+</body>
+</html>

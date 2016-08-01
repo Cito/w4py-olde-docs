@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/SidebarPage.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""WebKit page template class for pages with a sidebar."""</span>
+
+<span class="PY_KEYWORD">from</span> Page <span class="PY_KEYWORD">import</span> Page
+
+
+<span class="PY_KEYWORD">class</span> SidebarPage(Page):
+    <span class="PY_STRING">"""WebKit page template class for pages with a sidebar.
+
+    SidebarPage is an abstract superclass for pages that have a sidebar
+    (as well as a header and "content well"). Sidebars are normally used
+    for navigation (e.g., a menu or list of links), showing small bits
+    of info and occasionally a simple form (such as login or search).
+
+    Subclasses should override cornerTitle(), writeSidebar() and
+    writeContent() (and title() if necessary; see Page).
+
+    The utility methods menuHeading() and menuItem() can be used by
+    subclasses, typically in their implementation of writeSidebar().
+
+    WebKit itself uses this class: Examples/ExamplePage and Admin/AdminPage
+    both inherit from it.
+
+    TO DO
+      * More consequent use style sheets; get rid of tables completely.
+      * The header, corner and colors are not easy to customize via subclasses.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## StyleSheet ##</span>
+
+    _styleSheet = <span class="PY_STRING">'''
+&lt;!--
+body {
+    background-color: white;
+    color: #080810;
+    font-size: 11pt;
+    font-family: Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin: 0pt;
+    padding: 0pt;
+}
+
+h1 { font-size: 18pt; }
+h2 { font-size: 16pt; }
+h3 { font-size: 14pt; }
+h4 { font-size: 12pt; }
+h5 { font-size: 11pt; }
+table#PageTable {
+    border-collapse: collapse;
+}
+td#CornerTitle {
+    background-color: #101040;
+    color: white;
+    padding: 6pt 6pt;
+    font-size: 14pt;
+    text-align: center;
+    vertical-align: middle;
+}
+td#Banner {
+    background-color: #202080;
+    color: white;
+    padding: 8pt 6pt;
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+}
+td#Sidebar {
+    background-color: #E8E8F0;
+    padding: 4pt;
+    font-size: 10pt;
+    line-height: 13pt;
+    vertical-align: top;
+    white-space: nowrap;
+    height: 100%;
+}
+td#Sidebar div {
+    margin-bottom: 1pt;
+}
+td#Sidebar div.MenuHeading {
+    font-weight: bold;
+    margin-top: 6pt;
+    margin-bottom: 3pt;
+    width: 12em;
+}
+td#Content {
+    padding: 8pt;
+    vertical-align: top;
+    width: 100%;
+}
+table.NiceTable {
+    margin-bottom: 4pt;
+}
+table.NiceTable td, .Data {
+    background-color: #EEE;
+    color: #111;
+}
+table tr th, .SubHeading {
+    background-color: #CCC;
+    color: black;
+}
+table tr.TopHeading th, .TopHeading {
+background-color: #555;
+color: white;
+}
+td#Content table tr.NoTable td {
+    background-color: white;
+    color: #080810;
+}
+table.NiceTable th a:link, table.NiceTable th a:visited {
+    color: #101040;
+}
+--&gt;
+'''</span>
+
+    <span class="PY_KEYWORD">def</span> writeStyleSheet(self):
+        <span class="PY_STRING">"""We're using a simple internal style sheet.
+
+        This way we avoid having to care about where an external style
+        sheet should be located when this class is used in another context.
+
+        """</span>
+        self.writeln(<span class="PY_STRING">'&lt;style type="text/css"&gt;%s&lt;/style&gt;'</span> % self._styleSheet)
+
+
+    <span class="PY_COMMENT">## Content methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> writeBodyParts(self):
+        wr = self.writeln
+        wr(<span class="PY_STRING">'&lt;table id="PageTable"&gt;'</span>)
+        self.writeBanner()
+        wr(<span class="PY_STRING">'&lt;tr&gt;&lt;td id="Sidebar"&gt;'</span>)
+        self.writeSidebar()
+        wr(<span class="PY_STRING">'&lt;/td&gt;'</span>)
+        wr(<span class="PY_STRING">'&lt;td id="Content"&gt;'</span>)
+        self.writeContent()
+        wr(<span class="PY_STRING">'&lt;/td&gt;'</span>)
+        wr(<span class="PY_STRING">'&lt;/tr&gt;&lt;/table&gt;'</span>)
+
+    <span class="PY_KEYWORD">def</span> writeBanner(self):
+        self.writeln(<span class="PY_STRING">'&lt;tr&gt;&lt;td id="CornerTitle"&gt;%s&lt;/td&gt;'</span> % self.cornerTitle(),
+            <span class="PY_STRING">'&lt;td id="Banner"&gt;%s&lt;/td&gt;&lt;/tr&gt;'</span> % self.title())
+
+    <span class="PY_KEYWORD">def</span> writeSidebar(self):
+        self.writeWebKitSidebarSections()
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> cornerTitle():
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>
+
+
+    <span class="PY_COMMENT">## Menu ##</span>
+
+    <span class="PY_KEYWORD">def</span> menuHeading(self, title):
+        self.writeln(<span class="PY_STRING">'&lt;div class="MenuHeading"&gt;%s&lt;/div&gt;'</span> % title)
+
+    <span class="PY_KEYWORD">def</span> menuItem(self, title, url=None, suffix=None, indentLevel=1):
+        <span class="PY_KEYWORD">if</span> suffix:
+            suffix = <span class="PY_STRING">' '</span> + suffix
+        <span class="PY_KEYWORD">else</span>:
+            suffix = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">if</span> url <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            title = <span class="PY_STRING">'&lt;a href="%s"&gt;%s&lt;/a&gt;'</span> % (url, title)
+        self.writeln(<span class="PY_STRING">'&lt;div style="margin-left:%dpt"&gt;%s%s&lt;/div&gt;'</span>
+            % (4*indentLevel, title, suffix))
+
+
+    <span class="PY_COMMENT">## WebKit sidebar sections ##</span>
+
+    <span class="PY_KEYWORD">def</span> writeWebKitSidebarSections(self):
+        <span class="PY_STRING">"""Write sidebar sections.
+
+        This method (and consequently the methods it invokes)
+        are provided for WebKit's example and admin pages.
+        It writes sections such as contexts, e-mails, exits and versions.
+
+        """</span>
+        self.writeContextsMenu()
+        self.writeWebwareEmailMenu()
+        self.writeWebwareExitsMenu()
+        self.writeVersions()
+
+    <span class="PY_KEYWORD">def</span> writeContextsMenu(self):
+        self.menuHeading(<span class="PY_STRING">'Contexts'</span>)
+        servletPath = self.request().servletPath()
+        <span class="PY_KEYWORD">for</span> ctx <span class="PY_KEYWORD">in</span> sorted(ctx <span class="PY_KEYWORD">for</span> ctx <span class="PY_KEYWORD">in</span> self.application().contexts()
+                <span class="PY_KEYWORD">if</span> ctx != <span class="PY_STRING">'default'</span> <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> <span class="PY_STRING">'/'</span> <span class="PY_KEYWORD">in</span> ctx):
+            self.menuItem(ctx, <span class="PY_STRING">'%s/%s/'</span> % (servletPath, ctx))
+
+    <span class="PY_KEYWORD">def</span> writeWebwareEmailMenu(self):
+        self.menuHeading(<span class="PY_STRING">'E-mail'</span>)
+        self.menuItem(<span class="PY_STRING">'webware-discuss'</span>,
+            <span class="PY_STRING">'mailto:webware-discuss@lists.sourceforge.net'</span>)
+
+    <span class="PY_KEYWORD">def</span> writeWebwareExitsMenu(self):
+        self.menuHeading(<span class="PY_STRING">'Exits'</span>)
+        self.menuItem(<span class="PY_STRING">'Webware'</span>, <span class="PY_STRING">'http://www.webwareforpython.org'</span>)
+        self.menuItem(<span class="PY_STRING">'Python'</span>, <span class="PY_STRING">'http://www.python.org'</span>)
+
+    <span class="PY_KEYWORD">def</span> writeVersions(self):
+        app = self.application()
+        self.menuHeading(<span class="PY_STRING">'Versions'</span>)
+        self.menuItem(<span class="PY_STRING">'WebKit '</span> + app.webKitVersionString())
+        self.menuItem(<span class="PY_STRING">'Webware '</span> + app.webwareVersionString())
+        <span class="PY_KEYWORD">from</span> sys <span class="PY_KEYWORD">import</span> version
+        self.menuItem(<span class="PY_STRING">'Python '</span> + version.split(None, 1)[0])
+
+    <span class="PY_KEYWORD">def</span> writeContent(self):
+        self.writeln(<span class="PY_STRING">'Woops, someone forgot to override writeContent().'</span>)
+</pre>
+<!--footer-->
+
+</body>
+</html>

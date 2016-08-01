@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiddleKit/Core.ModelUser</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiddleKit/Core.ModelUser</h2>
+<p>You can also browse the <a href="../Files/ModelUser.html">complete source file</a>
+or the <a href="../Docs/MiddleKit/Core.ModelUser.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">ModelUser</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+
+<span class="line_category">    ## Settings ##</span>
+<span class="line_def">    def <span class="name_def">setting</span>(self, name, default=NoDefault)</span>
+
+<span class="line_category">    ## Models ##</span>
+<span class="line_def">    def <span class="name_def">model</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setModel</span>(self, model)</span>
+<span class="line_def">    def <span class="name_def">readModelFileNamed</span>(self, filename, modelClass=None, **keywords)</span>
+<span class="line_def">    def <span class="name_def">modelWasSet</span>(self)</span>
+
+<span class="line_category">    ## Mix-ins ##</span>
+<span class="line_def">    def <span class="name_def">installMixIns</span>(self, verbose=False)</span>
+<span class="line_def">    def <span class="name_def">installMixInsForModule</span>(self, module, verbose=False)</span>
+
+<span class="line_category">    ## Warning ##</span>
+<span class="line_def">    def <span class="name_def">warning</span>(self, msg)</span>
+
+<span class="line_category">    ## Self utility ##</span>
+<span class="line_def">    def <span class="name_def">modulesForClass</span>(self, pyClass, modules=None)</span>
+
+</pre>
+</body>
+</html>

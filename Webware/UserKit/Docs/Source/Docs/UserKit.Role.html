@@ -1,0 +1,78 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module UserKit.Role</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="UserKit.html"><font color="#ffffff">UserKit</font></a>.Role</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/UserKit/Role.py">/var/www/docs/Webware-1.1.1/UserKit/Role.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;basic&nbsp;<a href="#Role">Role</a>&nbsp;class.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="UserKit.Role.html#Role">Role</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Role">class <strong>Role</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Used&nbsp;in&nbsp;conjuction&nbsp;with&nbsp;RoleUser&nbsp;to&nbsp;provide&nbsp;role-based&nbsp;security.<br>
+&nbsp;<br>
+All&nbsp;roles&nbsp;have&nbsp;a&nbsp;name&nbsp;and&nbsp;a&nbsp;description&nbsp;and&nbsp;respond&nbsp;to&nbsp;<a href="#Role-playsRole">playsRole</a>().<br>
+&nbsp;<br>
+RoleUser&nbsp;also&nbsp;responds&nbsp;to&nbsp;<a href="#Role-playsRole">playsRole</a>()&nbsp;and&nbsp;is&nbsp;the&nbsp;more&nbsp;popular&nbsp;entry&nbsp;point<br>
+for&nbsp;programmers.&nbsp;Application&nbsp;code&nbsp;may&nbsp;then&nbsp;do&nbsp;something&nbsp;along&nbsp;the&nbsp;lines&nbsp;of:<br>
+&nbsp;<br>
+if&nbsp;user.<a href="#Role-playsRole">playsRole</a>('admin'):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;displayAdminMenuItems()<br>
+&nbsp;<br>
+See&nbsp;also:<br>
+&nbsp;&nbsp;*&nbsp;class&nbsp;HierRole<br>
+&nbsp;&nbsp;*&nbsp;class&nbsp;RoleUser<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Role-__init__"><strong>__init__</strong></a>(self, name, description<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Role-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Role-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Role-description"><strong>description</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Role-name"><strong>name</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Role-playsRole"><strong>playsRole</strong></a>(self, role)</dt><dd><tt>Return&nbsp;true&nbsp;if&nbsp;the&nbsp;receiving&nbsp;role&nbsp;plays&nbsp;the&nbsp;role&nbsp;passed&nbsp;in.<br>
+&nbsp;<br>
+For&nbsp;<a href="#Role">Role</a>,&nbsp;this&nbsp;is&nbsp;simply&nbsp;a&nbsp;test&nbsp;of&nbsp;equality.&nbsp;Subclasses&nbsp;may&nbsp;override<br>
+this&nbsp;method&nbsp;to&nbsp;provide&nbsp;richer&nbsp;semantics&nbsp;(such&nbsp;as&nbsp;hierarchical&nbsp;roles).</tt></dd></dl>
+
+<dl><dt><a name="Role-setDescription"><strong>setDescription</strong></a>(self, description)</dt></dl>
+
+<dl><dt><a name="Role-setName"><strong>setName</strong></a>(self, name)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

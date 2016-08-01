@@ -1,0 +1,142 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiddleKit.Core.MiddleDict</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiddleKit.html"><font color="#ffffff">MiddleKit</font></a>.<a href="MiddleKit.Core.html"><font color="#ffffff">Core</font></a>.MiddleDict</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiddleKit/Core/MiddleDict.py">/var/www/docs/Webware-1.1.1/MiddleKit/Core/MiddleDict.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#dict">__builtin__.dict</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleDict</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MiddleDict">class <strong>MiddleDict</strong></a>(<a href="__builtin__.html#dict">__builtin__.dict</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;MiddleKit&nbsp;dictionary.<br>
+&nbsp;<br>
+A&nbsp;dictionary&nbsp;for&nbsp;the&nbsp;purposes&nbsp;of&nbsp;MiddleKit,&nbsp;specifically&nbsp;Klass&nbsp;and&nbsp;Attr<br>
+which&nbsp;are&nbsp;subclasses.<br>
+&nbsp;<br>
+@@&nbsp;2004-04-02&nbsp;CE:&nbsp;Should&nbsp;consider&nbsp;making&nbsp;this&nbsp;case-preserving,&nbsp;but<br>
+&nbsp;&nbsp;&nbsp;case-insensitive&nbsp;with&nbsp;respect&nbsp;to&nbsp;keys.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleDict</a></dd>
+<dd><a href="__builtin__.html#dict">__builtin__.dict</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MiddleDict-boolForKey"><strong>boolForKey</strong></a>(self, key, default<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;True&nbsp;or&nbsp;False&nbsp;for&nbsp;the&nbsp;given&nbsp;key.<br>
+&nbsp;<br>
+Returns&nbsp;False&nbsp;if&nbsp;the&nbsp;key&nbsp;does&nbsp;not&nbsp;even&nbsp;exist.<br>
+Raises&nbsp;a&nbsp;value&nbsp;error&nbsp;if&nbsp;the&nbsp;key&nbsp;exists,&nbsp;but&nbsp;cannot&nbsp;be&nbsp;parsed&nbsp;as&nbsp;a&nbsp;bool.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><a name="MiddleDict-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-__contains__">__contains__</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__delitem__"><strong>__delitem__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__delitem__">__delitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__iter__">__iter__</a>()&nbsp;&lt;==&gt;&nbsp;iter(x)</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__len__"><strong>__len__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__len__">__len__</a>()&nbsp;&lt;==&gt;&nbsp;len(x)</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__setitem__"><strong>__setitem__</strong></a>(...)</dt><dd><tt>x.<a href="#MiddleDict-__setitem__">__setitem__</a>(i,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i]=y</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-__sizeof__">__sizeof__</a>()&nbsp;-&gt;&nbsp;size&nbsp;of&nbsp;D&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-clear"><strong>clear</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-clear">clear</a>()&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;D.</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-copy"><strong>copy</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-copy">copy</a>()&nbsp;-&gt;&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-get"><strong>get</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-get">get</a>(k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;else&nbsp;d.&nbsp;&nbsp;d&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-has_key"><strong>has_key</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-has_key">has_key</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-items"><strong>items</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-items">items</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;(key,&nbsp;value)&nbsp;pairs,&nbsp;as&nbsp;2-tuples</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-iteritems"><strong>iteritems</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-iteritems">iteritems</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;(key,&nbsp;value)&nbsp;items&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-iterkeys"><strong>iterkeys</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-iterkeys">iterkeys</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;keys&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-itervalues"><strong>itervalues</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-itervalues">itervalues</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;values&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-keys"><strong>keys</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-keys">keys</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;keys</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-pop"><strong>pop</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-pop">pop</a>(k[,d])&nbsp;-&gt;&nbsp;v,&nbsp;remove&nbsp;specified&nbsp;key&nbsp;and&nbsp;return&nbsp;the&nbsp;corresponding&nbsp;value.<br>
+If&nbsp;key&nbsp;is&nbsp;not&nbsp;found,&nbsp;d&nbsp;is&nbsp;returned&nbsp;if&nbsp;given,&nbsp;otherwise&nbsp;KeyError&nbsp;is&nbsp;raised</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-popitem"><strong>popitem</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-popitem">popitem</a>()&nbsp;-&gt;&nbsp;(k,&nbsp;v),&nbsp;remove&nbsp;and&nbsp;return&nbsp;some&nbsp;(key,&nbsp;value)&nbsp;pair&nbsp;as&nbsp;a<br>
+2-tuple;&nbsp;but&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;D&nbsp;is&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-setdefault"><strong>setdefault</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-setdefault">setdefault</a>(k[,d])&nbsp;-&gt;&nbsp;D.<a href="#MiddleDict-get">get</a>(k,d),&nbsp;also&nbsp;set&nbsp;D[k]=d&nbsp;if&nbsp;k&nbsp;not&nbsp;in&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-update"><strong>update</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-update">update</a>(E,&nbsp;**F)&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Update&nbsp;D&nbsp;from&nbsp;<a href="__builtin__.html#dict">dict</a>/iterable&nbsp;E&nbsp;and&nbsp;F.<br>
+If&nbsp;E&nbsp;has&nbsp;a&nbsp;.<a href="#MiddleDict-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;k&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;E[k]<br>
+If&nbsp;E&nbsp;lacks&nbsp;.<a href="#MiddleDict-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(k,&nbsp;v)&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;v<br>
+In&nbsp;either&nbsp;case,&nbsp;this&nbsp;is&nbsp;followed&nbsp;by:&nbsp;for&nbsp;k&nbsp;in&nbsp;F:&nbsp;D[k]&nbsp;=&nbsp;F[k]</tt></dd></dl>
+
+<dl><dt><a name="MiddleDict-values"><strong>values</strong></a>(...)</dt><dd><tt>D.<a href="#MiddleDict-values">values</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;values</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#MiddleDict-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<dl><dt><strong>fromkeys</strong> = &lt;built-in method fromkeys of type object&gt;<dd><tt><a href="__builtin__.html#dict">dict</a>.<a href="#MiddleDict-fromkeys">fromkeys</a>(S[,v])&nbsp;-&gt;&nbsp;New&nbsp;<a href="__builtin__.html#dict">dict</a>&nbsp;with&nbsp;keys&nbsp;from&nbsp;S&nbsp;and&nbsp;values&nbsp;equal&nbsp;to&nbsp;v.<br>
+v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

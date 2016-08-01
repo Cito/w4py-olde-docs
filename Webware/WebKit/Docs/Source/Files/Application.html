@@ -1,0 +1,1047 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Application.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""The Application singleton.
+
+`Application` and `AppServer` work together to setup up and dispatch requests.
+The distinction between the two is largely historical, but AppServer
+communicates directly with Adapters (or speaks protocols like HTTP), and
+Application receives the (slightly) processed input from AppServer and turns
+it into `Transaction`, `HTTPRequest`, `HTTPResponse`, and `Session`.
+
+Application is a singleton, which belongs to the AppServer. You can get access
+through the Transaction object (`transaction.application()`), or you can do::
+
+    from AppServer import globalAppServer
+    application = globalAppServer.application()
+
+Settings for Application are taken from ``Configs/Application.config``,
+which is used for many global settings, even if they aren't closely tied
+to the Application object itself.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.NamedValueAccess <span class="PY_KEYWORD">import</span> valueForName
+<span class="PY_KEYWORD">from</span> ConfigurableForServerSidePath <span class="PY_KEYWORD">import</span> ConfigurableForServerSidePath
+<span class="PY_KEYWORD">from</span> ExceptionHandler <span class="PY_KEYWORD">import</span> ExceptionHandler
+<span class="PY_KEYWORD">from</span> HTTPRequest <span class="PY_KEYWORD">import</span> HTTPRequest
+<span class="PY_KEYWORD">from</span> HTTPExceptions <span class="PY_KEYWORD">import</span> HTTPException, HTTPSessionExpired
+<span class="PY_KEYWORD">from</span> Transaction <span class="PY_KEYWORD">import</span> Transaction
+<span class="PY_KEYWORD">from</span> ASStreamOut <span class="PY_KEYWORD">import</span> ConnectionAbortedError
+<span class="PY_KEYWORD">import</span> URLParser
+
+debug = False
+
+defaultConfig = dict(
+    PrintConfigAtStartUp = True,
+    LogActivity = True,
+    ActivityLogFilename = <span class="PY_STRING">'Logs/Activity.csv'</span>,
+    ActivityLogColumns = [
+        <span class="PY_STRING">'request.remoteAddress'</span>, <span class="PY_STRING">'request.method'</span>,
+        <span class="PY_STRING">'request.uri'</span>, <span class="PY_STRING">'response.size'</span>,
+        <span class="PY_STRING">'servlet.name'</span>, <span class="PY_STRING">'request.timeStamp'</span>,
+        <span class="PY_STRING">'transaction.duration'</span>,
+        <span class="PY_STRING">'transaction.errorOccurred'</span>
+        ],
+    SessionModule = <span class="PY_STRING">'Session'</span>,
+    SessionStore = <span class="PY_STRING">'Dynamic'</span>,
+    SessionStoreDir = <span class="PY_STRING">'Sessions'</span>,
+    SessionTimeout = 60,
+    SessionPrefix = <span class="PY_STRING">''</span>,
+    SessionName = <span class="PY_STRING">'_SID_'</span>,
+    AlwaysSaveSessions = True,
+    IgnoreInvalidSession = True,
+    UseAutomaticPathSessions = False,
+    UseCookieSessions = True,
+    SessionCookiePath = None,
+    SecureSessionCookie = True,
+    ShowDebugInfoOnErrors = True,
+    EnterDebuggerOnException = False,
+    IncludeEditLink = True,
+    IncludeFancyTraceback = False,
+    FancyTracebackContext = 5,
+    UserErrorMessage = <span class="PY_STRING">'The site is having technical difficulties'</span>
+        <span class="PY_STRING">' with this page. An error has been logged, and the problem'</span>
+        <span class="PY_STRING">' will be fixed as soon as possible. Sorry!'</span>,
+    LogErrors = True,
+    ErrorLogFilename = <span class="PY_STRING">'Logs/Errors.csv'</span>,
+    SaveErrorMessages = True,
+    ErrorMessagesDir = <span class="PY_STRING">'ErrorMsgs'</span>,
+    EmailErrors = False,
+    EmailErrorReportAsAttachment = False,
+    ErrorEmailServer = <span class="PY_STRING">'localhost'</span>,
+    ErrorEmailHeaders = {
+        <span class="PY_STRING">'From'</span>: <span class="PY_STRING">'webware@mydomain'</span>,
+        <span class="PY_STRING">'To'</span>: [<span class="PY_STRING">'webware@mydomain'</span>],
+        <span class="PY_STRING">'Reply-To'</span>: <span class="PY_STRING">'webware@mydomain'</span>,
+        <span class="PY_STRING">'Content-Type'</span>: <span class="PY_STRING">'text/html'</span>,
+        <span class="PY_STRING">'Subject'</span>: <span class="PY_STRING">'Error'</span>
+        },
+    ErrorPage = None,
+    MaxValueLengthInExceptionReport = 500,
+    RPCExceptionReturn = <span class="PY_STRING">'traceback'</span>,
+    ReportRPCExceptionsInWebKit = True,
+    CacheDir = <span class="PY_STRING">'Cache'</span>,
+    Contexts = {
+        <span class="PY_STRING">'default'</span>: <span class="PY_STRING">'Examples'</span>,
+        <span class="PY_STRING">'Admin'</span>: <span class="PY_STRING">'Admin'</span>,
+        <span class="PY_STRING">'Examples'</span>: <span class="PY_STRING">'Examples'</span>,
+        <span class="PY_STRING">'Testing'</span>: <span class="PY_STRING">'Testing'</span>,
+        <span class="PY_STRING">'Docs'</span>: <span class="PY_STRING">'Docs'</span>,
+        },
+    Debug = dict(
+        Sessions = False,
+        ),
+    DirectoryFile = [<span class="PY_STRING">'index'</span>, <span class="PY_STRING">'Index'</span>, <span class="PY_STRING">'main'</span>, <span class="PY_STRING">'Main'</span>],
+    UseCascadingExtensions = True,
+    ExtensionCascadeOrder = [<span class="PY_STRING">'.py'</span>, <span class="PY_STRING">'.psp'</span>, <span class="PY_STRING">'.kid'</span>, <span class="PY_STRING">'.html'</span>],
+    ExtraPathInfo = True,
+    ExtensionsToIgnore = set([
+        <span class="PY_STRING">'.pyc'</span>, <span class="PY_STRING">'.pyo'</span>, <span class="PY_STRING">'.tmpl'</span>, <span class="PY_STRING">'.bak'</span>, <span class="PY_STRING">'.py_bak'</span>,
+        <span class="PY_STRING">'.py~'</span>, <span class="PY_STRING">'.psp~'</span>, <span class="PY_STRING">'.kid~'</span>, <span class="PY_STRING">'.html~'</span>, <span class="PY_STRING">'.tmpl~'</span>
+        ]),
+    ExtensionsToServe = [],
+    FilesToHide = set([
+        <span class="PY_STRING">'.*'</span>, <span class="PY_STRING">'*~'</span>, <span class="PY_STRING">'*.bak'</span>, <span class="PY_STRING">'*.py_bak'</span>, <span class="PY_STRING">'*.tmpl'</span>,
+        <span class="PY_STRING">'*.pyc'</span>, <span class="PY_STRING">'*.pyo'</span>, <span class="PY_STRING">'__init__.*'</span>, <span class="PY_STRING">'*.config'</span>
+        ]),
+    FilesToServe = [],
+    UnknownFileTypes = dict(
+        ReuseServlets = True,
+        Technique = <span class="PY_STRING">'serveContent'</span>, <span class="PY_COMMENT"># or redirectSansAdapter</span>
+        CacheContent = False,
+        MaxCacheContentSize = 128*1024,
+        ReadBufferSize = 32*1024
+        ),
+)
+
+
+<span class="PY_KEYWORD">class</span> EndResponse(Exception):
+    <span class="PY_STRING">"""End response exception.
+
+    Used to prematurely break out of the awake()/respond()/sleep()
+    cycle without reporting a traceback. During servlet processing,
+    if this exception is caught during awake() or respond() then sleep()
+    is called and the response is sent. If caught during sleep(),
+    processing ends and the response is sent.
+
+    """</span>
+    <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">class</span> Application(ConfigurableForServerSidePath):
+    <span class="PY_STRING">"""The Application singleton.
+
+    Purpose and usage are explained in the module docstring.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, server, useSessionSweeper=True):
+        <span class="PY_STRING">"""Called only by `AppServer`, sets up the Application."""</span>
+
+        self._server = server
+        self._serverSidePath = server.serverSidePath()
+
+        self._imp = server._imp <span class="PY_COMMENT"># the import manager</span>
+
+        ConfigurableForServerSidePath.__init__(self)
+
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Initializing Application...'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Current directory:'</span>, os.getcwd()
+
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'PrintConfigAtStartUp'</span>):
+            self.printConfig()
+
+        self.initVersions()
+        self.initErrorPage()
+
+        self._shutDownHandlers = []
+
+        <span class="PY_COMMENT"># Initialize task manager:</span>
+        <span class="PY_KEYWORD">if</span> self._server.isPersistent():
+            <span class="PY_KEYWORD">from</span> TaskKit.Scheduler <span class="PY_KEYWORD">import</span> Scheduler
+            self._taskManager = Scheduler(daemon=True,
+                exceptionHandler=self.handleException)
+            self._taskManager.start()
+        <span class="PY_KEYWORD">else</span>:
+            self._taskManager = None
+
+        <span class="PY_COMMENT"># Define this before initializing URLParser, so that contexts have a</span>
+        <span class="PY_COMMENT"># chance to override this. Also be sure to define it before loading the</span>
+        <span class="PY_COMMENT"># sessions, in case the loading of the sessions causes an exception.</span>
+        self._exceptionHandlerClass = ExceptionHandler
+
+        self.initSessions()
+        self.makeDirs()
+
+        URLParser.initApp(self)
+        self._rootURLParser = URLParser.ContextParser(self)
+
+        self._running = 1
+
+        <span class="PY_KEYWORD">if</span> useSessionSweeper:
+            self.startSessionSweeper()
+
+    <span class="PY_KEYWORD">def</span> initErrorPage(self):
+        <span class="PY_STRING">"""Initialize the error page related attributes."""</span>
+        <span class="PY_KEYWORD">for</span> dir <span class="PY_KEYWORD">in</span> (self._serverSidePath,
+                os.path.dirname(os.path.abspath(__file__))):
+            error404file = os.path.join(dir, <span class="PY_STRING">'error404.html'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                self._error404 = open(error404file).read()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">continue</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">break</span>
+        <span class="PY_KEYWORD">else</span>:
+            self._error404 = None
+        urls = self.setting(<span class="PY_STRING">'ErrorPage'</span>) <span class="PY_KEYWORD">or</span> None
+        <span class="PY_KEYWORD">if</span> urls:
+            <span class="PY_KEYWORD">try</span>:
+                errors = urls.keys()
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                errors = [<span class="PY_STRING">'Exception'</span>]
+                urls = {errors[0]: urls}
+            <span class="PY_KEYWORD">for</span> err <span class="PY_KEYWORD">in</span> errors:
+                <span class="PY_KEYWORD">if</span> urls[err] <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> urls[err].startswith(<span class="PY_STRING">'/'</span>):
+                    urls[err] = <span class="PY_STRING">'/'</span> + urls[err]
+        self._errorPage = urls
+
+    <span class="PY_KEYWORD">def</span> initSessions(self):
+        <span class="PY_STRING">"""Initialize all session related attributes."""</span>
+        self._sessionPrefix = self.setting(<span class="PY_STRING">'SessionPrefix'</span>) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">if</span> self._sessionPrefix:
+            <span class="PY_KEYWORD">if</span> self._sessionPrefix == <span class="PY_STRING">'hostname'</span>:
+                <span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> hostName
+                self._sessionPrefix = hostName()
+            self._sessionPrefix += <span class="PY_STRING">'-'</span>
+        self._sessionTimeout = self.setting(<span class="PY_STRING">'SessionTimeout'</span>)*60
+        self._sessionName = (self.setting(<span class="PY_STRING">'SessionName'</span>)
+            <span class="PY_KEYWORD">or</span> self.defaultConfig()[<span class="PY_STRING">'SessionName'</span>])
+        self._autoPathSessions = self.setting(<span class="PY_STRING">'UseAutomaticPathSessions'</span>)
+        self._alwaysSaveSessions = self.setting(<span class="PY_STRING">'AlwaysSaveSessions'</span>)
+        moduleName = self.setting(<span class="PY_STRING">'SessionModule'</span>)
+        className = moduleName.rsplit(<span class="PY_STRING">'.'</span>, 1)[-1]
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">exec</span> <span class="PY_STRING">'from %s import %s'</span> % (moduleName, className)
+            klass = locals()[className]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(klass, type):
+                <span class="PY_KEYWORD">raise</span> ImportError
+            self._sessionClass = klass
+        <span class="PY_KEYWORD">except</span> ImportError:
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"ERROR: Could not import Session class '%s'"</span>
+                <span class="PY_STRING">" from module '%s'"</span> % (className, moduleName))
+            self._sessionClass = None
+        moduleName = self.setting(<span class="PY_STRING">'SessionStore'</span>)
+        <span class="PY_KEYWORD">if</span> moduleName <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'Dynamic'</span>, <span class="PY_STRING">'File'</span>, <span class="PY_STRING">'Memcached'</span>, <span class="PY_STRING">'Memory'</span>, <span class="PY_STRING">'Shelve'</span>):
+            moduleName = <span class="PY_STRING">'Session%sStore'</span> % moduleName
+        self._sessionDir = self.serverSidePath(
+            self.setting(<span class="PY_STRING">'SessionStoreDir'</span>) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'Sessions'</span>)
+        className = moduleName.rsplit(<span class="PY_STRING">'.'</span>, 1)[-1]
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">exec</span> <span class="PY_STRING">'from %s import %s'</span> % (moduleName, className)
+            klass = locals()[className]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(klass, type):
+                <span class="PY_KEYWORD">raise</span> ImportError
+            self._sessions = klass(self)
+        <span class="PY_KEYWORD">except</span> ImportError, err:
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"ERROR: Could not import SessionStore class '%s'"</span>
+                <span class="PY_STRING">" from module '%s':\n%s"</span> % (className, moduleName, err))
+            self._sessions = None
+
+    <span class="PY_KEYWORD">def</span> makeDirs(self):
+        <span class="PY_STRING">"""Make sure some standard directories are always available."""</span>
+        self._cacheDir = self.serverSidePath(
+            self.setting(<span class="PY_STRING">'CacheDir'</span>) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'Cache'</span>)
+        self._errorMessagesDir = self.serverSidePath(
+            self.setting(<span class="PY_STRING">'ErrorMessagesDir'</span>) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'ErrorMsgs'</span>)
+        <span class="PY_KEYWORD">for</span> dir <span class="PY_KEYWORD">in</span> (self.serverSidePath(<span class="PY_STRING">'Logs'</span>),
+                self._cacheDir, self._errorMessagesDir, self._sessionDir):
+            <span class="PY_KEYWORD">if</span> dir <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> os.path.exists(dir):
+                os.makedirs(dir)
+
+    <span class="PY_KEYWORD">def</span> initVersions(self):
+        <span class="PY_STRING">"""Get and store versions.
+
+        Initialize attributes that store the Webware and WebKit versions as
+        both tuples and strings. These are stored in the Properties.py files.
+
+        """</span>
+        <span class="PY_KEYWORD">from</span> MiscUtils.PropertiesObject <span class="PY_KEYWORD">import</span> PropertiesObject
+        props = PropertiesObject(os.path.join(self.webwarePath(),
+            <span class="PY_STRING">'Properties.py'</span>))
+        self._webwareVersion = props[<span class="PY_STRING">'version'</span>]
+        self._webwareVersionString = props[<span class="PY_STRING">'versionString'</span>]
+        props = PropertiesObject(os.path.join(self.webKitPath(),
+            <span class="PY_STRING">'Properties.py'</span>))
+        self._webKitVersion = props[<span class="PY_STRING">'version'</span>]
+        self._webKitVersionString = props[<span class="PY_STRING">'versionString'</span>]
+
+    <span class="PY_KEYWORD">def</span> taskManager(self):
+        <span class="PY_STRING">"""Accessor: `TaskKit.Scheduler` instance."""</span>
+        <span class="PY_KEYWORD">return</span> self._taskManager
+
+    <span class="PY_KEYWORD">def</span> startSessionSweeper(self):
+        <span class="PY_STRING">"""Start session sweeper.
+
+        Starts the session sweeper, `WebKit.Tasks.SessionTask`, which deletes
+        session objects (and disk copies of those objects) that have expired.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._sessionTimeout:
+            tm = self.taskManager()
+            <span class="PY_KEYWORD">if</span> tm:
+                <span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+                <span class="PY_KEYWORD">from</span> Tasks <span class="PY_KEYWORD">import</span> SessionTask
+                task = SessionTask.SessionTask(self._sessions)
+                sweepinterval = self._sessionTimeout/10
+                tm.addPeriodicAction(time() + sweepinterval,
+                    sweepinterval, task, <span class="PY_STRING">"SessionSweeper"</span>)
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Session sweeper has started."</span>
+
+    <span class="PY_KEYWORD">def</span> shutDown(self):
+        <span class="PY_STRING">"""Shut down the application.
+
+        Called by AppServer when it is shuting down.  The `__del__` function
+        of Application probably won't be called due to circular references.
+
+        """</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Application is shutting down..."</span>
+        self._running = 0
+        self._sessions.storeAllSessions()
+        <span class="PY_KEYWORD">if</span> self._server.isPersistent():
+            self.taskManager().stop()
+        <span class="PY_KEYWORD">del</span> self._sessions
+        <span class="PY_KEYWORD">del</span> self._server
+
+        <span class="PY_COMMENT"># Call all registered shutdown handlers</span>
+        <span class="PY_KEYWORD">for</span> shutDownHandler <span class="PY_KEYWORD">in</span> self._shutDownHandlers:
+            shutDownHandler()
+        <span class="PY_KEYWORD">del</span> self._shutDownHandlers
+
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Application has been successfully shutdown."</span>
+
+    <span class="PY_KEYWORD">def</span> addShutDownHandler(self, func):
+        <span class="PY_STRING">"""Add a shutdown handler.
+
+        Functions added through `addShutDownHandler` will be called when
+        the AppServer is shutting down. You can use this hook to close
+        database connections, clean up resources, save data to disk, etc.
+
+        """</span>
+        self._shutDownHandlers.append(func)
+
+
+    <span class="PY_COMMENT">## Config ##</span>
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""The default Application.config."""</span>
+        <span class="PY_KEYWORD">return</span> defaultConfig <span class="PY_COMMENT"># defined on the module level</span>
+
+    <span class="PY_KEYWORD">def</span> configFilename(self):
+        <span class="PY_KEYWORD">return</span> self.serverSidePath(<span class="PY_STRING">'Configs/Application.config'</span>)
+
+    <span class="PY_KEYWORD">def</span> configReplacementValues(self):
+        <span class="PY_KEYWORD">return</span> self._server.configReplacementValues()
+
+
+    <span class="PY_COMMENT">## Versions ##</span>
+
+    <span class="PY_KEYWORD">def</span> webwareVersion(self):
+        <span class="PY_STRING">"""Return the Webware version as a tuple."""</span>
+        <span class="PY_KEYWORD">return</span> self._webwareVersion
+
+    <span class="PY_KEYWORD">def</span> webwareVersionString(self):
+        <span class="PY_STRING">"""Return the Webware version as a printable string."""</span>
+        <span class="PY_KEYWORD">return</span> self._webwareVersionString
+
+    <span class="PY_KEYWORD">def</span> webKitVersion(self):
+        <span class="PY_STRING">"""Return the WebKit version as a tuple."""</span>
+        <span class="PY_KEYWORD">return</span> self._webKitVersion
+
+    <span class="PY_KEYWORD">def</span> webKitVersionString(self):
+        <span class="PY_STRING">"""Return the WebKit version as a printable string."""</span>
+        <span class="PY_KEYWORD">return</span> self._webKitVersionString
+
+
+    <span class="PY_COMMENT">## Sessions ##</span>
+
+    <span class="PY_KEYWORD">def</span> session(self, sessionId, default=NoDefault):
+        <span class="PY_STRING">"""The session object for `sessionId`.
+
+        Raises `KeyError` if session not found and no default is given.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._sessions[sessionId]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._sessions.get(sessionId, default)
+
+    <span class="PY_KEYWORD">def</span> hasSession(self, sessionId):
+        <span class="PY_STRING">"""Check whether session `sessionId` exists."""</span>
+        <span class="PY_KEYWORD">return</span> sessionId <span class="PY_KEYWORD">in</span> self._sessions
+
+    <span class="PY_KEYWORD">def</span> sessions(self):
+        <span class="PY_STRING">"""A dictionary of all the session objects."""</span>
+        <span class="PY_KEYWORD">return</span> self._sessions
+
+    <span class="PY_KEYWORD">def</span> createSessionForTransaction(self, trans):
+        <span class="PY_STRING">"""Get the session object for the transaction.
+
+        If the session already exists, returns that, otherwise creates
+        a new session.
+
+        Finding the session ID is done in `Transaction.sessionId`.
+
+        """</span>
+        debug = self.setting(<span class="PY_STRING">'Debug'</span>).get(<span class="PY_STRING">'Sessions'</span>)
+        <span class="PY_KEYWORD">if</span> debug:
+            prefix = <span class="PY_STRING">'&gt;&gt; [session] createSessionForTransaction:'</span>
+        sessId = trans.request().sessionId()
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> prefix, <span class="PY_STRING">'sessId ='</span>, sessId
+        <span class="PY_KEYWORD">if</span> sessId:
+            <span class="PY_KEYWORD">try</span>:
+                session = self.session(sessId)
+                <span class="PY_KEYWORD">if</span> debug:
+                    <span class="PY_KEYWORD">print</span> prefix, <span class="PY_STRING">'retrieved session ='</span>, session
+            <span class="PY_KEYWORD">except</span> KeyError:
+                trans.request().setSessionExpired(1)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.setting(<span class="PY_STRING">'IgnoreInvalidSession'</span>):
+                    <span class="PY_KEYWORD">raise</span> HTTPSessionExpired
+                sessId = None
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> sessId:
+            session = self._sessionClass(trans)
+            self._sessions[session.identifier()] = session
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> prefix, <span class="PY_STRING">'created session ='</span>, session
+        trans.setSession(session)
+        <span class="PY_KEYWORD">return</span> session
+
+    <span class="PY_KEYWORD">def</span> createSessionWithID(self, trans, sessionID):
+        <span class="PY_STRING">"""Create a session object with our session ID."""</span>
+        session = self._sessionClass(trans, sessionID)
+        <span class="PY_COMMENT"># Replace the session if it didn't already exist,</span>
+        <span class="PY_COMMENT"># otherwise we just throw it away.  setdefault is an atomic</span>
+        <span class="PY_COMMENT"># operation so this guarantees that 2 different</span>
+        <span class="PY_COMMENT"># copies of the session with the same ID never get placed into</span>
+        <span class="PY_COMMENT"># the session store, even if multiple threads are calling</span>
+        <span class="PY_COMMENT"># this method simultaneously.</span>
+        trans.application()._sessions.setdefault(sessionID, session)
+
+    <span class="PY_KEYWORD">def</span> sessionTimeout(self, trans):
+        <span class="PY_STRING">"""Get the timeout (in seconds) for a user session.
+
+        Overwrite to make this transaction dependent.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._sessionTimeout
+
+    <span class="PY_KEYWORD">def</span> sessionPrefix(self, trans):
+        <span class="PY_STRING">"""Get the prefix string for the session ID.
+
+        Overwrite to make this transaction dependent.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._sessionPrefix
+
+    <span class="PY_KEYWORD">def</span> sessionName(self, trans):
+        <span class="PY_STRING">"""Get the name of the field holding the session ID.
+
+        Overwrite to make this transaction dependent.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._sessionName
+
+    <span class="PY_KEYWORD">def</span> sessionCookiePath(self, trans):
+        <span class="PY_STRING">"""Get the cookie path for this transaction.
+
+        If not path is specified in the configuration setting,
+        the servlet path is used for security reasons, see:
+        http://www.net-security.org/dl/articles/cookie_path.pdf
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.setting(<span class="PY_STRING">'SessionCookiePath'</span>) <span class="PY_KEYWORD">or</span> (
+            trans.request().servletPath() + <span class="PY_STRING">'/'</span>)
+
+
+    <span class="PY_COMMENT">## Misc Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> server(self):
+        <span class="PY_STRING">"""Acessor: the AppServer"""</span>
+        <span class="PY_KEYWORD">return</span> self._server
+
+    <span class="PY_KEYWORD">def</span> serverSidePath(self, path=None):
+        <span class="PY_STRING">"""Get the server-side path.
+
+        Returns the absolute server-side path of the WebKit application.
+        If the optional path is passed in, then it is joined with the
+        server side directory to form a path relative to the app server.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> path:
+            <span class="PY_KEYWORD">return</span> os.path.normpath(
+                os.path.join(self._serverSidePath, path))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._serverSidePath
+
+    <span class="PY_KEYWORD">def</span> webwarePath(self):
+        <span class="PY_STRING">"""The path of the ``Webware/`` directory."""</span>
+        <span class="PY_KEYWORD">return</span> self._server.webwarePath()
+
+    <span class="PY_KEYWORD">def</span> webKitPath(self):
+        <span class="PY_STRING">"""The Path of the ``Webware/WebKit/`` directory."""</span>
+        <span class="PY_KEYWORD">return</span> self._server.webKitPath()
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> name():
+        <span class="PY_STRING">"""The name by which this was started. Usually `AppServer`."""</span>
+        <span class="PY_KEYWORD">return</span> sys.argv[0]
+
+
+    <span class="PY_COMMENT">## Activity Log ##</span>
+
+    <span class="PY_KEYWORD">def</span> writeActivityLog(self, trans):
+        <span class="PY_STRING">"""Write an entry to the activity log.
+
+        Writes an entry to the script log file. Uses settings
+        ``ActivityLogFilename`` and ``ActivityLogColumns``.
+
+        """</span>
+        filename = self.serverSidePath(
+            self.setting(<span class="PY_STRING">'ActivityLogFilename'</span>))
+        <span class="PY_KEYWORD">if</span> os.path.exists(filename):
+            f = open(filename, <span class="PY_STRING">'a'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            f = open(filename, <span class="PY_STRING">'w'</span>)
+            f.write(<span class="PY_STRING">','</span>.join(self.setting(<span class="PY_STRING">'ActivityLogColumns'</span>)) + <span class="PY_STRING">'\n'</span>)
+        values = []
+        objects = dict(application=self, transaction=trans,
+            request=trans.request(), response=trans.response(),
+             <span class="PY_COMMENT"># don't cause creation of session here:</span>
+            servlet=trans.servlet(), session=trans._session)
+        <span class="PY_KEYWORD">for</span> column <span class="PY_KEYWORD">in</span> self.setting(<span class="PY_STRING">'ActivityLogColumns'</span>):
+            <span class="PY_KEYWORD">try</span>:
+                value = valueForName(objects, column)
+            <span class="PY_KEYWORD">except</span> Exception:
+                value = <span class="PY_STRING">'(unknown)'</span>
+            <span class="PY_KEYWORD">if</span> isinstance(value, float):
+                <span class="PY_COMMENT"># probably need more flexibility in the future</span>
+                value = <span class="PY_STRING">'%0.2f'</span> % value
+            <span class="PY_KEYWORD">else</span>:
+                value = str(value)
+            values.append(value)
+        f.write(<span class="PY_STRING">','</span>.join(values) + <span class="PY_STRING">'\n'</span>)
+        f.close()
+
+
+    <span class="PY_COMMENT">## Request Dispatching ##</span>
+
+    <span class="PY_COMMENT"># These are the entry points from `AppServer`, which take a raw request,</span>
+    <span class="PY_COMMENT"># turn it into a transaction, run the transaction, and clean up.</span>
+
+    <span class="PY_KEYWORD">def</span> dispatchRawRequest(self, requestDict, strmOut):
+        <span class="PY_STRING">"""Dispatch a raw request.
+
+        Dispatch a request as passed from the Adapter through the AppServer.
+        This method creates the request, response, and transaction object,
+        then runs (via `runTransaction`) the transaction. It also catches any
+        exceptions, which are then passed on to `handleExceptionInTransaction`.
+
+        """</span>
+        request = self.createRequestForDict(requestDict)
+        <span class="PY_KEYWORD">if</span> request:
+            trans = Transaction(application=self, request=request)
+            <span class="PY_KEYWORD">if</span> trans:
+                request.setTransaction(trans)
+                response = request.responseClass()(trans, strmOut)
+                <span class="PY_KEYWORD">if</span> response:
+                    trans.setResponse(response)
+                    self.runTransaction(trans)
+                    <span class="PY_KEYWORD">try</span>:
+                        trans.response().deliver()
+                    <span class="PY_KEYWORD">except</span> ConnectionAbortedError, err:
+                        trans.setError(err)
+                    response.clearTransaction()
+                    <span class="PY_COMMENT"># release possible servlets on the stack</span>
+                    <span class="PY_KEYWORD">while</span> 1:
+                        servlet = request.pop()
+                        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> servlet:
+                            <span class="PY_KEYWORD">break</span>
+                        self.returnServlet(servlet)
+                    <span class="PY_COMMENT"># get current servlet (this may have changed)</span>
+                    servlet = trans.servlet()
+                    <span class="PY_KEYWORD">if</span> servlet:
+                        <span class="PY_COMMENT"># return the current servlet to its pool</span>
+                        self.returnServlet(servlet)
+                <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'LogActivity'</span>):
+                    self.writeActivityLog(trans)
+            request.clearTransaction()
+        <span class="PY_KEYWORD">return</span> trans
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> createRequestForDict(requestDict):
+        <span class="PY_STRING">"""Create request object for a given dictionary.
+
+        Create a request object (subclass of `Request`) given the raw
+        dictionary as passed by the adapter.
+
+        The class of the request may be based on the contents of the
+        dictionary (though only `HTTPRequest` is currently created),
+        and the request will later determine the class of the response.
+
+        Called by `dispatchRawRequest`.
+
+        """</span>
+        format = requestDict[<span class="PY_STRING">'format'</span>]
+        <span class="PY_COMMENT"># Maybe an EmailAdapter would make a request with a format of Email,</span>
+        <span class="PY_COMMENT"># and an EmailRequest would be generated. For now just CGI/HTTPRequest.</span>
+        <span class="PY_KEYWORD">assert</span> format == <span class="PY_STRING">'CGI'</span>
+        request = HTTPRequest(requestDict)
+        <span class="PY_COMMENT"># The request object is stored for tracking/debugging purposes.</span>
+        requestDict[<span class="PY_STRING">'requestObject'</span>] = request
+        <span class="PY_KEYWORD">return</span> request
+
+    <span class="PY_KEYWORD">def</span> runTransaction(self, trans):
+        <span class="PY_STRING">"""Run transation.
+
+        Executes the transaction, handling HTTPException errors.
+        Finds the servlet (using the root parser, probably
+        `URLParser.ContextParser`, to find the servlet for the
+        transaction, then calling `runTransactionViaServlet`.
+
+        Called by `dispatchRawRequest`.
+
+        """</span>
+        findServlet = self.rootURLParser().findServletForTransaction
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_COMMENT"># remove the session identifier from the path</span>
+            self.removePathSession(trans)
+            <span class="PY_COMMENT"># determine the context and the servlet for the transaction</span>
+            servlet = findServlet(trans)
+            <span class="PY_COMMENT"># handle session field only now, because the name of the</span>
+            <span class="PY_COMMENT"># session id field can depend on the context</span>
+            self.handlePathSession(trans)
+            <span class="PY_COMMENT"># now everything is set, run the transaction</span>
+            self.runTransactionViaServlet(servlet, trans)
+        <span class="PY_KEYWORD">except</span> EndResponse:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">except</span> ConnectionAbortedError, err:
+            trans.setError(err)
+        <span class="PY_KEYWORD">except</span> (KeyboardInterrupt, SystemExit):
+            <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># do not catch these here</span>
+        <span class="PY_KEYWORD">except</span>:
+            <span class="PY_COMMENT"># For once, we use a bare except here in order to catch</span>
+            <span class="PY_COMMENT"># string and non standard exceptions from legacy code</span>
+            <span class="PY_COMMENT"># (starting with Python 2.5 you can simply catch Exception;</span>
+            <span class="PY_COMMENT"># KeyboardInterrupt, SystemExit will be excluded already</span>
+            <span class="PY_COMMENT"># and string exceptions will output deprecation warnings).</span>
+            errClass, err = sys.exc_info()[:2]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> err: <span class="PY_COMMENT"># string exception</span>
+                err, errClass = errClass, None
+            urls = {}
+            <span class="PY_KEYWORD">while</span> 1:
+                trans.setError(err)
+                isHTTPException = isinstance(err, HTTPException)
+                <span class="PY_KEYWORD">if</span> isHTTPException:
+                    err.setTransaction(trans)
+                <span class="PY_KEYWORD">if</span> trans.response().isCommitted():
+                    <span class="PY_COMMENT"># response already committed, cannot display error</span>
+                    isHTTPException = False
+                    <span class="PY_KEYWORD">break</span>
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._errorPage:
+                    <span class="PY_COMMENT"># no custom error page configured</span>
+                    <span class="PY_KEYWORD">break</span>
+                <span class="PY_COMMENT"># get custom error page for this exception</span>
+                url = errClass <span class="PY_KEYWORD">and</span> self.errorPage(errClass)
+                <span class="PY_KEYWORD">if</span> isHTTPException <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> url:
+                    <span class="PY_COMMENT"># get custom error page for status code</span>
+                    code = err.code()
+                    <span class="PY_KEYWORD">if</span> code <span class="PY_KEYWORD">in</span> self._errorPage:
+                        url = self._errorPage[code]
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> url <span class="PY_KEYWORD">or</span> url <span class="PY_KEYWORD">in</span> urls:
+                    <span class="PY_COMMENT"># If there is no custom error page configured,</span>
+                    <span class="PY_COMMENT"># or we get into a circular chain of error pages,</span>
+                    <span class="PY_COMMENT"># then we fall back to standard error handling.</span>
+                    <span class="PY_KEYWORD">break</span>
+                urls[url] = None
+                <span class="PY_COMMENT"># forward to custom error page</span>
+                <span class="PY_KEYWORD">try</span>:
+                    self.forward(trans, url)
+                <span class="PY_KEYWORD">except</span> EndResponse:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">except</span> ConnectionAbortedError, err:
+                    trans.setError(err)
+                <span class="PY_KEYWORD">except</span> (KeyboardInterrupt, SystemExit):
+                    <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># do not catch these here</span>
+                <span class="PY_KEYWORD">except</span>:
+                    <span class="PY_COMMENT"># Once more, catch all other kinds of exceptions here.</span>
+                    <span class="PY_COMMENT"># If the custom error page itself throws an exception,</span>
+                    <span class="PY_COMMENT"># display the new exception instead of the original one,</span>
+                    <span class="PY_COMMENT"># so we notice that something is broken here.</span>
+                    errClass, err = sys.exc_info()[:2]
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> err: <span class="PY_COMMENT"># string exception</span>
+                        err, errClass = errClass, None
+                    url = None
+                <span class="PY_KEYWORD">if</span> url:
+                    <span class="PY_KEYWORD">return</span> <span class="PY_COMMENT"># error has already been handled</span>
+            <span class="PY_KEYWORD">if</span> isHTTPException:
+                <span class="PY_COMMENT"># display standard http error page</span>
+                trans.response().displayError(err)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_COMMENT"># standard error handling</span>
+                <span class="PY_KEYWORD">if</span> (self.setting(<span class="PY_STRING">'EnterDebuggerOnException'</span>)
+                        <span class="PY_KEYWORD">and</span> sys.stdin.isatty()):
+                    <span class="PY_KEYWORD">import</span> pdb
+                    pdb.post_mortem(sys.exc_info()[2])
+                self.handleExceptionInTransaction(
+                    sys.exc_info(), trans)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> runTransactionViaServlet(servlet, trans):
+        <span class="PY_STRING">"""Execute the transaction using the servlet.
+
+        This is the `awake`/`respond`/`sleep` sequence of calls, or if
+        the servlet supports it, a single `runTransaction` call (which is
+        presumed to make the awake/respond/sleep calls on its own). Using
+        `runTransaction` allows the servlet to override the basic call
+        sequence, or catch errors from that sequence.
+
+        Called by `runTransaction`.
+
+        """</span>
+        trans.setServlet(servlet)
+        <span class="PY_KEYWORD">if</span> hasattr(servlet, <span class="PY_STRING">'runTransaction'</span>):
+            servlet.runTransaction(trans)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># For backward compatibility (Servlet.runTransaction implements</span>
+            <span class="PY_COMMENT"># this same sequence of calls, but by keeping it in the servlet</span>
+            <span class="PY_COMMENT"># it's easier for the servlet to catch exceptions).</span>
+            <span class="PY_KEYWORD">try</span>:
+                trans.awake()
+                trans.respond()
+            <span class="PY_KEYWORD">finally</span>:
+                trans.sleep()
+
+    <span class="PY_KEYWORD">def</span> forward(self, trans, url):
+        <span class="PY_STRING">"""Forward the request to a different (internal) URL.
+
+        The transaction's URL is changed to point to the new servlet,
+        and the transaction is simply run again.
+
+        Output is _not_ accumulated, so if the original servlet had any output,
+        the new output will _replace_ the old output.
+
+        You can change the request in place to control the servlet you are
+        forwarding to -- using methods like `HTTPRequest.setField`.
+
+        """</span>
+        <span class="PY_COMMENT"># Reset the response to a "blank slate"</span>
+        trans.response().reset()
+        <span class="PY_COMMENT"># Include the other servlet</span>
+        self.includeURL(trans, url)
+        <span class="PY_COMMENT"># Raise an exception to end processing of this request</span>
+        <span class="PY_KEYWORD">raise</span> EndResponse
+
+    <span class="PY_KEYWORD">def</span> callMethodOfServlet(self, trans, url, method, *args, **kw):
+        <span class="PY_STRING">"""Call method of another servlet.
+
+        Call a method of the servlet referred to by the URL. Calls sleep()
+        and awake() before and after the method call. Or, if the servlet
+        defines it, then `runMethodForTransaction` is used (analogous to the
+        use of `runTransaction` in `forward`).
+
+        The entire process is similar to `forward`, except that instead of
+        `respond`, `method` is called (`method` should be a string, `*args`
+        and `**kw` are passed as arguments to that method).
+
+        """</span>
+        <span class="PY_COMMENT"># store current request and set the new URL</span>
+        request = trans.request()
+        request.push(trans.servlet(),
+            self.resolveInternalRelativePath(trans, url))
+        <span class="PY_COMMENT"># get new servlet</span>
+        servlet = self.rootURLParser().findServletForTransaction(trans)
+        trans.setServlet(servlet)
+        <span class="PY_COMMENT"># call method of included servlet</span>
+        <span class="PY_KEYWORD">if</span> hasattr(servlet, <span class="PY_STRING">'runMethodForTransaction'</span>):
+            result = servlet.runMethodForTransaction(
+                trans, method, *args, **kw)
+        <span class="PY_KEYWORD">else</span>:
+            servlet.awake(trans)
+            result = getattr(servlet, method)(*args, **kw)
+            servlet.sleep(trans)
+        <span class="PY_COMMENT"># return new servlet to its pool</span>
+        self.returnServlet(servlet)
+        <span class="PY_COMMENT"># restore current request</span>
+        trans.setServlet(request.pop())
+        <span class="PY_KEYWORD">return</span> result
+
+    <span class="PY_KEYWORD">def</span> includeURL(self, trans, url):
+        <span class="PY_STRING">"""Include another servlet.
+
+        Include the servlet given by the URL. Like `forward`,
+        except control is ultimately returned to the servlet.
+
+        """</span>
+        <span class="PY_COMMENT"># store current request and set the new URL</span>
+        request = trans.request()
+        request.push(trans.servlet(),
+            self.resolveInternalRelativePath(trans, url))
+        <span class="PY_COMMENT"># get new servlet</span>
+        servlet = self.rootURLParser().findServletForTransaction(trans)
+        trans.setServlet(servlet)
+        <span class="PY_COMMENT"># run the included servlet</span>
+        <span class="PY_KEYWORD">try</span>:
+            servlet.runTransaction(trans)
+        <span class="PY_KEYWORD">except</span> EndResponse:
+            <span class="PY_COMMENT"># we interpret an EndResponse in an included page to mean</span>
+            <span class="PY_COMMENT"># that the current page may continue processing</span>
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_COMMENT"># return new servlet to its pool</span>
+        self.returnServlet(servlet)
+        <span class="PY_COMMENT"># restore current request</span>
+        trans.setServlet(request.pop())
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> resolveInternalRelativePath(trans, url):
+        <span class="PY_STRING">"""Return the absolute internal path.
+
+        Given a URL, return the absolute internal URL.
+        URLs are assumed relative to the current URL.
+        Absolute paths are returned unchanged.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> url.startswith(<span class="PY_STRING">'/'</span>):
+            origDir = trans.request().urlPath()
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> origDir.endswith(<span class="PY_STRING">'/'</span>):
+                origDir = os.path.dirname(origDir)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> origDir.endswith(<span class="PY_STRING">'/'</span>):
+                    origDir += <span class="PY_STRING">'/'</span>
+            url = origDir + url
+        <span class="PY_COMMENT"># deal with . and .. in the path</span>
+        parts = []
+        <span class="PY_KEYWORD">for</span> part <span class="PY_KEYWORD">in</span> url.split(<span class="PY_STRING">'/'</span>):
+            <span class="PY_KEYWORD">if</span> parts <span class="PY_KEYWORD">and</span> part == <span class="PY_STRING">'..'</span>:
+                parts.pop()
+            <span class="PY_KEYWORD">elif</span> part != <span class="PY_STRING">'.'</span>:
+                parts.append(part)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'/'</span>.join(parts)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> returnServlet(servlet):
+        <span class="PY_STRING">"""Return the servlet to its pool."""</span>
+        servlet.close()
+
+    <span class="PY_KEYWORD">def</span> errorPage(self, errorClass):
+        <span class="PY_STRING">"""Get the error page url corresponding to an error class."""</span>
+        <span class="PY_KEYWORD">if</span> errorClass.__name__ <span class="PY_KEYWORD">in</span> self._errorPage:
+            <span class="PY_KEYWORD">return</span> self._errorPage[errorClass.__name__]
+        <span class="PY_KEYWORD">if</span> errorClass <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> Exception:
+            <span class="PY_KEYWORD">for</span> errorClass <span class="PY_KEYWORD">in</span> errorClass.__bases__:
+                url = self.errorPage(errorClass)
+                <span class="PY_KEYWORD">if</span> url:
+                    <span class="PY_KEYWORD">return</span> url
+
+    <span class="PY_KEYWORD">def</span> handleException(self):
+        <span class="PY_STRING">"""Handle exceptions.
+
+        This should only be used in cases where there is no transaction object,
+        for example if an exception occurs when attempting to save a session
+        to disk.
+
+        """</span>
+        self._exceptionHandlerClass(self, None, sys.exc_info())
+
+    <span class="PY_KEYWORD">def</span> handleExceptionInTransaction(self, excInfo, trans):
+        <span class="PY_STRING">"""Handle exception with info.
+
+        Handles exception `excInfo` (as returned by `sys.exc_info()`)
+        that was generated by `transaction`. It may display the exception
+        report, email the report, etc., handled by
+        `ExceptionHandler.ExceptionHandler`.
+
+        """</span>
+        request = trans.request()
+        editlink = (self.setting(<span class="PY_STRING">'IncludeEditLink'</span>)
+            <span class="PY_KEYWORD">and</span> request.adapterName() + <span class="PY_STRING">"/Admin/EditFile"</span> <span class="PY_KEYWORD">or</span> None)
+        self._exceptionHandlerClass(self, trans, excInfo,
+            dict(editlink=editlink))
+
+    <span class="PY_KEYWORD">def</span> rootURLParser(self):
+        <span class="PY_STRING">"""Accessor: the Rool URL parser.
+
+        URL parsing (as defined by subclasses of `URLParser.URLParser`)
+        starts here. Other parsers are called in turn by this parser.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._rootURLParser
+
+    <span class="PY_KEYWORD">def</span> hasContext(self, name):
+        <span class="PY_STRING">"""Checks whether context `name` exist."""</span>
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._rootURLParser._contexts
+
+    <span class="PY_KEYWORD">def</span> addContext(self, name, path):
+        <span class="PY_STRING">"""Add a context by named `name`, rooted at `path`.
+
+        This gets imported as a package, and the last directory
+        of `path` does not have to match the context name.
+        (The package will be named `name`, regardless of `path`).
+
+        Delegated to `URLParser.ContextParser`.
+
+        """</span>
+        self._rootURLParser.addContext(name, path)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> addServletFactory(factory):
+        <span class="PY_STRING">"""Add a ServletFactory.
+
+        Delegated to the `URLParser.ServletFactoryManager` singleton.
+
+        """</span>
+        URLParser.ServletFactoryManager.addServletFactory(factory)
+
+    <span class="PY_KEYWORD">def</span> contexts(self):
+        <span class="PY_STRING">"""Return a dictionary of context-name: context-path."""</span>
+        <span class="PY_KEYWORD">return</span> self._rootURLParser._contexts
+
+    _exceptionReportAttrNames = [<span class="PY_STRING">'webwareVersion'</span>, <span class="PY_STRING">'webwarePath'</span>,
+        <span class="PY_STRING">'serverSidePath'</span>, <span class="PY_STRING">'contexts'</span>]
+
+    <span class="PY_KEYWORD">def</span> writeExceptionReport(self, handler):
+        <span class="PY_STRING">"""Write extra information to the exception report.
+
+        See `WebKit.ExceptionHandler` for more information.
+
+        """</span>
+        handler.writeTitle(self.__class__.__name__)
+        handler.writeAttrs(self, self._exceptionReportAttrNames)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> removePathSession(trans):
+        <span class="PY_STRING">"""Remove a possible session identifier from the path."""</span>
+        request = trans.request()
+        <span class="PY_COMMENT"># Try to get automatic path session:</span>
+        <span class="PY_COMMENT"># If UseAutomaticPathSessions is enabled in Application.config,</span>
+        <span class="PY_COMMENT"># Application redirects the browser to a URL with SID in path:</span>
+        <span class="PY_COMMENT"># http://gandalf/a/_SID_=2001080221301877755/Examples/</span>
+        <span class="PY_COMMENT"># The _SID_ part is extracted and removed from path here.</span>
+        <span class="PY_COMMENT"># Note that We do not check for the exact name of the field</span>
+        <span class="PY_COMMENT"># here because it may be context dependent.</span>
+        p = request._pathInfo
+        <span class="PY_KEYWORD">if</span> p:
+            p = p.split(<span class="PY_STRING">'/'</span>, 2)
+            <span class="PY_KEYWORD">if</span> len(p) &gt; 1 <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> p[0] <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'='</span> <span class="PY_KEYWORD">in</span> p[1]:
+                s = p[1]
+                request._pathSID = s.split(<span class="PY_STRING">'='</span>, 1)
+                s += <span class="PY_STRING">'/'</span>
+                <span class="PY_KEYWORD">del</span> p[1]
+                env = request.environ()
+                request._pathInfo = env[<span class="PY_STRING">'PATH_INFO'</span>] = <span class="PY_STRING">'/'</span>.join(p)
+                <span class="PY_KEYWORD">for</span> v <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'REQUEST_URI'</span>, <span class="PY_STRING">'PATH_TRANSLATED'</span>):
+                    <span class="PY_KEYWORD">if</span> v <span class="PY_KEYWORD">in</span> env:
+                        env[v] = env[v].replace(s, <span class="PY_STRING">''</span>, 1)
+            <span class="PY_KEYWORD">else</span>:
+                request._pathSID = None
+        <span class="PY_KEYWORD">else</span>:
+            request._pathSID = None
+
+    <span class="PY_KEYWORD">def</span> handlePathSession(self, trans):
+        <span class="PY_STRING">"""Handle the session identifier that has been found in the path."""</span>
+        request = trans.request()
+        <span class="PY_KEYWORD">if</span> request._pathSID:
+            sessionName = self.sessionName(trans)
+            <span class="PY_KEYWORD">if</span> request._pathSID[0] == sessionName:
+                <span class="PY_KEYWORD">if</span> request.hasCookie(sessionName):
+                    self.handleUnnecessaryPathSession(trans)
+                request.cookies()[sessionName] = request._pathSID[1]
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> self._autoPathSessions:
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> request.hasCookie(sessionName):
+                        self.handleMissingPathSession(trans)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> self._autoPathSessions:
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> request.hasCookie(self.sessionName(trans)):
+                    self.handleMissingPathSession(trans)
+
+    <span class="PY_KEYWORD">def</span> handleMissingPathSession(self, trans):
+        <span class="PY_STRING">"""Redirect requests without session info in the path.
+
+        If UseAutomaticPathSessions is enabled in Application.config
+        we redirect the browser to an absolute url with SID in path
+        http://gandalf/a/_SID_=2001080221301877755/Examples/
+        _SID_ is extracted and removed from path in HTTPRequest.py
+
+        This is for convinient building of webapps that must not
+        depend on cookie support.
+
+        Note that we create an absolute URL with scheme and hostname
+        because otherwise IIS will only cause an internal redirect.
+
+        """</span>
+        request = trans.request()
+        url = <span class="PY_STRING">'%s://%s%s/%s=%s%s%s%s'</span> % (request.scheme(),
+            request.hostAndPort(), request.servletPath(),
+            self.sessionName(trans), trans.session().identifier(),
+            request.pathInfo(), request.extraURLPath() <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>,
+            request.queryString() <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'?'</span> + request.queryString() <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>)
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'Debug'</span>)[<span class="PY_STRING">'Sessions'</span>]:
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'&gt;&gt; [sessions] handling UseAutomaticPathSessions, '</span>
+                <span class="PY_STRING">'redirecting to'</span>, url)
+        trans.response().sendRedirect(url)
+        <span class="PY_KEYWORD">raise</span> EndResponse
+
+    <span class="PY_KEYWORD">def</span> handleUnnecessaryPathSession(self, trans):
+        <span class="PY_STRING">"""Redirect request with unnecessary session info in the path.
+
+        This is called if it has been determined that the request has a path
+        session, but also cookies. In that case we redirect to eliminate the
+        unnecessary path session.
+
+        """</span>
+        request = trans.request()
+        url = <span class="PY_STRING">'%s://%s%s%s%s%s'</span> % (request.scheme(),
+            request.hostAndPort(), request.servletPath(),
+            request.pathInfo(), request.extraURLPath() <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>,
+            request.queryString() <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'?'</span> + request.queryString() <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>)
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'Debug'</span>)[<span class="PY_STRING">'Sessions'</span>]:
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'&gt;&gt; [sessions] handling unnecessary path session, '</span>
+                <span class="PY_STRING">'redirecting to'</span>, url)
+        trans.response().sendRedirect(url)
+        <span class="PY_KEYWORD">raise</span> EndResponse
+</pre>
+<!--footer-->
+
+</body>
+</html>

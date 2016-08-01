@@ -1,0 +1,172 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module UserKit.RoleUserManagerToFile</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="UserKit.html"><font color="#ffffff">UserKit</font></a>.RoleUserManagerToFile</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/UserKit/RoleUserManagerToFile.py">/var/www/docs/Webware-1.1.1/UserKit/RoleUserManagerToFile.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;<a href="#RoleUserManagerToFile">RoleUserManagerToFile</a>&nbsp;class.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="UserKit.RoleUserManagerMixIn.html#RoleUserManagerMixIn">UserKit.RoleUserManagerMixIn.RoleUserManagerMixIn</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="UserKit.RoleUserManagerToFile.html#RoleUserManagerToFile">RoleUserManagerToFile</a>(<a href="UserKit.UserManagerToFile.html#UserManagerToFile">UserKit.UserManagerToFile.UserManagerToFile</a>, <a href="UserKit.RoleUserManagerMixIn.html#RoleUserManagerMixIn">UserKit.RoleUserManagerMixIn.RoleUserManagerMixIn</a>)
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="UserKit.UserManagerToFile.html#UserManagerToFile">UserKit.UserManagerToFile.UserManagerToFile</a>(<a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="UserKit.RoleUserManagerToFile.html#RoleUserManagerToFile">RoleUserManagerToFile</a>(<a href="UserKit.UserManagerToFile.html#UserManagerToFile">UserKit.UserManagerToFile.UserManagerToFile</a>, <a href="UserKit.RoleUserManagerMixIn.html#RoleUserManagerMixIn">UserKit.RoleUserManagerMixIn.RoleUserManagerMixIn</a>)
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RoleUserManagerToFile">class <strong>RoleUserManagerToFile</strong></a>(<a href="UserKit.UserManagerToFile.html#UserManagerToFile">UserKit.UserManagerToFile.UserManagerToFile</a>, <a href="UserKit.RoleUserManagerMixIn.html#RoleUserManagerMixIn">UserKit.RoleUserManagerMixIn.RoleUserManagerMixIn</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>See&nbsp;the&nbsp;base&nbsp;classes&nbsp;for&nbsp;more&nbsp;information.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="UserKit.RoleUserManagerToFile.html#RoleUserManagerToFile">RoleUserManagerToFile</a></dd>
+<dd><a href="UserKit.UserManagerToFile.html#UserManagerToFile">UserKit.UserManagerToFile.UserManagerToFile</a></dd>
+<dd><a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a></dd>
+<dd><a href="UserKit.RoleUserManagerMixIn.html#RoleUserManagerMixIn">UserKit.RoleUserManagerMixIn.RoleUserManagerMixIn</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="RoleUserManagerToFile-__init__"><strong>__init__</strong></a>(self, userClass<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Methods inherited from <a href="UserKit.UserManagerToFile.html#UserManagerToFile">UserKit.UserManagerToFile.UserManagerToFile</a>:<br>
+<dl><dt><a name="RoleUserManagerToFile-activeUsers"><strong>activeUsers</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-addUser"><strong>addUser</strong></a>(self, user)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-decoder"><strong>decoder</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-encoder"><strong>encoder</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-inactiveUsers"><strong>inactiveUsers</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-initNextSerialNum"><strong>initNextSerialNum</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-loadUser"><strong>loadUser</strong></a>(self, serialNum, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Load&nbsp;the&nbsp;user&nbsp;with&nbsp;the&nbsp;given&nbsp;serial&nbsp;number&nbsp;from&nbsp;disk.<br>
+&nbsp;<br>
+If&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;user,&nbsp;a&nbsp;KeyError&nbsp;will&nbsp;be&nbsp;raised&nbsp;unless<br>
+a&nbsp;default&nbsp;value&nbsp;was&nbsp;passed,&nbsp;in&nbsp;which&nbsp;case&nbsp;that&nbsp;value&nbsp;is&nbsp;returned.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-nextSerialNum"><strong>nextSerialNum</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-scanSerialNums"><strong>scanSerialNums</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;serial&nbsp;numbers&nbsp;of&nbsp;users&nbsp;found&nbsp;on&nbsp;disk.<br>
+&nbsp;<br>
+Serial&nbsp;numbers&nbsp;are&nbsp;always&nbsp;integers.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-setEncoderDecoder"><strong>setEncoderDecoder</strong></a>(self, encoder, decoder)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-setUserClass"><strong>setUserClass</strong></a>(self, userClass)</dt><dd><tt>Overridden&nbsp;to&nbsp;mix&nbsp;in&nbsp;UserMixIn&nbsp;to&nbsp;the&nbsp;class&nbsp;that&nbsp;is&nbsp;passed&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-setUserDir"><strong>setUserDir</strong></a>(self, userDir)</dt><dd><tt>Set&nbsp;the&nbsp;directory&nbsp;where&nbsp;user&nbsp;information&nbsp;is&nbsp;stored.<br>
+&nbsp;<br>
+You&nbsp;should&nbsp;strongly&nbsp;consider&nbsp;invoking&nbsp;<a href="#RoleUserManagerToFile-initNextSerialNum">initNextSerialNum</a>()&nbsp;afterwards.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-userDir"><strong>userDir</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-userForExternalId"><strong>userForExternalId</strong></a>(self, externalId, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-userForName"><strong>userForName</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-userForSerialNum"><strong>userForSerialNum</strong></a>(self, serialNum, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-users"><strong>users</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>:<br>
+<dl><dt><a name="RoleUserManagerToFile-activeUserTimeout"><strong>activeUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-cachedUserTimeout"><strong>cachedUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-clearCache"><strong>clearCache</strong></a>(self)</dt><dd><tt>Clear&nbsp;the&nbsp;cache&nbsp;of&nbsp;the&nbsp;manager.<br>
+&nbsp;<br>
+Use&nbsp;with&nbsp;extreme&nbsp;caution.&nbsp;If&nbsp;your&nbsp;program&nbsp;maintains&nbsp;a&nbsp;reference<br>
+to&nbsp;a&nbsp;user&nbsp;object,&nbsp;but&nbsp;the&nbsp;manager&nbsp;loads&nbsp;in&nbsp;a&nbsp;new&nbsp;copy&nbsp;later&nbsp;on,<br>
+then&nbsp;consistency&nbsp;problems&nbsp;could&nbsp;occur.<br>
+&nbsp;<br>
+The&nbsp;most&nbsp;popular&nbsp;use&nbsp;of&nbsp;this&nbsp;method&nbsp;is&nbsp;in&nbsp;the&nbsp;regression&nbsp;test&nbsp;suite.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-createUser"><strong>createUser</strong></a>(self, name, password, userClass<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;a&nbsp;newly&nbsp;created&nbsp;user&nbsp;that&nbsp;is&nbsp;added&nbsp;to&nbsp;the&nbsp;manager.<br>
+&nbsp;<br>
+If&nbsp;userClass&nbsp;is&nbsp;not&nbsp;specified,&nbsp;the&nbsp;manager's&nbsp;default&nbsp;user&nbsp;class<br>
+is&nbsp;instantiated.&nbsp;This&nbsp;not&nbsp;imply&nbsp;that&nbsp;the&nbsp;user&nbsp;is&nbsp;logged&nbsp;in.<br>
+This&nbsp;method&nbsp;invokes&nbsp;<a href="#RoleUserManagerToFile-addUser">addUser</a>().<br>
+&nbsp;<br>
+See&nbsp;also:&nbsp;<a href="#RoleUserManagerToFile-userClass">userClass</a>(),&nbsp;<a href="#RoleUserManagerToFile-setUserClass">setUserClass</a>()</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-login"><strong>login</strong></a>(self, user, password)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;if&nbsp;the&nbsp;login&nbsp;is&nbsp;successful,&nbsp;otherwise&nbsp;return&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-loginExternalId"><strong>loginExternalId</strong></a>(self, externalId, password)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-loginName"><strong>loginName</strong></a>(self, userName, password)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-loginSerialNum"><strong>loginSerialNum</strong></a>(self, serialNum, password)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-logout"><strong>logout</strong></a>(self, user)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-modifiedUserTimeout"><strong>modifiedUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-numActiveUsers"><strong>numActiveUsers</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;active&nbsp;users,&nbsp;e.g.,&nbsp;users&nbsp;that&nbsp;are&nbsp;logged&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-setActiveUserTimeout"><strong>setActiveUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-setCachedUserTimeout"><strong>setCachedUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-setModifiedUserTimeout"><strong>setModifiedUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Perform&nbsp;any&nbsp;tasks&nbsp;necessary&nbsp;to&nbsp;shut&nbsp;down&nbsp;the&nbsp;user&nbsp;manager.<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;and&nbsp;must&nbsp;invoke&nbsp;super&nbsp;as&nbsp;their&nbsp;*last*&nbsp;step.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-userClass"><strong>userClass</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;userClass,&nbsp;which&nbsp;is&nbsp;used&nbsp;by&nbsp;createUser.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;value&nbsp;is&nbsp;UserKit.User.User.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="UserKit.RoleUserManagerMixIn.html#RoleUserManagerMixIn">UserKit.RoleUserManagerMixIn.RoleUserManagerMixIn</a>:<br>
+<dl><dt><a name="RoleUserManagerToFile-addRole"><strong>addRole</strong></a>(self, role)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-clearRoles"><strong>clearRoles</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-delRole"><strong>delRole</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-hasRole"><strong>hasRole</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-initUserClass"><strong>initUserClass</strong></a>(self)</dt><dd><tt>Invoked&nbsp;by&nbsp;__init__&nbsp;to&nbsp;set&nbsp;the&nbsp;default&nbsp;user&nbsp;class&nbsp;to&nbsp;RoleUser.</tt></dd></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-role"><strong>role</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="RoleUserManagerToFile-roles"><strong>roles</strong></a>(self)</dt></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

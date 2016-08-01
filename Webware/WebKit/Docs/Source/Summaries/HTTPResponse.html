@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.HTTPResponse</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.HTTPResponse</h2>
+<p>You can also browse the <a href="../Files/HTTPResponse.html">complete source file</a>
+or the <a href="../Docs/WebKit.HTTPResponse.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">HTTPResponse</span>(Response):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, transaction, strmOut, headers=None)</span>
+
+<span class="line_category">    ## Protocol ##</span>
+<span class="line_def">    def <span class="name_def">protocol</span>(self)</span>
+
+<span class="line_category">    ## Headers ##</span>
+<span class="line_def">    def <span class="name_def">header</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">hasHeader</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setHeader</span>(self, name, value)</span>
+<span class="line_def">    def <span class="name_def">headers</span>(self, name=None)</span>
+<span class="line_def">    def <span class="name_def">clearHeaders</span>(self)</span>
+
+<span class="line_category">    ## Cookies ##</span>
+<span class="line_def">    def <span class="name_def">cookie</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">hasCookie</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setCookie</span>(self, name, value, path='/', expires='ONCLOSE',</span>
+<span class="line_def">    def <span class="name_def">addCookie</span>(self, cookie)</span>
+<span class="line_def">    def <span class="name_def">delCookie</span>(self, name, path='/', secure=False)</span>
+<span class="line_def">    def <span class="name_def">cookies</span>(self)</span>
+<span class="line_def">    def <span class="name_def">clearCookies</span>(self)</span>
+
+<span class="line_category">    ## Status ##</span>
+<span class="line_def">    def <span class="name_def">setStatus</span>(self, code, msg='')</span>
+
+<span class="line_category">    ## Special responses ##</span>
+<span class="line_def">    def <span class="name_def">sendError</span>(self, code, msg='')</span>
+<span class="line_def">    def <span class="name_def">sendRedirect</span>(self, url, status=None)</span>
+<span class="line_def">    def <span class="name_def">sendRedirectPermanent</span>(self, url)</span>
+<span class="line_def">    def <span class="name_def">sendRedirectSeeOther</span>(self, url)</span>
+<span class="line_def">    def <span class="name_def">sendRedirectTemporary</span>(self, url)</span>
+
+<span class="line_category">    ## Output ##</span>
+<span class="line_def">    def <span class="name_def">write</span>(self, charstr=None)</span>
+<span class="line_def">    def <span class="name_def">flush</span>(self, autoFlush=True)</span>
+<span class="line_def">    def <span class="name_def">isCommitted</span>(self)</span>
+<span class="line_def">    def <span class="name_def">deliver</span>(self)</span>
+<span class="line_def">    def <span class="name_def">commit</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeHeaders</span>(self)</span>
+<span class="line_def">    def <span class="name_def">recordSession</span>(self)</span>
+<span class="line_def">    def <span class="name_def">reset</span>(self)</span>
+<span class="line_def">    def <span class="name_def">rawResponse</span>(self)</span>
+<span class="line_def">    def <span class="name_def">size</span>(self)</span>
+<span class="line_def">    def <span class="name_def">mergeTextHeaders</span>(self, headerstr)</span>
+
+<span class="line_category">    ## Exception reporting ##</span>
+<span class="line_def">    def <span class="name_def">setErrorHeaders</span>(self, err)</span>
+<span class="line_def">    def <span class="name_def">displayError</span>(self, err)</span>
+
+</pre>
+</body>
+</html>

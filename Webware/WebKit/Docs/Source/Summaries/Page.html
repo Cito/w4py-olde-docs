@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.Page</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.Page</h2>
+<p>You can also browse the <a href="../Files/Page.html">complete source file</a>
+or the <a href="../Docs/WebKit.Page.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Page</span>(HTTPContent):</span>
+
+<span class="line_category">    ## Transactions ##</span>
+<span class="line_def">    def <span class="name_def">defaultAction</span>(self)</span>
+
+<span class="line_category">    ## Generating results ##</span>
+<span class="line_def">    def <span class="name_def">title</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htTitle</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htBodyArgs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeHTML</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeDocType</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeHead</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeHeadParts</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeTitle</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeMetaData</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeStyleSheet</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeJavaScript</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeBody</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeBodyParts</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeContent</span>(self)</span>
+<span class="line_def">    def <span class="name_def">preAction</span>(self, actionName)</span>
+<span class="line_def">    def <span class="name_def">postAction</span>(self, actionName)</span>
+
+<span class="line_category">    ## Convenience Methods ##</span>
+<span class="line_def">    def <span class="name_def">htmlEncode</span>(s)</span>
+<span class="line_def">    def <span class="name_def">htmlDecode</span>(s)</span>
+
+<span class="line_category">    ## Validate HTML output (developer debugging) ##</span>
+<span class="line_def">    def <span class="name_def">validateHTML</span>(self, closingTags='</body></html>')</span>
+
+</pre>
+</body>
+</html>

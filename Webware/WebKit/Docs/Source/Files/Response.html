@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Response.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""An abstract response"""</span>
+
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError
+
+<span class="PY_KEYWORD">from</span> Message <span class="PY_KEYWORD">import</span> Message
+
+
+<span class="PY_KEYWORD">class</span> Response(Message):
+    <span class="PY_STRING">"""The abstract response class.
+
+    Response is a type of Message that offers the following:
+
+      * A time stamp (indicating when the response was finished)
+      * An output stream
+
+    Response is an abstract class; developers typically use HTTPResponse.
+
+    FUTURE
+
+      * Consider implementing the buffer/flush logic here
+        including buffer size.
+      * Also, consider then having a method that doesn't allow
+        commitment until the end.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, trans, strmOut):
+        Message.__init__(self)
+        self._strmOut = strmOut
+        self._transaction = trans
+
+
+    <span class="PY_COMMENT">## End time ##</span>
+
+    <span class="PY_KEYWORD">def</span> endTime(self):
+        <span class="PY_KEYWORD">return</span> self._endTime
+
+    <span class="PY_KEYWORD">def</span> recordEndTime(self):
+        <span class="PY_STRING">"""Record the end time of the response.
+
+        Stores the current time as the end time of the response. This should
+        be invoked at the end of deliver(). It may also be invoked by the
+        application for those responses that never deliver due to an error.
+
+        """</span>
+        self._endTime = time()
+
+
+    <span class="PY_COMMENT">## Output ##</span>
+
+    <span class="PY_KEYWORD">def</span> write(self, string):
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> isCommitted(self):
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> deliver(self):
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> reset(self):
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> streamOut(self):
+        <span class="PY_KEYWORD">return</span> self._strmOut
+
+
+    <span class="PY_COMMENT">## Cleanup ##</span>
+
+    <span class="PY_KEYWORD">def</span> clearTransaction(self):
+        <span class="PY_KEYWORD">del</span> self._transaction
+
+
+    <span class="PY_COMMENT">## Exception reporting ##</span>
+
+    _exceptionReportAttrNames = Message._exceptionReportAttrNames + [<span class="PY_STRING">'endTime'</span>]
+</pre>
+<!--footer-->
+
+</body>
+</html>

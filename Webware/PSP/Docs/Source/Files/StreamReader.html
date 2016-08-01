@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/StreamReader.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""This module co-ordinates the reading of the source file.
+
+It maintains the current position of the parser in the source file.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> copy <span class="PY_KEYWORD">import</span> copy
+<span class="PY_KEYWORD">import</span> os
+
+<span class="PY_KEYWORD">from</span> PSPUtils <span class="PY_KEYWORD">import</span> PSPParserException
+
+
+<span class="PY_KEYWORD">class</span> Mark(object):
+    <span class="PY_STRING">"""The Mark class marks a point in an input stream."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, reader,
+            fileId=None, stream=None, inBaseDir=None, encoding=None):
+
+        <span class="PY_KEYWORD">if</span> isinstance(reader, StreamReader):
+            self.reader = reader
+            self.fileId = fileId
+            self.includeStack = []
+            self.cursor = 0
+            self.stream = stream
+            self.baseDir = inBaseDir
+            self.encoding = encoding
+        <span class="PY_KEYWORD">else</span>:
+            self = copy(reader)
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'%s(%d)'</span> % (self.getFile(), self.cursor)
+
+    <span class="PY_KEYWORD">def</span> getFile(self):
+        <span class="PY_KEYWORD">return</span> self.reader.getFile(self.fileId)
+
+    <span class="PY_KEYWORD">def</span> pushStream(self, inFileId, inStream, inBaseDir, inEncoding):
+        self.includeStack.append((self.cursor, self.fileId, self.baseDir,
+            self.encoding, self.stream))
+        self.cursor = 0
+        self.fileId = inFileId
+        self.stream = inStream
+        self.baseDir = inBaseDir
+        self.encoding = inEncoding
+
+    <span class="PY_KEYWORD">def</span> popStream(self):
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.includeStack:
+            <span class="PY_KEYWORD">return</span> False
+        (self.cursor, self.fileId, self.baseDir,
+            self.encoding, self.stream) = self.includeStack.pop()
+        <span class="PY_KEYWORD">return</span> True
+
+
+<span class="PY_KEYWORD">class</span> StreamReader(object):
+    <span class="PY_STRING">"""This class handles the PSP source file.
+
+    It provides the characters to the other parts of the system.
+    It can move forward and backwards in a file and remember locactions.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, filename, ctxt):
+        self._pspfile = filename
+        self._ctxt = ctxt
+        self.sourcefiles = []
+        self.current = None
+        self.master = None
+
+    <span class="PY_KEYWORD">def</span> init(self):
+        self.pushFile(self._ctxt.getFullPspFileName())
+
+    <span class="PY_KEYWORD">def</span> registerSourceFile(self, filepath):
+        self.sourcefiles.append(filepath)
+        <span class="PY_KEYWORD">return</span> len(self.sourcefiles) - 1
+
+    <span class="PY_KEYWORD">def</span> pushFile(self, filepath, encoding=None):
+        <span class="PY_KEYWORD">assert</span> isinstance(filepath, basestring)
+        <span class="PY_KEYWORD">if</span> self.master <span class="PY_KEYWORD">is</span> None:
+            parent = None
+            self.master = filepath
+        <span class="PY_KEYWORD">else</span>:
+            parent = os.path.split(self.master)[0]
+        isAbsolute = os.path.isabs(filepath)
+        <span class="PY_KEYWORD">if</span> parent <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> isAbsolute:
+            filepath = os.path.join(parent, filepath)
+        fileId = self.registerSourceFile(filepath)
+        handle = open(filepath, <span class="PY_STRING">'rU'</span>)
+        stream = handle.read()
+        handle.seek(0, 0)
+        <span class="PY_KEYWORD">if</span> self.current <span class="PY_KEYWORD">is</span> None:
+            self.current = Mark(self, fileId, stream,
+                self._ctxt.getBaseUri(), encoding)
+        <span class="PY_KEYWORD">else</span>:
+            self.current.pushStream(fileId, stream,
+                self._ctxt.getBaseUri(), encoding) <span class="PY_COMMENT"># don't use yet</span>
+
+    <span class="PY_KEYWORD">def</span> popFile(self):
+        <span class="PY_KEYWORD">if</span> self.current <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span> None
+        <span class="PY_KEYWORD">return</span> self.current.popStream()
+
+    <span class="PY_KEYWORD">def</span> getFile(self, i):
+        <span class="PY_KEYWORD">return</span> self.sourcefiles[i]
+
+    <span class="PY_KEYWORD">def</span> newSourceFile(self, filename):
+        <span class="PY_KEYWORD">if</span> filename <span class="PY_KEYWORD">in</span> self.sourcefiles:
+            <span class="PY_KEYWORD">return</span> None
+        self.sourcefiles.append(filename)
+        <span class="PY_KEYWORD">return</span> len(self.sourcefiles)
+
+    <span class="PY_KEYWORD">def</span> mark(self):
+        <span class="PY_KEYWORD">return</span> copy(self.current)
+
+    <span class="PY_KEYWORD">def</span> skipUntil(self, s):
+        <span class="PY_STRING">"""Greedy search.
+
+        Return the point before the string, but move reader past it.
+
+        """</span>
+        new_cursor = self.current.stream.find(s, self.current.cursor)
+        <span class="PY_KEYWORD">if</span> new_cursor &lt; 0:
+            self.current.cursor = len(self.current.stream)
+            <span class="PY_KEYWORD">if</span> self.hasMoreInput():
+                self.popFile()
+                self.skipUntil(s)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">raise</span> EOFError
+        <span class="PY_KEYWORD">else</span>:
+            self.current.cursor = new_cursor
+            mark = self.mark()
+            self.current.cursor += len(s)
+            <span class="PY_KEYWORD">return</span> mark
+
+    <span class="PY_KEYWORD">def</span> reset(self, mark):
+        self.current = mark
+
+    <span class="PY_KEYWORD">def</span> matches(self, s):
+        <span class="PY_KEYWORD">if</span> s == self.current.stream[
+                self.current.cursor:self.current.cursor+len(s)]:
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">return</span> False
+
+    <span class="PY_KEYWORD">def</span> advance(self, length):
+        <span class="PY_STRING">"""Advance length characters"""</span>
+        <span class="PY_KEYWORD">if</span> length + self.current.cursor &lt;= len(self.current.stream):
+            self.current.cursor += length
+        <span class="PY_KEYWORD">else</span>:
+            prog = len(self.current.stream) - self.current.cursor
+            self.current.cursor = len(self.current.stream)
+            <span class="PY_KEYWORD">if</span> self.hasMoreInput():
+                self.advance(length - prog)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">raise</span> EOFError()
+
+    <span class="PY_KEYWORD">def</span> nextChar(self):
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.hasMoreInput():
+            <span class="PY_KEYWORD">return</span> -1
+        c = self.current.stream[self.current.cursor]
+        self.advance(1)
+        <span class="PY_KEYWORD">return</span> c
+
+    <span class="PY_KEYWORD">def</span> isSpace(self):
+        <span class="PY_STRING">"""No advancing."""</span>
+        <span class="PY_KEYWORD">return</span> self.current.stream[self.current.cursor] <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">' '</span>, <span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> isDelimiter(self):
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.isSpace():
+            c = self.peekChar()
+            <span class="PY_COMMENT"># Look for single character work delimiter:</span>
+            <span class="PY_KEYWORD">if</span> c <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'='</span>, <span class="PY_STRING">'"'</span>, <span class="PY_STRING">"'"</span>, <span class="PY_STRING">'/'</span>):
+                <span class="PY_KEYWORD">return</span> True
+            <span class="PY_COMMENT"># Look for end of comment or basic end tag:</span>
+            <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'-'</span>:
+                mark = self.mark()
+                c = self.nextChar()
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">return</span> c == <span class="PY_STRING">'&gt;'</span> <span class="PY_KEYWORD">or</span> (c == <span class="PY_STRING">'-'</span> <span class="PY_KEYWORD">and</span> self.nextChar() == <span class="PY_STRING">'&gt;'</span>)
+                <span class="PY_KEYWORD">finally</span>:
+                    self.reset(mark)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> peekChar(self, cnt=1):
+        <span class="PY_KEYWORD">if</span> self.hasMoreInput():
+            <span class="PY_KEYWORD">return</span> self.current.stream[
+                self.current.cursor:self.current.cursor+cnt]
+        <span class="PY_KEYWORD">raise</span> EOFError
+
+    <span class="PY_KEYWORD">def</span> skipSpaces(self):
+        i = 0
+        <span class="PY_KEYWORD">while</span> self.isSpace():
+            self.nextChar()
+            i += 1
+        <span class="PY_KEYWORD">return</span> i
+
+    <span class="PY_KEYWORD">def</span> getChars(self, start, stop):
+        mark = self.mark()
+        self.reset(start)
+        chars = self.current.stream[start.cursor:stop.cursor]
+        self.reset(mark)
+        <span class="PY_KEYWORD">return</span> chars
+
+    <span class="PY_KEYWORD">def</span> hasMoreInput(self):
+        <span class="PY_KEYWORD">if</span> self.current.cursor &gt;= len(self.current.stream):
+            <span class="PY_KEYWORD">while</span> self.popFile():
+                <span class="PY_KEYWORD">if</span> self.current.cursor &lt; len(self.current.stream):
+                    <span class="PY_KEYWORD">return</span> True
+            <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> nextContent(self):
+        <span class="PY_STRING">"""Find next &lt; char."""</span>
+        cur_cursor = self.current.cursor
+        self.current.cursor += 1
+        new_cursor = self.current.stream.find(<span class="PY_STRING">'&lt;'</span>, self.current.cursor)
+        <span class="PY_KEYWORD">if</span> new_cursor &lt; 0:
+            new_cursor = len(self.current.stream)
+        self.current.cursor = new_cursor
+        <span class="PY_KEYWORD">return</span> self.current.stream[cur_cursor:new_cursor]
+
+    <span class="PY_KEYWORD">def</span> parseTagAttributes(self):
+        <span class="PY_STRING">"""Parse the attributes at the beginning of a tag."""</span>
+        values = {}
+        <span class="PY_KEYWORD">while</span> 1:
+            self.skipSpaces()
+            c = self.peekChar()
+            <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'&gt;'</span>:
+                <span class="PY_KEYWORD">return</span> values
+            <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'-'</span>:
+                mark = self.mark()
+                self.nextChar()
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> self.nextChar() == <span class="PY_STRING">'-'</span> <span class="PY_KEYWORD">and</span> self.nextChar() == <span class="PY_STRING">'&gt;'</span>:
+                        <span class="PY_KEYWORD">return</span> values
+                <span class="PY_KEYWORD">finally</span>:
+                    self.reset(mark)
+            <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'%'</span>:
+                mark = self.mark()
+                self.nextChar()
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> self.peekChar() == <span class="PY_STRING">'&gt;'</span>:
+                        <span class="PY_KEYWORD">return</span> values
+                <span class="PY_KEYWORD">finally</span>:
+                    self.reset(mark)
+            <span class="PY_KEYWORD">elif</span> <span class="PY_KEYWORD">not</span> c:
+                <span class="PY_KEYWORD">break</span>
+            self.parseAttributeValue(values)
+        <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Unterminated attribute'</span>)
+
+    <span class="PY_KEYWORD">def</span> parseAttributeValue(self, valueDict):
+        self.skipSpaces()
+        name = self.parseToken(0)
+        self.skipSpaces()
+        <span class="PY_KEYWORD">if</span> self.peekChar() != <span class="PY_STRING">'='</span>:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'No attribute value'</span>)
+        self.nextChar()
+        self.skipSpaces()
+        value = self.parseToken(1)
+        self.skipSpaces()
+        valueDict[name] = value
+
+    <span class="PY_KEYWORD">def</span> parseToken(self, quoted):
+        <span class="PY_COMMENT"># This may not be quite right:</span>
+        buffer = []
+        self.skipSpaces()
+        c = self.peekChar()
+        <span class="PY_KEYWORD">if</span> quoted:
+            <span class="PY_KEYWORD">if</span> c <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'"'</span>, <span class="PY_STRING">"'"</span>):
+                endquote = c
+                self.nextChar()
+                c = self.peekChar()
+                <span class="PY_KEYWORD">while</span> c <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> c != endquote:
+                    c = self.nextChar()
+                    <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'\\'</span>:
+                        c = self.nextChar()
+                    buffer.append(c)
+                    c = self.peekChar()
+                <span class="PY_KEYWORD">if</span> c <span class="PY_KEYWORD">is</span> None:
+                    <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Unterminated attribute value'</span>)
+                self.nextChar()
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.isDelimiter():
+                <span class="PY_KEYWORD">while</span> <span class="PY_KEYWORD">not</span> self.isDelimiter():
+                    c = self.nextChar()
+                    <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'\\'</span>:
+                        c = self.peekChar()
+                        <span class="PY_KEYWORD">if</span> c <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'"'</span>, <span class="PY_STRING">"'"</span>, <span class="PY_STRING">'&gt;'</span>, <span class="PY_STRING">'%'</span>):
+                            c = self.nextChar()
+                    buffer.append(c)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(buffer)
+</pre>
+<!--footer-->
+
+</body>
+</html>

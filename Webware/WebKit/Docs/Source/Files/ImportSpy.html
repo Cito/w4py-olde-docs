@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/ImportSpy.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""ImportSpy
+
+Keeps track of modules not imported directly by Webware for Python.
+
+This module helps save the filepath of every module which is imported.
+This is used by the `AutoReloadingAppServer` (see doc strings for more
+information) to restart the server if any source files change.
+
+Other than keeping track of the filepaths, the behaviour of this module
+loader is identical to Python's default behaviour.
+
+If the system supports FAM (file alteration monitor) and python-fam is
+installed, then the need for reloading can be monitored very effectively
+with the use of ImportSpy. Otherwise, ImportSpy will not have much benefit.
+
+Note that ImportSpy is based on the new import hooks of Python described
+in PEP 302. It is possible to suppress the use of ImportSpy by setting
+`UseImportSpy` in AppServer.config to False.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> os.path <span class="PY_KEYWORD">import</span> isdir
+<span class="PY_KEYWORD">from</span> sys <span class="PY_KEYWORD">import</span> path_hooks, path_importer_cache
+
+
+<span class="PY_KEYWORD">class</span> ImportSpy(object):
+    <span class="PY_STRING">"""New style import tracker."""</span>
+
+    _imp = None
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path=None):
+        <span class="PY_STRING">"""Create importer."""</span>
+        <span class="PY_KEYWORD">assert</span> self._imp
+        <span class="PY_KEYWORD">if</span> path <span class="PY_KEYWORD">and</span> isdir(path):
+            self.path = path
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> ImportError
+
+    <span class="PY_KEYWORD">def</span> find_module(self, fullname):
+        <span class="PY_STRING">"""Replaces imp.find_module."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self.file, self.filename, self.info = self._imp.find_module(
+                fullname.rsplit(<span class="PY_STRING">'.'</span>, 1)[-1], [self.path])
+        <span class="PY_KEYWORD">except</span> ImportError:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self
+
+    <span class="PY_KEYWORD">def</span> load_module(self, fullname):
+        <span class="PY_STRING">"""Replaces imp.load_module."""</span>
+        mod = self._imp.load_module(fullname, self.file, self.filename, self.info)
+        <span class="PY_KEYWORD">if</span> mod:
+            mod.__loader__ = self
+        <span class="PY_KEYWORD">return</span> mod
+
+
+<span class="PY_KEYWORD">def</span> activate(impManager):
+    <span class="PY_STRING">"""Activate ImportSpy."""</span>
+    <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> ImportSpy._imp
+    ImportSpy._imp = impManager
+    path_hooks.append(ImportSpy)
+    path_importer_cache.clear()
+    impManager.recordModules()
+</pre>
+<!--footer-->
+
+</body>
+</html>

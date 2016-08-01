@@ -1,0 +1,57 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebUtils.Funcs</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebUtils.html"><font color="#ffffff">WebUtils</font></a>.Funcs</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebUtils/Funcs.py">/var/www/docs/Webware-1.1.1/WebUtils/Funcs.py</a></font></td></tr></table>
+    <p><tt>WebUtils.Funcs<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;some&nbsp;basic&nbsp;functions&nbsp;that&nbsp;are&nbsp;useful<br>
+in&nbsp;HTML&nbsp;and&nbsp;web&nbsp;development.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;safely&nbsp;import&nbsp;*&nbsp;from&nbsp;WebUtils.Funcs&nbsp;if&nbsp;you&nbsp;like.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-htmlDecode"><strong>htmlDecode</strong></a>(s, codes<font color="#909090">=(('"', '&amp;quot;'), ('&gt;', '&amp;gt;'), ('&lt;', '&amp;lt;'), ('&amp;', '&amp;amp;'))</font>)</dt><dd><tt>Return&nbsp;the&nbsp;ASCII&nbsp;decoded&nbsp;version&nbsp;of&nbsp;the&nbsp;given&nbsp;HTML&nbsp;string.<br>
+&nbsp;<br>
+This&nbsp;does&nbsp;NOT&nbsp;remove&nbsp;normal&nbsp;HTML&nbsp;tags&nbsp;like&nbsp;&lt;p&gt;.<br>
+It&nbsp;is&nbsp;the&nbsp;inverse&nbsp;of&nbsp;<a href="#-htmlEncode">htmlEncode</a>().<br>
+&nbsp;<br>
+The&nbsp;optional&nbsp;'codes'&nbsp;parameter&nbsp;allows&nbsp;passing&nbsp;custom&nbsp;translations.</tt></dd></dl>
+ <dl><dt><a name="-htmlEncode"><strong>htmlEncode</strong></a>(what, codes<font color="#909090">=(('&amp;', '&amp;amp;'), ('&lt;', '&amp;lt;'), ('&gt;', '&amp;gt;'), ('"', '&amp;quot;'))</font>)</dt><dd><tt>Return&nbsp;the&nbsp;HTML&nbsp;encoded&nbsp;version&nbsp;of&nbsp;the&nbsp;given&nbsp;object.<br>
+&nbsp;<br>
+The&nbsp;optional&nbsp;'codes'&nbsp;parameter&nbsp;allows&nbsp;passing&nbsp;custom&nbsp;translations.</tt></dd></dl>
+ <dl><dt><a name="-htmlEncodeStr"><strong>htmlEncodeStr</strong></a>(s, codes<font color="#909090">=(('&amp;', '&amp;amp;'), ('&lt;', '&amp;lt;'), ('&gt;', '&amp;gt;'), ('"', '&amp;quot;'))</font>)</dt><dd><tt>Return&nbsp;the&nbsp;HTML&nbsp;encoded&nbsp;version&nbsp;of&nbsp;the&nbsp;given&nbsp;string.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;useful&nbsp;to&nbsp;display&nbsp;a&nbsp;plain&nbsp;ASCII&nbsp;text&nbsp;string&nbsp;on&nbsp;a&nbsp;web&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;optional&nbsp;'codes'&nbsp;parameter&nbsp;allows&nbsp;passing&nbsp;custom&nbsp;translations.</tt></dd></dl>
+ <dl><dt><a name="-htmlForDict"><strong>htmlForDict</strong></a>(d, addSpace<font color="#909090">=None</font>, filterValueCallBack<font color="#909090">=None</font>, maxValueLength<font color="#909090">=None</font>, topHeading<font color="#909090">=None</font>, isEncoded<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;an&nbsp;HTML&nbsp;string&nbsp;with&nbsp;a&nbsp;table&nbsp;where&nbsp;each&nbsp;row&nbsp;is&nbsp;a&nbsp;key-value&nbsp;pair.</tt></dd></dl>
+ <dl><dt><a name="-normURL"><strong>normURL</strong></a>(path)</dt><dd><tt>Normalizes&nbsp;a&nbsp;URL&nbsp;path,&nbsp;like&nbsp;os.path.normpath.<br>
+&nbsp;<br>
+Acts&nbsp;on&nbsp;a&nbsp;URL&nbsp;independant&nbsp;of&nbsp;operating&nbsp;system&nbsp;environment.</tt></dd></dl>
+ <dl><dt><a name="-requestURI"><strong>requestURI</strong></a>(env)</dt><dd><tt>Return&nbsp;the&nbsp;request&nbsp;URI&nbsp;for&nbsp;a&nbsp;given&nbsp;CGI-style&nbsp;dictionary.<br>
+&nbsp;<br>
+Uses&nbsp;REQUEST_URI&nbsp;if&nbsp;available,&nbsp;otherwise&nbsp;constructs&nbsp;and&nbsp;returns&nbsp;it<br>
+from&nbsp;SCRIPT_URL,&nbsp;SCRIPT_NAME,&nbsp;PATH_INFO&nbsp;and&nbsp;QUERY_STRING.</tt></dd></dl>
+ <dl><dt><a name="-urlDecode"><strong>urlDecode</strong></a> = unquote_plus(s)</dt><dd><tt>unquote('%7e/abc+def')&nbsp;-&gt;&nbsp;'~/abc&nbsp;def'</tt></dd></dl>
+ <dl><dt><a name="-urlEncode"><strong>urlEncode</strong></a> = quote_plus(s, safe<font color="#909090">=''</font>)</dt><dd><tt>Quote&nbsp;the&nbsp;query&nbsp;fragment&nbsp;of&nbsp;a&nbsp;URL;&nbsp;replacing&nbsp;'&nbsp;'&nbsp;with&nbsp;'+'</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['htmlEncode', 'htmlEncodeStr', 'htmlDecode', 'urlEncode', 'urlDecode', 'htmlForDict', 'requestURI', 'normURL']</td></tr></table>
+</body></html>

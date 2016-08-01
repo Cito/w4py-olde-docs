@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Servlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Abstract servlets"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> asclocaltime, excstr
+
+
+<span class="PY_KEYWORD">class</span> Servlet(object):
+    <span class="PY_STRING">"""A general servlet.
+
+    A servlet is a key portion of a server-based application that implements
+    the semantics of a particular request by providing a response.
+    This abstract class defines servlets at a very high level.
+    Most often, developers will subclass HTTPServlet or even Page.
+
+    Servlets can be created once, then used and destroyed, or they may be
+    reused several times over (it's up to the server). Therefore, servlet
+    developers should take the proper actions in awake() and sleep()
+    so that reuse can occur.
+
+    Objects that participate in a transaction include:
+      * Application
+      * Request
+      * Transaction
+      * Session
+      * Servlet
+      * Response
+
+    The awake(), respond() and sleep() methods form a message sandwich.
+    Each is passed an instance of Transaction which gives further access
+    to all the objects involved.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        <span class="PY_STRING">"""Subclasses must invoke super."""</span>
+        self._serverSidePath = None
+        self._factory = None
+        self._busy = False
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_STRING">"""Return the name which is simple the name of the class.
+
+        Subclasses should *not* override this method.
+        It is used for logging and debugging.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.__class__.__name__
+
+
+    <span class="PY_COMMENT">## Request-response cycles ##</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> runTransaction(trans):
+        <span class="PY_KEYWORD">try</span>:
+            trans.awake()
+            trans.respond()
+        <span class="PY_KEYWORD">except</span> Exception, first:
+            <span class="PY_KEYWORD">try</span>:
+                trans.sleep()
+            <span class="PY_KEYWORD">except</span> Exception, second:
+                <span class="PY_COMMENT"># The first exception is more important than the *second* one</span>
+                <span class="PY_COMMENT"># that comes from sleep(). In fact, without this little trick</span>
+                <span class="PY_COMMENT"># the first exception gets hidden by the second which is often</span>
+                <span class="PY_COMMENT"># just a result of the first. Then you're stuck scratching your</span>
+                <span class="PY_COMMENT"># head wondering what the first might have been.</span>
+                <span class="PY_KEYWORD">raise</span> Exception(<span class="PY_STRING">'Two exceptions. first=%s; second=%s'</span>
+                    % (excstr(first), excstr(second)))
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># no problems with sleep() so raise the one and only exception</span>
+        <span class="PY_KEYWORD">else</span>:
+            trans.sleep()
+
+    <span class="PY_KEYWORD">def</span> runMethodForTransaction(self, trans, method, *args, **kw):
+        self.awake(trans)
+        result = getattr(self, method)(*args, **kw)
+        self.sleep(trans)
+        <span class="PY_KEYWORD">return</span> result
+
+    <span class="PY_KEYWORD">def</span> awake(self, trans):
+        <span class="PY_STRING">"""Send the awake message.
+
+        This message is sent to all objects that participate in the
+        request-response cycle in a top-down fashion, prior to respond().
+        Subclasses must invoke super.
+
+        """</span>
+        self._transaction = trans
+
+    <span class="PY_KEYWORD">def</span> respond(self, trans):
+        <span class="PY_STRING">"""Respond to a request."""</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> sleep(self, trans):
+        <span class="PY_STRING">"""Send the sleep message."""</span>
+        <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Log ##</span>
+
+    <span class="PY_KEYWORD">def</span> log(self, message):
+        <span class="PY_STRING">"""Log a message.
+
+        This can be invoked to print messages concerning the servlet.
+        This is often used by self to relay important information back
+        to developers.
+
+        """</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'[%s] [msg] %s'</span> % (asclocaltime(), message)
+
+
+    <span class="PY_COMMENT">## Abilities ##</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> canBeThreaded():
+        <span class="PY_STRING">"""Return whether the servlet can be multithreaded.
+
+        This value should not change during the lifetime of the object.
+        The default implementation returns False.
+        Note: This is not currently used.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> False
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> canBeReused():
+        <span class="PY_STRING">"""Returns whether a single servlet instance can be reused.
+
+        The default is True, but subclasses con override to return False.
+        Keep in mind that performance may seriously be degraded if instances
+        can't be reused. Also, there's no known good reasons not to reuse
+        an instance. Remember the awake() and sleep() methods are invoked
+        for every transaction. But just in case, your servlet can refuse
+        to be reused.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> True
+
+
+    <span class="PY_COMMENT">## Server side filesystem ##</span>
+
+    <span class="PY_KEYWORD">def</span> serverSidePath(self, path=None):
+        <span class="PY_STRING">"""Return the filesystem path of the page on the server."""</span>
+        <span class="PY_KEYWORD">if</span> self._serverSidePath <span class="PY_KEYWORD">is</span> None:
+            self._serverSidePath = self._transaction.request().serverSidePath()
+        <span class="PY_KEYWORD">if</span> path:
+            <span class="PY_KEYWORD">if</span> path.startswith(<span class="PY_STRING">'/'</span>):
+                path = path[1:]
+            <span class="PY_KEYWORD">return</span> os.path.normpath(os.path.join(
+                os.path.dirname(self._serverSidePath), path))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._serverSidePath
+
+
+    <span class="PY_COMMENT">## Private ##</span>
+
+    <span class="PY_KEYWORD">def</span> open(self):
+        self._busy = True
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_KEYWORD">if</span> self._busy <span class="PY_KEYWORD">and</span> self._factory:
+            self._busy = False
+            self._factory.returnServlet(self)
+
+    <span class="PY_KEYWORD">def</span> setFactory(self, factory):
+        self._factory = factory
+</pre>
+<!--footer-->
+
+</body>
+</html>

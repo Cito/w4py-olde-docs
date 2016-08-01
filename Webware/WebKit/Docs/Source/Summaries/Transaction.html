@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.Transaction</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.Transaction</h2>
+<p>You can also browse the <a href="../Files/Transaction.html">complete source file</a>
+or the <a href="../Docs/WebKit.Transaction.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Transaction</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, application, request=None)</span>
+<span class="line_def">    def <span class="name_def">__repr__</span>(self)</span>
+
+<span class="line_category">    ## Access ##</span>
+<span class="line_def">    def <span class="name_def">application</span>(self)</span>
+<span class="line_def">    def <span class="name_def">request</span>(self)</span>
+<span class="line_def">    def <span class="name_def">response</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setResponse</span>(self, response)</span>
+<span class="line_def">    def <span class="name_def">hasSession</span>(self)</span>
+<span class="line_def">    def <span class="name_def">session</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setSession</span>(self, session)</span>
+<span class="line_def">    def <span class="name_def">servlet</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setServlet</span>(self, servlet)</span>
+<span class="line_def">    def <span class="name_def">duration</span>(self)</span>
+<span class="line_def">    def <span class="name_def">errorOccurred</span>(self)</span>
+<span class="line_def">    def <span class="name_def">error</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setError</span>(self, err)</span>
+
+<span class="line_category">    ## Transaction stages ##</span>
+<span class="line_def">    def <span class="name_def">awake</span>(self)</span>
+<span class="line_def">    def <span class="name_def">respond</span>(self)</span>
+<span class="line_def">    def <span class="name_def">sleep</span>(self)</span>
+
+<span class="line_category">    ## Debugging ##</span>
+<span class="line_def">    def <span class="name_def">dump</span>(self, file=None)</span>
+
+<span class="line_category">    ## Die ##</span>
+<span class="line_def">    def <span class="name_def">die</span>(self)</span>
+
+<span class="line_category">    ## Exception handling ##</span>
+<span class="line_def">    def <span class="name_def">writeExceptionReport</span>(self, handler)</span>
+
+</pre>
+</body>
+</html>

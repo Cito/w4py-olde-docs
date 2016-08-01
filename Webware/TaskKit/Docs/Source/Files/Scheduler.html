@@ -1,0 +1,525 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>TaskKit/Scheduler.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""This is the task manager Python package.
+
+It provides a system for running any number of predefined tasks in separate
+threads in an organized and controlled manner.
+
+A task in this package is a class derived from the Task class. The task
+should have a run method that, when called, performs some task.
+
+The Scheduler class is the organizing object. It manages the addition,
+execution, deletion, and well being of a number of tasks. Once you have
+created your task class, you call the Scheduler to get it added to the
+tasks to be run.
+
+"""</span>
+
+
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Thread, Event
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> localtime, time
+
+<span class="PY_KEYWORD">from</span> TaskHandler <span class="PY_KEYWORD">import</span> TaskHandler
+
+
+<span class="PY_KEYWORD">class</span> Scheduler(Thread):
+    <span class="PY_STRING">"""The top level class of the task manager system.
+
+    The Scheduler is a thread that handles organizing and running tasks.
+    The Scheduler class should be instantiated to start a task manager session.
+    Its start method should be called to start the task manager.
+    Its stop method should be called to end the task manager session.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, daemon=True, exceptionHandler=None):
+        Thread.__init__(self)
+        self._notifyEvent = Event()
+        self._nextTime = None
+        self._scheduled = {}
+        self._running = {}
+        self._onDemand = {}
+        self._isRunning = False
+        self._exceptionHandler = exceptionHandler
+        <span class="PY_KEYWORD">if</span> daemon:
+            self.setDaemon(True)
+
+
+    <span class="PY_COMMENT">## Event Methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> wait(self, seconds=None):
+        <span class="PY_STRING">"""Our own version of wait().
+
+        When called, it waits for the specified number of seconds, or until
+        it is notified that it needs to wake up, through the notify event.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            self._notifyEvent.wait(seconds)
+        <span class="PY_KEYWORD">except</span> IOError:
+            <span class="PY_KEYWORD">pass</span>
+        self._notifyEvent.clear()
+
+
+    <span class="PY_COMMENT">## Attributes ##</span>
+
+    <span class="PY_KEYWORD">def</span> runningTasks(self):
+        <span class="PY_STRING">"""Return all running tasks."""</span>
+        <span class="PY_KEYWORD">return</span> self._running
+
+    <span class="PY_KEYWORD">def</span> running(self, name, default=None):
+        <span class="PY_STRING">"""Return running task with given name.
+
+        Returns a task with the given name from the "running" list,
+        if it is present there.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._running.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> hasRunning(self, name):
+        <span class="PY_STRING">"""Check to see if a task with the given name is currently running."""</span>
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._running
+
+    <span class="PY_KEYWORD">def</span> setRunning(self, handle):
+        <span class="PY_STRING">"""Add a task to the running dictionary.
+
+        Used internally only.
+
+        """</span>
+        self._running[handle.name()] = handle
+
+    <span class="PY_KEYWORD">def</span> delRunning(self, name):
+        <span class="PY_STRING">"""Delete a task from the running list.
+
+        Used internally.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            handle = self._running[name]
+            <span class="PY_KEYWORD">del</span> self._running[name]
+            <span class="PY_KEYWORD">return</span> handle
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">return</span> None
+
+    <span class="PY_KEYWORD">def</span> scheduledTasks(self):
+        <span class="PY_STRING">"""Return all scheduled tasks."""</span>
+        <span class="PY_KEYWORD">return</span> self._scheduled
+
+    <span class="PY_KEYWORD">def</span> scheduled(self, name, default=None):
+        <span class="PY_STRING">"""Return a task from the scheduled list."""</span>
+        <span class="PY_KEYWORD">return</span> self._scheduled.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> hasScheduled(self, name):
+        <span class="PY_STRING">"""Checks whether task with given name is in the scheduled list."""</span>
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._scheduled
+
+    <span class="PY_KEYWORD">def</span> setScheduled(self, handle):
+        <span class="PY_STRING">"""Add the given task to the scheduled list."""</span>
+        self._scheduled[handle.name()] = handle
+
+    <span class="PY_KEYWORD">def</span> delScheduled(self, name):
+        <span class="PY_STRING">"""Delete a task with the given name from the scheduled list."""</span>
+        <span class="PY_KEYWORD">return</span> self._scheduled.pop(name, None)
+
+    <span class="PY_KEYWORD">def</span> onDemandTasks(self):
+        <span class="PY_STRING">"""Return all on demand tasks."""</span>
+        <span class="PY_KEYWORD">return</span> self._onDemand
+
+    <span class="PY_KEYWORD">def</span> onDemand(self, name, default=None):
+        <span class="PY_STRING">"""Return a task from the onDemand list."""</span>
+        <span class="PY_KEYWORD">return</span> self._onDemand.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> hasOnDemand(self, name):
+        <span class="PY_STRING">"""Checks whether task with given name is in the on demand list."""</span>
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._onDemand
+
+    <span class="PY_KEYWORD">def</span> setOnDemand(self, handle):
+        <span class="PY_STRING">"""Add the given task to the on demand list."""</span>
+        self._onDemand[handle.name()] = handle
+
+    <span class="PY_KEYWORD">def</span> delOnDemand(self, name):
+        <span class="PY_STRING">"""Delete a task with the given name from the on demand list."""</span>
+        <span class="PY_KEYWORD">return</span> self._onDemand.pop(name, None)
+
+    <span class="PY_KEYWORD">def</span> nextTime(self):
+        <span class="PY_STRING">"""Get next execution time."""</span>
+        <span class="PY_KEYWORD">return</span> self._nextTime
+
+    <span class="PY_KEYWORD">def</span> setNextTime(self, time):
+        <span class="PY_STRING">"""Set next execution time."""</span>
+        self._nextTime = time
+
+    <span class="PY_KEYWORD">def</span> isRunning(self):
+        <span class="PY_STRING">"""Check whether thread is running."""</span>
+        <span class="PY_KEYWORD">return</span> self._isRunning
+
+
+    <span class="PY_COMMENT">## Adding Tasks ##</span>
+
+    <span class="PY_KEYWORD">def</span> addTimedAction(self, time, task, name):
+        <span class="PY_STRING">"""Add a task to be run once, at a specific time."""</span>
+        handle = self.unregisterTask(name)
+        <span class="PY_KEYWORD">if</span> handle:
+            handle.reset(time, 0, task, True)
+        <span class="PY_KEYWORD">else</span>:
+            handle = TaskHandler(self, time, 0, task, name)
+        self.scheduleTask(handle)
+
+    <span class="PY_KEYWORD">def</span> addActionOnDemand(self, task, name):
+        <span class="PY_STRING">"""Add a task to be run only on demand.
+
+        Adds a task to the scheduler that will not be scheduled
+        until specifically requested.
+
+        """</span>
+        handle = self.unregisterTask(name)
+        <span class="PY_KEYWORD">if</span> handle:
+            handle.reset(time(), 0, task, True)
+        <span class="PY_KEYWORD">else</span>:
+            handle = TaskHandler(self, time(), 0, task, name)
+        self.setOnDemand(handle)
+
+    <span class="PY_KEYWORD">def</span> addDailyAction(self, hour, minute, task, name):
+        <span class="PY_STRING">"""Add an action to be run every day at a specific time.
+
+        If a task with the given name is already registered with the
+        scheduler, that task will be removed from the scheduling queue
+        and registered anew as a periodic task.
+
+        Can we make this addCalendarAction? What if we want to run
+        something once a week? We probably don't need that for Webware,
+        but this is a more generally useful module. This could be a
+        difficult function, though. Particularly without mxDateTime.
+
+        """</span>
+        current = localtime()
+        currHour = current[3]
+        currMin = current[4]
+
+        <span class="PY_KEYWORD">if</span> hour &gt; currHour:
+            hourDifference = hour - currHour
+            <span class="PY_KEYWORD">if</span> minute &gt; currMin:
+                minuteDifference = minute - currMin
+            <span class="PY_KEYWORD">elif</span> minute &lt; currMin:
+                minuteDifference = 60 - currMin + minute
+                hourDifference -= 1
+            <span class="PY_KEYWORD">else</span>:
+                minuteDifference = 0
+        <span class="PY_KEYWORD">elif</span> hour &lt; currHour:
+            hourDifference = 24 - currHour + hour
+            <span class="PY_KEYWORD">if</span> minute &gt; currMin:
+                minuteDifference = minute - currMin
+            <span class="PY_KEYWORD">elif</span> minute &lt; currMin:
+                minuteDifference = 60 - currMin + minute
+                hourDifference -= 1
+            <span class="PY_KEYWORD">else</span>:
+                minuteDifference = 0
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> minute &gt; currMin:
+                hourDifference = 0
+                minuteDifference = minute - currMin
+            <span class="PY_KEYWORD">elif</span> minute &lt; currMin:
+                minuteDifference = 60 - currMin + minute
+                hourDifference = 23
+            <span class="PY_KEYWORD">else</span>:
+                hourDifference = 0
+                minuteDifference = 0
+
+        delay = (minuteDifference + (hourDifference * 60)) * 60
+        self.addPeriodicAction(time()+delay, 24*60*60, task, name)
+
+    <span class="PY_KEYWORD">def</span> addPeriodicAction(self, start, period, task, name):
+        <span class="PY_STRING">"""Add a task to be run periodically.
+
+        Adds an action to be run at a specific initial time,
+        and every period thereafter.
+
+        The scheduler will not reschedule a task until the last
+        scheduled instance of the task has completed.
+
+        If a task with the given name is already registered with
+        the scheduler, that task will be removed from the scheduling
+        queue and registered anew as a periodic task.
+
+        """</span>
+        handle = self.unregisterTask(name)
+        <span class="PY_KEYWORD">if</span> handle:
+            handle.reset(start, period, task, True)
+        <span class="PY_KEYWORD">else</span>:
+            handle = TaskHandler(self, start, period, task, name)
+        self.scheduleTask(handle)
+
+
+    <span class="PY_COMMENT">## Task methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> unregisterTask(self, name):
+        <span class="PY_STRING">"""Unregisters the named task.
+
+        After that it can be rescheduled with different parameters,
+        or simply removed.
+
+        """</span>
+
+        handle = (self.delRunning(name)
+            <span class="PY_KEYWORD">or</span> self.delScheduled(name) <span class="PY_KEYWORD">or</span> self.delOnDemand(name))
+        <span class="PY_KEYWORD">if</span> handle:
+            handle.unregister()
+        <span class="PY_KEYWORD">return</span> handle
+
+    <span class="PY_KEYWORD">def</span> runTaskNow(self, name):
+        <span class="PY_STRING">"""Allow a registered task to be immediately executed.
+
+        Returns True if the task is either currently running or was started,
+        or False if the task could not be found in the list of currently
+        registered tasks.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self.hasRunning(name):
+            <span class="PY_KEYWORD">return</span> True
+        handle = self.scheduled(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            handle = self.onDemand(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            <span class="PY_KEYWORD">return</span> False
+        self.runTask(handle)
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> demandTask(self, name):
+        <span class="PY_STRING">"""Demand execution of a task.
+
+        Allow the server to request that a task listed as being registered
+        on-demand be run as soon as possible.
+
+        If the task is currently running, it will be flagged to run again
+        as soon as the current run completes.
+
+        Returns False if the task name could not be found on the on-demand
+        or currently running lists.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self.hasRunning(name) <span class="PY_KEYWORD">or</span> self.hasOnDemand(name):
+            handle = self.running(name)
+            <span class="PY_KEYWORD">if</span> handle:
+                handle.runOnCompletion()
+                <span class="PY_KEYWORD">return</span> True
+            handle = self.onDemand(name)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+                <span class="PY_KEYWORD">return</span> False
+            self.runTask(handle)
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> False
+
+    <span class="PY_KEYWORD">def</span> stopTask(self, name):
+        <span class="PY_STRING">"""Put an immediate halt to a running background task.
+
+        Returns True if the task was either not running, or was
+        running and was told to stop.
+
+        """</span>
+        handle = self.running(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            <span class="PY_KEYWORD">return</span> False
+        handle.stop()
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> stopAllTasks(self):
+        <span class="PY_STRING">"""Terminate all running tasks."""</span>
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> self._running:
+            self.stopTask(i)
+
+    <span class="PY_KEYWORD">def</span> disableTask(self, name):
+        <span class="PY_STRING">"""Specify that a task be suspended.
+
+        Suspended tasks will not be scheduled until later enabled.
+        If the task is currently running, it will not be interfered
+        with, but the task will not be scheduled for execution in
+        future until re-enabled.
+
+        Returns True if the task was found and disabled.
+
+        """</span>
+        handle = self.running(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            handle = self.scheduled(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            <span class="PY_KEYWORD">return</span> False
+        handle.disable()
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> enableTask(self, name):
+        <span class="PY_STRING">"""Enable a task again.
+
+        This method is provided to specify that a task be re-enabled
+        after a suspension. A re-enabled task will be scheduled for
+        execution according to its original schedule, with any runtimes
+        that would have been issued during the time the task was suspended
+        simply skipped.
+
+        Returns True if the task was found and enabled.
+
+        """</span>
+        handle = self.running(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            handle = self.scheduled(name)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> handle:
+            <span class="PY_KEYWORD">return</span> False
+        handle.enable()
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> runTask(self, handle):
+        <span class="PY_STRING">"""Run a task.
+
+        Used by the Scheduler thread's main loop to put a task in
+        the scheduled hash onto the run hash.
+
+        """</span>
+        name = handle.name()
+        <span class="PY_KEYWORD">if</span> self.delScheduled(name) <span class="PY_KEYWORD">or</span> self.delOnDemand(name):
+            self.setRunning(handle)
+            handle.runTask()
+
+    <span class="PY_KEYWORD">def</span> scheduleTask(self, handle):
+        <span class="PY_STRING">"""Schedule a task.
+
+        This method takes a task that needs to be scheduled and adds it
+        to the scheduler. All scheduling additions or changes are handled
+        by this method. This is the only Scheduler method that can notify
+        the run() method that it may need to wake up early to handle a
+        newly registered task.
+
+        """</span>
+        self.setScheduled(handle)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.nextTime() <span class="PY_KEYWORD">or</span> handle.startTime() &lt; self.nextTime():
+            self.setNextTime(handle.startTime())
+            self.notify()
+
+
+    <span class="PY_COMMENT">## Misc Methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> notifyCompletion(self, handle):
+        <span class="PY_STRING">"""Notify completion of a task.
+
+        Used by instances of TaskHandler to let the Scheduler thread know
+        when their tasks have run to completion. This method is responsible
+        for rescheduling the task if it is a periodic task.
+
+        """</span>
+        name = handle.name()
+        <span class="PY_KEYWORD">if</span> self.hasRunning(name):
+            self.delRunning(name)
+            <span class="PY_KEYWORD">if</span> handle.startTime() <span class="PY_KEYWORD">and</span> handle.startTime() &gt; time():
+                self.scheduleTask(handle)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> handle.reschedule():
+                    self.scheduleTask(handle)
+                <span class="PY_KEYWORD">elif</span> handle.isOnDemand():
+                    self.setOnDemand(handle)
+                    <span class="PY_KEYWORD">if</span> handle.runAgain():
+                        self.runTask(handle)
+
+    <span class="PY_KEYWORD">def</span> notifyFailure(self, handle):
+        <span class="PY_STRING">"""Notify failure of a task.
+
+        Used by instances of TaskHandler to let the Scheduler thread know
+        if an exception has occurred within the task thread.
+
+        """</span>
+        self.notifyCompletion(handle)
+        <span class="PY_KEYWORD">if</span> self._exceptionHandler <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self._exceptionHandler()
+
+    <span class="PY_KEYWORD">def</span> notify(self):
+        <span class="PY_STRING">"""Wake up scheduler by sending a notify even."""</span>
+        self._notifyEvent.set()
+
+    <span class="PY_KEYWORD">def</span> start(self):
+        <span class="PY_STRING">"""Start the scheduler's activity."""</span>
+        self._isRunning = True
+        Thread.start(self)
+
+    <span class="PY_KEYWORD">def</span> stop(self):
+        <span class="PY_STRING">"""Terminate the scheduler and its associated tasks."""</span>
+        self._isRunning = False
+        self.notify()
+        self.stopAllTasks()
+        <span class="PY_COMMENT"># jdh: wait until the scheduler thread exits; otherwise</span>
+        <span class="PY_COMMENT"># it's possible for the interpreter to exit before this thread</span>
+        <span class="PY_COMMENT"># has a chance to shut down completely, which causes a traceback</span>
+        <span class="PY_COMMENT"># cz: but use a timeout of 3 seconds, this should suffice</span>
+        self.join(3)
+
+
+    <span class="PY_COMMENT">## Main Method ##</span>
+
+    <span class="PY_KEYWORD">def</span> run(self):
+        <span class="PY_STRING">"""The main method of the scheduler running as a background thread.
+
+        This method is responsible for carrying out the scheduling work of
+        this class on a background thread. The basic logic is to wait until
+        the next action is due to run, move the task from our scheduled
+        list to our running list, and run it. Other synchronized methods
+        such as runTask(), scheduleTask(), and notifyCompletion(), may
+        be called while this method is waiting for something to happen.
+        These methods modify the data structures that run() uses to
+        determine its scheduling needs.
+
+        """</span>
+        <span class="PY_KEYWORD">while</span> self._isRunning:
+            <span class="PY_KEYWORD">if</span> self.nextTime():
+                nextTime = self.nextTime()
+                currentTime = time()
+                <span class="PY_KEYWORD">if</span> currentTime &lt; nextTime:
+                    sleepTime = nextTime - currentTime
+                    self.wait(sleepTime)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._isRunning:
+                    <span class="PY_KEYWORD">return</span>
+                currentTime = time()
+                <span class="PY_KEYWORD">if</span> currentTime &gt;= nextTime:
+                    toRun = []
+                    nextRun = None
+                    <span class="PY_KEYWORD">for</span> handle <span class="PY_KEYWORD">in</span> self._scheduled.values():
+                        startTime = handle.startTime()
+                        <span class="PY_KEYWORD">if</span> startTime &lt;= currentTime:
+                            toRun.append(handle)
+                        <span class="PY_KEYWORD">else</span>:
+                            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> nextRun:
+                                nextRun = startTime
+                            <span class="PY_KEYWORD">elif</span> startTime &lt; nextRun:
+                                nextRun = startTime
+                    self.setNextTime(nextRun)
+                    <span class="PY_KEYWORD">for</span> handle <span class="PY_KEYWORD">in</span> toRun:
+                        self.runTask(handle)
+            <span class="PY_KEYWORD">else</span>:
+                self.wait()
+</pre>
+<!--footer-->
+
+</body>
+</html>

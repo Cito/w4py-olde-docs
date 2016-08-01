@@ -1,0 +1,54 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebUtils.HTMLForException</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebUtils.html"><font color="#ffffff">WebUtils</font></a>.HTMLForException</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebUtils/HTMLForException.py">/var/www/docs/Webware-1.1.1/WebUtils/HTMLForException.py</a></font></td></tr></table>
+    <p><tt>HTMLForException.py<br>
+&nbsp;<br>
+Create&nbsp;HTML&nbsp;for&nbsp;exceptions.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="traceback.html">traceback</a><br>
+</td><td width="25%" valign=top><a href="urllib.html">urllib</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-HTMLForException"><strong>HTMLForException</strong></a>(excInfo<font color="#909090">=None</font>, options<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;HTML&nbsp;for&nbsp;displaying&nbsp;an&nbsp;exception.<br>
+&nbsp;<br>
+Returns&nbsp;an&nbsp;HTML&nbsp;string&nbsp;that&nbsp;presents&nbsp;useful&nbsp;information&nbsp;to&nbsp;the&nbsp;developer<br>
+about&nbsp;the&nbsp;exception.&nbsp;The&nbsp;first&nbsp;argument&nbsp;is&nbsp;a&nbsp;tuple&nbsp;such&nbsp;as&nbsp;returned&nbsp;by<br>
+sys.exc_info()&nbsp;which&nbsp;is&nbsp;in&nbsp;fact&nbsp;invoked&nbsp;if&nbsp;the&nbsp;tuple&nbsp;isn't&nbsp;provided.</tt></dd></dl>
+ <dl><dt><a name="-HTMLForLines"><strong>HTMLForLines</strong></a>(lines, options<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;HTML&nbsp;for&nbsp;exceptions&nbsp;and&nbsp;tracebacks&nbsp;from&nbsp;a&nbsp;list&nbsp;of&nbsp;strings.</tt></dd></dl>
+ <dl><dt><a name="-HTMLForStackTrace"><strong>HTMLForStackTrace</strong></a>(frame<font color="#909090">=None</font>, options<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;HTML&nbsp;for&nbsp;displaying&nbsp;a&nbsp;stack&nbsp;trace.<br>
+&nbsp;<br>
+Returns&nbsp;an&nbsp;HTML&nbsp;string&nbsp;that&nbsp;presents&nbsp;useful&nbsp;information&nbsp;to&nbsp;the&nbsp;developer<br>
+about&nbsp;the&nbsp;stack.&nbsp;The&nbsp;first&nbsp;argument&nbsp;is&nbsp;a&nbsp;stack&nbsp;frame&nbsp;such&nbsp;as&nbsp;returned&nbsp;by<br>
+sys._getframe()&nbsp;which&nbsp;is&nbsp;in&nbsp;fact&nbsp;invoked&nbsp;if&nbsp;a&nbsp;stack&nbsp;frame&nbsp;isn't&nbsp;provided.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>HTMLForExceptionOptions</strong> = {'default': 'color:#000000', 'editlink': None, 'row.code': 'color:#990000', 'row.location': 'color:#000099', 'table': 'background-color:#F0F0F0'}<br>
+<strong>fileRE</strong> = &lt;_sre.SRE_Pattern object&gt;</td></tr></table>
+</body></html>

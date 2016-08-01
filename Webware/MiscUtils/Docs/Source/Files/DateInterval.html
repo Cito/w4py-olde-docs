@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/DateInterval.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""DateInterval.py
+
+Convert interval strings (in the form of 1w2d, etc) to seconds, and back again.
+Is not exactly about months or years (leap years in particular).
+
+Accepts (y)ear, (b)month, (w)eek, (d)ay, (h)our, (m)inute, (s)econd.
+
+Exports only timeEncode and timeDecode functions.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> re
+
+<span class="PY_KEYWORD">from</span> operator <span class="PY_KEYWORD">import</span> itemgetter
+
+second = 1
+minute = second*60
+hour = minute*60
+day = hour*24
+week = day*7
+month = day*30
+year = day*365
+timeValues = {
+    <span class="PY_STRING">'y'</span>: year,
+    <span class="PY_STRING">'b'</span>: month,
+    <span class="PY_STRING">'w'</span>: week,
+    <span class="PY_STRING">'d'</span>: day,
+    <span class="PY_STRING">'h'</span>: hour,
+    <span class="PY_STRING">'m'</span>: minute,
+    <span class="PY_STRING">'s'</span>: second,
+}
+timeOrdered = timeValues.items()
+timeOrdered.sort(key=itemgetter(1), reverse=True)
+
+<span class="PY_KEYWORD">def</span> timeEncode(seconds):
+    <span class="PY_STRING">"""Encode a number of seconds (representing a time interval).
+
+    Encode the number into a form like 2d1h3s.
+
+    """</span>
+    s = []
+    <span class="PY_KEYWORD">for</span> char, amount <span class="PY_KEYWORD">in</span> timeOrdered:
+        <span class="PY_KEYWORD">if</span> seconds &gt;= amount:
+            i, seconds = divmod(seconds, amount)
+            s.append(<span class="PY_STRING">'%i%s'</span> % (i, char))
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(s)
+
+_timeRE = re.compile(r<span class="PY_STRING">'[0-9]+[a-zA-Z]'</span>)
+
+<span class="PY_KEYWORD">def</span> timeDecode(s):
+    <span class="PY_STRING">"""Decode a number in the format 1h4d3m (1 hour, 3 days, 3 minutes).
+
+    Decode the format into a number of seconds.
+
+    """</span>
+    time = 0
+    <span class="PY_KEYWORD">for</span> match <span class="PY_KEYWORD">in</span> _timeRE.findall(s):
+        char = match[-1].lower()
+        <span class="PY_KEYWORD">try</span>:
+            time += int(match[:-1]) * timeValues[char]
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Invalid unit of time: %c'</span> % char)
+    <span class="PY_KEYWORD">return</span> time
+
+__all__ = [<span class="PY_STRING">'timeEncode'</span>, <span class="PY_STRING">'timeDecode'</span>]
+</pre>
+<!--footer-->
+
+</body>
+</html>

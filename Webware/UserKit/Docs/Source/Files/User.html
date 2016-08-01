@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/User.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The basic User class."""</span>
+
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> uniqueId
+
+
+<span class="PY_KEYWORD">class</span> User(object):
+    <span class="PY_STRING">"""The base class for a UserKit User."""</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, manager=None, name=None, password=None):
+        self._creationTime = time()
+
+        self._manager = None
+        self._name = None
+        self._password = None
+        self._isActive = False
+        self._externalId = None
+
+        <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self.setName(name)
+        <span class="PY_KEYWORD">if</span> manager <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self.setManager(manager)
+        <span class="PY_KEYWORD">if</span> password <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self.setPassword(password)
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> self.name()
+
+
+    <span class="PY_COMMENT">## Attributes ##</span>
+
+    <span class="PY_KEYWORD">def</span> manager(self):
+        <span class="PY_KEYWORD">return</span> self._manager
+
+    <span class="PY_KEYWORD">def</span> setManager(self, manager):
+        <span class="PY_STRING">"""Set the manager, which can only be done once."""</span>
+        <span class="PY_KEYWORD">assert</span> self._manager <span class="PY_KEYWORD">is</span> None
+        <span class="PY_KEYWORD">from</span> UserManager <span class="PY_KEYWORD">import</span> UserManager
+        <span class="PY_KEYWORD">assert</span> isinstance(manager, UserManager)
+        <span class="PY_KEYWORD">assert</span> manager.userForName(self.name(), None) <span class="PY_KEYWORD">is</span> None, (
+            <span class="PY_STRING">'There is already a user named %r.'</span> % self.name())
+        self._manager = manager
+
+    <span class="PY_KEYWORD">def</span> serialNum(self):
+        <span class="PY_KEYWORD">return</span> self._serialNum
+
+    <span class="PY_KEYWORD">def</span> setSerialNum(self, serialNum):
+        self._serialNum = serialNum
+
+    <span class="PY_KEYWORD">def</span> externalId(self):
+        <span class="PY_KEYWORD">if</span> self._externalId <span class="PY_KEYWORD">is</span> None:
+            self._externalId = uniqueId(self)
+        <span class="PY_KEYWORD">return</span> self._externalId
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> setName(self, name):
+        <span class="PY_STRING">"""Set the name, which can only be done once."""</span>
+        <span class="PY_KEYWORD">assert</span> self._name <span class="PY_KEYWORD">is</span> None
+        self._name = name
+        <span class="PY_COMMENT"># @@ 2001-02-15 ce: do we need to notify the manager</span>
+        <span class="PY_COMMENT"># which may have us keyed by name?</span>
+
+    <span class="PY_KEYWORD">def</span> password(self):
+        <span class="PY_KEYWORD">return</span> self._password
+
+    <span class="PY_KEYWORD">def</span> setPassword(self, password):
+        self._password = password
+        <span class="PY_COMMENT"># @@ 2001-02-15 ce: should we make some attempt to cryptify</span>
+        <span class="PY_COMMENT"># the password so it's not real obvious when inspecting memory?</span>
+
+    <span class="PY_KEYWORD">def</span> isActive(self):
+        <span class="PY_KEYWORD">return</span> self._isActive
+
+    <span class="PY_KEYWORD">def</span> creationTime(self):
+        <span class="PY_KEYWORD">return</span> self._creationTime
+
+    <span class="PY_KEYWORD">def</span> lastAccessTime(self):
+        <span class="PY_KEYWORD">return</span> self._lastAccessTime
+
+    <span class="PY_KEYWORD">def</span> lastLoginTime(self):
+        <span class="PY_KEYWORD">return</span> self._lastLoginTime
+
+
+    <span class="PY_COMMENT">## Log in and out ##</span>
+
+    <span class="PY_KEYWORD">def</span> login(self, password, fromMgr=0):
+        <span class="PY_STRING">"""Return self if the login is successful and None otherwise."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> fromMgr:
+            <span class="PY_COMMENT"># Our manager needs to know about this</span>
+            <span class="PY_COMMENT"># So make sure we go through him</span>
+            <span class="PY_KEYWORD">return</span> self.manager().login(self, password)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> password == self.password():
+                self._isActive = True
+                self._lastLoginTime = self._lastAccessTime = time()
+                <span class="PY_KEYWORD">return</span> self
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> self._isActive:
+                    <span class="PY_COMMENT"># Woops. We were already logged in, but we tried again</span>
+                    <span class="PY_COMMENT"># and this time it failed. Logout:</span>
+                    self.logout()
+                <span class="PY_KEYWORD">return</span> None
+
+    <span class="PY_KEYWORD">def</span> logout(self, fromMgr=False):
+        <span class="PY_KEYWORD">if</span> fromMgr:
+            self._isActive = False
+            self._lastLogoutTime = time()
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># Our manager needs to know about this</span>
+            <span class="PY_COMMENT"># So make sure we go through him</span>
+            self.manager().logout(self)
+
+
+    <span class="PY_COMMENT">## Notifications ##</span>
+
+    <span class="PY_KEYWORD">def</span> wasAccessed(self):
+        self._lastAccessTime = time()
+</pre>
+<!--footer-->
+
+</body>
+</html>

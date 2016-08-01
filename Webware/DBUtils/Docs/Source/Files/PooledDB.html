@@ -1,0 +1,563 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>DBUtils/PooledDB.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""PooledDB - pooling for DB-API 2 connections.
+
+Implements a pool of steady, thread-safe cached connections
+to a database which are transparently reused,
+using an arbitrary DB-API 2 compliant database interface module.
+
+This should result in a speedup for persistent applications such as the
+application server of "Webware for Python," without loss of robustness.
+
+Robustness is provided by using "hardened" SteadyDB connections.
+Even if the underlying database is restarted and all connections
+are lost, they will be automatically and transparently reopened.
+However, since you don't want this to happen in the middle of a database
+transaction, you must explicitly start transactions with the begin()
+method so that SteadyDB knows that the underlying connection shall not
+be replaced and errors passed on until the transaction is completed.
+
+Measures are taken to make the pool of connections thread-safe.
+If the underlying DB-API module is thread-safe at the connection level,
+the requested connections may be shared with other threads by default,
+but you can also request dedicated connections in case you need them.
+
+For the Python DB-API 2 specification, see:
+    http://www.python.org/peps/pep-0249.html
+For information on Webware for Python, see:
+    http://www.webwareforpython.org
+
+
+Usage:
+
+First you need to set up the database connection pool by creating
+an instance of PooledDB, passing the following parameters:
+
+    creator: either an arbitrary function returning new DB-API 2
+        connection objects or a DB-API 2 compliant database module
+    mincached: the initial number of idle connections in the pool
+        (the default of 0 means no connections are made at startup)
+    maxcached: the maximum number of idle connections in the pool
+        (the default value of 0 or None means unlimited pool size)
+    maxshared: maximum number of shared connections allowed
+        (the default value of 0 or None means all connections are dedicated)
+        When this maximum number is reached, connections are
+        shared if they have been requested as shareable.
+    maxconnections: maximum number of connections generally allowed
+        (the default value of 0 or None means any number of connections)
+    blocking: determines behavior when exceeding the maximum
+        (if this is set to true, block and wait until the number of
+        connections decreases, but by default an error will be reported)
+    maxusage: maximum number of reuses of a single connection
+        (the default of 0 or None means unlimited reuse)
+        When this maximum usage number of the connection is reached,
+        the connection is automatically reset (closed and reopened).
+    setsession: an optional list of SQL commands that may serve to
+        prepare the session, e.g. ["set datestyle to german", ...]
+    reset: how connections should be reset when returned to the pool
+        (False or None to rollback transcations started with begin(),
+        the default value True always issues a rollback for safety's sake)
+    failures: an optional exception class or a tuple of exception classes
+        for which the connection failover mechanism shall be applied,
+        if the default (OperationalError, InternalError) is not adequate
+    ping: an optional flag controlling when connections are checked
+        with the ping() method if such a method is available
+        (0 = None = never, 1 = default = whenever fetched from the pool,
+        2 = when a cursor is created, 4 = when a query is executed,
+        7 = always, and all other bit combinations of these values)
+
+    The creator function or the connect function of the DB-API 2 compliant
+    database module specified as the creator will receive any additional
+    parameters such as the host, database, user, password etc. You may
+    choose some or all of these parameters in your own creator function,
+    allowing for sophisticated failover and load-balancing mechanisms.
+
+For instance, if you are using pgdb as your DB-API 2 database module and
+want a pool of at least five connections to your local database 'mydb':
+
+    import pgdb # import used DB-API 2 module
+    from DBUtils.PooledDB import PooledDB
+    pool = PooledDB(pgdb, 5, database='mydb')
+
+Once you have set up the connection pool you can request
+database connections from that pool:
+
+    db = pool.connection()
+
+You can use these connections just as if they were ordinary
+DB-API 2 connections. Actually what you get is the hardened
+SteadyDB version of the underlying DB-API 2 connection.
+
+Please note that the connection may be shared with other threads
+by default if you set a non-zero maxshared parameter and the DB-API 2
+module allows this. If you want to have a dedicated connection, use:
+
+    db = pool.connection(shareable=False)
+
+You can also use this to get a dedicated connection:
+
+    db = pool.dedicated_connection()
+
+If you don't need it any more, you should immediately return it to the
+pool with db.close(). You can get another connection in the same way.
+
+Warning: In a threaded environment, never do the following:
+
+    pool.connection().cursor().execute(...)
+
+This would release the connection too early for reuse which may be
+fatal if the connections are not thread-safe. Make sure that the
+connection object stays alive as long as you are using it, like that:
+
+    db = pool.connection()
+    cur = db.cursor()
+    cur.execute(...)
+    res = cur.fetchone()
+    cur.close() # or del cur
+    db.close() # or del db
+
+Note that you need to explicitly start transactions by calling the
+begin() method. This ensures that the connection will not be shared
+with other threads, that the transparent reopening will be suspended
+until the end of the transaction, and that the connection will be rolled
+back before being given back to the connection pool.
+
+
+Ideas for improvement:
+
+* Add a thread for monitoring, restarting (or closing) bad or expired
+  connections (similar to DBConnectionPool/ResourcePool by Warren Smith).
+* Optionally log usage, bad connections and exceeding of limits.
+
+
+Copyright, credits and license:
+
+* Contributed as supplement for Webware for Python and PyGreSQL
+  by Christoph Zwerschke in September 2005
+* Based on the code of DBPool, contributed to Webware for Python
+  by Dan Green in December 2000
+
+Licensed under the Open Software License version 2.1.
+
+"""</span>
+
+__version__ = <span class="PY_STRING">'1.1'</span>
+__revision__ = <span class="PY_STRING">"$Rev: 8218 $"</span>
+__date__ = <span class="PY_STRING">"$Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $"</span>
+
+
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Condition
+
+<span class="PY_KEYWORD">from</span> DBUtils.SteadyDB <span class="PY_KEYWORD">import</span> connect
+
+
+<span class="PY_KEYWORD">class</span> PooledDBError(Exception):
+    <span class="PY_STRING">"""General PooledDB error."""</span>
+
+<span class="PY_KEYWORD">class</span> InvalidConnection(PooledDBError):
+    <span class="PY_STRING">"""Database connection is invalid."""</span>
+
+<span class="PY_KEYWORD">class</span> NotSupportedError(PooledDBError):
+    <span class="PY_STRING">"""DB-API module not supported by PooledDB."""</span>
+
+<span class="PY_KEYWORD">class</span> TooManyConnections(PooledDBError):
+    <span class="PY_STRING">"""Too many database connections were opened."""</span>
+
+
+<span class="PY_KEYWORD">class</span> PooledDB:
+    <span class="PY_STRING">"""Pool for DB-API 2 connections.
+
+    After you have created the connection pool, you can use
+    connection() to get pooled, steady DB-API 2 connections.
+
+    """</span>
+
+    version = __version__
+
+    <span class="PY_KEYWORD">def</span> __init__(self, creator,
+            mincached=0, maxcached=0,
+            maxshared=0, maxconnections=0, blocking=False,
+            maxusage=None, setsession=None, reset=True,
+            failures=None, ping=1,
+            *args, **kwargs):
+        <span class="PY_STRING">"""Set up the DB-API 2 connection pool.
+
+        creator: either an arbitrary function returning new DB-API 2
+            connection objects or a DB-API 2 compliant database module
+        mincached: initial number of idle connections in the pool
+            (0 means no connections are made at startup)
+        maxcached: maximum number of idle connections in the pool
+            (0 or None means unlimited pool size)
+        maxshared: maximum number of shared connections
+            (0 or None means all connections are dedicated)
+            When this maximum number is reached, connections are
+            shared if they have been requested as shareable.
+        maxconnections: maximum number of connections generally allowed
+            (0 or None means an arbitrary number of connections)
+        blocking: determines behavior when exceeding the maximum
+            (if this is set to true, block and wait until the number of
+            connections decreases, otherwise an error will be reported)
+        maxusage: maximum number of reuses of a single connection
+            (0 or None means unlimited reuse)
+            When this maximum usage number of the connection is reached,
+            the connection is automatically reset (closed and reopened).
+        setsession: optional list of SQL commands that may serve to prepare
+            the session, e.g. ["set datestyle to ...", "set time zone ..."]
+        reset: how connections should be reset when returned to the pool
+            (False or None to rollback transcations started with begin(),
+            True to always issue a rollback for safety's sake)
+        failures: an optional exception class or a tuple of exception classes
+            for which the connection failover mechanism shall be applied,
+            if the default (OperationalError, InternalError) is not adequate
+        ping: determines when the connection should be checked with ping()
+            (0 = None = never, 1 = default = whenever fetched from the pool,
+            2 = when a cursor is created, 4 = when a query is executed,
+            7 = always, and all other bit combinations of these values)
+        args, kwargs: the parameters that shall be passed to the creator
+            function or the connection constructor of the DB-API 2 module
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            threadsafety = creator.threadsafety
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> callable(creator.connect):
+                    <span class="PY_KEYWORD">raise</span> AttributeError
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                threadsafety = 2
+            <span class="PY_KEYWORD">else</span>:
+                threadsafety = 0
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> threadsafety:
+            <span class="PY_KEYWORD">raise</span> NotSupportedError(<span class="PY_STRING">"Database module is not thread-safe."</span>)
+        self._creator = creator
+        self._args, self._kwargs = args, kwargs
+        self._maxusage = maxusage
+        self._setsession = setsession
+        self._reset = reset
+        self._failures = failures
+        self._ping = ping
+        <span class="PY_KEYWORD">if</span> mincached <span class="PY_KEYWORD">is</span> None:
+            mincached = 0
+        <span class="PY_KEYWORD">if</span> maxcached <span class="PY_KEYWORD">is</span> None:
+            maxcached = 0
+        <span class="PY_KEYWORD">if</span> maxconnections <span class="PY_KEYWORD">is</span> None:
+            maxconnections = 0
+        <span class="PY_KEYWORD">if</span> maxcached:
+            <span class="PY_KEYWORD">if</span> maxcached &lt; mincached:
+                maxcached = mincached
+            self._maxcached = maxcached
+        <span class="PY_KEYWORD">else</span>:
+            self._maxcached = 0
+        <span class="PY_KEYWORD">if</span> threadsafety &gt; 1 <span class="PY_KEYWORD">and</span> maxshared:
+            self._maxshared = maxshared
+            self._shared_cache = [] <span class="PY_COMMENT"># the cache for shared connections</span>
+        <span class="PY_KEYWORD">else</span>:
+            self._maxshared = 0
+        <span class="PY_KEYWORD">if</span> maxconnections:
+            <span class="PY_KEYWORD">if</span> maxconnections &lt; maxcached:
+                maxconnections = maxcached
+            <span class="PY_KEYWORD">if</span> maxconnections &lt; maxshared:
+                maxconnections = maxshared
+            self._maxconnections = maxconnections
+        <span class="PY_KEYWORD">else</span>:
+            self._maxconnections = 0
+        self._idle_cache = [] <span class="PY_COMMENT"># the actual pool of idle connections</span>
+        self._condition = Condition()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> blocking:
+            <span class="PY_KEYWORD">def</span> wait():
+                <span class="PY_KEYWORD">raise</span> TooManyConnections
+            self._condition.wait = wait
+        self._connections = 0
+        <span class="PY_COMMENT"># Establish an initial number of idle database connections:</span>
+        idle = [self.dedicated_connection() <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(mincached)]
+        <span class="PY_KEYWORD">while</span> idle:
+            idle.pop().close()
+
+    <span class="PY_KEYWORD">def</span> steady_connection(self):
+        <span class="PY_STRING">"""Get a steady, unpooled DB-API 2 connection."""</span>
+        <span class="PY_KEYWORD">return</span> connect(self._creator,
+            self._maxusage, self._setsession,
+            self._failures, self._ping, True,
+            *self._args, **self._kwargs)
+
+    <span class="PY_KEYWORD">def</span> connection(self, shareable=True):
+        <span class="PY_STRING">"""Get a steady, cached DB-API 2 connection from the pool.
+
+        If shareable is set and the underlying DB-API 2 allows it,
+        then the connection may be shared with other threads.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> shareable <span class="PY_KEYWORD">and</span> self._maxshared:
+            self._condition.acquire()
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">while</span> (<span class="PY_KEYWORD">not</span> self._shared_cache <span class="PY_KEYWORD">and</span> self._maxconnections
+                        <span class="PY_KEYWORD">and</span> self._connections &gt;= self._maxconnections):
+                    self._condition.wait()
+                <span class="PY_KEYWORD">if</span> len(self._shared_cache) &lt; self._maxshared:
+                    <span class="PY_COMMENT"># shared cache is not full, get a dedicated connection</span>
+                    <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># first try to get it from the idle cache</span>
+                        con = self._idle_cache.pop(0)
+                    <span class="PY_KEYWORD">except</span> IndexError: <span class="PY_COMMENT"># else get a fresh connection</span>
+                        con = self.steady_connection()
+                    <span class="PY_KEYWORD">else</span>:
+                        con._ping_check() <span class="PY_COMMENT"># check this connection</span>
+                    con = SharedDBConnection(con)
+                    self._connections += 1
+                <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># shared cache full or no more connections allowed</span>
+                    self._shared_cache.sort() <span class="PY_COMMENT"># least shared connection first</span>
+                    con = self._shared_cache.pop(0) <span class="PY_COMMENT"># get it</span>
+                    <span class="PY_KEYWORD">while</span> con.con._transaction:
+                        <span class="PY_COMMENT"># do not share connections which are in a transaction</span>
+                        self._shared_cache.insert(0, con)
+                        self._condition.wait()
+                        self._shared_cache.sort()
+                        con = self._shared_cache.pop(0)
+                    con.con._ping_check() <span class="PY_COMMENT"># check the underlying connection</span>
+                    con.share() <span class="PY_COMMENT"># increase share of this connection</span>
+                <span class="PY_COMMENT"># put the connection (back) into the shared cache</span>
+                self._shared_cache.append(con)
+                self._condition.notify()
+            <span class="PY_KEYWORD">finally</span>:
+                self._condition.release()
+            con = PooledSharedDBConnection(self, con)
+        <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># try to get a dedicated connection</span>
+            self._condition.acquire()
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">while</span> (self._maxconnections
+                        <span class="PY_KEYWORD">and</span> self._connections &gt;= self._maxconnections):
+                    self._condition.wait()
+                <span class="PY_COMMENT"># connection limit not reached, get a dedicated connection</span>
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># first try to get it from the idle cache</span>
+                    con = self._idle_cache.pop(0)
+                <span class="PY_KEYWORD">except</span> IndexError: <span class="PY_COMMENT"># else get a fresh connection</span>
+                    con = self.steady_connection()
+                <span class="PY_KEYWORD">else</span>:
+                    con._ping_check() <span class="PY_COMMENT"># check connection</span>
+                con = PooledDedicatedDBConnection(self, con)
+                self._connections += 1
+            <span class="PY_KEYWORD">finally</span>:
+                self._condition.release()
+        <span class="PY_KEYWORD">return</span> con
+
+    <span class="PY_KEYWORD">def</span> dedicated_connection(self):
+        <span class="PY_STRING">"""Alias for connection(shareable=False)."""</span>
+        <span class="PY_KEYWORD">return</span> self.connection(False)
+
+    <span class="PY_KEYWORD">def</span> unshare(self, con):
+        <span class="PY_STRING">"""Decrease the share of a connection in the shared cache."""</span>
+        self._condition.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            con.unshare()
+            shared = con.shared
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> shared: <span class="PY_COMMENT"># connection is idle,</span>
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># so try to remove it</span>
+                    self._shared_cache.remove(con) <span class="PY_COMMENT"># from shared cache</span>
+                <span class="PY_KEYWORD">except</span> ValueError:
+                    <span class="PY_KEYWORD">pass</span> <span class="PY_COMMENT"># pool has already been closed</span>
+        <span class="PY_KEYWORD">finally</span>:
+            self._condition.release()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> shared: <span class="PY_COMMENT"># connection has become idle,</span>
+            self.cache(con.con) <span class="PY_COMMENT"># so add it to the idle cache</span>
+
+    <span class="PY_KEYWORD">def</span> cache(self, con):
+        <span class="PY_STRING">"""Put a dedicated connection back into the idle cache."""</span>
+        self._condition.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._maxcached <span class="PY_KEYWORD">or</span> len(self._idle_cache) &lt; self._maxcached:
+                con._reset(force=self._reset) <span class="PY_COMMENT"># rollback possible transaction</span>
+                <span class="PY_COMMENT"># the idle cache is not full, so put it there</span>
+                self._idle_cache.append(con) <span class="PY_COMMENT"># append it to the idle cache</span>
+            <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># if the idle cache is already full,</span>
+                con.close() <span class="PY_COMMENT"># then close the connection</span>
+            self._connections -= 1
+            self._condition.notify()
+        <span class="PY_KEYWORD">finally</span>:
+            self._condition.release()
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close all connections in the pool."""</span>
+        self._condition.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">while</span> self._idle_cache: <span class="PY_COMMENT"># close all idle connections</span>
+                con = self._idle_cache.pop(0)
+                <span class="PY_KEYWORD">try</span>:
+                    con.close()
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">if</span> self._maxshared: <span class="PY_COMMENT"># close all shared connections</span>
+                <span class="PY_KEYWORD">while</span> self._shared_cache:
+                    con = self._shared_cache.pop(0).con
+                    <span class="PY_KEYWORD">try</span>:
+                        con.close()
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">pass</span>
+                    self._connections -= 1
+            self._condition.notifyAll()
+        <span class="PY_KEYWORD">finally</span>:
+            self._condition.release()
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Delete the pool."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self.close()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_COMMENT"># Auxiliary classes for pooled connections</span>
+
+<span class="PY_KEYWORD">class</span> PooledDedicatedDBConnection:
+    <span class="PY_STRING">"""Auxiliary proxy class for pooled dedicated connections."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, pool, con):
+        <span class="PY_STRING">"""Create a pooled dedicated connection.
+
+        pool: the corresponding PooledDB instance
+        con: the underlying SteadyDB connection
+
+        """</span>
+        <span class="PY_COMMENT"># basic initialization to make finalizer work</span>
+        self._con = None
+        <span class="PY_COMMENT"># proper initialization of the connection</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> con.threadsafety():
+            <span class="PY_KEYWORD">raise</span> NotSupportedError(<span class="PY_STRING">"Database module is not thread-safe."</span>)
+        self._pool = pool
+        self._con = con
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close the pooled dedicated connection."""</span>
+        <span class="PY_COMMENT"># Instead of actually closing the connection,</span>
+        <span class="PY_COMMENT"># return it to the pool for future reuse.</span>
+        <span class="PY_KEYWORD">if</span> self._con:
+            self._pool.cache(self._con)
+            self._con = None
+
+    <span class="PY_KEYWORD">def</span> __getattr__(self, name):
+        <span class="PY_STRING">"""Proxy all members of the class."""</span>
+        <span class="PY_KEYWORD">if</span> self._con:
+            <span class="PY_KEYWORD">return</span> getattr(self._con, name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> InvalidConnection
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Delete the pooled connection."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self.close()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">class</span> SharedDBConnection:
+    <span class="PY_STRING">"""Auxiliary class for shared connections."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, con):
+        <span class="PY_STRING">"""Create a shared connection.
+
+        con: the underlying SteadyDB connection
+
+        """</span>
+        self.con = con
+        self.shared = 1
+
+    <span class="PY_KEYWORD">def</span> __lt__(self, other):
+        <span class="PY_KEYWORD">if</span> self.con._transaction == other.con._transaction:
+            <span class="PY_KEYWORD">return</span> self.shared &lt; other.shared
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> <span class="PY_KEYWORD">not</span> self.con._transaction
+
+    <span class="PY_KEYWORD">def</span> __le__(self, other):
+        <span class="PY_KEYWORD">if</span> self.con._transaction == other.con._transaction:
+            <span class="PY_KEYWORD">return</span> self.shared &lt;= other.shared
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> <span class="PY_KEYWORD">not</span> self.con._transaction
+
+    <span class="PY_KEYWORD">def</span> __eq__(self, other):
+        <span class="PY_KEYWORD">return</span> (self.con._transaction == other.con._transaction
+            <span class="PY_KEYWORD">and</span> self.shared == other.shared)
+
+    <span class="PY_KEYWORD">def</span> __ne__(self, other):
+        <span class="PY_KEYWORD">return</span> <span class="PY_KEYWORD">not</span> self.__eq__(other)
+
+    <span class="PY_KEYWORD">def</span> __gt__(self, other):
+        <span class="PY_KEYWORD">return</span> other.__lt__(self)
+
+    <span class="PY_KEYWORD">def</span> __ge__(self, other):
+        <span class="PY_KEYWORD">return</span> other.__le__(self)
+
+    <span class="PY_KEYWORD">def</span> share(self):
+        <span class="PY_STRING">"""Increase the share of this connection."""</span>
+        self.shared += 1
+
+    <span class="PY_KEYWORD">def</span> unshare(self):
+        <span class="PY_STRING">"""Decrease the share of this connection."""</span>
+        self.shared -= 1
+
+
+<span class="PY_KEYWORD">class</span> PooledSharedDBConnection:
+    <span class="PY_STRING">"""Auxiliary proxy class for pooled shared connections."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, pool, shared_con):
+        <span class="PY_STRING">"""Create a pooled shared connection.
+
+        pool: the corresponding PooledDB instance
+        con: the underlying SharedDBConnection
+
+        """</span>
+        <span class="PY_COMMENT"># basic initialization to make finalizer work</span>
+        self._con = None
+        <span class="PY_COMMENT"># proper initialization of the connection</span>
+        con = shared_con.con
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> con.threadsafety() &gt; 1:
+            <span class="PY_KEYWORD">raise</span> NotSupportedError(<span class="PY_STRING">"Database connection is not thread-safe."</span>)
+        self._pool = pool
+        self._shared_con = shared_con
+        self._con = con
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close the pooled shared connection."""</span>
+        <span class="PY_COMMENT"># Instead of actually closing the connection,</span>
+        <span class="PY_COMMENT"># unshare it and/or return it to the pool.</span>
+        <span class="PY_KEYWORD">if</span> self._con:
+            self._pool.unshare(self._shared_con)
+            self._shared_con = self._con = None
+
+    <span class="PY_KEYWORD">def</span> __getattr__(self, name):
+        <span class="PY_STRING">"""Proxy all members of the class."""</span>
+        <span class="PY_KEYWORD">if</span> self._con:
+            <span class="PY_KEYWORD">return</span> getattr(self._con, name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> InvalidConnection
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Delete the pooled connection."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self.close()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

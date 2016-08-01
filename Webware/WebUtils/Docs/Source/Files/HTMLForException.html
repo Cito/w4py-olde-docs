@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/HTMLForException.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""HTMLForException.py
+
+Create HTML for exceptions.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os, re, sys, traceback, urllib
+
+<span class="PY_KEYWORD">from</span> Funcs <span class="PY_KEYWORD">import</span> htmlEncode
+
+
+HTMLForExceptionOptions = {
+    <span class="PY_STRING">'table'</span>: <span class="PY_STRING">'background-color:#F0F0F0'</span>,
+    <span class="PY_STRING">'default'</span>: <span class="PY_STRING">'color:#000000'</span>,
+    <span class="PY_STRING">'row.location'</span>: <span class="PY_STRING">'color:#000099'</span>,
+    <span class="PY_STRING">'row.code'</span>: <span class="PY_STRING">'color:#990000'</span>,
+    <span class="PY_STRING">'editlink'</span>: None,
+}
+
+
+fileRE = re.compile(r<span class="PY_STRING">'File "([^"]*)", line ([0-9]+), in ([^ ]*)'</span>)
+
+<span class="PY_KEYWORD">def</span> HTMLForLines(lines, options=None):
+    <span class="PY_STRING">"""Create HTML for exceptions and tracebacks from a list of strings."""</span>
+
+    <span class="PY_COMMENT"># Set up the options:</span>
+    <span class="PY_KEYWORD">if</span> options:
+        opt = HTMLForExceptionOptions.copy()
+        opt.update(options)
+    <span class="PY_KEYWORD">else</span>:
+        opt = HTMLForExceptionOptions
+
+    <span class="PY_COMMENT"># Create the HTML:</span>
+    res = [<span class="PY_STRING">'&lt;table style="%s" width="100%%"'</span>
+        <span class="PY_STRING">' cellpadding="2" cellspacing="2"&gt;\n'</span> % opt[<span class="PY_STRING">'table'</span>],
+        <span class="PY_STRING">'&lt;tr&gt;&lt;td&gt;&lt;pre style="%s"&gt;\n'</span> % opt[<span class="PY_STRING">'default'</span>]]
+    <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+        match = fileRE.search(line)
+        <span class="PY_KEYWORD">if</span> match:
+            parts = map(htmlEncode, line.split(<span class="PY_STRING">'\n'</span>, 2))
+            parts[0] = <span class="PY_STRING">'&lt;span style="%s"&gt;%s&lt;/span&gt;'</span> % (
+                opt[<span class="PY_STRING">'row.location'</span>], parts[0])
+            <span class="PY_KEYWORD">if</span> opt[<span class="PY_STRING">'editlink'</span>]:
+                parts[0] = (<span class="PY_STRING">'%s &lt;a href="%s?filename=%s&amp;amp;line=%s"&gt;[edit]&lt;/a&gt;'</span>
+                    % (parts[0], opt[<span class="PY_STRING">'editlink'</span>], urllib.quote(
+                        os.path.abspath(match.group(1))), match.group(2)))
+            parts[1] = <span class="PY_STRING">'&lt;span style="%s"&gt;%s&lt;/span&gt;'</span> % (
+                opt[<span class="PY_STRING">'row.code'</span>], parts[1])
+            line = <span class="PY_STRING">'\n'</span>.join(parts)
+            res.append(line)
+        <span class="PY_KEYWORD">else</span>:
+            res.append(htmlEncode(line))
+    <span class="PY_KEYWORD">if</span> lines:
+        <span class="PY_KEYWORD">if</span> res[-1][-1] == <span class="PY_STRING">'\n'</span>:
+            res[-1] = res[-1].rstrip()
+    res.extend([<span class="PY_STRING">'&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;\n'</span>, <span class="PY_STRING">'&lt;/table&gt;\n'</span>])
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(res)
+
+
+<span class="PY_KEYWORD">def</span> HTMLForStackTrace(frame=None, options=None):
+    <span class="PY_STRING">"""Get HTML for displaying a stack trace.
+
+    Returns an HTML string that presents useful information to the developer
+    about the stack. The first argument is a stack frame such as returned by
+    sys._getframe() which is in fact invoked if a stack frame isn't provided.
+
+    """</span>
+
+    <span class="PY_COMMENT"># Get the stack frame if needed:</span>
+    <span class="PY_KEYWORD">if</span> frame <span class="PY_KEYWORD">is</span> None:
+        frame = sys._getframe()
+
+    <span class="PY_COMMENT"># Return formatted stack traceback</span>
+    <span class="PY_KEYWORD">return</span> HTMLForLines(traceback.format_stack(frame), options)
+
+
+<span class="PY_KEYWORD">def</span> HTMLForException(excInfo=None, options=None):
+    <span class="PY_STRING">"""Get HTML for displaying an exception.
+
+    Returns an HTML string that presents useful information to the developer
+    about the exception. The first argument is a tuple such as returned by
+    sys.exc_info() which is in fact invoked if the tuple isn't provided.
+
+    """</span>
+
+    <span class="PY_COMMENT"># Get the excInfo if needed:</span>
+    <span class="PY_KEYWORD">if</span> excInfo <span class="PY_KEYWORD">is</span> None:
+        excInfo = sys.exc_info()
+
+    <span class="PY_COMMENT"># Return formatted exception traceback</span>
+    <span class="PY_KEYWORD">return</span> HTMLForLines(traceback.format_exception(*excInfo), options)
+</pre>
+<!--footer-->
+
+</body>
+</html>

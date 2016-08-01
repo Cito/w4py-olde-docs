@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Message.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Message
+
+A very general (dumb) message class.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+
+<span class="PY_KEYWORD">class</span> Message(object):
+    <span class="PY_STRING">"""A very general message class.
+
+    Message is the abstract parent class for both Request and Response,
+    and implements the behavior that is generic to both.
+
+    Messages have:
+
+      * A set of arguments.
+      * A protocol.
+      * A content type and length.
+
+    FUTURE
+
+      * Support for different types of encodings
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self._args = {}
+
+
+    <span class="PY_COMMENT">## Content ##</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> contentLength():
+        <span class="PY_STRING">"""Return the length of the message body or -1 if not known."""</span>
+        <span class="PY_KEYWORD">return</span> -1
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> contentType():
+        <span class="PY_STRING">"""Return the MIME type of the message body or None if not known."""</span>
+        <span class="PY_KEYWORD">return</span> None
+
+
+    <span class="PY_COMMENT">## Protocol ##</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> protocol():
+        <span class="PY_STRING">"""Return the protocol.
+
+        Returns the name and version of the protocol the message uses
+        in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> None
+
+
+    <span class="PY_COMMENT">## Arguments ##</span>
+
+    <span class="PY_COMMENT"># @@ 2000-05-10 ce: Are arguments really used for anything?</span>
+
+    <span class="PY_KEYWORD">def</span> arg(self, name, default=NoDefault):
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._args[name]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._args.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> setArg(self, name, value):
+        self._args[name] = value
+
+    <span class="PY_KEYWORD">def</span> hasArg(self, name):
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._args
+
+    <span class="PY_KEYWORD">def</span> deleteArg(self, name):
+        <span class="PY_KEYWORD">del</span> self._args[name]
+
+    <span class="PY_KEYWORD">def</span> clearArgs(self):
+        self._args.clear()
+
+    <span class="PY_KEYWORD">def</span> argNames(self):
+        <span class="PY_STRING">"""Return a list of argument names."""</span>
+        <span class="PY_KEYWORD">return</span> self._args.keys()
+
+
+    <span class="PY_COMMENT">## Exception reports ##</span>
+
+    _exceptionReportAttrNames = [<span class="PY_STRING">'args'</span>]
+
+    <span class="PY_KEYWORD">def</span> writeExceptionReport(self, handler):
+        handler.writeTitle(self.__class__.__name__)
+        handler.writeAttrs(self, self._exceptionReportAttrNames)
+</pre>
+<!--footer-->
+
+</body>
+</html>

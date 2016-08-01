@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/PlugIn.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">from</span> MiscUtils.PropertiesObject <span class="PY_KEYWORD">import</span> PropertiesObject
+
+
+<span class="PY_KEYWORD">class</span> PlugInError(Exception):
+    <span class="PY_STRING">"""Plug-in error."""</span>
+
+
+<span class="PY_KEYWORD">class</span> PlugIn(object):
+    <span class="PY_STRING">"""Template for Webware Plug-ins.
+
+    A plug-in is a software component that is loaded by WebKit in order to
+    provide additional WebKit functionality without necessarily having to modify
+    WebKit's source. The most infamous plug-in is PSP (Python Server Pages)
+    which ships with Webware.
+
+    Plug-ins often provide additional servlet factories, servlet subclasses,
+    examples and documentation. Ultimately, it is the plug-in author's choice
+    as to what to provide and in what manner.
+
+    Instances of this class represent plug-ins which are ultimately Python
+    packages (see the Python Tutorial, 6.4: "Packages" at
+    http://docs.python.org/tut/node8.html#SECTION008400000000000000000).
+
+    A plug-in must also be a Webware component which means that it will have
+    a Properties.py file advertising its name, version, requirements, etc.
+    You can ask a plug-in for its properties().
+
+    The plug-in/package must have an __init__.py while must contain a function:
+        def InstallInWebKit(appServer):
+    This function is invoked to take whatever actions are needed to plug the
+    new component into WebKit. See PSP for an example.
+
+    If you ask an AppServer for its plugIns(), you will get a list of instances
+    of this class.
+
+    The path of the plug-in is added to sys.path, if it's not already there.
+    This is convenient, but we may need a more sophisticated solution in the
+    future to avoid name collisions between plug-ins.
+
+    Note that this class is hardly ever subclassed. The software in the
+    plug-in package is what provides new functionality and there is currently
+    no way to tell AppServer to use custom subclasses of this class on a
+    case-by-case basis (and so far there is currently no need).
+
+    Instructions for invoking:
+        p = PlugIn(self, '../Foo') # 'self' is typically AppServer. It gets passed to InstallInWebKit()
+        willNotLoadReason = plugIn.load()
+        if willNotLoadReason:
+            print '    Plug-in %s cannot be loaded because:\n    %s' % (path, willNotLoadReason)
+            return None
+        p.install()
+        # Note that load() and install() could raise exceptions. You should expect this.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init, load and install ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, appServer, path):
+        <span class="PY_STRING">"""Initializes the plug-in with basic information.
+
+        This lightweight constructor does not access the file system.
+
+        """</span>
+        self._appServer = appServer
+        self._path = path
+        self._dir, self._name = os.path.split(path)
+        self._cacheDir = os.path.join(
+            self._appServer.application()._cacheDir, self._name)
+        self._ver = <span class="PY_STRING">'(unknown)'</span>
+        self._docs = self._docContext = None
+        self._examplePages = self._examplePagesContext = None
+
+    <span class="PY_KEYWORD">def</span> load(self):
+        <span class="PY_STRING">"""Loads the plug-in into memory, but does not yet install it.
+
+        Will return None on success, otherwise a message (string) that says
+        why the plug-in could not be loaded.
+
+        """</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Loading plug-in: %s at %s'</span> % (self._name, self._path)
+
+        <span class="PY_KEYWORD">assert</span> os.path.exists(self._path)
+
+        <span class="PY_COMMENT"># Grab the Properties.py</span>
+        self._properties = PropertiesObject(self.serverSidePath(<span class="PY_STRING">'Properties.py'</span>))
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._properties[<span class="PY_STRING">'willRun'</span>]:
+            <span class="PY_KEYWORD">return</span> self._properties[<span class="PY_STRING">'willNotRunReason'</span>]
+
+        <span class="PY_COMMENT"># Update sys.path</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._dir <span class="PY_KEYWORD">in</span> sys.path:
+            sys.path.append(self._dir)
+
+        <span class="PY_COMMENT"># Import the package</span>
+        self._module = __import__(self._name, globals(), [], [])
+
+        <span class="PY_COMMENT"># Inspect it and verify some required conventions</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> hasattr(self._module, <span class="PY_STRING">'InstallInWebKit'</span>):
+            <span class="PY_KEYWORD">raise</span> PlugInError(
+                <span class="PY_STRING">"Plug-in '%s' in '%s' has no InstallInWebKit() function."</span>
+                % (self._name, self._dir))
+
+        <span class="PY_COMMENT"># Give the module a pointer back to us</span>
+        setattr(self._module, <span class="PY_STRING">'plugIn'</span>, self)
+
+        <span class="PY_COMMENT"># Make a subdirectory for it in the Cache directory:</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(self._cacheDir):
+            os.mkdir(self._cacheDir)
+
+        self.setUpDocContext()
+        self.setUpExamplePages()
+
+    <span class="PY_KEYWORD">def</span> setUpDocContext(self):
+        <span class="PY_STRING">"""Add a context for the documentation."""</span>
+        app = self._appServer.application()
+        <span class="PY_KEYWORD">if</span> app.hasContext(<span class="PY_STRING">'Docs'</span>):
+            self._docs = self._properties.get(<span class="PY_STRING">'docs'</span>) <span class="PY_KEYWORD">or</span> None
+            <span class="PY_KEYWORD">if</span> self.hasDocs():
+                docsPath = self.serverSidePath(<span class="PY_STRING">'Docs'</span>)
+                <span class="PY_KEYWORD">assert</span> os.path.exists(docsPath), (
+                    <span class="PY_STRING">'Plug-in %s says it has documentation, '</span>
+                    <span class="PY_STRING">'but there is no Docs/ subdir.'</span> % self._name)
+                <span class="PY_KEYWORD">if</span> os.path.exists(os.path.join(docsPath, <span class="PY_STRING">'__init__.py'</span>)):
+                    ctxName = self._name + <span class="PY_STRING">'/Docs'</span>
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> app.hasContext(ctxName):
+                        app.addContext(ctxName, docsPath)
+                    self._docContext = ctxName
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'Cannot create Docs context for plug-in %s'</span>
+                        <span class="PY_STRING">' (no __init__.py found).'</span> % self._name)
+
+    <span class="PY_KEYWORD">def</span> setUpExamplePages(self):
+        <span class="PY_STRING">"""Add a context for the examples."""</span>
+        app = self._appServer.application()
+        <span class="PY_KEYWORD">if</span> app.hasContext(<span class="PY_STRING">'Examples'</span>):
+            config = self._properties.get(<span class="PY_STRING">'WebKitConfig'</span>, {})
+            self._examplePages = config.get(<span class="PY_STRING">'examplePages'</span>) <span class="PY_KEYWORD">or</span> None
+            <span class="PY_KEYWORD">if</span> self.hasExamplePages():
+                examplesPath = self.serverSidePath(<span class="PY_STRING">'Examples'</span>)
+                <span class="PY_KEYWORD">assert</span> os.path.exists(examplesPath), (
+                    <span class="PY_STRING">'Plug-in %s says it has example pages, '</span>
+                    <span class="PY_STRING">'but there is no Examples/ subdir.'</span> % self._name)
+                <span class="PY_KEYWORD">if</span> os.path.exists(os.path.join(examplesPath, <span class="PY_STRING">'__init__.py'</span>)):
+                    ctxName = self._name + <span class="PY_STRING">'/Examples'</span>
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> app.hasContext(ctxName):
+                        app.addContext(ctxName, examplesPath)
+                    self._examplePagesContext = ctxName
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'Cannot create Examples context for plug-in %s'</span>
+                        <span class="PY_STRING">' (no __init__.py found).'</span> % self._name)
+
+    <span class="PY_KEYWORD">def</span> docs(self):
+        <span class="PY_KEYWORD">return</span> self._docs
+
+    <span class="PY_KEYWORD">def</span> hasDocs(self):
+        <span class="PY_KEYWORD">return</span> self._docs <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+
+    <span class="PY_KEYWORD">def</span> docsContext(self):
+        <span class="PY_KEYWORD">return</span> self._docsContext
+
+    <span class="PY_KEYWORD">def</span> examplePages(self):
+        <span class="PY_KEYWORD">return</span> self._examplePages
+
+    <span class="PY_KEYWORD">def</span> hasExamplePages(self):
+        <span class="PY_KEYWORD">return</span> self._examplePages <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+
+    <span class="PY_KEYWORD">def</span> examplePagesContext(self):
+        <span class="PY_KEYWORD">return</span> self._examplePagesContext
+
+    <span class="PY_KEYWORD">def</span> install(self):
+        <span class="PY_STRING">"""Install plug-in by invoking its required InstallInWebKit function."""</span>
+        self._module.InstallInWebKit(self._appServer)
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_STRING">"""Return the name of the plug-in. Example: 'Foo'"""</span>
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> directory(self):
+        <span class="PY_STRING">"""Return the directory in which the plug-in resides. Example: '..'"""</span>
+        <span class="PY_KEYWORD">return</span> self._dir
+
+    <span class="PY_KEYWORD">def</span> path(self):
+        <span class="PY_STRING">"""Return the full path of the plug-in. Example: '../Foo'"""</span>
+        <span class="PY_KEYWORD">return</span> self._path
+
+    <span class="PY_KEYWORD">def</span> serverSidePath(self, path=None):
+        <span class="PY_KEYWORD">if</span> path:
+            <span class="PY_KEYWORD">return</span> os.path.normpath(os.path.join(self._path, path))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._path
+
+    <span class="PY_KEYWORD">def</span> module(self):
+        <span class="PY_STRING">"""Return the Python module object of the plug-in."""</span>
+        <span class="PY_KEYWORD">return</span> self._module
+
+    <span class="PY_KEYWORD">def</span> properties(self):
+        <span class="PY_STRING">"""Return the properties.
+
+        This is a dictionary-like object, of the plug-in which comes
+        from its Properties.py file. See MiscUtils.PropertiesObject.py.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._properties
+</pre>
+<!--footer-->
+
+</body>
+</html>

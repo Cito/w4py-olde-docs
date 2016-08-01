@@ -1,0 +1,83 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module DBUtils.ThreadingLocal</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="DBUtils.html"><font color="#ffffff">DBUtils</font></a>.ThreadingLocal</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/DBUtils/ThreadingLocal.py">/var/www/docs/Webware-1.1.1/DBUtils/ThreadingLocal.py</a></font></td></tr></table>
+    <p><tt>Thread-<a href="#local">local</a>&nbsp;objects.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;a&nbsp;Python&nbsp;version&nbsp;of&nbsp;the&nbsp;threading.<a href="#local">local</a>&nbsp;class.<br>
+It&nbsp;is&nbsp;avaliable&nbsp;as&nbsp;_threading_local&nbsp;in&nbsp;the&nbsp;standard&nbsp;library&nbsp;since&nbsp;Python&nbsp;2.4.<br>
+&nbsp;<br>
+Depending&nbsp;on&nbsp;the&nbsp;version&nbsp;of&nbsp;Python&nbsp;you're&nbsp;using,&nbsp;there&nbsp;may&nbsp;be&nbsp;a&nbsp;faster<br>
+threading.<a href="#local">local</a>&nbsp;class&nbsp;available&nbsp;in&nbsp;the&nbsp;standard&nbsp;library.<br>
+&nbsp;<br>
+However,&nbsp;the&nbsp;C&nbsp;implementation&nbsp;turned&nbsp;out&nbsp;to&nbsp;be&nbsp;unusable&nbsp;with&nbsp;mod_wsgi,<br>
+since&nbsp;it&nbsp;does&nbsp;not&nbsp;keep&nbsp;the&nbsp;thread-<a href="#local">local</a>&nbsp;data&nbsp;between&nbsp;requests.<br>
+To&nbsp;have&nbsp;a&nbsp;reliable&nbsp;solution&nbsp;that&nbsp;works&nbsp;the&nbsp;same&nbsp;with&nbsp;all&nbsp;Python&nbsp;versions,<br>
+we&nbsp;fall&nbsp;back&nbsp;to&nbsp;this&nbsp;Python&nbsp;implemention&nbsp;in&nbsp;DBUtils.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.ThreadingLocal.html#_localbase">_localbase</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.ThreadingLocal.html#local">local</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="local">class <strong>local</strong></a>(<a href="DBUtils.ThreadingLocal.html#_localbase">_localbase</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;class&nbsp;that&nbsp;represents&nbsp;thread-<a href="#local">local</a>&nbsp;data.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="DBUtils.ThreadingLocal.html#local">local</a></dd>
+<dd><a href="DBUtils.ThreadingLocal.html#_localbase">_localbase</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="local-__del__"><strong>__del__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="local-__delattr__"><strong>__delattr__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="local-__getattribute__"><strong>__getattribute__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="local-__setattr__"><strong>__setattr__</strong></a>(self, name, value)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Static methods inherited from <a href="DBUtils.ThreadingLocal.html#_localbase">_localbase</a>:<br>
+<dl><dt><a name="local-__new__"><strong>__new__</strong></a>(cls, *args, **kw)</dt></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['local']</td></tr></table>
+</body></html>

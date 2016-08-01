@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/DateParser.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""DateParser.py
+
+Convert string representations of dates to Python datetime objects.
+
+Since this is not adequately supported by the Python standard library,
+we try using the following third-party modules (in this order):
+
+    python-dateutil: http://labix.org/python-dateutil
+    mxDateTime: http://www.egenix.com/products/python/mxBase/mxDateTime/
+
+If none of these modules are available, we try using the strptime function
+in the Python standard library with several frequently used formats.
+
+Contributed to Webware for Python by Christoph Zwerschke.
+
+"""</span>
+
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> dateutil.parser <span class="PY_KEYWORD">import</span> parse <span class="PY_KEYWORD">as</span> parseDateTime
+
+<span class="PY_KEYWORD">except</span> ImportError: <span class="PY_COMMENT"># dateutil not available</span>
+
+    <span class="PY_KEYWORD">from</span> datetime <span class="PY_KEYWORD">import</span> datetime
+
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">from</span> mx.DateTime.Parser <span class="PY_KEYWORD">import</span> DateTimeFromString
+
+        <span class="PY_KEYWORD">def</span> parseDateTime(s):
+            t = DateTimeFromString(s)
+            <span class="PY_COMMENT"># needs to be converted to datetime</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> datetime.fromtimestamp(t)
+            <span class="PY_KEYWORD">except</span> Exception: <span class="PY_COMMENT"># out of range for timestamp values</span>
+                <span class="PY_KEYWORD">return</span> datetime(*t.tuple()[:6])
+
+    <span class="PY_KEYWORD">except</span> ImportError: <span class="PY_COMMENT"># mx.DateTime not available</span>
+
+        <span class="PY_KEYWORD">try</span>:
+            strpdatetime = datetime.strptime
+        <span class="PY_KEYWORD">except</span> AttributeError: <span class="PY_COMMENT"># Python &lt; 2.5</span>
+            <span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> strptime
+            <span class="PY_COMMENT"># needs to be converted to datetime</span>
+            strpdatetime = <span class="PY_KEYWORD">lambda</span> s, format: datetime(
+                *strptime(s, format)[:6])
+
+        <span class="PY_KEYWORD">def</span> parseDateTime(s):
+            <span class="PY_STRING">"""Return a datetime object corresponding to the given string."""</span>
+            formats = (<span class="PY_STRING">"%a %b %d %H:%M:%S %Y"</span>, <span class="PY_STRING">"%a, %d-%b-%Y %H:%M:%S"</span>,
+                <span class="PY_STRING">"%Y-%m-%d %H:%M:%S"</span>, <span class="PY_STRING">"%Y-%m-%dT%H:%M:%S"</span>,
+                <span class="PY_STRING">"%Y%m%d %H:%M:%S"</span>, <span class="PY_STRING">"%Y%m%dT%H:%M:%S"</span>,
+                <span class="PY_STRING">"%Y%m%d %H%M%S"</span>, <span class="PY_STRING">"%Y%m%dT%H%M%S"</span>,
+                <span class="PY_STRING">"%m/%d/%y %H:%M:%S"</span>, <span class="PY_STRING">"%Y-%m-%d %H:%M"</span>,
+                <span class="PY_STRING">"%Y-%m-%d"</span>, <span class="PY_STRING">"%Y%m%d"</span>, <span class="PY_STRING">"%m/%d/%y"</span>,
+                <span class="PY_STRING">"%H:%M:%S"</span>, <span class="PY_STRING">"%H:%M"</span>, <span class="PY_STRING">"%c"</span>)
+            <span class="PY_KEYWORD">for</span> format <span class="PY_KEYWORD">in</span> formats:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">return</span> strpdatetime(s, format)
+                <span class="PY_KEYWORD">except</span> ValueError:
+                    <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Cannot parse date/time %s'</span> % s)
+
+
+<span class="PY_KEYWORD">def</span> parseDate(s):
+    <span class="PY_STRING">"""Return a date object corresponding to the given string."""</span>
+    <span class="PY_KEYWORD">return</span> parseDateTime(s).date()
+
+
+<span class="PY_KEYWORD">def</span> parseTime(s):
+    <span class="PY_STRING">"""Return a time object corresponding to the given string."""</span>
+    <span class="PY_KEYWORD">return</span> parseDateTime(s).time()
+
+
+__all__ = [<span class="PY_STRING">'parseDateTime'</span>, <span class="PY_STRING">'parseDate'</span>, <span class="PY_STRING">'parseTime'</span>]
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/ServletWriter.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""This module holds the actual file writer class.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">from</span> tempfile <span class="PY_KEYWORD">import</span> mkstemp
+
+
+<span class="PY_KEYWORD">class</span> ServletWriter(object):
+    <span class="PY_STRING">"""This file creates the servlet source code.
+
+    Well, it writes it out to a file at least.
+
+    """</span>
+
+    _tab = <span class="PY_STRING">'\t'</span>
+    _spaces = <span class="PY_STRING">'    '</span> <span class="PY_COMMENT"># 4 spaces</span>
+    _emptyString = <span class="PY_STRING">''</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, ctxt):
+        self._pyfilename = ctxt.getPythonFileName()
+        fd, self._temp = mkstemp(<span class="PY_STRING">'tmp'</span>, dir=os.path.dirname(self._pyfilename))
+        self._filehandle = os.fdopen(fd, <span class="PY_STRING">'w'</span>)
+        self._tabcnt = 0
+        self._blockcount = 0 <span class="PY_COMMENT"># a hack to handle nested blocks of python code</span>
+        self._indentSpaces = self._spaces
+        self._useTabs = False
+        self._useBraces = False
+        self._indent = <span class="PY_STRING">'    '</span>
+        self._userIndent = self._emptyString
+        self._awakeCreated = False <span class="PY_COMMENT"># means that awake() needs to be generated</span>
+
+    <span class="PY_KEYWORD">def</span> setIndentSpaces(self, amt):
+        self._indentSpaces = <span class="PY_STRING">' '</span> * amt
+        self.setIndention()
+
+    <span class="PY_KEYWORD">def</span> setIndention(self):
+        <span class="PY_KEYWORD">if</span> self._useTabs:
+            self._indent = <span class="PY_STRING">'\t'</span>
+        <span class="PY_KEYWORD">else</span>:
+            self._indent = self._indentSpaces
+
+    <span class="PY_KEYWORD">def</span> setIndentType(self, type):
+        <span class="PY_KEYWORD">if</span> type == <span class="PY_STRING">'tabs'</span>:
+            self._useTabs = True
+            self.setIndention()
+        <span class="PY_KEYWORD">elif</span> type == <span class="PY_STRING">'spaces'</span>:
+            self._useTabs = False
+            self.setIndention()
+        <span class="PY_KEYWORD">elif</span> type == <span class="PY_STRING">'braces'</span>:
+            self._useTabs = False
+            self._useBraces = True
+            self.setIndention()
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        self._filehandle.close()
+        <span class="PY_KEYWORD">if</span> os.path.exists(self._pyfilename):
+            os.remove(self._pyfilename)
+        <span class="PY_KEYWORD">try</span>:
+            os.rename(self._temp, self._pyfilename)
+        <span class="PY_KEYWORD">except</span> OSError:
+            <span class="PY_COMMENT"># The operation may fail on some Unix flavors</span>
+            <span class="PY_COMMENT"># if the files are on different filesystems.</span>
+            <span class="PY_COMMENT"># In this case, we try to move the files manually:</span>
+            f = open(self._pyfilename, <span class="PY_STRING">'wb'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                f.write(open(self._temp, <span class="PY_STRING">'rb'</span>).read())
+            <span class="PY_KEYWORD">finally</span>:
+                f.close()
+            os.remove(self._temp)
+
+    <span class="PY_KEYWORD">def</span> pushIndent(self):
+        <span class="PY_STRING">"""this is very key, have to think more about it"""</span>
+        self._tabcnt += 1
+
+    <span class="PY_KEYWORD">def</span> popIndent(self):
+        <span class="PY_KEYWORD">if</span> self._tabcnt &gt; 0:
+            self._tabcnt -= 1
+
+    <span class="PY_KEYWORD">def</span> printComment(self, start, stop, chars):
+        <span class="PY_KEYWORD">if</span> start <span class="PY_KEYWORD">and</span> stop:
+            self.println(<span class="PY_STRING">'## from '</span> + str(start))
+            self.println(<span class="PY_STRING">'## from '</span> + str(stop))
+        <span class="PY_KEYWORD">if</span> chars:
+            lines = chars.splitlines()
+            <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+                self._filehandle.write(self.indent(<span class="PY_STRING">''</span>))
+                self._filehandle.write(<span class="PY_STRING">'##'</span>)
+                self._filehandle.write(line)
+
+    <span class="PY_KEYWORD">def</span> quoteString(self, s):
+        <span class="PY_STRING">"""Escape the string."""</span>
+        <span class="PY_KEYWORD">if</span> s <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_COMMENT"># this probably won't work, I'll be back for this</span>
+            <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'None'</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'r'</span> + s
+
+    <span class="PY_KEYWORD">def</span> indent(self, s):
+        <span class="PY_STRING">"""Indent the string."""</span>
+        <span class="PY_KEYWORD">if</span> self._userIndent <span class="PY_KEYWORD">or</span> self._tabcnt &gt; 0:
+            <span class="PY_KEYWORD">return</span> self._userIndent + self._indent*self._tabcnt + s
+        <span class="PY_KEYWORD">return</span> s
+
+    <span class="PY_KEYWORD">def</span> println(self, line=None):
+        <span class="PY_STRING">"""Print with indentation and a newline if none supplied."""</span>
+        <span class="PY_KEYWORD">if</span> line:
+            self._filehandle.write(self.indent(line))
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> line.endswith(<span class="PY_STRING">'\n'</span>):
+                self._filehandle.write(<span class="PY_STRING">'\n'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self._filehandle.write(self.indent(<span class="PY_STRING">'\n'</span>))
+
+    <span class="PY_KEYWORD">def</span> printChars(self, s):
+        <span class="PY_STRING">"""Just prints what its given."""</span>
+        self._filehandle.write(s)
+
+    <span class="PY_KEYWORD">def</span> printMultiLn(self, s):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> printList(self, strlist):
+        <span class="PY_STRING">"""Prints a list of strings with indentation and a newline."""</span>
+        <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> strlist:
+            self.printChars(self.indent(line))
+            self.printChars(<span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> printIndent(self):
+        <span class="PY_STRING">"""Just prints tabs."""</span>
+        self.printChars(self.indent(<span class="PY_STRING">''</span>))
+</pre>
+<!--footer-->
+
+</body>
+</html>

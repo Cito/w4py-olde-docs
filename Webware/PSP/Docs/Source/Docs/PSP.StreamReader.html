@@ -1,0 +1,148 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.StreamReader</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.StreamReader</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/StreamReader.py">/var/www/docs/Webware-1.1.1/PSP/StreamReader.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;co-ordinates&nbsp;the&nbsp;reading&nbsp;of&nbsp;the&nbsp;source&nbsp;file.<br>
+&nbsp;<br>
+It&nbsp;maintains&nbsp;the&nbsp;current&nbsp;position&nbsp;of&nbsp;the&nbsp;parser&nbsp;in&nbsp;the&nbsp;source&nbsp;file.<br>
+&nbsp;<br>
+(c)&nbsp;Copyright&nbsp;by&nbsp;Jay&nbsp;Love,&nbsp;2000&nbsp;(mailto:jsliv@jslove.org)<br>
+&nbsp;<br>
+Permission&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;and&nbsp;distribute&nbsp;this&nbsp;software&nbsp;and&nbsp;its<br>
+documentation&nbsp;for&nbsp;any&nbsp;purpose&nbsp;and&nbsp;without&nbsp;fee&nbsp;or&nbsp;royalty&nbsp;is&nbsp;hereby&nbsp;granted,<br>
+provided&nbsp;that&nbsp;the&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;appear&nbsp;in&nbsp;all&nbsp;copies&nbsp;and&nbsp;that<br>
+both&nbsp;that&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;appear&nbsp;in<br>
+supporting&nbsp;documentation&nbsp;or&nbsp;portions&nbsp;thereof,&nbsp;including&nbsp;modifications,<br>
+that&nbsp;you&nbsp;make.<br>
+&nbsp;<br>
+This&nbsp;software&nbsp;is&nbsp;based&nbsp;in&nbsp;part&nbsp;on&nbsp;work&nbsp;done&nbsp;by&nbsp;the&nbsp;Jakarta&nbsp;group.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.StreamReader.html#Mark">Mark</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.StreamReader.html#StreamReader">StreamReader</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Mark">class <strong>Mark</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;<a href="#Mark">Mark</a>&nbsp;class&nbsp;marks&nbsp;a&nbsp;point&nbsp;in&nbsp;an&nbsp;input&nbsp;stream.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Mark-__init__"><strong>__init__</strong></a>(self, reader, fileId<font color="#909090">=None</font>, stream<font color="#909090">=None</font>, inBaseDir<font color="#909090">=None</font>, encoding<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Mark-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Mark-getFile"><strong>getFile</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Mark-popStream"><strong>popStream</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Mark-pushStream"><strong>pushStream</strong></a>(self, inFileId, inStream, inBaseDir, inEncoding)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="StreamReader">class <strong>StreamReader</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;handles&nbsp;the&nbsp;PSP&nbsp;source&nbsp;file.<br>
+&nbsp;<br>
+It&nbsp;provides&nbsp;the&nbsp;characters&nbsp;to&nbsp;the&nbsp;other&nbsp;parts&nbsp;of&nbsp;the&nbsp;system.<br>
+It&nbsp;can&nbsp;move&nbsp;forward&nbsp;and&nbsp;backwards&nbsp;in&nbsp;a&nbsp;file&nbsp;and&nbsp;remember&nbsp;locactions.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="StreamReader-__init__"><strong>__init__</strong></a>(self, filename, ctxt)</dt></dl>
+
+<dl><dt><a name="StreamReader-advance"><strong>advance</strong></a>(self, length)</dt><dd><tt>Advance&nbsp;length&nbsp;characters</tt></dd></dl>
+
+<dl><dt><a name="StreamReader-getChars"><strong>getChars</strong></a>(self, start, stop)</dt></dl>
+
+<dl><dt><a name="StreamReader-getFile"><strong>getFile</strong></a>(self, i)</dt></dl>
+
+<dl><dt><a name="StreamReader-hasMoreInput"><strong>hasMoreInput</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-init"><strong>init</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-isDelimiter"><strong>isDelimiter</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-isSpace"><strong>isSpace</strong></a>(self)</dt><dd><tt>No&nbsp;advancing.</tt></dd></dl>
+
+<dl><dt><a name="StreamReader-mark"><strong>mark</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-matches"><strong>matches</strong></a>(self, s)</dt></dl>
+
+<dl><dt><a name="StreamReader-newSourceFile"><strong>newSourceFile</strong></a>(self, filename)</dt></dl>
+
+<dl><dt><a name="StreamReader-nextChar"><strong>nextChar</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-nextContent"><strong>nextContent</strong></a>(self)</dt><dd><tt>Find&nbsp;next&nbsp;&lt;&nbsp;char.</tt></dd></dl>
+
+<dl><dt><a name="StreamReader-parseAttributeValue"><strong>parseAttributeValue</strong></a>(self, valueDict)</dt></dl>
+
+<dl><dt><a name="StreamReader-parseTagAttributes"><strong>parseTagAttributes</strong></a>(self)</dt><dd><tt>Parse&nbsp;the&nbsp;attributes&nbsp;at&nbsp;the&nbsp;beginning&nbsp;of&nbsp;a&nbsp;tag.</tt></dd></dl>
+
+<dl><dt><a name="StreamReader-parseToken"><strong>parseToken</strong></a>(self, quoted)</dt></dl>
+
+<dl><dt><a name="StreamReader-peekChar"><strong>peekChar</strong></a>(self, cnt<font color="#909090">=1</font>)</dt></dl>
+
+<dl><dt><a name="StreamReader-popFile"><strong>popFile</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-pushFile"><strong>pushFile</strong></a>(self, filepath, encoding<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="StreamReader-registerSourceFile"><strong>registerSourceFile</strong></a>(self, filepath)</dt></dl>
+
+<dl><dt><a name="StreamReader-reset"><strong>reset</strong></a>(self, mark)</dt></dl>
+
+<dl><dt><a name="StreamReader-skipSpaces"><strong>skipSpaces</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StreamReader-skipUntil"><strong>skipUntil</strong></a>(self, s)</dt><dd><tt>Greedy&nbsp;search.<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;point&nbsp;before&nbsp;the&nbsp;string,&nbsp;but&nbsp;move&nbsp;reader&nbsp;past&nbsp;it.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

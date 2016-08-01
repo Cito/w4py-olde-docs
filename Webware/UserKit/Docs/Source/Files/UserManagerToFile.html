@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/UserManagerToFile.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The UserManagerToFile class."""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">from</span> glob <span class="PY_KEYWORD">import</span> glob
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cPickle <span class="PY_KEYWORD">import</span> load, dump
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> pickle <span class="PY_KEYWORD">import</span> load, dump
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.MixIn <span class="PY_KEYWORD">import</span> MixIn
+
+<span class="PY_KEYWORD">from</span> User <span class="PY_KEYWORD">import</span> User
+<span class="PY_KEYWORD">from</span> UserManager <span class="PY_KEYWORD">import</span> UserManager
+
+
+<span class="PY_KEYWORD">class</span> UserManagerToFile(UserManager):
+    <span class="PY_STRING">"""User manager storing user data in the file system.
+
+    When using this user manager, make sure you invoke setUserDir()
+    and that this directory is writeable by your application.
+    It will contain one file per user with the user's serial number
+    as the main filename and an extension of '.user'.
+
+    The default user directory is the current working directory,
+    but relying on the current directory is often a bad practice.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, userClass=None):
+        super(UserManagerToFile, self).__init__(userClass=None)
+        self.setEncoderDecoder(dump, load)
+        self.setUserDir(os.getcwd())
+        self.initNextSerialNum()
+
+    <span class="PY_KEYWORD">def</span> initNextSerialNum(self):
+        <span class="PY_KEYWORD">if</span> os.path.exists(self._userDir):
+            serialNums = self.scanSerialNums()
+            <span class="PY_KEYWORD">if</span> serialNums:
+                self._nextSerialNum = max(serialNums) + 1
+            <span class="PY_KEYWORD">else</span>:
+                self._nextSerialNum = 1
+        <span class="PY_KEYWORD">else</span>:
+            self._nextSerialNum = 1
+
+
+    <span class="PY_COMMENT">## File storage specifics ##</span>
+
+    <span class="PY_KEYWORD">def</span> userDir(self):
+        <span class="PY_KEYWORD">return</span> self._userDir
+
+    <span class="PY_KEYWORD">def</span> setUserDir(self, userDir):
+        <span class="PY_STRING">"""Set the directory where user information is stored.
+
+        You should strongly consider invoking initNextSerialNum() afterwards.
+
+        """</span>
+        self._userDir = userDir
+
+    <span class="PY_KEYWORD">def</span> loadUser(self, serialNum, default=NoDefault):
+        <span class="PY_STRING">"""Load the user with the given serial number from disk.
+
+        If there is no such user, a KeyError will be raised unless
+        a default value was passed, in which case that value is returned.
+
+        """</span>
+        filename = str(serialNum) + <span class="PY_STRING">'.user'</span>
+        filename = os.path.join(self.userDir(), filename)
+        <span class="PY_KEYWORD">if</span> os.path.exists(filename):
+            file = open(filename, <span class="PY_STRING">'r'</span>)
+            user = self.decoder()(file)
+            file.close()
+            self._cachedUsers.append(user)
+            self._cachedUsersBySerialNum[serialNum] = user
+            <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+                <span class="PY_KEYWORD">raise</span> KeyError(serialNum)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> scanSerialNums(self):
+        <span class="PY_STRING">"""Return a list of all the serial numbers of users found on disk.
+
+        Serial numbers are always integers.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> [int(os.path.basename(num[:-5]))
+            <span class="PY_KEYWORD">for</span> num <span class="PY_KEYWORD">in</span> glob(os.path.join(self.userDir(), <span class="PY_STRING">'*.user'</span>))]
+
+
+    <span class="PY_COMMENT">## UserManager customizations ##</span>
+
+    <span class="PY_KEYWORD">def</span> setUserClass(self, userClass):
+        <span class="PY_STRING">"""Overridden to mix in UserMixIn to the class that is passed in."""</span>
+        MixIn(userClass, UserMixIn)
+        super(UserManagerToFile, self).setUserClass(userClass)
+
+
+    <span class="PY_COMMENT">## UserManager concrete methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> nextSerialNum(self):
+        result = self._nextSerialNum
+        self._nextSerialNum += 1
+        <span class="PY_KEYWORD">return</span> result
+
+    <span class="PY_KEYWORD">def</span> addUser(self, user):
+        <span class="PY_KEYWORD">assert</span> isinstance(user, User)
+        user.setSerialNum(self.nextSerialNum())
+        user.externalId() <span class="PY_COMMENT"># set unique id</span>
+        super(UserManagerToFile, self).addUser(user)
+        user.save()
+
+    <span class="PY_KEYWORD">def</span> userForSerialNum(self, serialNum, default=NoDefault):
+        user = self._cachedUsersBySerialNum.get(serialNum)
+        <span class="PY_KEYWORD">if</span> user <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">return</span> self.loadUser(serialNum, default)
+
+    <span class="PY_KEYWORD">def</span> userForExternalId(self, externalId, default=NoDefault):
+        <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self._cachedUsers:
+            <span class="PY_KEYWORD">if</span> user.externalId() == externalId:
+                <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self.users():
+            <span class="PY_KEYWORD">if</span> user.externalId() == externalId:
+                <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">raise</span> KeyError(externalId)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> userForName(self, name, default=NoDefault):
+        <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self._cachedUsers:
+            <span class="PY_KEYWORD">if</span> user.name() == name:
+                <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self.users():
+            <span class="PY_KEYWORD">if</span> user.name() == name:
+                <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">raise</span> KeyError(name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> users(self):
+        <span class="PY_KEYWORD">return</span> _UserList(self)
+
+    <span class="PY_KEYWORD">def</span> activeUsers(self):
+        <span class="PY_KEYWORD">return</span> _UserList(self, <span class="PY_KEYWORD">lambda</span> user: user.isActive())
+
+    <span class="PY_KEYWORD">def</span> inactiveUsers(self):
+        <span class="PY_KEYWORD">return</span> _UserList(self, <span class="PY_KEYWORD">lambda</span> user: <span class="PY_KEYWORD">not</span> user.isActive())
+
+
+    <span class="PY_COMMENT">## Encoder/decoder ##</span>
+
+    <span class="PY_KEYWORD">def</span> encoder(self):
+        <span class="PY_KEYWORD">return</span> self._encoder
+
+    <span class="PY_KEYWORD">def</span> decoder(self):
+        <span class="PY_KEYWORD">return</span> self._decoder
+
+    <span class="PY_KEYWORD">def</span> setEncoderDecoder(self, encoder, decoder):
+        self._encoder = encoder
+        self._decoder = decoder
+
+
+<span class="PY_KEYWORD">class</span> UserMixIn(object):
+
+    <span class="PY_KEYWORD">def</span> filename(self):
+        <span class="PY_KEYWORD">return</span> os.path.join(self.manager().userDir(),
+            str(self.serialNum())) + <span class="PY_STRING">'.user'</span>
+
+    <span class="PY_KEYWORD">def</span> save(self):
+        file = open(self.filename(), <span class="PY_STRING">'w'</span>)
+        self.manager().encoder()(self, file)
+        file.close()
+
+
+<span class="PY_KEYWORD">class</span> _UserList(object):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, mgr, filterFunc=None):
+        self._mgr = mgr
+        self._serialNums = mgr.scanSerialNums()
+        self._count = len(self._serialNums)
+        self._data = None
+        <span class="PY_KEYWORD">if</span> filterFunc:
+            results = []
+            <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self:
+                <span class="PY_KEYWORD">if</span> filterFunc(user):
+                    results.append(user)
+            self._count = len(results)
+            self._data = results
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, index):
+        <span class="PY_KEYWORD">if</span> index &gt;= self._count:
+            <span class="PY_KEYWORD">raise</span> IndexError(index)
+        <span class="PY_KEYWORD">if</span> self._data:
+            <span class="PY_COMMENT"># We have the data directly. Just return it</span>
+            <span class="PY_KEYWORD">return</span> self._data[index]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># We have a list of the serial numbers.</span>
+            <span class="PY_COMMENT"># Get the user from the manager via the cache or loading</span>
+            serialNum = self._serialNums[index]
+            <span class="PY_KEYWORD">if</span> serialNum <span class="PY_KEYWORD">in</span> self._mgr._cachedUsersBySerialNum:
+                <span class="PY_KEYWORD">return</span> self._mgr._cachedUsersBySerialNum[serialNum]
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> self._mgr.loadUser(self._serialNums[index])
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_KEYWORD">return</span> self._count
+</pre>
+<!--footer-->
+
+</body>
+</html>

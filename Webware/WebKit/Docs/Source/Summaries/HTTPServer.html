@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.HTTPServer</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.HTTPServer</h2>
+<p>You can also browse the <a href="../Files/HTTPServer.html">complete source file</a>
+or the <a href="../Docs/WebKit.HTTPServer.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">HTTPHandler</span>(BaseHTTPServer.BaseHTTPRequestHandler):</span>
+<span class="line_def">    def <span class="name_def">handleRequest</span>(self)</span>
+<span class="line_def">    def <span class="name_def">headersToEnviron</span>(headers, env)</span>
+<span class="line_def">    def <span class="name_def">processResponse</span>(self, data)</span>
+<span class="line_def">    def <span class="name_def">log_request</span>(self, code='-', size='-')</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPAppServerHandler</span>(Handler, HTTPHandler):</span>
+<span class="line_def">    def <span class="name_def">handleRequest</span>(self)</span>
+<span class="line_def">    def <span class="name_def">doTransaction</span>(self, env, input)</span>
+<span class="line_def">    def <span class="name_def">dispatchRawRequest</span>(self, requestDict, streamOut)</span>
+
+</pre>
+</body>
+</html>

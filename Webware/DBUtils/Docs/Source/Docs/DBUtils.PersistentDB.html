@@ -1,0 +1,338 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module DBUtils.PersistentDB</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="DBUtils.html"><font color="#ffffff">DBUtils</font></a>.PersistentDB</strong></big></big> (version 1.1, $Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/DBUtils/PersistentDB.py">/var/www/docs/Webware-1.1.1/DBUtils/PersistentDB.py</a></font></td></tr></table>
+    <p><tt><a href="#PersistentDB">PersistentDB</a>&nbsp;-&nbsp;persistent&nbsp;DB-API&nbsp;2&nbsp;connections.<br>
+&nbsp;<br>
+Implements&nbsp;steady,&nbsp;thread-affine&nbsp;persistent&nbsp;connections&nbsp;to&nbsp;a&nbsp;database<br>
+based&nbsp;on&nbsp;an&nbsp;arbitrary&nbsp;DB-API&nbsp;2&nbsp;compliant&nbsp;database&nbsp;interface&nbsp;module.<br>
+&nbsp;<br>
+This&nbsp;should&nbsp;result&nbsp;in&nbsp;a&nbsp;speedup&nbsp;for&nbsp;persistent&nbsp;applications&nbsp;such&nbsp;as&nbsp;the<br>
+application&nbsp;server&nbsp;of&nbsp;"Webware&nbsp;for&nbsp;Python,"&nbsp;without&nbsp;loss&nbsp;of&nbsp;robustness.<br>
+&nbsp;<br>
+Robustness&nbsp;is&nbsp;provided&nbsp;by&nbsp;using&nbsp;"hardened"&nbsp;SteadyDB&nbsp;connections.<br>
+Even&nbsp;if&nbsp;the&nbsp;underlying&nbsp;database&nbsp;is&nbsp;restarted&nbsp;and&nbsp;all&nbsp;connections<br>
+are&nbsp;lost,&nbsp;they&nbsp;will&nbsp;be&nbsp;automatically&nbsp;and&nbsp;transparently&nbsp;reopened.<br>
+However,&nbsp;since&nbsp;you&nbsp;don't&nbsp;want&nbsp;this&nbsp;to&nbsp;happen&nbsp;in&nbsp;the&nbsp;middle&nbsp;of&nbsp;a&nbsp;database<br>
+transaction,&nbsp;you&nbsp;must&nbsp;explicitly&nbsp;start&nbsp;transactions&nbsp;with&nbsp;the&nbsp;begin()<br>
+method&nbsp;so&nbsp;that&nbsp;SteadyDB&nbsp;knows&nbsp;that&nbsp;the&nbsp;underlying&nbsp;connection&nbsp;shall&nbsp;not<br>
+be&nbsp;replaced&nbsp;and&nbsp;errors&nbsp;passed&nbsp;on&nbsp;until&nbsp;the&nbsp;transaction&nbsp;is&nbsp;completed.<br>
+&nbsp;<br>
+Measures&nbsp;are&nbsp;taken&nbsp;to&nbsp;make&nbsp;the&nbsp;database&nbsp;connections&nbsp;thread-affine.<br>
+This&nbsp;means&nbsp;the&nbsp;same&nbsp;thread&nbsp;always&nbsp;uses&nbsp;the&nbsp;same&nbsp;cached&nbsp;connection,<br>
+and&nbsp;no&nbsp;other&nbsp;thread&nbsp;will&nbsp;use&nbsp;it.&nbsp;So&nbsp;even&nbsp;if&nbsp;the&nbsp;underlying&nbsp;DB-API&nbsp;module<br>
+is&nbsp;not&nbsp;thread-safe&nbsp;at&nbsp;the&nbsp;connection&nbsp;level&nbsp;this&nbsp;will&nbsp;be&nbsp;no&nbsp;problem&nbsp;here.<br>
+&nbsp;<br>
+For&nbsp;best&nbsp;performance,&nbsp;the&nbsp;application&nbsp;server&nbsp;should&nbsp;keep&nbsp;threads&nbsp;persistent.<br>
+For&nbsp;this,&nbsp;you&nbsp;have&nbsp;to&nbsp;set&nbsp;MinServerThreads&nbsp;=&nbsp;MaxServerThreads&nbsp;in&nbsp;Webware.<br>
+&nbsp;<br>
+For&nbsp;the&nbsp;Python&nbsp;DB-API&nbsp;2&nbsp;specification,&nbsp;see:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.python.org/peps/pep-0249.html">http://www.python.org/peps/pep-0249.html</a><br>
+For&nbsp;information&nbsp;on&nbsp;Webware&nbsp;for&nbsp;Python,&nbsp;see:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.webwareforpython.org">http://www.webwareforpython.org</a><br>
+&nbsp;<br>
+&nbsp;<br>
+Usage:<br>
+&nbsp;<br>
+First&nbsp;you&nbsp;need&nbsp;to&nbsp;set&nbsp;up&nbsp;a&nbsp;generator&nbsp;for&nbsp;your&nbsp;kind&nbsp;of&nbsp;database&nbsp;connections<br>
+by&nbsp;creating&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#PersistentDB">PersistentDB</a>,&nbsp;passing&nbsp;the&nbsp;following&nbsp;parameters:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;creator:&nbsp;either&nbsp;an&nbsp;arbitrary&nbsp;function&nbsp;returning&nbsp;new&nbsp;DB-API&nbsp;2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;objects&nbsp;or&nbsp;a&nbsp;DB-API&nbsp;2&nbsp;compliant&nbsp;database&nbsp;module<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maxusage:&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;reuses&nbsp;of&nbsp;a&nbsp;single&nbsp;connection<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(the&nbsp;default&nbsp;of&nbsp;0&nbsp;or&nbsp;None&nbsp;means&nbsp;unlimited&nbsp;reuse)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whenever&nbsp;the&nbsp;limit&nbsp;is&nbsp;reached,&nbsp;the&nbsp;connection&nbsp;will&nbsp;be&nbsp;reset.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setsession:&nbsp;an&nbsp;optional&nbsp;list&nbsp;of&nbsp;SQL&nbsp;commands&nbsp;that&nbsp;may&nbsp;serve&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prepare&nbsp;the&nbsp;session,&nbsp;e.g.&nbsp;["set&nbsp;datestyle&nbsp;to&nbsp;german",&nbsp;...].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;failures:&nbsp;an&nbsp;optional&nbsp;exception&nbsp;class&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;exception&nbsp;classes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;which&nbsp;the&nbsp;connection&nbsp;failover&nbsp;mechanism&nbsp;shall&nbsp;be&nbsp;applied,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;the&nbsp;default&nbsp;(OperationalError,&nbsp;InternalError)&nbsp;is&nbsp;not&nbsp;adequate<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ping:&nbsp;an&nbsp;optional&nbsp;flag&nbsp;controlling&nbsp;when&nbsp;connections&nbsp;are&nbsp;checked<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;the&nbsp;ping()&nbsp;method&nbsp;if&nbsp;such&nbsp;a&nbsp;method&nbsp;is&nbsp;available<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0&nbsp;=&nbsp;None&nbsp;=&nbsp;never,&nbsp;1&nbsp;=&nbsp;default&nbsp;=&nbsp;whenever&nbsp;it&nbsp;is&nbsp;requested,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;when&nbsp;a&nbsp;cursor&nbsp;is&nbsp;created,&nbsp;4&nbsp;=&nbsp;when&nbsp;a&nbsp;query&nbsp;is&nbsp;executed,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;=&nbsp;always,&nbsp;and&nbsp;all&nbsp;other&nbsp;bit&nbsp;combinations&nbsp;of&nbsp;these&nbsp;values)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;closeable:&nbsp;if&nbsp;this&nbsp;is&nbsp;set&nbsp;to&nbsp;true,&nbsp;then&nbsp;closing&nbsp;connections&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;allowed,&nbsp;but&nbsp;by&nbsp;default&nbsp;this&nbsp;will&nbsp;be&nbsp;silently&nbsp;ignored<br>
+&nbsp;&nbsp;&nbsp;&nbsp;threadlocal:&nbsp;an&nbsp;optional&nbsp;class&nbsp;for&nbsp;representing&nbsp;thread-local&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;instead&nbsp;of&nbsp;our&nbsp;Python&nbsp;implementation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(threading.local&nbsp;is&nbsp;faster,&nbsp;but&nbsp;cannot&nbsp;be&nbsp;used&nbsp;in&nbsp;all&nbsp;cases)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;creator&nbsp;function&nbsp;or&nbsp;the&nbsp;connect&nbsp;function&nbsp;of&nbsp;the&nbsp;DB-API&nbsp;2&nbsp;compliant<br>
+&nbsp;&nbsp;&nbsp;&nbsp;database&nbsp;module&nbsp;specified&nbsp;as&nbsp;the&nbsp;creator&nbsp;will&nbsp;receive&nbsp;any&nbsp;additional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parameters&nbsp;such&nbsp;as&nbsp;the&nbsp;host,&nbsp;database,&nbsp;user,&nbsp;password&nbsp;etc.&nbsp;You&nbsp;may<br>
+&nbsp;&nbsp;&nbsp;&nbsp;choose&nbsp;some&nbsp;or&nbsp;all&nbsp;of&nbsp;these&nbsp;parameters&nbsp;in&nbsp;your&nbsp;own&nbsp;creator&nbsp;function,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;allowing&nbsp;for&nbsp;sophisticated&nbsp;failover&nbsp;and&nbsp;load-balancing&nbsp;mechanisms.<br>
+&nbsp;<br>
+For&nbsp;instance,&nbsp;if&nbsp;you&nbsp;are&nbsp;using&nbsp;pgdb&nbsp;as&nbsp;your&nbsp;DB-API&nbsp;2&nbsp;database&nbsp;module&nbsp;and&nbsp;want<br>
+every&nbsp;connection&nbsp;to&nbsp;your&nbsp;local&nbsp;database&nbsp;'mydb'&nbsp;to&nbsp;be&nbsp;reused&nbsp;1000&nbsp;times:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;pgdb&nbsp;#&nbsp;import&nbsp;used&nbsp;DB-API&nbsp;2&nbsp;module<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;DBUtils.<a href="#PersistentDB">PersistentDB</a>&nbsp;import&nbsp;<a href="#PersistentDB">PersistentDB</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;persist&nbsp;=&nbsp;<a href="#PersistentDB">PersistentDB</a>(pgdb,&nbsp;1000,&nbsp;database='mydb')<br>
+&nbsp;<br>
+Once&nbsp;you&nbsp;have&nbsp;set&nbsp;up&nbsp;the&nbsp;generator&nbsp;with&nbsp;these&nbsp;parameters,&nbsp;you&nbsp;can<br>
+request&nbsp;database&nbsp;connections&nbsp;of&nbsp;that&nbsp;kind:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;db&nbsp;=&nbsp;persist.connection()<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;use&nbsp;these&nbsp;connections&nbsp;just&nbsp;as&nbsp;if&nbsp;they&nbsp;were&nbsp;ordinary<br>
+DB-API&nbsp;2&nbsp;connections.&nbsp;Actually&nbsp;what&nbsp;you&nbsp;get&nbsp;is&nbsp;the&nbsp;hardened<br>
+SteadyDB&nbsp;version&nbsp;of&nbsp;the&nbsp;underlying&nbsp;DB-API&nbsp;2&nbsp;connection.<br>
+&nbsp;<br>
+Closing&nbsp;a&nbsp;persistent&nbsp;connection&nbsp;with&nbsp;db.close()&nbsp;will&nbsp;be&nbsp;silently<br>
+ignored&nbsp;since&nbsp;it&nbsp;would&nbsp;be&nbsp;reopened&nbsp;at&nbsp;the&nbsp;next&nbsp;usage&nbsp;anyway&nbsp;and<br>
+contrary&nbsp;to&nbsp;the&nbsp;intent&nbsp;of&nbsp;having&nbsp;persistent&nbsp;connections.&nbsp;Instead,<br>
+the&nbsp;connection&nbsp;will&nbsp;be&nbsp;automatically&nbsp;closed&nbsp;when&nbsp;the&nbsp;thread&nbsp;dies.<br>
+You&nbsp;can&nbsp;change&nbsp;this&nbsp;behavior&nbsp;be&nbsp;setting&nbsp;the&nbsp;closeable&nbsp;parameter.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;you&nbsp;need&nbsp;to&nbsp;explicitly&nbsp;start&nbsp;transactions&nbsp;by&nbsp;calling&nbsp;the<br>
+begin()&nbsp;method.&nbsp;This&nbsp;ensures&nbsp;that&nbsp;the&nbsp;transparent&nbsp;reopening&nbsp;will&nbsp;be<br>
+suspended&nbsp;until&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;transaction,&nbsp;and&nbsp;that&nbsp;the&nbsp;connection<br>
+will&nbsp;be&nbsp;rolled&nbsp;back&nbsp;before&nbsp;being&nbsp;reused&nbsp;by&nbsp;the&nbsp;same&nbsp;thread.<br>
+&nbsp;<br>
+By&nbsp;setting&nbsp;the&nbsp;threadlocal&nbsp;parameter&nbsp;to&nbsp;threading.local,&nbsp;getting<br>
+connections&nbsp;may&nbsp;become&nbsp;a&nbsp;bit&nbsp;faster,&nbsp;but&nbsp;this&nbsp;may&nbsp;not&nbsp;work&nbsp;in&nbsp;all<br>
+environments&nbsp;(for&nbsp;instance,&nbsp;mod_wsgi&nbsp;is&nbsp;known&nbsp;to&nbsp;cause&nbsp;problems<br>
+since&nbsp;it&nbsp;clears&nbsp;the&nbsp;threading.local&nbsp;data&nbsp;between&nbsp;requests).<br>
+&nbsp;<br>
+&nbsp;<br>
+Requirements:<br>
+&nbsp;<br>
+Python&nbsp;&gt;=&nbsp;2.3,&nbsp;&lt;&nbsp;3.0.<br>
+&nbsp;<br>
+&nbsp;<br>
+Ideas&nbsp;for&nbsp;improvement:<br>
+&nbsp;<br>
+*&nbsp;Add&nbsp;a&nbsp;thread&nbsp;for&nbsp;monitoring,&nbsp;restarting&nbsp;(or&nbsp;closing)&nbsp;bad&nbsp;or&nbsp;expired<br>
+&nbsp;&nbsp;connections&nbsp;(similar&nbsp;to&nbsp;DBConnectionPool/ResourcePool&nbsp;by&nbsp;Warren&nbsp;Smith).<br>
+*&nbsp;Optionally&nbsp;log&nbsp;usage,&nbsp;bad&nbsp;connections&nbsp;and&nbsp;exceeding&nbsp;of&nbsp;limits.<br>
+&nbsp;<br>
+&nbsp;<br>
+Copyright,&nbsp;credits&nbsp;and&nbsp;license:<br>
+&nbsp;<br>
+*&nbsp;Contributed&nbsp;as&nbsp;supplement&nbsp;for&nbsp;Webware&nbsp;for&nbsp;Python&nbsp;and&nbsp;PyGreSQL<br>
+&nbsp;&nbsp;by&nbsp;Christoph&nbsp;Zwerschke&nbsp;in&nbsp;September&nbsp;2005<br>
+*&nbsp;Based&nbsp;on&nbsp;an&nbsp;idea&nbsp;presented&nbsp;on&nbsp;the&nbsp;Webware&nbsp;developer&nbsp;mailing&nbsp;list<br>
+&nbsp;&nbsp;by&nbsp;Geoffrey&nbsp;Talvola&nbsp;in&nbsp;July&nbsp;2005<br>
+&nbsp;<br>
+Licensed&nbsp;under&nbsp;the&nbsp;Open&nbsp;Software&nbsp;License&nbsp;version&nbsp;2.1.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="DBUtils.ThreadingLocal.html">DBUtils.ThreadingLocal</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.PersistentDB.html#PersistentDB">PersistentDB</a>
+</font></dt><dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.PersistentDB.html#PersistentDBError">PersistentDBError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.PersistentDB.html#NotSupportedError">NotSupportedError</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NotSupportedError">class <strong>NotSupportedError</strong></a>(<a href="DBUtils.PersistentDB.html#PersistentDBError">PersistentDBError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>DB-API&nbsp;module&nbsp;not&nbsp;supported&nbsp;by&nbsp;<a href="#PersistentDB">PersistentDB</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="DBUtils.PersistentDB.html#NotSupportedError">NotSupportedError</a></dd>
+<dd><a href="DBUtils.PersistentDB.html#PersistentDBError">PersistentDBError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="DBUtils.PersistentDB.html#PersistentDBError">PersistentDBError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="NotSupportedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#NotSupportedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="NotSupportedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="NotSupportedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="NotSupportedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#NotSupportedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="NotSupportedError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PersistentDB">class <strong>PersistentDB</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Generator&nbsp;for&nbsp;persistent&nbsp;DB-API&nbsp;2&nbsp;connections.<br>
+&nbsp;<br>
+After&nbsp;you&nbsp;have&nbsp;created&nbsp;the&nbsp;connection&nbsp;pool,&nbsp;you&nbsp;can&nbsp;use<br>
+<a href="#PersistentDB-connection">connection</a>()&nbsp;to&nbsp;get&nbsp;thread-affine,&nbsp;steady&nbsp;DB-API&nbsp;2&nbsp;connections.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PersistentDB-__init__"><strong>__init__</strong></a>(self, creator, maxusage<font color="#909090">=None</font>, setsession<font color="#909090">=None</font>, failures<font color="#909090">=None</font>, ping<font color="#909090">=1</font>, closeable<font color="#909090">=False</font>, threadlocal<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Set&nbsp;up&nbsp;the&nbsp;persistent&nbsp;DB-API&nbsp;2&nbsp;connection&nbsp;generator.<br>
+&nbsp;<br>
+creator:&nbsp;either&nbsp;an&nbsp;arbitrary&nbsp;function&nbsp;returning&nbsp;new&nbsp;DB-API&nbsp;2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;objects&nbsp;or&nbsp;a&nbsp;DB-API&nbsp;2&nbsp;compliant&nbsp;database&nbsp;module<br>
+maxusage:&nbsp;maximum&nbsp;number&nbsp;of&nbsp;reuses&nbsp;of&nbsp;a&nbsp;single&nbsp;connection<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(number&nbsp;of&nbsp;database&nbsp;operations,&nbsp;0&nbsp;or&nbsp;None&nbsp;means&nbsp;unlimited)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Whenever&nbsp;the&nbsp;limit&nbsp;is&nbsp;reached,&nbsp;the&nbsp;connection&nbsp;will&nbsp;be&nbsp;reset.<br>
+setsession:&nbsp;optional&nbsp;list&nbsp;of&nbsp;SQL&nbsp;commands&nbsp;that&nbsp;may&nbsp;serve&nbsp;to&nbsp;prepare<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;session,&nbsp;e.g.&nbsp;["set&nbsp;datestyle&nbsp;to&nbsp;...",&nbsp;"set&nbsp;time&nbsp;zone&nbsp;..."]<br>
+failures:&nbsp;an&nbsp;optional&nbsp;exception&nbsp;class&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;exception&nbsp;classes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;which&nbsp;the&nbsp;connection&nbsp;failover&nbsp;mechanism&nbsp;shall&nbsp;be&nbsp;applied,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;the&nbsp;default&nbsp;(OperationalError,&nbsp;InternalError)&nbsp;is&nbsp;not&nbsp;adequate<br>
+ping:&nbsp;determines&nbsp;when&nbsp;the&nbsp;connection&nbsp;should&nbsp;be&nbsp;checked&nbsp;with&nbsp;ping()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(0&nbsp;=&nbsp;None&nbsp;=&nbsp;never,&nbsp;1&nbsp;=&nbsp;default&nbsp;=&nbsp;whenever&nbsp;it&nbsp;is&nbsp;requested,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;when&nbsp;a&nbsp;cursor&nbsp;is&nbsp;created,&nbsp;4&nbsp;=&nbsp;when&nbsp;a&nbsp;query&nbsp;is&nbsp;executed,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;=&nbsp;always,&nbsp;and&nbsp;all&nbsp;other&nbsp;bit&nbsp;combinations&nbsp;of&nbsp;these&nbsp;values)<br>
+closeable:&nbsp;if&nbsp;this&nbsp;is&nbsp;set&nbsp;to&nbsp;true,&nbsp;then&nbsp;closing&nbsp;connections&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;allowed,&nbsp;but&nbsp;by&nbsp;default&nbsp;this&nbsp;will&nbsp;be&nbsp;silently&nbsp;ignored<br>
+threadlocal:&nbsp;an&nbsp;optional&nbsp;class&nbsp;for&nbsp;representing&nbsp;thread-local&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;instead&nbsp;of&nbsp;our&nbsp;Python&nbsp;implementation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(threading.local&nbsp;is&nbsp;faster,&nbsp;but&nbsp;cannot&nbsp;be&nbsp;used&nbsp;in&nbsp;all&nbsp;cases)<br>
+args,&nbsp;kwargs:&nbsp;the&nbsp;parameters&nbsp;that&nbsp;shall&nbsp;be&nbsp;passed&nbsp;to&nbsp;the&nbsp;creator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;or&nbsp;the&nbsp;connection&nbsp;constructor&nbsp;of&nbsp;the&nbsp;DB-API&nbsp;2&nbsp;module</tt></dd></dl>
+
+<dl><dt><a name="PersistentDB-connection"><strong>connection</strong></a>(self, shareable<font color="#909090">=False</font>)</dt><dd><tt>Get&nbsp;a&nbsp;steady,&nbsp;persistent&nbsp;DB-API&nbsp;2&nbsp;connection.<br>
+&nbsp;<br>
+The&nbsp;shareable&nbsp;parameter&nbsp;exists&nbsp;only&nbsp;for&nbsp;compatibility&nbsp;with&nbsp;the<br>
+PooledDB&nbsp;connection&nbsp;method.&nbsp;In&nbsp;reality,&nbsp;persistent&nbsp;connections<br>
+are&nbsp;of&nbsp;course&nbsp;never&nbsp;shared&nbsp;with&nbsp;other&nbsp;threads.</tt></dd></dl>
+
+<dl><dt><a name="PersistentDB-dedicated_connection"><strong>dedicated_connection</strong></a>(self)</dt><dd><tt>Alias&nbsp;for&nbsp;<a href="#PersistentDB-connection">connection</a>(shareable=False).</tt></dd></dl>
+
+<dl><dt><a name="PersistentDB-steady_connection"><strong>steady_connection</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;steady,&nbsp;non-persistent&nbsp;DB-API&nbsp;2&nbsp;connection.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>version</strong> = '1.1'</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PersistentDBError">class <strong>PersistentDBError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>General&nbsp;<a href="#PersistentDB">PersistentDB</a>&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="DBUtils.PersistentDB.html#PersistentDBError">PersistentDBError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="PersistentDBError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#PersistentDBError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="PersistentDBError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="PersistentDBError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="PersistentDBError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#PersistentDBError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="PersistentDBError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__date__</strong> = '$Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $'<br>
+<strong>__revision__</strong> = '$Rev: 8218 $'<br>
+<strong>__version__</strong> = '1.1'</td></tr></table>
+</body></html>

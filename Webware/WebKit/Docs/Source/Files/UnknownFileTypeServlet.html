@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/UnknownFileTypeServlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Servlet factory for unknown file types."""</span>
+
+<span class="PY_KEYWORD">import</span> os
+
+<span class="PY_KEYWORD">from</span> mimetypes <span class="PY_KEYWORD">import</span> guess_type
+
+<span class="PY_KEYWORD">import</span> HTTPExceptions
+<span class="PY_KEYWORD">from</span> HTTPServlet <span class="PY_KEYWORD">import</span> HTTPServlet
+<span class="PY_KEYWORD">from</span> MiscUtils.Configurable <span class="PY_KEYWORD">import</span> Configurable
+<span class="PY_KEYWORD">from</span> ServletFactory <span class="PY_KEYWORD">import</span> ServletFactory
+
+debug = 0
+
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> mimetypes <span class="PY_KEYWORD">import</span> init <span class="PY_KEYWORD">as</span> init_mimetypes
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">pass</span>
+<span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># workaround for Python issue #5853</span>
+    init_mimetypes()
+
+
+<span class="PY_KEYWORD">class</span> UnknownFileTypeServletFactory(ServletFactory):
+    <span class="PY_STRING">"""The servlet factory for unknown file types.
+
+    I.e. all files other than .py, .psp, .kid and the other types we support.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> uniqueness(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'file'</span>
+
+    <span class="PY_KEYWORD">def</span> extensions(self):
+        <span class="PY_KEYWORD">return</span> [<span class="PY_STRING">'.*'</span>]
+
+    <span class="PY_KEYWORD">def</span> servletForTransaction(self, transaction):
+        <span class="PY_KEYWORD">return</span> UnknownFileTypeServlet(transaction.application())
+
+    <span class="PY_KEYWORD">def</span> flushCache(self):
+        <span class="PY_KEYWORD">pass</span>
+
+
+fileCache = {}
+    <span class="PY_COMMENT"># A cache of the files served up by UnknownFileTypeServlet cached by</span>
+    <span class="PY_COMMENT"># absolute, server side path. Each content is another dictionary with keys:</span>
+    <span class="PY_COMMENT"># content, mimeType, mimeEncoding.</span>
+    <span class="PY_COMMENT"># Previously, this content was stored directly in the attributes of the</span>
+    <span class="PY_COMMENT"># UnknownFileTypeServlets, but with that approach subclasses cannot</span>
+    <span class="PY_COMMENT"># dynamically serve content from different locations.</span>
+
+
+<span class="PY_KEYWORD">class</span> UnknownFileTypeServlet(HTTPServlet, Configurable):
+    <span class="PY_STRING">"""Servlet for unknown file types.
+
+    Normally this class is just a "private" utility class for WebKit's
+    purposes. However, you may find it useful to subclass on occasion,
+    such as when the server side file path is determined by something
+    other than a direct correlation to the URL. Here is such an example:
+
+
+    from WebKit.AppServer import globalAppServer
+    from WebKit.UnknownFileTypeServlet import UnknownFileTypeServlet
+    import os
+
+    class Image(UnknownFileTypeServlet):
+
+        imageDir = '/var/images'
+
+        def filename(self, trans):
+            filename = trans.request().field('i')
+            filename = os.path.join(self.imageDir, filename)
+            return filename
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Candidates for subclass overrides ##</span>
+
+    <span class="PY_KEYWORD">def</span> filename(self, trans):
+        <span class="PY_STRING">"""Return the filename to be served.
+
+        A subclass could override this in order to serve files from other
+        disk locations based on some logic.
+
+        """</span>
+        filename = getattr(self, <span class="PY_STRING">'_serverSideFilename'</span>, None)
+        <span class="PY_KEYWORD">if</span> filename <span class="PY_KEYWORD">is</span> None:
+            filename = trans.request().serverSidePath()
+            self._serverSideFilename = filename <span class="PY_COMMENT"># cache it</span>
+        <span class="PY_KEYWORD">return</span> filename
+
+    <span class="PY_KEYWORD">def</span> shouldCacheContent(self):
+        <span class="PY_STRING">"""Return whether the content should be cached or not.
+
+        Returns a boolean that controls whether or not the content served
+        through this servlet is cached. The default behavior is to return
+        the CacheContent setting. Subclasses may override to always True
+        or False, or incorporate some other logic.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.setting(<span class="PY_STRING">'CacheContent'</span>)
+
+
+    <span class="PY_COMMENT">## Init et al ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, application=None):
+        HTTPServlet.__init__(self)
+        Configurable.__init__(self)
+        <span class="PY_KEYWORD">if</span> application <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">from</span> AppServer <span class="PY_KEYWORD">import</span> globalAppServer
+            application = globalAppServer.application()
+            <span class="PY_KEYWORD">assert</span> application <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+        self._application = application
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""Get the default config.
+
+        Taken from Application's 'UnknownFileTypes' default setting.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._application.defaultConfig()[<span class="PY_STRING">'UnknownFileTypes'</span>]
+
+    <span class="PY_KEYWORD">def</span> userConfig(self):
+        <span class="PY_STRING">"""Get the user config.
+
+        Taken from Application's 'UnknownFileTypes' user setting.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._application.userConfig().get(<span class="PY_STRING">'UnknownFileTypes'</span>, {})
+
+    <span class="PY_KEYWORD">def</span> configFilename(self):
+        <span class="PY_KEYWORD">return</span> self._application.configFilename()
+
+    <span class="PY_KEYWORD">def</span> canBeReused(self):
+        <span class="PY_KEYWORD">return</span> self.setting(<span class="PY_STRING">'ReuseServlets'</span>)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> validTechniques():
+        <span class="PY_KEYWORD">return</span> [<span class="PY_STRING">'serveContent'</span>, <span class="PY_STRING">'redirectSansAdapter'</span>]
+
+    <span class="PY_KEYWORD">def</span> respondToGet(self, trans):
+        <span class="PY_STRING">"""Respond to GET request.
+
+        Responds to the transaction by invoking self.foo() for foo is
+        specified by the 'Technique' setting.
+
+        """</span>
+        technique = self.setting(<span class="PY_STRING">'Technique'</span>)
+        <span class="PY_KEYWORD">assert</span> technique <span class="PY_KEYWORD">in</span> self.validTechniques(), <span class="PY_STRING">'technique = %s'</span> % technique
+        method = getattr(self, technique)
+        method(trans)
+
+    respondToHead = respondToGet
+
+    <span class="PY_KEYWORD">def</span> respondToPost(self, trans):
+        <span class="PY_STRING">"""Respond to POST request.
+
+        Invoke self.respondToGet().
+
+        Since posts are usually accompanied by data, this might not be
+        the best policy. However, a POST would most likely be for a CGI,
+        which currently no one is mixing in with their WebKit-based web sites.
+
+        """</span>
+        <span class="PY_COMMENT"># @@ 2001-01-25 ce: See doc string for why this might be a bad idea.</span>
+        self.respondToGet(trans)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> redirectSansAdapter(trans):
+        <span class="PY_STRING">"""Redirect to web server.
+
+        Sends a redirect to a URL that doesn't contain the adapter name.
+        Under the right configuration, this will cause the web server to
+        then be responsible for the URL rather than the app server.
+        This has only been test with "*.[f]cgi" adapters.
+        Keep in mind that links off the target page will *not* include
+        the adapter in the URL.
+
+        """</span>
+        <span class="PY_COMMENT"># @@ 2000-05-08 ce: the following is horribly CGI specific and hacky</span>
+        env = trans.request()._environ
+        <span class="PY_COMMENT"># @@ 2001-01-25 ce: isn't there a func in WebUtils to get script name?</span>
+        <span class="PY_COMMENT"># because some servers are different?</span>
+        newURL = os.path.split(env[<span class="PY_STRING">'SCRIPT_NAME'</span>])[0] + env[<span class="PY_STRING">'PATH_INFO'</span>]
+        newURL = newURL.replace(<span class="PY_STRING">'//'</span>, <span class="PY_STRING">'/'</span>) <span class="PY_COMMENT"># hacky</span>
+        trans.response().sendRedirect(newURL)
+
+    <span class="PY_KEYWORD">def</span> lastModified(self, trans):
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> os.path.getmtime(self.filename(trans))
+        <span class="PY_KEYWORD">except</span> OSError:
+            <span class="PY_KEYWORD">return</span> None
+
+    <span class="PY_KEYWORD">def</span> serveContent(self, trans):
+        response = trans.response()
+
+        maxCacheContentSize = self.setting(<span class="PY_STRING">'MaxCacheContentSize'</span>)
+        readBufferSize = self.setting(<span class="PY_STRING">'ReadBufferSize'</span>)
+
+        <span class="PY_COMMENT"># start sending automatically</span>
+        response.streamOut().setAutoCommit()
+
+        filename = self.filename(trans)
+        <span class="PY_KEYWORD">try</span>:
+            f = open(filename, <span class="PY_STRING">'rb'</span>)
+        <span class="PY_KEYWORD">except</span> IOError:
+            <span class="PY_KEYWORD">raise</span> HTTPExceptions.HTTPNotFound
+
+        stat = os.fstat(f.fileno())
+        fileSize, mtime = stat[6], stat[8]
+
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; UnknownFileType.serveContent()'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; filename ='</span>, filename
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; size='</span>, fileSize
+        fileDict = fileCache.get(filename)
+        <span class="PY_KEYWORD">if</span> fileDict <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> mtime != fileDict[<span class="PY_STRING">'mtime'</span>]:
+            <span class="PY_COMMENT"># Cache is out of date; clear it.</span>
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; changed, clearing cache'</span>
+            <span class="PY_KEYWORD">del</span> fileCache[filename]
+            fileDict = None
+        <span class="PY_KEYWORD">if</span> fileDict <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; not found in cache'</span>
+            mimeType, mimeEncoding = guess_type(filename, False)
+            <span class="PY_KEYWORD">if</span> mimeType <span class="PY_KEYWORD">is</span> None:
+                mimeType, mimeEncoding = <span class="PY_STRING">'application/octet-stream'</span>, None
+        <span class="PY_KEYWORD">else</span>:
+            mimeType = fileDict[<span class="PY_STRING">'mimeType'</span>]
+            mimeEncoding = fileDict[<span class="PY_STRING">'mimeEncoding'</span>]
+        response.setHeader(<span class="PY_STRING">'Content-Type'</span>, mimeType)
+        response.setHeader(<span class="PY_STRING">'Content-Length'</span>, str(fileSize))
+        <span class="PY_KEYWORD">if</span> mimeEncoding:
+            response.setHeader(<span class="PY_STRING">'Content-Encoding'</span>, mimeEncoding)
+        <span class="PY_KEYWORD">if</span> trans.request().method() == <span class="PY_STRING">'HEAD'</span>:
+            f.close()
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">if</span> (fileDict <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">and</span> self.setting(<span class="PY_STRING">'ReuseServlets'</span>)
+                <span class="PY_KEYWORD">and</span> self.shouldCacheContent()
+                <span class="PY_KEYWORD">and</span> fileSize &lt; maxCacheContentSize):
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; caching'</span>
+            fileDict = dict(content=f.read(),
+                mimeType=mimeType, mimeEncoding=mimeEncoding,
+                mtime=mtime, size=fileSize, filename=filename)
+            fileCache[filename] = fileDict
+        <span class="PY_KEYWORD">if</span> fileDict <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; sending content from cache'</span>
+            response.write(fileDict[<span class="PY_STRING">'content'</span>])
+        <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># too big or not supposed to cache</span>
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; sending directly'</span>
+            numBytesSent = 0
+            <span class="PY_KEYWORD">while</span> numBytesSent &lt; fileSize:
+                data = f.read(min(fileSize-numBytesSent, readBufferSize))
+                <span class="PY_KEYWORD">if</span> data == <span class="PY_STRING">''</span>:
+                    <span class="PY_KEYWORD">break</span> <span class="PY_COMMENT"># unlikely, but safety first</span>
+                response.write(data)
+                numBytesSent += len(data)
+        f.close()
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.Servlet</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.Servlet</h2>
+<p>You can also browse the <a href="../Files/Servlet.html">complete source file</a>
+or the <a href="../Docs/WebKit.Servlet.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Servlet</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+
+<span class="line_category">    ## Access ##</span>
+<span class="line_def">    def <span class="name_def">name</span>(self)</span>
+
+<span class="line_category">    ## Request-response cycles ##</span>
+<span class="line_def">    def <span class="name_def">runTransaction</span>(trans)</span>
+<span class="line_def">    def <span class="name_def">runMethodForTransaction</span>(self, trans, method, *args, **kw)</span>
+<span class="line_def">    def <span class="name_def">awake</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">respond</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">sleep</span>(self, trans)</span>
+
+<span class="line_category">    ## Log ##</span>
+<span class="line_def">    def <span class="name_def">log</span>(self, message)</span>
+
+<span class="line_category">    ## Abilities ##</span>
+<span class="line_def">    def <span class="name_def">canBeThreaded</span>()</span>
+<span class="line_def">    def <span class="name_def">canBeReused</span>()</span>
+
+<span class="line_category">    ## Server side filesystem ##</span>
+<span class="line_def">    def <span class="name_def">serverSidePath</span>(self, path=None)</span>
+
+<span class="line_category">    ## Private ##</span>
+<span class="line_def">    def <span class="name_def">open</span>(self)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setFactory</span>(self, factory)</span>
+
+</pre>
+</body>
+</html>

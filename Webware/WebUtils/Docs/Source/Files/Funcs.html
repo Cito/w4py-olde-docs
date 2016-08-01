@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/Funcs.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""WebUtils.Funcs
+
+This module provides some basic functions that are useful
+in HTML and web development.
+
+You can safely import * from WebUtils.Funcs if you like.
+
+"""</span>
+
+__all__ = [
+    <span class="PY_STRING">'htmlEncode'</span>, <span class="PY_STRING">'htmlEncodeStr'</span>, <span class="PY_STRING">'htmlDecode'</span>, <span class="PY_STRING">'urlEncode'</span>, <span class="PY_STRING">'urlDecode'</span>,
+    <span class="PY_STRING">'htmlForDict'</span>, <span class="PY_STRING">'requestURI'</span>, <span class="PY_STRING">'normURL'</span>]
+
+
+htmlForNone = <span class="PY_STRING">'-'</span> <span class="PY_COMMENT"># used by htmlEncode</span>
+
+htmlCodes = (
+    (<span class="PY_STRING">'&amp;'</span>, <span class="PY_STRING">'&amp;amp;'</span>),
+    (<span class="PY_STRING">'&lt;'</span>, <span class="PY_STRING">'&amp;lt;'</span>),
+    (<span class="PY_STRING">'&gt;'</span>, <span class="PY_STRING">'&amp;gt;'</span>),
+    (<span class="PY_STRING">'"'</span>, <span class="PY_STRING">'&amp;quot;'</span>),
+    <span class="PY_COMMENT"># ['\n', '&lt;br&gt;'],</span>
+)
+
+htmlCodesReversed = tuple(reversed(htmlCodes))
+
+
+<span class="PY_KEYWORD">def</span> htmlEncode(what, codes=htmlCodes):
+    <span class="PY_STRING">"""Return the HTML encoded version of the given object.
+
+    The optional 'codes' parameter allows passing custom translations.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> what <span class="PY_KEYWORD">is</span> None:
+        <span class="PY_KEYWORD">return</span> htmlForNone
+    <span class="PY_KEYWORD">if</span> hasattr(what, <span class="PY_STRING">'html'</span>):
+        <span class="PY_COMMENT"># allow objects to specify their own translation to html</span>
+        <span class="PY_COMMENT"># via a method, property or attribute</span>
+        ht = what.html
+        <span class="PY_KEYWORD">if</span> callable(ht):
+            ht = ht()
+        <span class="PY_KEYWORD">return</span> ht
+    what = str(what)
+    <span class="PY_KEYWORD">return</span> htmlEncodeStr(what, codes)
+
+
+<span class="PY_KEYWORD">def</span> htmlEncodeStr(s, codes=htmlCodes):
+    <span class="PY_STRING">"""Return the HTML encoded version of the given string.
+
+    This is useful to display a plain ASCII text string on a web page.
+
+    The optional 'codes' parameter allows passing custom translations.
+
+    """</span>
+    <span class="PY_KEYWORD">for</span> c, e <span class="PY_KEYWORD">in</span> codes:
+        s = s.replace(c, e)
+    <span class="PY_KEYWORD">return</span> s
+
+
+<span class="PY_KEYWORD">def</span> htmlDecode(s, codes=htmlCodesReversed):
+    <span class="PY_STRING">"""Return the ASCII decoded version of the given HTML string.
+
+    This does NOT remove normal HTML tags like &lt;p&gt;.
+    It is the inverse of htmlEncode().
+
+    The optional 'codes' parameter allows passing custom translations.
+
+    """</span>
+    <span class="PY_KEYWORD">for</span> c, e <span class="PY_KEYWORD">in</span> codes:
+        s = s.replace(e, c)
+    <span class="PY_KEYWORD">return</span> s
+
+
+<span class="PY_COMMENT"># Aliases for URL encoding and decoding functions:</span>
+<span class="PY_KEYWORD">from</span> urllib <span class="PY_KEYWORD">import</span> quote_plus <span class="PY_KEYWORD">as</span> urlEncode, unquote_plus <span class="PY_KEYWORD">as</span> urlDecode
+
+
+<span class="PY_KEYWORD">def</span> htmlForDict(d, addSpace=None, filterValueCallBack=None,
+        maxValueLength=None, topHeading=None, isEncoded=None):
+    <span class="PY_STRING">"""Return an HTML string with a table where each row is a key-value pair."""</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> d:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>
+    <span class="PY_COMMENT"># A really great (er, bad) example of hardcoding.  :-)</span>
+    html = [<span class="PY_STRING">'&lt;table class="NiceTable"&gt;\n'</span>]
+    <span class="PY_KEYWORD">if</span> topHeading:
+        html.append(<span class="PY_STRING">'&lt;tr class="TopHeading"&gt;&lt;th'</span>)
+        html.append((isinstance(topHeading, tuple)
+            <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'&gt;%s&lt;/th&gt;&lt;th&gt;%s'</span> <span class="PY_KEYWORD">or</span> <span class="PY_STRING">' colspan="2"&gt;%s'</span>) % topHeading)
+        html.append(<span class="PY_STRING">'&lt;/th&gt;&lt;/tr&gt;\n'</span>)
+    <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> sorted(d):
+        value = d[key]
+        <span class="PY_KEYWORD">if</span> addSpace <span class="PY_KEYWORD">and</span> key <span class="PY_KEYWORD">in</span> addSpace:
+            target = addSpace[key]
+            value = (target + <span class="PY_STRING">' '</span>).join(value.split(target))
+        <span class="PY_KEYWORD">if</span> filterValueCallBack:
+            value = filterValueCallBack(value, key, d)
+        <span class="PY_KEYWORD">if</span> maxValueLength <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> isEncoded:
+            value = str(value)
+            <span class="PY_KEYWORD">if</span> len(value) &gt; maxValueLength:
+                value = value[:maxValueLength-3] + <span class="PY_STRING">'...'</span>
+        key = htmlEncode(key)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isEncoded:
+            value = htmlEncode(value)
+        html.append(<span class="PY_STRING">'&lt;tr&gt;&lt;th align="left"&gt;%s&lt;/th&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;\n'</span>
+            % (key, value))
+    html.append(<span class="PY_STRING">'&lt;/table&gt;'</span>)
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(html)
+
+
+<span class="PY_KEYWORD">def</span> requestURI(env):
+    <span class="PY_STRING">"""Return the request URI for a given CGI-style dictionary.
+
+    Uses REQUEST_URI if available, otherwise constructs and returns it
+    from SCRIPT_URL, SCRIPT_NAME, PATH_INFO and QUERY_STRING.
+
+    """</span>
+    uri = env.get(<span class="PY_STRING">'REQUEST_URI'</span>)
+    <span class="PY_KEYWORD">if</span> uri <span class="PY_KEYWORD">is</span> None:
+        uri = env.get(<span class="PY_STRING">'SCRIPT_URL'</span>)
+        <span class="PY_KEYWORD">if</span> uri <span class="PY_KEYWORD">is</span> None:
+            uri = env.get(<span class="PY_STRING">'SCRIPT_NAME'</span>, <span class="PY_STRING">''</span>) + env.get(<span class="PY_STRING">'PATH_INFO'</span>, <span class="PY_STRING">''</span>)
+        query = env.get(<span class="PY_STRING">'QUERY_STRING'</span>, <span class="PY_STRING">''</span>)
+        <span class="PY_KEYWORD">if</span> query != <span class="PY_STRING">''</span>:
+            uri += <span class="PY_STRING">'?'</span> + query
+    <span class="PY_KEYWORD">return</span> uri
+
+
+<span class="PY_KEYWORD">def</span> normURL(path):
+    <span class="PY_STRING">"""Normalizes a URL path, like os.path.normpath.
+
+    Acts on a URL independant of operating system environment.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> path:
+        <span class="PY_KEYWORD">return</span>
+    initialslash = path[0] == <span class="PY_STRING">'/'</span>
+    lastslash = path[-1] == <span class="PY_STRING">'/'</span>
+    comps = path.split(<span class="PY_STRING">'/'</span>)
+    newcomps = []
+    <span class="PY_KEYWORD">for</span> comp <span class="PY_KEYWORD">in</span> comps:
+        <span class="PY_KEYWORD">if</span> comp <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">''</span>, <span class="PY_STRING">'.'</span>):
+            <span class="PY_KEYWORD">continue</span>
+        <span class="PY_KEYWORD">if</span> comp != <span class="PY_STRING">'..'</span>:
+            newcomps.append(comp)
+        <span class="PY_KEYWORD">elif</span> newcomps:
+            newcomps.pop()
+    path = <span class="PY_STRING">'/'</span>.join(newcomps)
+    <span class="PY_KEYWORD">if</span> path <span class="PY_KEYWORD">and</span> lastslash:
+        path += <span class="PY_STRING">'/'</span>
+    <span class="PY_KEYWORD">if</span> initialslash:
+        path = <span class="PY_STRING">'/'</span> + path
+    <span class="PY_KEYWORD">return</span> path
+</pre>
+<!--footer-->
+
+</body>
+</html>

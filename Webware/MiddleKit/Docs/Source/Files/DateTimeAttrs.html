@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/DateTimeAttrs.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">from</span> Attr <span class="PY_KEYWORD">import</span> Attr
+
+
+<span class="PY_KEYWORD">class</span> AnyDateTimeAttr(Attr):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        Attr.__init__(self, attr)
+
+
+<span class="PY_KEYWORD">class</span> DateTimeAttr(AnyDateTimeAttr):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        Attr.__init__(self, attr)
+
+
+<span class="PY_KEYWORD">class</span> DateAttr(AnyDateTimeAttr):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        Attr.__init__(self, attr)
+
+
+<span class="PY_KEYWORD">class</span> TimeAttr(AnyDateTimeAttr):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        Attr.__init__(self, attr)
+
+<span class="PY_COMMENT"># @@ 2000-10-13 ce: complete</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

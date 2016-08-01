@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/Context.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""Utility class for keeping track of the context.
+
+A utility class that holds information about the file we are parsing
+and the environment we are doing it in.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+
+
+<span class="PY_KEYWORD">class</span> PSPContext(object):
+    <span class="PY_STRING">"""PSPContext is an abstract base class for Context classes.
+
+    Holds all the common stuff that various parts of the compilation
+    will need access to. The items in this class will be used by both
+    the compiler and the class generator.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> getClassPath(self):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getReader(self):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getWriter(self):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getOutputDirectory(self):
+        <span class="PY_STRING">"""Provide directory to dump PSP source file to."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getServletClassName(self):
+        <span class="PY_STRING">"""Return the class name of the servlet being generated."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getFullClassName(self):
+        <span class="PY_STRING">"""Return the class name including package prefixes.
+
+        Won't use this for now.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getPythonFileName(self):
+        <span class="PY_STRING">"""Return the filename that we are generating to."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getPythonFileEncoding(self):
+        <span class="PY_STRING">"""Return the encoding of the file that we are generating."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> setPSPReader(self, reader):
+        <span class="PY_STRING">"""Set the PSPReader for this context."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> setServletWriter(self, writer):
+        <span class="PY_STRING">"""Set the PSPWriter instance for this context."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> setPythonFileName(self, name):
+        <span class="PY_STRING">"""Set the name of the .py file to generate."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> setPythonFileEncoding(self, encoding):
+        <span class="PY_STRING">"""Set the encoding of the .py file to generate."""</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+
+<span class="PY_KEYWORD">class</span> PSPCLContext(PSPContext):
+    <span class="PY_STRING">"""A context for command line compilation.
+
+    Currently used for both command line and PSPServletEngine compilation.
+    This class provides all the information necessary during the parsing
+    and page generation steps of the PSP compilation process.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, pspfile):
+        PSPContext.__init__(self)
+        self._baseUri, self._pspfile = os.path.split(pspfile)
+        self._fullpath = pspfile
+        self._pyFileEncoding = None
+
+    <span class="PY_KEYWORD">def</span> getClassPath(self):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getReader(self):
+        <span class="PY_STRING">"""Return the PSPReader object assigned to this context."""</span>
+        <span class="PY_KEYWORD">return</span> self._pspReader
+
+    <span class="PY_KEYWORD">def</span> getServletWriter(self):
+        <span class="PY_STRING">"""Return the ServletWriter object assigned to this context."""</span>
+        <span class="PY_KEYWORD">return</span> self._servletWriter
+
+    <span class="PY_KEYWORD">def</span> getOutputDirectory(self):
+        <span class="PY_STRING">"""Provide directory to dump PSP source file to.
+
+        I am probably doing this in reverse order at the moment.
+        I should start with this and get the Python filename from it.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> os.path.split(self._pyFileName)[0]
+
+    <span class="PY_KEYWORD">def</span> getServletClassName(self):
+        <span class="PY_STRING">"""Return the class name of the servlet being generated."""</span>
+        <span class="PY_KEYWORD">return</span> self._className
+
+    <span class="PY_KEYWORD">def</span> getFullClassName(self):
+        <span class="PY_STRING">"""Return the class name including package prefixes.
+
+        Won't use this for now.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> NotImplementedError
+
+    <span class="PY_KEYWORD">def</span> getPythonFileName(self):
+        <span class="PY_STRING">"""Return the filename that we are generating to."""</span>
+        <span class="PY_KEYWORD">return</span> self._pyFileName
+
+    <span class="PY_KEYWORD">def</span> getPythonFileEncoding(self):
+        <span class="PY_STRING">"""Return the encoding of the file that we are generating."""</span>
+        <span class="PY_KEYWORD">return</span> self._pyFileEncoding
+
+    <span class="PY_KEYWORD">def</span> getPspFileName(self):
+        <span class="PY_STRING">"""Return the name of the PSP file from which we are generating."""</span>
+        <span class="PY_KEYWORD">return</span> self._pspfile
+
+    <span class="PY_KEYWORD">def</span> getFullPspFileName(self):
+        <span class="PY_STRING">"""Return the name of the PSP file including its file path."""</span>
+        <span class="PY_KEYWORD">return</span> self._fullpath
+
+    <span class="PY_KEYWORD">def</span> setPSPReader(self, reader):
+        <span class="PY_STRING">"""Set the PSPReader for this context."""</span>
+        self._pspReader = reader
+
+    <span class="PY_KEYWORD">def</span> setServletWriter(self, writer):
+        <span class="PY_STRING">"""Set the ServletWriter instance for this context."""</span>
+        self._servletWriter = writer
+
+    <span class="PY_KEYWORD">def</span> setPythonFileName(self, name):
+        <span class="PY_STRING">"""Set the name of the .py file to generate."""</span>
+        self._pyFileName = name
+
+    <span class="PY_KEYWORD">def</span> setPythonFileEncoding(self, encoding):
+        <span class="PY_STRING">"""Set the encoding of the .py file to generate."""</span>
+        self._pyFileEncoding = encoding
+
+    <span class="PY_KEYWORD">def</span> setClassName(self, name):
+        <span class="PY_STRING">"""Set the class name to create."""</span>
+        self._className = name
+
+    <span class="PY_KEYWORD">def</span> resolveRelativeURI(self, uri):
+        <span class="PY_STRING">"""This is used mainly for including files.
+
+        It simply returns the location relative to the base context
+        directory, ie Examples/. If the filename has a leading /,
+        it is assumed to be an absolute path.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> os.path.isabs(uri):
+            <span class="PY_KEYWORD">return</span> uri
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> os.path.join(self._baseUri, uri)
+
+    <span class="PY_KEYWORD">def</span> getBaseUri(self):
+        <span class="PY_STRING">"""Return the base URI for the servlet."""</span>
+        <span class="PY_KEYWORD">return</span> self._baseUri
+</pre>
+<!--footer-->
+
+</body>
+</html>

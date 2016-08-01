@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/AppServer.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""The AppServer singleton.
+
+The `AppServer` singleton is the controlling object/process/thread.
+`AppServer` receives requests and dispatches them to `Application`
+(via `Application.dispatchRawRequest`).
+
+There is only one instance of AppServer, `globalAppServer` contains
+that instance. Use it like:
+
+    from WebKit.AppServer import globalAppServer
+
+`ThreadedAppServer` completes the implementation, dispatching
+these requests to separate threads. `AppServer`, at least in the
+abstract, could support different execution models and environments,
+but that support is not yet realized (Will it ever be realized?).
+
+The distinction between `AppServer` and `Application` is somewhat
+vague -- both are global singletons and both handle dispatching requests.
+`AppServer` works on a lower level, handling sockets and threads.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Thread, Event
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError, NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> asclocaltime
+<span class="PY_KEYWORD">from</span> Application <span class="PY_KEYWORD">import</span> Application
+<span class="PY_KEYWORD">from</span> ImportManager <span class="PY_KEYWORD">import</span> ImportManager
+<span class="PY_KEYWORD">from</span> PlugIn <span class="PY_KEYWORD">import</span> PlugIn
+<span class="PY_KEYWORD">from</span> PidFile <span class="PY_KEYWORD">import</span> PidFile, ProcessRunning
+<span class="PY_KEYWORD">from</span> ConfigurableForServerSidePath <span class="PY_KEYWORD">import</span> ConfigurableForServerSidePath
+<span class="PY_KEYWORD">import</span> Profiler
+
+defaultConfig = dict(
+    PrintConfigAtStartUp = True,
+    Verbose = True,
+    SilentURIs = None,
+    PlugIns = [],
+    PlugInDirs = [],
+    CheckInterval = 100,
+    PidFile = <span class="PY_STRING">'appserver.pid'</span>)
+
+<span class="PY_COMMENT"># This actually gets set inside AppServer.__init__</span>
+globalAppServer = None
+
+
+<span class="PY_KEYWORD">class</span> AppServer(ConfigurableForServerSidePath):
+    <span class="PY_STRING">"""The AppServer singleton.
+
+    Purpose and usage are explained in the module docstring.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path=None):
+        <span class="PY_STRING">"""Sets up and starts the `AppServer`.
+
+        `path` is the working directory for the AppServer
+        (directory in which AppServer is contained, by default)
+
+        This method loads plugins, creates the Application object,
+        and starts the request handling loop.
+
+        """</span>
+        self._running = 0
+        self._startTime = time()
+
+        <span class="PY_KEYWORD">global</span> globalAppServer
+        <span class="PY_KEYWORD">if</span> globalAppServer:
+            <span class="PY_KEYWORD">raise</span> ProcessRunning(<span class="PY_STRING">'More than one AppServer'</span>
+                <span class="PY_STRING">' or __init__() invoked more than once.'</span>)
+        globalAppServer = self
+
+        <span class="PY_COMMENT"># Set up the import manager:</span>
+        self._imp = ImportManager()
+
+        ConfigurableForServerSidePath.__init__(self)
+        <span class="PY_KEYWORD">if</span> path <span class="PY_KEYWORD">is</span> None:
+            path = os.path.dirname(__file__) <span class="PY_COMMENT"># os.getcwd()</span>
+        self._serverSidePath = os.path.abspath(path)
+        self._webKitPath = os.path.abspath(os.path.dirname(__file__))
+        self._webwarePath = os.path.dirname(self._webKitPath)
+
+        self.recordPID()
+
+        self._verbose = self.setting(<span class="PY_STRING">'Verbose'</span>)
+        <span class="PY_KEYWORD">if</span> self._verbose:
+            self._silentURIs = self.setting(<span class="PY_STRING">'SilentURIs'</span>)
+            <span class="PY_KEYWORD">if</span> self._silentURIs:
+                <span class="PY_KEYWORD">import</span> re
+                self._silentURIs = re.compile(self._silentURIs)
+        <span class="PY_KEYWORD">else</span>:
+            self._silentURIs = None
+        self._plugIns = []
+        self._requestID = 0
+
+        self.checkForInstall()
+        self.config() <span class="PY_COMMENT"># cache the config</span>
+        self.printStartUpMessage()
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'CheckInterval'</span>) <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            sys.setcheckinterval(self.setting(<span class="PY_STRING">'CheckInterval'</span>))
+        self._app = self.createApplication()
+        self.loadPlugIns()
+
+        <span class="PY_COMMENT"># @@ 2003-03 ib: shouldn't this just be in a subclass's __init__?</span>
+        <span class="PY_KEYWORD">if</span> self.isPersistent():
+            self._closeEvent = Event()
+            self._closeThread = Thread(target=self.closeThread,
+                name=<span class="PY_STRING">"CloseThread"</span>)
+            <span class="PY_COMMENT"># self._closeThread.setDaemon(1)</span>
+            self._closeThread.start()
+        self._running = 1
+
+    <span class="PY_KEYWORD">def</span> checkForInstall(self):
+        <span class="PY_STRING">"""Check whether Webware was installed.
+
+        Exits with an error message if Webware was not installed.
+        Called from `__init__`.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(os.path.join(self._webwarePath, <span class="PY_STRING">'install.log'</span>)):
+            sys.stdout = sys.stderr
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'ERROR: You have not installed Webware.'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Please run install.py from inside the Webware directory.'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'For example:'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt; cd ..'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt; python install.py'</span>
+            <span class="PY_KEYWORD">print</span>
+            sys.exit(0)
+
+    <span class="PY_KEYWORD">def</span> readyForRequests(self):
+        <span class="PY_STRING">"""Declare ready for getting requests.
+
+        Should be invoked by subclasses when they are finally ready to
+        accept requests. Records some stats and prints a message.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> Profiler.startTime <span class="PY_KEYWORD">is</span> None:
+            Profiler.startTime = self._startTime
+        Profiler.readyTime = time()
+        Profiler.readyDuration = Profiler.readyTime - Profiler.startTime
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Ready (%.2f seconds after launch)."</span> % Profiler.readyDuration
+        <span class="PY_KEYWORD">print</span>
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+    <span class="PY_KEYWORD">def</span> closeThread(self):
+        <span class="PY_STRING">"""This method is called when the shutdown sequence is initiated."""</span>
+        <span class="PY_KEYWORD">if</span> self.isPersistent():
+            self._closeEvent.wait()
+        self.shutDown()
+
+    <span class="PY_KEYWORD">def</span> initiateShutdown(self):
+        <span class="PY_STRING">"""Ask the master thread to begin the shutdown."""</span>
+        <span class="PY_KEYWORD">if</span> self.isPersistent():
+            self._closeEvent.set()
+
+    <span class="PY_KEYWORD">def</span> recordPID(self):
+        <span class="PY_STRING">"""Save the pid of the AppServer to a file."""</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'PidFile'</span>) <span class="PY_KEYWORD">is</span> None:
+            self._pidFile = None
+            <span class="PY_KEYWORD">return</span>
+        pidpath = self.serverSidePath(self.setting(<span class="PY_STRING">'PidFile'</span>))
+        <span class="PY_KEYWORD">try</span>:
+            self._pidFile = PidFile(pidpath)
+        <span class="PY_KEYWORD">except</span> ProcessRunning:
+            <span class="PY_KEYWORD">raise</span> ProcessRunning(<span class="PY_STRING">'The file '</span> + pidpath + <span class="PY_STRING">' exists\n'</span>
+                <span class="PY_STRING">'and contains a process id corresponding to a running process.\n'</span>
+                <span class="PY_STRING">'This indicates that there is an AppServer already running.\n'</span>
+                <span class="PY_STRING">'If this is not the case, delete this file and restart the AppServer.'</span>)
+
+    <span class="PY_KEYWORD">def</span> shutDown(self):
+        <span class="PY_STRING">"""Shut down the AppServer.
+
+        Subclasses may override and normally follow this sequence:
+            1. set self._running = 1 (request to shut down)
+            2. class specific statements for shutting down
+            3. Invoke super's shutDown() e.g., `AppServer.shutDown(self)`
+            4. set self._running = 0 (server is completely down)
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._running:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"AppServer is shutting down..."</span>
+            sys.stdout.flush()
+            self._running = 1
+            self._app.shutDown()
+            <span class="PY_KEYWORD">del</span> self._plugIns
+            <span class="PY_KEYWORD">del</span> self._app
+            <span class="PY_KEYWORD">if</span> self._pidFile:
+                self._pidFile.remove() <span class="PY_COMMENT"># remove the pid file</span>
+            <span class="PY_KEYWORD">del</span> self._pidFile
+            <span class="PY_KEYWORD">if</span> Profiler.profiler:
+                <span class="PY_COMMENT"># The profile stats will be dumped by Launch.py.</span>
+                <span class="PY_COMMENT"># You might also considering having a page/servlet</span>
+                <span class="PY_COMMENT"># that lets you dump the stats on demand.</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'AppServer ran for %0.2f seconds.'</span> % (
+                    time() - Profiler.startTime)
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"AppServer has been shutdown."</span>
+            sys.stdout.flush()
+            sys.stderr.flush()
+            self._running = 0
+
+
+    <span class="PY_COMMENT">## Configuration ##</span>
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""The default AppServer.config."""</span>
+        <span class="PY_KEYWORD">return</span> defaultConfig <span class="PY_COMMENT"># defined on the module level</span>
+
+    <span class="PY_KEYWORD">def</span> configFilename(self):
+        <span class="PY_STRING">"""Return the name of the AppServer configuration file."""</span>
+        <span class="PY_KEYWORD">return</span> self.serverSidePath(<span class="PY_STRING">'Configs/AppServer.config'</span>)
+
+    <span class="PY_KEYWORD">def</span> configReplacementValues(self):
+        <span class="PY_STRING">"""Get config values that need to be escaped."""</span>
+        <span class="PY_COMMENT"># Since these strings may be eval'ed as ordinary strings,</span>
+        <span class="PY_COMMENT"># we need to use forward slashes instead of backslashes.</span>
+        <span class="PY_COMMENT"># Note: This is only needed for old style config files.</span>
+        <span class="PY_COMMENT"># In new style config files, they are note eval'ed, but used</span>
+        <span class="PY_COMMENT"># directly, so double escaping would be a bad idea here.</span>
+        <span class="PY_KEYWORD">return</span> dict(
+            WebwarePath = self._webwarePath.replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'/'</span>),
+            WebKitPath = self._webKitPath.replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'/'</span>),
+            serverSidePath = self._serverSidePath.replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'/'</span>))
+
+
+    <span class="PY_COMMENT">## Network Server ##</span>
+
+    <span class="PY_KEYWORD">def</span> createApplication(self):
+        <span class="PY_STRING">"""Create and return an application object. Invoked by __init__."""</span>
+        <span class="PY_KEYWORD">return</span> Application(server=self)
+
+    <span class="PY_KEYWORD">def</span> printStartUpMessage(self):
+        <span class="PY_STRING">"""Invoked by __init__, prints a little intro."""</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WebKit AppServer'</span>, self.version()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Part of Webware for Python.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Copyright 1999-2010 by Chuck Esterbrook. All Rights Reserved.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WebKit and Webware are open source.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Please visit: http://www.webwareforpython.org'</span>
+        <span class="PY_KEYWORD">print</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Process id is'</span>, os.getpid()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Date/time is'</span>, asclocaltime()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Python is'</span>, sys.version.replace(<span class="PY_STRING">') ['</span>, <span class="PY_STRING">')\n['</span>)
+        <span class="PY_KEYWORD">print</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'PrintConfigAtStartUp'</span>):
+            self.printConfig()
+
+
+    <span class="PY_COMMENT">## Plug-in loading ##</span>
+
+    <span class="PY_KEYWORD">def</span> plugIns(self):
+        <span class="PY_STRING">"""Return a list of the plug-ins loaded by the app server.
+
+        Each plug-in is a Python package.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._plugIns
+
+    <span class="PY_KEYWORD">def</span> plugIn(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the plug-in with the given name."""</span>
+        <span class="PY_COMMENT"># @@ 2001-04-25 ce: linear search. yuck.</span>
+        <span class="PY_COMMENT"># Plus we should guarantee plug-in name uniqueness anyway</span>
+        <span class="PY_KEYWORD">for</span> plugin <span class="PY_KEYWORD">in</span> self._plugIns:
+            <span class="PY_KEYWORD">if</span> plugin.name() == name:
+                <span class="PY_KEYWORD">return</span> plugin
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">raise</span> KeyError(name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> loadPlugIn(self, path):
+        <span class="PY_STRING">"""Load and return the given plug-in.
+
+        May return None if loading was unsuccessful (in which case this method
+        prints a message saying so). Used by `loadPlugIns` (note the **s**).
+
+        """</span>
+        plugIn = None
+        path = self.serverSidePath(path)
+        <span class="PY_KEYWORD">try</span>:
+            plugIn = PlugIn(self, path)
+            willNotLoadReason = plugIn.load()
+            <span class="PY_KEYWORD">if</span> willNotLoadReason:
+                <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'    Plug-in %s cannot be loaded because:\n'</span>
+                    <span class="PY_STRING">'    %s'</span> % (path, willNotLoadReason))
+                <span class="PY_KEYWORD">return</span> None
+            plugIn.install()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Plug-in'</span>, path, <span class="PY_STRING">'raised exception.'</span>
+            <span class="PY_KEYWORD">raise</span>
+        <span class="PY_KEYWORD">return</span> plugIn
+
+    <span class="PY_KEYWORD">def</span> loadPlugIns(self):
+        <span class="PY_STRING">"""Load all plug-ins.
+
+        A plug-in allows you to extend the functionality of WebKit without
+        necessarily having to modify its source. Plug-ins are loaded by
+        AppServer at startup time, just before listening for requests.
+        See the docs in `WebKit.PlugIn` for more info.
+
+        """</span>
+        plugIns = [self.serverSidePath(path)
+            <span class="PY_KEYWORD">for</span> path <span class="PY_KEYWORD">in</span> self.setting(<span class="PY_STRING">'PlugIns'</span>)]
+
+        <span class="PY_COMMENT"># Scan each directory named in the PlugInDirs list.</span>
+        <span class="PY_COMMENT"># If those directories contain Python packages (that don't have</span>
+        <span class="PY_COMMENT"># a "dontload" file) then add them to the plugs in list.</span>
+        <span class="PY_KEYWORD">for</span> plugInDir <span class="PY_KEYWORD">in</span> self.setting(<span class="PY_STRING">'PlugInDirs'</span>):
+            plugInDir = self.serverSidePath(plugInDir)
+            <span class="PY_KEYWORD">for</span> filename <span class="PY_KEYWORD">in</span> sorted(os.listdir(plugInDir)):
+                filename = os.path.normpath(os.path.join(plugInDir, filename))
+                <span class="PY_KEYWORD">if</span> (os.path.isdir(filename)
+                        <span class="PY_KEYWORD">and</span> os.path.exists(os.path.join(filename, <span class="PY_STRING">'__init__.py'</span>))
+                        <span class="PY_KEYWORD">and</span> os.path.exists(os.path.join(filename, <span class="PY_STRING">'Properties.py'</span>))
+                        <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> os.path.exists(os.path.join(filename, <span class="PY_STRING">'dontload'</span>))
+                        <span class="PY_KEYWORD">and</span> os.path.basename(filename) != <span class="PY_STRING">'WebKit'</span>
+                        <span class="PY_KEYWORD">and</span> filename <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> plugIns):
+                    plugIns.append(filename)
+
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Plug-ins list:'</span>, <span class="PY_STRING">', '</span>.join(plugIns) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'empty'</span>
+
+        <span class="PY_COMMENT"># Now that we have our plug-in list, load them...</span>
+        <span class="PY_KEYWORD">for</span> plugInPath <span class="PY_KEYWORD">in</span> plugIns:
+            plugIn = self.loadPlugIn(plugInPath)
+            <span class="PY_KEYWORD">if</span> plugIn:
+                self._plugIns.append(plugIn)
+        <span class="PY_KEYWORD">print</span>
+
+
+    <span class="PY_COMMENT">## Accessors ##</span>
+
+    <span class="PY_KEYWORD">def</span> version(self):
+        <span class="PY_STRING">"""Return WebKit version."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> hasattr(self, <span class="PY_STRING">'_webKitVersionString'</span>):
+            <span class="PY_KEYWORD">from</span> MiscUtils.PropertiesObject <span class="PY_KEYWORD">import</span> PropertiesObject
+            props = PropertiesObject(os.path.join(self.webKitPath(), <span class="PY_STRING">'Properties.py'</span>))
+            self._webKitVersionString = props[<span class="PY_STRING">'versionString'</span>]
+        <span class="PY_KEYWORD">return</span> self._webKitVersionString
+
+    <span class="PY_KEYWORD">def</span> application(self):
+        <span class="PY_STRING">"""Return the Application singleton."""</span>
+        <span class="PY_KEYWORD">return</span> self._app
+
+    <span class="PY_KEYWORD">def</span> startTime(self):
+        <span class="PY_STRING">"""Return the time the app server was started.
+
+        The time is given as seconds, like time().
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._startTime
+
+    <span class="PY_KEYWORD">def</span> numRequests(self):
+        <span class="PY_STRING">"""Return the number of requests.
+
+        Returns the number of requests received by this app server
+        since it was launched.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._requestID
+
+    <span class="PY_KEYWORD">def</span> isPersistent(self):
+        <span class="PY_STRING">"""Check whether the AppServer is persistent.
+
+        When using `OneShot`, the AppServer will exist only for a single
+        request, otherwise it will stay around indefinitely.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> serverSidePath(self, path=None):
+        <span class="PY_STRING">"""Return the absolute server-side path of the WebKit app server.
+
+        If the optional path is passed in, then it is joined with the
+        server side directory to form a path relative to the app server.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> path:
+            <span class="PY_KEYWORD">return</span> os.path.normpath(os.path.join(self._serverSidePath, path))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._serverSidePath
+
+    <span class="PY_KEYWORD">def</span> webwarePath(self):
+        <span class="PY_STRING">"""Return the Webware path."""</span>
+        <span class="PY_KEYWORD">return</span> self._webwarePath
+
+    <span class="PY_KEYWORD">def</span> webKitPath(self):
+        <span class="PY_STRING">"""Return teh WebKit path."""</span>
+        <span class="PY_KEYWORD">return</span> self._webKitPath
+
+
+<span class="PY_COMMENT">## Main ##</span>
+
+<span class="PY_KEYWORD">def</span> main():
+    <span class="PY_STRING">"""Start the Appserver."""</span>
+    <span class="PY_KEYWORD">try</span>:
+        server = AppServer()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Ready."</span>
+        <span class="PY_KEYWORD">print</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"WARNING: There is nothing to do here with the abstract AppServer."</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Use one of the adapters such as WebKit.cgi (with ThreadedAppServer)"</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"or OneShot.cgi"</span>
+        server.shutDown()
+    <span class="PY_KEYWORD">except</span> Exception, exc: <span class="PY_COMMENT"># Need to kill the sweeper thread somehow</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Caught exception:"</span>, exc
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting AppServer..."</span>
+        server.shutDown()
+        <span class="PY_KEYWORD">del</span> server
+        sys.exit()
+
+<span class="PY_KEYWORD">def</span> stop(*args, **kw):
+    <span class="PY_STRING">"""Stop the AppServer (which may be in a different process)."""</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Stopping the AppServer..."</span>
+    workDir = kw.get(<span class="PY_STRING">'workDir'</span>)
+    <span class="PY_KEYWORD">if</span> workDir:
+        pidfile = None
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">if</span> globalAppServer:
+            pidfile = globalAppServer._pidFile
+        <span class="PY_KEYWORD">else</span>:
+            pidfile = None
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> pidfile:
+            workDir = os.path.dirname(__file__)
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> pidfile:
+        pidfile = PidFile(os.path.join(workDir, <span class="PY_STRING">'appserver.pid'</span>), create=0)
+    <span class="PY_KEYWORD">try</span>:
+        pidfile.kill()
+    <span class="PY_KEYWORD">except</span> Exception:
+        <span class="PY_KEYWORD">from</span> traceback <span class="PY_KEYWORD">import</span> print_exc
+        print_exc(1)
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"WebKit cannot terminate the running process."</span>
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+    main()
+</pre>
+<!--footer-->
+
+</body>
+</html>

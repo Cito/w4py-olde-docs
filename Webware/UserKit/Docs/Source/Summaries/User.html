@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of UserKit.User</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of UserKit.User</h2>
+<p>You can also browse the <a href="../Files/User.html">complete source file</a>
+or the <a href="../Docs/UserKit.User.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">User</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, manager=None, name=None, password=None)</span>
+<span class="line_def">    def <span class="name_def">__str__</span>(self)</span>
+
+<span class="line_category">    ## Attributes ##</span>
+<span class="line_def">    def <span class="name_def">manager</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setManager</span>(self, manager)</span>
+<span class="line_def">    def <span class="name_def">serialNum</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setSerialNum</span>(self, serialNum)</span>
+<span class="line_def">    def <span class="name_def">externalId</span>(self)</span>
+<span class="line_def">    def <span class="name_def">name</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setName</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">password</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setPassword</span>(self, password)</span>
+<span class="line_def">    def <span class="name_def">isActive</span>(self)</span>
+<span class="line_def">    def <span class="name_def">creationTime</span>(self)</span>
+<span class="line_def">    def <span class="name_def">lastAccessTime</span>(self)</span>
+<span class="line_def">    def <span class="name_def">lastLoginTime</span>(self)</span>
+
+<span class="line_category">    ## Log in and out ##</span>
+<span class="line_def">    def <span class="name_def">login</span>(self, password, fromMgr=0)</span>
+<span class="line_def">    def <span class="name_def">logout</span>(self, fromMgr=False)</span>
+
+<span class="line_category">    ## Notifications ##</span>
+<span class="line_def">    def <span class="name_def">wasAccessed</span>(self)</span>
+
+</pre>
+</body>
+</html>

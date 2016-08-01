@@ -1,0 +1,2070 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.HTTPExceptions</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.HTTPExceptions</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/HTTPExceptions.py">/var/www/docs/Webware-1.1.1/WebKit/HTTPExceptions.py</a></font></td></tr></table>
+    <p><tt>HTTP&nbsp;exceptions.<br>
+&nbsp;<br>
+HTTPExceptions&nbsp;are&nbsp;for&nbsp;situations&nbsp;that&nbsp;are&nbsp;predicted&nbsp;by&nbsp;the&nbsp;HTTP&nbsp;spec.<br>
+Where&nbsp;the&nbsp;``200&nbsp;OK``&nbsp;response&nbsp;is&nbsp;typical,&nbsp;a&nbsp;``404&nbsp;Not&nbsp;Found``<br>
+or&nbsp;``301&nbsp;Moved&nbsp;Temporarily``&nbsp;response&nbsp;is&nbsp;not&nbsp;entirely&nbsp;unexpected.<br>
+&nbsp;<br>
+`Application`&nbsp;catches&nbsp;all&nbsp;`<a href="#HTTPException">HTTPException</a>`&nbsp;exceptions&nbsp;(and&nbsp;subclasses&nbsp;of<br>
+<a href="#HTTPException">HTTPException</a>),&nbsp;and&nbsp;instead&nbsp;of&nbsp;being&nbsp;errors&nbsp;these&nbsp;are&nbsp;translated&nbsp;into&nbsp;responses.<br>
+In&nbsp;various&nbsp;places&nbsp;these&nbsp;can&nbsp;also&nbsp;be&nbsp;caught&nbsp;and&nbsp;changed,&nbsp;for&nbsp;instance<br>
+an&nbsp;`<a href="#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>`&nbsp;could&nbsp;be&nbsp;turned&nbsp;into&nbsp;a&nbsp;normal&nbsp;login&nbsp;page.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPBadRequest">HTTPBadRequest</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPConflict">HTTPConflict</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPForbidden">HTTPForbidden</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPInsufficientStorage">HTTPInsufficientStorage</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPMethodNotAllowed">HTTPMethodNotAllowed</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPTemporaryRedirect">HTTPTemporaryRedirect</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPTemporaryRedirect">HTTPTemporaryRedirect</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPNotFound">HTTPNotFound</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPNotImplemented">HTTPNotImplemented</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPPreconditionFailed">HTTPPreconditionFailed</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPRequestTimeout">HTTPRequestTimeout</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPServerError">HTTPServerError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">HTTPServiceUnavailable</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPSessionExpired">HTTPSessionExpired</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPUnsupportedMediaType">HTTPUnsupportedMediaType</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPAuthenticationRequired">class <strong>HTTPAuthenticationRequired</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"authentication&nbsp;required"&nbsp;subclass.<br>
+&nbsp;<br>
+<a href="#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>&nbsp;will&nbsp;usually&nbsp;cause&nbsp;the&nbsp;browser&nbsp;to&nbsp;open&nbsp;up&nbsp;an<br>
+HTTP&nbsp;login&nbsp;box,&nbsp;and&nbsp;after&nbsp;getting&nbsp;login&nbsp;information&nbsp;from&nbsp;the&nbsp;user,&nbsp;the<br>
+browser&nbsp;will&nbsp;resubmit&nbsp;the&nbsp;request.&nbsp;However,&nbsp;this&nbsp;should&nbsp;also&nbsp;trigger<br>
+login&nbsp;pages&nbsp;in&nbsp;properly&nbsp;set&nbsp;up&nbsp;environments&nbsp;(though&nbsp;much&nbsp;code&nbsp;will&nbsp;not<br>
+work&nbsp;this&nbsp;way).<br>
+&nbsp;<br>
+Browsers&nbsp;will&nbsp;usually&nbsp;not&nbsp;send&nbsp;authentication&nbsp;information&nbsp;unless&nbsp;they<br>
+receive&nbsp;this&nbsp;response,&nbsp;even&nbsp;when&nbsp;other&nbsp;pages&nbsp;on&nbsp;the&nbsp;site&nbsp;have&nbsp;given&nbsp;401<br>
+responses&nbsp;before.&nbsp;So&nbsp;when&nbsp;using&nbsp;this&nbsp;authentication&nbsp;every&nbsp;request&nbsp;will<br>
+usually&nbsp;be&nbsp;doubled,&nbsp;once&nbsp;without&nbsp;authentication,&nbsp;once&nbsp;with.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPAuthenticationRequired-__init__"><strong>__init__</strong></a>(self, realm<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-headers"><strong>headers</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPAuthenticationRequired-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPAuthenticationRequired-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPAuthenticationRequired-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthenticationRequired-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthenticationRequired-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthenticationRequired-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthenticationRequired-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthenticationRequired-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthenticationRequired-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><strong>HTTPAuthorizationRequired</strong> = <a name="HTTPAuthorizationRequired">class HTTPAuthenticationRequired</a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"authentication&nbsp;required"&nbsp;subclass.<br>
+&nbsp;<br>
+<a href="#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>&nbsp;will&nbsp;usually&nbsp;cause&nbsp;the&nbsp;browser&nbsp;to&nbsp;open&nbsp;up&nbsp;an<br>
+HTTP&nbsp;login&nbsp;box,&nbsp;and&nbsp;after&nbsp;getting&nbsp;login&nbsp;information&nbsp;from&nbsp;the&nbsp;user,&nbsp;the<br>
+browser&nbsp;will&nbsp;resubmit&nbsp;the&nbsp;request.&nbsp;However,&nbsp;this&nbsp;should&nbsp;also&nbsp;trigger<br>
+login&nbsp;pages&nbsp;in&nbsp;properly&nbsp;set&nbsp;up&nbsp;environments&nbsp;(though&nbsp;much&nbsp;code&nbsp;will&nbsp;not<br>
+work&nbsp;this&nbsp;way).<br>
+&nbsp;<br>
+Browsers&nbsp;will&nbsp;usually&nbsp;not&nbsp;send&nbsp;authentication&nbsp;information&nbsp;unless&nbsp;they<br>
+receive&nbsp;this&nbsp;response,&nbsp;even&nbsp;when&nbsp;other&nbsp;pages&nbsp;on&nbsp;the&nbsp;site&nbsp;have&nbsp;given&nbsp;401<br>
+responses&nbsp;before.&nbsp;So&nbsp;when&nbsp;using&nbsp;this&nbsp;authentication&nbsp;every&nbsp;request&nbsp;will<br>
+usually&nbsp;be&nbsp;doubled,&nbsp;once&nbsp;without&nbsp;authentication,&nbsp;once&nbsp;with.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPAuthenticationRequired-__init__"><strong>__init__</strong></a>(self, realm<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-headers"><strong>headers</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPAuthenticationRequired-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPAuthorizationRequired-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPAuthenticationRequired-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthorizationRequired-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthorizationRequired-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthorizationRequired-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthorizationRequired-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthorizationRequired-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPAuthorizationRequired-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPAuthenticationRequired-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPBadRequest">class <strong>HTTPBadRequest</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"bad&nbsp;request"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;browser&nbsp;sends&nbsp;an&nbsp;invalid&nbsp;request.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPBadRequest">HTTPBadRequest</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPBadRequest-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPBadRequest-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPBadRequest-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPBadRequest-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPBadRequest-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPBadRequest-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPBadRequest-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPBadRequest-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPBadRequest-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPConflict">class <strong>HTTPConflict</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"conflict"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;there's&nbsp;a&nbsp;locking&nbsp;conflict&nbsp;on&nbsp;this&nbsp;resource&nbsp;(in&nbsp;response&nbsp;to<br>
+something&nbsp;like&nbsp;a&nbsp;PUT,&nbsp;not&nbsp;for&nbsp;most&nbsp;other&nbsp;conflicts).&nbsp;Mostly&nbsp;for&nbsp;WebDAV.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPConflict">HTTPConflict</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPConflict-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPConflict-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPConflict-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPConflict-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPConflict-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPConflict-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPConflict-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPConflict-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPConflict-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPException">class <strong>HTTPException</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#HTTPException">HTTPException</a>&nbsp;template&nbsp;class.<br>
+&nbsp;<br>
+Subclasses&nbsp;must&nbsp;define&nbsp;these&nbsp;variables&nbsp;(usually&nbsp;as&nbsp;class&nbsp;variables):<br>
+&nbsp;<br>
+`_code`:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;tuple&nbsp;of&nbsp;the&nbsp;integer&nbsp;error&nbsp;code,&nbsp;and&nbsp;the&nbsp;short<br>
+&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;that&nbsp;goes&nbsp;with&nbsp;it&nbsp;(like&nbsp;``(200,&nbsp;"OK")``)<br>
+`_description`:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;long-winded&nbsp;description,&nbsp;to&nbsp;be&nbsp;presented<br>
+&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;the&nbsp;response&nbsp;page.&nbsp;Or&nbsp;you&nbsp;can&nbsp;override&nbsp;<a href="#HTTPException-description">description</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;you&nbsp;want&nbsp;something&nbsp;more&nbsp;context-sensitive.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPException-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPException-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPException-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPException-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPException-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPException-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPException-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPException-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPException-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPForbidden">class <strong>HTTPForbidden</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"forbidden"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;access&nbsp;is&nbsp;not&nbsp;allowed&nbsp;to&nbsp;this&nbsp;resource.&nbsp;If&nbsp;the&nbsp;user&nbsp;is&nbsp;anonymous,<br>
+and&nbsp;must&nbsp;be&nbsp;authenticated,&nbsp;then&nbsp;<a href="#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>&nbsp;is&nbsp;a&nbsp;preferable<br>
+exception.&nbsp;If&nbsp;the&nbsp;user&nbsp;should&nbsp;not&nbsp;be&nbsp;able&nbsp;to&nbsp;get&nbsp;to&nbsp;this&nbsp;resource&nbsp;(at<br>
+least&nbsp;through&nbsp;the&nbsp;path&nbsp;they&nbsp;did),&nbsp;or&nbsp;is&nbsp;authenticated&nbsp;and&nbsp;still&nbsp;doesn't<br>
+have&nbsp;access,&nbsp;or&nbsp;no&nbsp;one&nbsp;is&nbsp;allowed&nbsp;to&nbsp;view&nbsp;this,&nbsp;then&nbsp;<a href="#HTTPForbidden">HTTPForbidden</a>&nbsp;would<br>
+be&nbsp;the&nbsp;proper&nbsp;response.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPForbidden">HTTPForbidden</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPForbidden-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPForbidden-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPForbidden-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPForbidden-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPForbidden-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPForbidden-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPForbidden-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPForbidden-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPForbidden-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPInsufficientStorage">class <strong>HTTPInsufficientStorage</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"insufficient&nbsp;storage"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;there&nbsp;is&nbsp;not&nbsp;sufficient&nbsp;storage,&nbsp;usually&nbsp;in&nbsp;response&nbsp;to&nbsp;a&nbsp;PUT&nbsp;when<br>
+there&nbsp;isn't&nbsp;enough&nbsp;disk&nbsp;space.&nbsp;Mostly&nbsp;for&nbsp;WebDAV.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPInsufficientStorage">HTTPInsufficientStorage</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPInsufficientStorage-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPInsufficientStorage-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPInsufficientStorage-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPInsufficientStorage-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPInsufficientStorage-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPInsufficientStorage-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPMethodNotAllowed">class <strong>HTTPMethodNotAllowed</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"method&nbsp;not&nbsp;allowed"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;a&nbsp;method&nbsp;(like&nbsp;GET,&nbsp;PROPFIND,&nbsp;POST,&nbsp;etc)&nbsp;is&nbsp;not&nbsp;allowed<br>
+on&nbsp;this&nbsp;resource&nbsp;(usually&nbsp;because&nbsp;it&nbsp;does&nbsp;not&nbsp;make&nbsp;sense,&nbsp;not<br>
+because&nbsp;it&nbsp;is&nbsp;not&nbsp;permitted).&nbsp;Mostly&nbsp;for&nbsp;WebDAV.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPMethodNotAllowed">HTTPMethodNotAllowed</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPMethodNotAllowed-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPMethodNotAllowed-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPMethodNotAllowed-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPMethodNotAllowed-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMethodNotAllowed-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPMethodNotAllowed-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPMovedPermanently">class <strong>HTTPMovedPermanently</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"moved&nbsp;permanently"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;a&nbsp;resource&nbsp;is&nbsp;permanently&nbsp;moved.&nbsp;The&nbsp;browser&nbsp;may&nbsp;remember&nbsp;this<br>
+relocation,&nbsp;and&nbsp;later&nbsp;requests&nbsp;may&nbsp;skip&nbsp;requesting&nbsp;the&nbsp;original<br>
+resource&nbsp;altogether.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPMovedPermanently-__init__"><strong>__init__</strong></a>(self, location<font color="#909090">=None</font>, webkitLocation<font color="#909090">=None</font>, *args)</dt><dd><tt>Set&nbsp;destination.<br>
+&nbsp;<br>
+<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>&nbsp;needs&nbsp;a&nbsp;destination&nbsp;that&nbsp;you&nbsp;it&nbsp;should&nbsp;be<br>
+directed&nbsp;to&nbsp;--&nbsp;you&nbsp;can&nbsp;pass&nbsp;`location`&nbsp;*or*&nbsp;`webkitLocation`&nbsp;--<br>
+if&nbsp;you&nbsp;pass&nbsp;`webkitLocation`&nbsp;it&nbsp;will&nbsp;be&nbsp;relative&nbsp;to&nbsp;the&nbsp;WebKit&nbsp;base<br>
+(the&nbsp;portion&nbsp;through&nbsp;the&nbsp;adapter).</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-description"><strong>description</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-headers"><strong>headers</strong></a>(self)</dt><dd><tt>We&nbsp;include&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-location"><strong>location</strong></a>(self)</dt><dd><tt>The&nbsp;location&nbsp;that&nbsp;we&nbsp;will&nbsp;be&nbsp;redirecting&nbsp;to.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPMovedPermanently-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPMovedPermanently-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPMovedPermanently-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMovedPermanently-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMovedPermanently-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMovedPermanently-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMovedPermanently-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMovedPermanently-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPMovedPermanently-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPMovedPermanently-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPNotFound">class <strong>HTTPNotFound</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"not&nbsp;found"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;requested&nbsp;resource&nbsp;does&nbsp;not&nbsp;exist.&nbsp;To&nbsp;be&nbsp;more&nbsp;secretive,<br>
+it&nbsp;is&nbsp;okay&nbsp;to&nbsp;return&nbsp;a&nbsp;404&nbsp;if&nbsp;access&nbsp;to&nbsp;the&nbsp;resource&nbsp;is&nbsp;not&nbsp;permitted<br>
+(you&nbsp;are&nbsp;not&nbsp;required&nbsp;to&nbsp;use&nbsp;<a href="#HTTPForbidden">HTTPForbidden</a>,&nbsp;though&nbsp;it&nbsp;makes&nbsp;it&nbsp;more<br>
+clear&nbsp;why&nbsp;access&nbsp;was&nbsp;disallowed).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPNotFound">HTTPNotFound</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPNotFound-html"><strong>html</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPNotFound-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPNotFound-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPNotFound-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPNotFound-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPNotFound-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPNotFound-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotFound-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotFound-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPNotFound-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPNotImplemented">class <strong>HTTPNotImplemented</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"not&nbsp;implemented"&nbsp;subclass.<br>
+&nbsp;<br>
+When&nbsp;methods&nbsp;(like&nbsp;GET,&nbsp;POST,&nbsp;PUT,&nbsp;PROPFIND,&nbsp;etc)&nbsp;are&nbsp;not<br>
+implemented&nbsp;for&nbsp;this&nbsp;resource.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPNotImplemented">HTTPNotImplemented</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPNotImplemented-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPNotImplemented-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPNotImplemented-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPNotImplemented-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPNotImplemented-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPNotImplemented-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPNotImplemented-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPPreconditionFailed">class <strong>HTTPPreconditionFailed</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"Precondition&nbsp;Failed"&nbsp;subclass.<br>
+&nbsp;<br>
+During&nbsp;compound,&nbsp;atomic&nbsp;operations,&nbsp;when&nbsp;a&nbsp;precondition&nbsp;for&nbsp;an&nbsp;early<br>
+operation&nbsp;fail,&nbsp;then&nbsp;later&nbsp;operations&nbsp;in&nbsp;will&nbsp;fail&nbsp;with&nbsp;this&nbsp;code.<br>
+Mostly&nbsp;for&nbsp;WebDAV.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPPreconditionFailed">HTTPPreconditionFailed</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPPreconditionFailed-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPPreconditionFailed-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPPreconditionFailed-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPPreconditionFailed-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPPreconditionFailed-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPPreconditionFailed-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><strong>HTTPRedirect</strong> = <a name="HTTPRedirect">class HTTPTemporaryRedirect</a>(<a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"temporary&nbsp;redirect"&nbsp;subclass.<br>
+&nbsp;<br>
+Like&nbsp;<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>,&nbsp;except&nbsp;the&nbsp;redirect&nbsp;is&nbsp;only&nbsp;valid&nbsp;for&nbsp;this<br>
+request.&nbsp;Internally&nbsp;identical&nbsp;to&nbsp;<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>,&nbsp;except&nbsp;with&nbsp;a<br>
+different&nbsp;response&nbsp;code.&nbsp;Browsers&nbsp;will&nbsp;check&nbsp;the&nbsp;server&nbsp;for&nbsp;each&nbsp;request<br>
+to&nbsp;see&nbsp;where&nbsp;it's&nbsp;redirected&nbsp;to.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPTemporaryRedirect">HTTPTemporaryRedirect</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a>:<br>
+<dl><dt><a name="HTTPTemporaryRedirect-__init__"><strong>__init__</strong></a>(self, location<font color="#909090">=None</font>, webkitLocation<font color="#909090">=None</font>, *args)</dt><dd><tt>Set&nbsp;destination.<br>
+&nbsp;<br>
+<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>&nbsp;needs&nbsp;a&nbsp;destination&nbsp;that&nbsp;you&nbsp;it&nbsp;should&nbsp;be<br>
+directed&nbsp;to&nbsp;--&nbsp;you&nbsp;can&nbsp;pass&nbsp;`location`&nbsp;*or*&nbsp;`webkitLocation`&nbsp;--<br>
+if&nbsp;you&nbsp;pass&nbsp;`webkitLocation`&nbsp;it&nbsp;will&nbsp;be&nbsp;relative&nbsp;to&nbsp;the&nbsp;WebKit&nbsp;base<br>
+(the&nbsp;portion&nbsp;through&nbsp;the&nbsp;adapter).</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-description"><strong>description</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-headers"><strong>headers</strong></a>(self)</dt><dd><tt>We&nbsp;include&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-location"><strong>location</strong></a>(self)</dt><dd><tt>The&nbsp;location&nbsp;that&nbsp;we&nbsp;will&nbsp;be&nbsp;redirecting&nbsp;to.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPTemporaryRedirect-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPRedirect-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPTemporaryRedirect-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRedirect-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRedirect-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRedirect-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRedirect-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRedirect-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRedirect-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPRequestTimeout">class <strong>HTTPRequestTimeout</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"request&nbsp;timeout"&nbsp;subclass.<br>
+&nbsp;<br>
+The&nbsp;client&nbsp;did&nbsp;not&nbsp;produce&nbsp;a&nbsp;request&nbsp;within&nbsp;the&nbsp;time&nbsp;that&nbsp;the<br>
+server&nbsp;was&nbsp;prepared&nbsp;to&nbsp;wait.&nbsp;The&nbsp;client&nbsp;may&nbsp;repeat&nbsp;the&nbsp;request<br>
+without&nbsp;modifications&nbsp;at&nbsp;any&nbsp;later&nbsp;time.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPRequestTimeout">HTTPRequestTimeout</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPRequestTimeout-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPRequestTimeout-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPRequestTimeout-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPRequestTimeout-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPRequestTimeout-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPRequestTimeout-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPServerError">class <strong>HTTPServerError</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"Server&nbsp;Error"&nbsp;subclass.<br>
+&nbsp;<br>
+The&nbsp;server&nbsp;encountered&nbsp;an&nbsp;unexpected&nbsp;condition&nbsp;which&nbsp;prevented&nbsp;it<br>
+from&nbsp;fulfilling&nbsp;the&nbsp;request.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPServerError">HTTPServerError</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPServerError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPServerError-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPServerError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPServerError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPServerError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPServerError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServerError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPServerError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPServerError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPServiceUnavailable">class <strong>HTTPServiceUnavailable</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"service&nbsp;unavailable"&nbsp;subclass.<br>
+&nbsp;<br>
+The&nbsp;server&nbsp;is&nbsp;currently&nbsp;unable&nbsp;to&nbsp;handle&nbsp;the&nbsp;request&nbsp;due&nbsp;to&nbsp;a&nbsp;temporary<br>
+overloading&nbsp;or&nbsp;maintenance&nbsp;of&nbsp;the&nbsp;server.&nbsp;The&nbsp;implication&nbsp;is&nbsp;that&nbsp;this<br>
+is&nbsp;a&nbsp;temporary&nbsp;condition&nbsp;which&nbsp;will&nbsp;be&nbsp;alleviated&nbsp;after&nbsp;some&nbsp;delay.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">HTTPServiceUnavailable</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPServiceUnavailable-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPServiceUnavailable-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPServiceUnavailable-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPServiceUnavailable-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPServiceUnavailable-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPServiceUnavailable-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPSessionExpired">class <strong>HTTPSessionExpired</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"session&nbsp;expired"&nbsp;subclass.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;<a href="#HTTPAuthenticationRequired">HTTPAuthenticationRequired</a>,&nbsp;but&nbsp;should&nbsp;be&nbsp;used<br>
+in&nbsp;the&nbsp;situation&nbsp;when&nbsp;a&nbsp;session&nbsp;has&nbsp;expired.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPSessionExpired">HTTPSessionExpired</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPSessionExpired-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPSessionExpired-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPSessionExpired-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPSessionExpired-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPSessionExpired-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPSessionExpired-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPSessionExpired-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPTemporaryRedirect">class <strong>HTTPTemporaryRedirect</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"temporary&nbsp;redirect"&nbsp;subclass.<br>
+&nbsp;<br>
+Like&nbsp;<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>,&nbsp;except&nbsp;the&nbsp;redirect&nbsp;is&nbsp;only&nbsp;valid&nbsp;for&nbsp;this<br>
+request.&nbsp;Internally&nbsp;identical&nbsp;to&nbsp;<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>,&nbsp;except&nbsp;with&nbsp;a<br>
+different&nbsp;response&nbsp;code.&nbsp;Browsers&nbsp;will&nbsp;check&nbsp;the&nbsp;server&nbsp;for&nbsp;each&nbsp;request<br>
+to&nbsp;see&nbsp;where&nbsp;it's&nbsp;redirected&nbsp;to.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPTemporaryRedirect">HTTPTemporaryRedirect</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPMovedPermanently">HTTPMovedPermanently</a>:<br>
+<dl><dt><a name="HTTPTemporaryRedirect-__init__"><strong>__init__</strong></a>(self, location<font color="#909090">=None</font>, webkitLocation<font color="#909090">=None</font>, *args)</dt><dd><tt>Set&nbsp;destination.<br>
+&nbsp;<br>
+<a href="#HTTPMovedPermanently">HTTPMovedPermanently</a>&nbsp;needs&nbsp;a&nbsp;destination&nbsp;that&nbsp;you&nbsp;it&nbsp;should&nbsp;be<br>
+directed&nbsp;to&nbsp;--&nbsp;you&nbsp;can&nbsp;pass&nbsp;`location`&nbsp;*or*&nbsp;`webkitLocation`&nbsp;--<br>
+if&nbsp;you&nbsp;pass&nbsp;`webkitLocation`&nbsp;it&nbsp;will&nbsp;be&nbsp;relative&nbsp;to&nbsp;the&nbsp;WebKit&nbsp;base<br>
+(the&nbsp;portion&nbsp;through&nbsp;the&nbsp;adapter).</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-description"><strong>description</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-headers"><strong>headers</strong></a>(self)</dt><dd><tt>We&nbsp;include&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-location"><strong>location</strong></a>(self)</dt><dd><tt>The&nbsp;location&nbsp;that&nbsp;we&nbsp;will&nbsp;be&nbsp;redirecting&nbsp;to.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPTemporaryRedirect-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPTemporaryRedirect-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPTemporaryRedirect-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPTemporaryRedirect-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPTemporaryRedirect-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPTemporaryRedirect-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPTemporaryRedirect-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPTemporaryRedirect-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPTemporaryRedirect-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPTemporaryRedirect-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPUnsupportedMediaType">class <strong>HTTPUnsupportedMediaType</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTTPExcecption&nbsp;"unsupported&nbsp;media&nbsp;type"&nbsp;subclass.<br>
+&nbsp;<br>
+The&nbsp;server&nbsp;is&nbsp;refusing&nbsp;to&nbsp;service&nbsp;the&nbsp;request&nbsp;because&nbsp;the&nbsp;entity<br>
+of&nbsp;the&nbsp;request&nbsp;is&nbsp;in&nbsp;a&nbsp;format&nbsp;not&nbsp;supported&nbsp;by&nbsp;the&nbsp;requested&nbsp;resource<br>
+for&nbsp;the&nbsp;requested&nbsp;method.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPUnsupportedMediaType">HTTPUnsupportedMediaType</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><a name="HTTPUnsupportedMediaType-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="HTTPUnsupportedMediaType-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPUnsupportedMediaType-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPUnsupportedMediaType-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPUnsupportedMediaType-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPUnsupportedMediaType-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

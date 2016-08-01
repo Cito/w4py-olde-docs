@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of TaskKit.TaskHandler</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of TaskKit.TaskHandler</h2>
+<p>You can also browse the <a href="../Files/TaskHandler.html">complete source file</a>
+or the <a href="../Docs/TaskKit.TaskHandler.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">TaskHandler</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, scheduler, start, period, task, name)</span>
+
+<span class="line_category">    ## Scheduling ##</span>
+<span class="line_def">    def <span class="name_def">reset</span>(self, start, period, task, reregister)</span>
+<span class="line_def">    def <span class="name_def">runTask</span>(self)</span>
+<span class="line_def">    def <span class="name_def">reschedule</span>(self)</span>
+<span class="line_def">    def <span class="name_def">notifyCompletion</span>(self)</span>
+<span class="line_def">    def <span class="name_def">notifyFailure</span>(self)</span>
+
+<span class="line_category">    ## Attributes ##</span>
+<span class="line_def">    def <span class="name_def">isRunning</span>(self)</span>
+<span class="line_def">    def <span class="name_def">runAgain</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isOnDemand</span>(self)</span>
+<span class="line_def">    def <span class="name_def">runOnCompletion</span>(self)</span>
+<span class="line_def">    def <span class="name_def">unregister</span>(self)</span>
+<span class="line_def">    def <span class="name_def">disable</span>(self)</span>
+<span class="line_def">    def <span class="name_def">enable</span>(self)</span>
+<span class="line_def">    def <span class="name_def">period</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setPeriod</span>(self, period)</span>
+<span class="line_def">    def <span class="name_def">stop</span>(self)</span>
+<span class="line_def">    def <span class="name_def">name</span>(self)</span>
+<span class="line_def">    def <span class="name_def">startTime</span>(self, newTime=None)</span>
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Monitor.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""Fault tolerance system for WebKit.
+
+Contributed to Webware for Python by Jay Love.
+
+This module is intended to provide additional assurance that the
+AppServer continues running at all times. This module will be
+responsible for starting the AppServer, and monitoring its health.
+It does that by periodically sending a status check message to the
+AppServer to ensure that it is responding. If it finds that the
+AppServer does not respond within a specified time, it will start a
+new copy of the AppServer, after killing the previous process.
+
+Use::
+
+  $ python Monitor.py start
+  $ python Monitor.py stop
+
+The default AppServer specified below will be used, or you can list
+the AppServer you would like after ``start``.
+
+You can have the whole process run as a daemon by specifying ``daemon``
+after ``start`` on the command line.
+
+To stop the processes, run ``Monitor.py stop``.
+
+"""</span>
+
+<span class="PY_COMMENT"># Future:</span>
+<span class="PY_COMMENT"># Add ability to limit number of requests served. When some count is reached,</span>
+<span class="PY_COMMENT"># send a message to the server to save its sessions, then exit. Then start</span>
+<span class="PY_COMMENT"># a new AppServer that will pick up those sessions.</span>
+
+<span class="PY_COMMENT"># It should be possible on both Unix and Windows to monitor the AppServer</span>
+<span class="PY_COMMENT"># process in 2 ways:</span>
+<span class="PY_COMMENT"># 1) The method used here, i.e. can it service requests?</span>
+<span class="PY_COMMENT"># 2) is the process still running?</span>
+
+<span class="PY_COMMENT"># Combining these with a timer lends itself to load balancing of some kind.</span>
+
+defaultServer = <span class="PY_STRING">"ThreadedAppServer"</span>
+monitorInterval = 10 <span class="PY_COMMENT"># add to config if this implementation is adopted</span>
+maxStartTime = 120
+
+<span class="PY_STRING">"""Module global:
+
+`defaultServer`:
+    default ``"ThreadedAppServer"``. The type of AppServer
+    to start up (as listed in ``Launch.py``)
+`monitorInterval`:
+    default 10. Seconds between checks.
+`maxStartTime`:
+    default 120. Seconds to wait for AppServer to start
+    before killing it and trying again.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os, sys, time, socket, signal
+<span class="PY_KEYWORD">from</span> marshal <span class="PY_KEYWORD">import</span> dumps
+
+<span class="PY_COMMENT"># Initialize some more global variables</span>
+
+serverName = defaultServer
+srvpid = 0
+addr = None
+running = False
+
+debug = True
+
+statstr = dumps({<span class="PY_STRING">'format'</span>: <span class="PY_STRING">'STATUS'</span>})
+statstr = dumps(len(statstr)) + statstr
+quitstr = dumps({<span class="PY_STRING">'format'</span>: <span class="PY_STRING">'QUIT'</span>})
+quitstr = dumps(len(quitstr)) + quitstr
+
+
+<span class="PY_COMMENT">## Start ##</span>
+
+<span class="PY_KEYWORD">def</span> createServer(setupPath=0):
+    <span class="PY_STRING">"""Unix only, executed after forking for daemonization."""</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Starting Server..."</span>
+
+    <span class="PY_KEYWORD">import</span> WebKit
+    code = <span class="PY_STRING">'from WebKit.%s import main'</span> % serverName
+    <span class="PY_KEYWORD">exec</span> code
+    main([<span class="PY_STRING">'start'</span>])
+
+
+<span class="PY_KEYWORD">def</span> startupCheck():
+    <span class="PY_STRING">"""Make sure the AppServer starts up correctly."""</span>
+    <span class="PY_KEYWORD">if</span> os.name == <span class="PY_STRING">'posix'</span>:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Waiting for start..."</span>
+        time.sleep(monitorInterval / 2) <span class="PY_COMMENT"># give the server a chance to start</span>
+        count = 0
+        <span class="PY_KEYWORD">while</span> 1:
+            <span class="PY_KEYWORD">if</span> checkServer(False):
+                <span class="PY_KEYWORD">break</span>
+            count += monitorInterval
+            <span class="PY_KEYWORD">if</span> count &gt; maxStartTime:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Couldn't start AppServer."</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Killing AppServer..."</span>
+                os.kill(srvpid, signal.SIGKILL)
+                sys.exit(1)
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Waiting for start..."</span>
+            time.sleep(monitorInterval)
+
+
+<span class="PY_KEYWORD">def</span> startServer(killcurrent=True):
+    <span class="PY_STRING">"""Start the AppServer.
+
+    If `killcurrent` is true or not provided, kill the current AppServer.
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> srvpid
+    <span class="PY_KEYWORD">if</span> os.name == <span class="PY_STRING">'posix'</span>:
+        <span class="PY_KEYWORD">if</span> killcurrent:
+            <span class="PY_KEYWORD">try</span>:
+                os.kill(srvpid, signal.SIGTERM)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">try</span>:
+                os.waitpid(srvpid, 0)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+        srvpid = os.fork()
+        <span class="PY_KEYWORD">if</span> srvpid == 0:
+            createServer(<span class="PY_KEYWORD">not</span> killcurrent)
+            sys.exit()
+
+
+<span class="PY_KEYWORD">def</span> checkServer(restart=True):
+    <span class="PY_STRING">"""Send a check request to the AppServer.
+
+    If restart is 1, then attempt to restart the server
+    if we can't connect to it.
+
+    This function could also be used to see how busy an AppServer
+    is by measuring the delay in getting a response when using the
+    standard port.
+
+    """</span>
+    <span class="PY_KEYWORD">try</span>:
+        sts = time.time()
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(addr)
+        s.send(statstr)
+        s.shutdown(1)
+        resp = s.recv(9) <span class="PY_COMMENT"># up to 1 billion requests!</span>
+        monwait = time.time() - sts
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Processed %s Requests."</span> % resp
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Delay %s."</span> % monwait
+        <span class="PY_KEYWORD">return</span> True
+    <span class="PY_KEYWORD">except</span> Exception:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"No Response from AppServer."</span>
+        <span class="PY_KEYWORD">if</span> running <span class="PY_KEYWORD">and</span> restart:
+            startServer()
+            startupCheck()
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> False
+
+
+<span class="PY_KEYWORD">def</span> main(args):
+    <span class="PY_STRING">"""The main loop.
+
+    Starts the server with `startServer(False)`,
+    checks it's started up (`startupCheck`), and does a
+    loop checking the server (`checkServer`).
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> running
+    running = True
+
+    f = open(<span class="PY_STRING">'monitor.pid'</span>, <span class="PY_STRING">'w'</span>)
+    <span class="PY_KEYWORD">if</span> os.name == <span class="PY_STRING">'posix'</span>:
+        f.write(str(os.getpid()))
+    f.flush()
+    f.close()
+    startServer(False)
+    <span class="PY_KEYWORD">try</span>:
+        startupCheck()
+
+    <span class="PY_KEYWORD">except</span> Exception, e:
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Startup check exception:"</span>, e
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting monitor..."</span>
+        <span class="PY_KEYWORD">try</span>:
+            os.kill(srvpid, signal.SIGTERM)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+        sys.exit()
+
+    <span class="PY_KEYWORD">while</span> running:
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Checking server..."</span>
+            checkServer()
+            time.sleep(monitorInterval)
+        <span class="PY_KEYWORD">except</span> Exception, e:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exception:"</span>, e
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> running:
+                <span class="PY_KEYWORD">return</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting Monitor..."</span>
+            <span class="PY_KEYWORD">try</span>:
+                os.kill(srvpid, signal.SIGTERM)
+            <span class="PY_KEYWORD">except</span> Exception:
+                sys.exit(0)
+            <span class="PY_KEYWORD">try</span>:
+                os.waitpid(srvpid, 0) <span class="PY_COMMENT"># prevent zombies</span>
+            <span class="PY_KEYWORD">except</span> Exception:
+                sys.exit(0)
+
+
+<span class="PY_KEYWORD">def</span> shutDown(signum, frame):
+    <span class="PY_STRING">"""Shutdown handler.
+
+    For when Ctrl-C has been hit, or this process is being cleanly killed.
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> running
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Monitor Shutdown Called."</span>
+    sys.stdout.flush()
+    running = False
+    <span class="PY_KEYWORD">try</span>:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(addr)
+        s.send(quitstr)
+        s.shutdown(1)
+        resp = s.recv(10)
+        s.close()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"AppServer response to shutdown request:"</span>, resp
+    <span class="PY_KEYWORD">except</span> Exception, e:
+        <span class="PY_KEYWORD">print</span> e
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"No Response to shutdown request, performing hard kill."</span>
+        os.kill(srvpid, signal.SIGINT)
+        os.waitpid(srvpid, 0)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    <span class="PY_KEYWORD">return</span> False
+
+signal.signal(signal.SIGINT, shutDown)
+signal.signal(signal.SIGTERM, shutDown)
+
+
+<span class="PY_COMMENT">## Stop ##</span>
+
+<span class="PY_KEYWORD">def</span> stop():
+    <span class="PY_STRING">"""Stop the monitor.
+
+    This kills the other monitor process that has been opened
+    (from the PID file ``monitor.pid``).
+
+    """</span>
+    pid = int(open(<span class="PY_STRING">"monitor.pid"</span>, <span class="PY_STRING">"r"</span>).read())
+    <span class="PY_COMMENT"># this goes to the other running instance of this module</span>
+    os.kill(pid, signal.SIGINT)
+
+
+<span class="PY_COMMENT">## Command line interface ##</span>
+
+<span class="PY_KEYWORD">def</span> usage():
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"""
+This module serves as a watcher for the AppServer process.
+The required command line argument is one of:
+
+  start: Starts the monitor and default appserver.
+
+  stop: Stops the currently running Monitor process and the AppServer
+        if is running. This is the only way to stop the process other
+        than hunting down the individual process ID's and killing them.
+
+Optional arguments:
+
+"AppServer": The AppServer class to use (currently only ThreadedAppServer)
+daemon:      If "daemon" is specified, the Monitor will run
+             as a background process.
+
+"""</span>
+
+arguments = [<span class="PY_STRING">"start"</span>, <span class="PY_STRING">"stop"</span>]
+servernames = [<span class="PY_STRING">"ThreadedAppServer"</span>]
+optionalargs = [<span class="PY_STRING">"daemon"</span>]
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+
+    <span class="PY_KEYWORD">if</span> os.name != <span class="PY_STRING">'posix'</span>:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"This service can only be run on Posix machines (UNIX)."</span>
+        sys.exit()
+
+    <span class="PY_KEYWORD">if</span> len(sys.argv) == 1:
+        usage()
+        sys.exit()
+
+    args = sys.argv[1:]
+    <span class="PY_KEYWORD">if</span> args[0] <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> arguments:
+        usage()
+        sys.exit()
+
+    <span class="PY_KEYWORD">if</span> True: <span class="PY_COMMENT"># setup path:</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">''</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> sys.path:
+            sys.path = [<span class="PY_STRING">''</span>] + sys.path
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">import</span> WebwarePathLocation
+            wwdir = os.path.abspath(os.path.join(os.path.dirname(
+                WebwarePathLocation.__file__), <span class="PY_STRING">'..'</span>))
+        <span class="PY_KEYWORD">except</span> Exception, e:
+            <span class="PY_KEYWORD">print</span> e
+            usage()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> wwdir <span class="PY_KEYWORD">in</span> sys.path:
+            sys.path.insert(0, wwdir)
+        sys.path.remove(<span class="PY_STRING">''</span>)
+        <span class="PY_KEYWORD">try</span>:
+            sys.path.remove(<span class="PY_STRING">'.'</span>)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+    cfgfile = open(os.path.join(wwdir, <span class="PY_STRING">'WebKit'</span>,
+        <span class="PY_STRING">'Configs/AppServer.config'</span>), <span class="PY_STRING">'rU'</span>).read()
+    cfg = dict(WebwarePath=wwdir)
+    <span class="PY_KEYWORD">if</span> cfgfile.lstrip().startswith(<span class="PY_STRING">'{'</span>):
+        cfg = eval(cfgfile, cfg)
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">exec</span> cfgfile <span class="PY_KEYWORD">in</span> cfg
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> cfg.get(<span class="PY_STRING">'EnableMonitor'</span>):
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Monitoring has not been enabled in AppServer.config!"</span>
+        sys.exit()
+    host = cfg.get(<span class="PY_STRING">'Host'</span>, <span class="PY_STRING">'127.0.0.1'</span>)
+    port = cfg.get(<span class="PY_STRING">'MonitorPort'</span>, 8085)
+    addr = (host, port)
+
+    <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'stop'</span> <span class="PY_KEYWORD">in</span> args:
+        stop()
+        sys.exit()
+
+    <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> servernames:
+        <span class="PY_KEYWORD">if</span> i <span class="PY_KEYWORD">in</span> args:
+            serverName = i
+
+    <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'daemon'</span> <span class="PY_KEYWORD">in</span> args: <span class="PY_COMMENT"># fork and become a daemon</span>
+        daemon = os.fork()
+        <span class="PY_KEYWORD">if</span> daemon:
+            sys.exit()
+
+    main(args)
+</pre>
+<!--footer-->
+
+</body>
+</html>

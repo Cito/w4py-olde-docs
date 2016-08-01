@@ -1,0 +1,762 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/HTMLTag.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""HTMLTag.py
+
+HTMLTag defines a class of the same name that represents HTML content.
+An additional HTMLReader class kicks off the process of reading an HTML
+file into a set of tags:
+
+    from WebUtils.HTMLTag import HTMLReader
+    reader = HTMLReader()
+    tag = reader.readFileNamed('foo.html')
+    tag.pprint()
+
+Tags have attributes and children, which makes them hierarchical.
+See HTMLTag class docs for more info.
+
+Note that you imported HTMLReader instead of HTMLTag.
+You only need the latter if you plan on creating tags directly.
+
+You can discard the reader immediately if you like:
+
+    tag = HTMLReader().readFileNamed('foo.html')
+
+The point of reading HTML into tag objects is so that you have a concrete,
+Pythonic data structure to work with. The original motiviation for such a
+beast was in building automated regression test suites that wanted granular,
+structured access to the HTML output by the web application.
+
+See the doc string for HTMLTag for examples of what you can do with tags.
+
+
+CAVEATS
+
+  * HTMLReader needs special attention with regards to tags like &lt;p&gt; and &lt;li&gt;
+    which sometimes are closed (&lt;/p&gt; &lt;/li&gt;) and sometimes not.
+    See its doc string for full information.
+
+  * HTMLReader is picky about the correctness of the HTML you feed it.
+    Again see the class docs for full info.
+
+
+TO DO
+
+  * See the TO DO sections for each class.
+
+
+CREDITS
+
+  * I didn't grok how to write an SGMLParser subclass until I read the very
+    small example by Sean McGrath at http://www.digitome.com/html2pyx.py
+    (which I believe is broken for empty tags).
+
+  * Determined what HTML tags are empty by scanning O'Reilly's HTML Pocket
+    Reference.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">from</span> sgmllib <span class="PY_KEYWORD">import</span> SGMLParser
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault, AbstractError
+
+<span class="PY_COMMENT"># If enabled, overrides some key SGMLParser methods for more speed.</span>
+<span class="PY_COMMENT"># Changing this has no effect once the module is imported (unless you reload()).</span>
+runFast = True
+
+
+<span class="PY_KEYWORD">class</span> HTMLTagError(Exception):
+    <span class="PY_STRING">"""General HTML tag error"""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, msg, **values):
+        Exception.__init__(self, msg)
+        self.values = values.copy()
+
+<span class="PY_KEYWORD">class</span> HTMLTagAttrLookupError(HTMLTagError, LookupError):
+    <span class="PY_STRING">"""HTML tag attribute lookup error"""</span>
+
+<span class="PY_KEYWORD">class</span> HTMLTagUnbalancedError(HTMLTagError):
+    <span class="PY_STRING">"""Unbalanced HTML tag error"""</span>
+
+<span class="PY_KEYWORD">class</span> HTMLNotAllowedError(HTMLTagError):
+    <span class="PY_STRING">"""HTML tag not allowed here error"""</span>
+
+<span class="PY_KEYWORD">class</span> HTMLTagProcessingInstructionError(HTMLTagError):
+    <span class="PY_STRING">"""HTML tag processing instruction error"""</span>
+
+<span class="PY_KEYWORD">class</span> HTMLTagIncompleteError(HTMLTagError):
+    <span class="PY_STRING">"""HTML tag incomplete error"""</span>
+
+
+DefaultEmptyTags = (<span class="PY_STRING">'area basefont base bgsound br col colgroup frame hr'</span>
+    <span class="PY_STRING">' img input isindex link meta spacer wbr'</span>).split()
+
+
+<span class="PY_KEYWORD">class</span> HTMLTag(object):
+    <span class="PY_STRING">"""Container class for representing HTML as tag objects.
+
+    Tags essentially have 4 major attributes:
+      * name
+      * attributes
+      * children
+      * subtags
+
+    Name is simple:
+        print tag.name()
+
+    Attributes are dictionary-like in nature:
+        print tag.attr('color') # throws an exception if no color
+        print tag.attr('bgcolor', None) # returns None if no bgcolor
+        print tag.attrs()
+
+    Children are all the leaf parts of a tag, consisting of other tags
+    and strings of character data.
+        print tag.numChildren()
+        print tag.childAt(0)
+        print tag.children()
+
+    Subtags is a convenient list of only the tags in the children:
+        print tag.numSubtags()
+        print tag.subtagAt(0)
+        print tag.subtags()
+
+    You can search a tag and all the tags it contains for a tag with
+    a particular attribute matching a particular value:
+        print tag.tagWithMatchingAttr('width', '100%')
+
+    An HTMLTagAttrLookupError is raised if no matching tag is found.
+    You can avoid this by providing a default value:
+        print tag.tagWithMatchingAttr('width', '100%', None)
+
+    Looking for specific 'id' attributes is common in regression testing
+    (it allows you to zero in on logical portions of a page),
+    so a convenience method is provided:
+        tag = htmlTag.tagWithId('accountTable')
+
+
+    TO DO
+
+      * A walker() method for traversing the tag tree.
+      * Search for a subtag with a given name, recursive or not.
+      * Attribute traversal with dotted notation?
+      * Do we need to convert tag names and attribute names to lower case,
+        or does SGMLParser already do that?
+      * Should attribute values be strip()ed?
+        Probably not. SGMLParser probably strips them already unless they
+        really do have spaces as in "  quoted  ". But that's speculation.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init and reading ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, name, lineNumber=None):
+        <span class="PY_KEYWORD">assert</span> <span class="PY_STRING">'\n'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> name
+        self._name = name
+        self._attrs = {}
+        self._children = []
+        self._subtags = []
+        self._lineNumber = lineNumber
+        <span class="PY_COMMENT"># Used by closedBy() and __repr__, helps with HTMLReader error messages:</span>
+        self._isClosed = False
+
+    <span class="PY_KEYWORD">def</span> readAttr(self, name, value):
+        <span class="PY_STRING">"""Set an attribute of the tag with the given name and value.
+
+        An assertion fails if an attribute is set twice.
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> name <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._attrs, <span class="PY_STRING">'name = %r, attrs = %r'</span> % (name, attrs)
+        self._attrs[name] = value
+
+    <span class="PY_KEYWORD">def</span> addChild(self, child):
+        <span class="PY_STRING">"""Add a child to the receiver.
+
+        The child will be another tag or a string (CDATA).
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> isinstance(child, (basestring, HTMLTag)), <span class="PY_STRING">'Invalid child: %r'</span> % child
+        self._children.append(child)
+        <span class="PY_KEYWORD">if</span> isinstance(child, HTMLTag):
+            self._subtags.append(child)
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> attr(self, name, default=NoDefault):
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._attrs[name]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._attrs.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> hasAttr(self, name):
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._attrs
+
+    <span class="PY_KEYWORD">def</span> attrs(self):
+        <span class="PY_KEYWORD">return</span> self._attrs
+
+    <span class="PY_KEYWORD">def</span> numAttrs(self):
+        <span class="PY_KEYWORD">return</span> len(self._attrs)
+
+    <span class="PY_KEYWORD">def</span> childAt(self, index):
+        <span class="PY_KEYWORD">return</span> self._children[index]
+
+    <span class="PY_KEYWORD">def</span> numChildren(self):
+        <span class="PY_KEYWORD">return</span> len(self._children)
+
+    <span class="PY_KEYWORD">def</span> children(self):
+        <span class="PY_KEYWORD">return</span> self._children
+
+    <span class="PY_KEYWORD">def</span> subtagAt(self, index):
+        <span class="PY_KEYWORD">return</span> self._subtags[index]
+
+    <span class="PY_KEYWORD">def</span> numSubtags(self):
+        <span class="PY_KEYWORD">return</span> len(self._subtags)
+
+    <span class="PY_KEYWORD">def</span> subtags(self):
+        <span class="PY_KEYWORD">return</span> self._subtags
+
+
+    <span class="PY_COMMENT">## Printing ##</span>
+
+    <span class="PY_KEYWORD">def</span> pprint(self, out=None, indent=0):
+        <span class="PY_KEYWORD">if</span> out <span class="PY_KEYWORD">is</span> None:
+            out = sys.stdout
+        wr = out.write
+        spacer = <span class="PY_STRING">' '</span>*4*indent
+        wr(<span class="PY_STRING">'%s&lt;%s&gt;\n'</span> % (spacer, self._name))
+        <span class="PY_KEYWORD">for</span> key, value <span class="PY_KEYWORD">in</span> self._attrs.items():
+            wr(<span class="PY_STRING">'%s  %s = %s\n'</span> % (spacer, key.ljust(12), value))
+        indent += 1
+        <span class="PY_KEYWORD">for</span> child <span class="PY_KEYWORD">in</span> self._children:
+            <span class="PY_KEYWORD">if</span> isinstance(child, HTMLTag):
+                child.pprint(out, indent)
+            <span class="PY_KEYWORD">else</span>:
+                wr(<span class="PY_STRING">'%s    %s\n'</span> % (spacer, child))
+        wr(<span class="PY_STRING">'%s&lt;/%s&gt;\n'</span> % (spacer, self._name))
+        <span class="PY_COMMENT"># Note: Printing a closing tag for an empty tag (such as &lt;br&gt;)</span>
+        <span class="PY_COMMENT"># doesn't make much sense, but then it's a good reminder that</span>
+        <span class="PY_COMMENT"># certain tags like &lt;p&gt; are closed immediately.</span>
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        r = [<span class="PY_STRING">'&lt;'</span>, self._name]
+        <span class="PY_KEYWORD">if</span> self._attrs:
+            <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> sorted(self._attrs):
+                r.extend([<span class="PY_STRING">' '</span>, key, <span class="PY_STRING">'="'</span>, self._attrs[key], <span class="PY_STRING">'"'</span>])
+        r.append(<span class="PY_STRING">'&gt;'</span>)
+        <span class="PY_KEYWORD">if</span> self._lineNumber <span class="PY_KEYWORD">or</span> self._isClosed:
+            r.append(<span class="PY_STRING">' ('</span>)
+            <span class="PY_KEYWORD">if</span> self._lineNumber:
+                r.append(<span class="PY_STRING">'%s'</span> % self._lineNumber)
+            <span class="PY_KEYWORD">if</span> self._isClosed:
+                <span class="PY_KEYWORD">if</span> self._lineNumber:
+                    r.append(<span class="PY_STRING">'; '</span>)
+                r.append(<span class="PY_STRING">'closed by %s at %s'</span> % (self._closedBy, self._closedAt))
+            r.append(<span class="PY_STRING">')'</span>)
+        r = <span class="PY_STRING">''</span>.join(r)
+        <span class="PY_KEYWORD">return</span> r
+
+
+    <span class="PY_COMMENT">## Searching ##</span>
+
+    <span class="PY_KEYWORD">def</span> tagWithMatchingAttr(self, name, value, default=NoDefault):
+        <span class="PY_STRING">"""Search for tag with matching attributes.
+
+        Performs a depth-first search for a tag with an attribute that matches
+        the given value. If the tag cannot be found, a KeyError will be raised
+        *unless* a default value was specified, which is then returned.
+
+            tag = tag.tagWithMatchingAttr('bgcolor', '#FFFF', None)
+
+        """</span>
+        tag = self._tagWithMatchingAttr(name, value)
+        <span class="PY_KEYWORD">if</span> tag <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+                <span class="PY_KEYWORD">raise</span> HTMLTagAttrLookupError(<span class="PY_STRING">'name = %r, value = %r'</span> % (name, value), name=name, value=value)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> default
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> tag
+
+    <span class="PY_KEYWORD">def</span> tagWithId(self, id, default=NoDefault):
+        <span class="PY_STRING">"""Search for tag with a given id.
+
+        Finds and returns the tag with the given id. As in:
+
+            &lt;td id=foo&gt; bar &lt;/td&gt;
+
+        This is just a cover for:
+
+            tagWithMatchingAttr('id', id, default)
+
+        But searching for id's is so popular (at least in regression testing
+        web sites) that this convenience method is provided.
+        Why is it so popular? Because by attaching ids to logical portions
+        of your HTML, your regression test suite can quickly zero in on them
+        for examination.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.tagWithMatchingAttr(<span class="PY_STRING">'id'</span>, id, default)
+
+
+    <span class="PY_COMMENT">## Parsing (HTMLReader) ##</span>
+
+    <span class="PY_KEYWORD">def</span> closedBy(self, name, lineNumber):
+
+        self._isClosed = True
+        self._closedBy = name
+        self._closedAt = lineNumber
+
+
+    <span class="PY_COMMENT">## Self utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> _tagWithMatchingAttr(self, name, value):
+        <span class="PY_STRING">"""Search for tag with matching attributes.
+
+        Performs a depth-first search for a tag with an attribute that matches
+        the given value. Returns None if the tag cannot be found. The method
+        tagWithMatchingAttr() (e.g., sans underscore) is more commonly used.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._attrs.get(name) == value:
+            <span class="PY_KEYWORD">return</span> self
+        <span class="PY_KEYWORD">for</span> tag <span class="PY_KEYWORD">in</span> self._subtags:
+            matchingTag = tag._tagWithMatchingAttr(name, value)
+            <span class="PY_KEYWORD">if</span> matchingTag:
+                <span class="PY_KEYWORD">return</span> matchingTag
+        <span class="PY_KEYWORD">return</span> None
+
+
+<span class="PY_KEYWORD">class</span> HTMLReader(SGMLParser):
+    <span class="PY_STRING">"""Reader class for representing HTML as tag objects.
+
+    NOTES
+
+      * Special attention is required regarding tags like &lt;p&gt; and &lt;li&gt; which
+        sometimes are closed and sometimes not. HTMLReader can deal with both
+        situations (closed and not) provided that:
+          * the file doesn't change conventions for a given tag
+          * the reader knows ahead of time what to expect
+
+    Be default, HTMLReader assumes that &lt;p&gt; and &lt;li&gt; will be closed with &lt;/p&gt;
+    and &lt;/li&gt; as the official HTML spec, as well as upcomer XHTML, encourage
+    or require, respectively.
+
+    But if your files don't close certain tags that are supposed to be required,
+    you can do this:
+        HTMLReader(extraEmptyTags=['p', 'li'])
+    or:
+        reader.extendEmptyTags(['p', 'li'])
+    or just set them entirely:
+        HTMLReader(emptyTags=['br', 'hr', 'p'])
+        reader.setEmptyTags(['br', 'hr', 'p'])
+
+    Although there are quite a few. Consider the DefaultEmptyTags global
+    list (which is used to initialize the reader's tags) which contains
+    about 16 tag names.
+
+    If an HTML file doesn't conform to the reader's expectation, you will get
+    an exception (see more below for details).
+
+    If your HTML file doesn't contain root &lt;html&gt; ... &lt;/html&gt; tags wrapping
+    everything, a fake root tag will be constructed for you, unless you pass
+    in fakeRootTagIfNeeded=False.
+
+    Besides fixing your reader manually, you could conceivably loop through
+    the permutations of the various empty tags to see if one of them resulted
+    in a correct read.
+
+    Or you could fix the HTML.
+
+      * The reader ignores extra preceding and trailing whitespace by stripping
+        it from strings. I suppose this is a little harsher than reducing spans
+        of preceding and trailing whitespace down to one space, which is what
+        really happens in an HTML browser.
+
+      * The reader will not read past the closing &lt;/html&gt; tag.
+
+      * The reader is picky about the correctness of the HTML you feed it.
+        If tags are not closed, overlap (instead of nest) or left unfinished,
+        an exception is thrown. These include HTMLTagUnbalancedError,
+        HTMLTagIncompleteError and HTMLNotAllowedError which all inherit
+        HTMLTagError.
+
+        This pickiness can be quite useful for the validation of the HTML of
+        your own applications.
+
+        I believe it is possible that others kinds of HTML errors could raise
+        exceptions from sgmlib.SGMLParser (from which HTMLReader inherits),
+        although in practice, I have not seen them.
+
+
+    TO DO
+
+      * Could the "empty" tag issue be dealt with more sophistication
+        by automatically closing &lt;p&gt; and &lt;li&gt; (e.g., popping them off
+        the _tagStack) when other major tags were encountered such as
+        &lt;p&gt;, &lt;li&gt;, &lt;table&gt;, &lt;center&gt;, etc.?
+
+      * Readers don't handle processing instructions: &lt;? foobar ?&gt;.
+
+      * The tagContainmentConfig class var can certainly be expanded
+        for even better validation.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, emptyTags=None, extraEmptyTags=None,
+            fakeRootTagIfNeeded=True):
+        SGMLParser.__init__(self)
+        self._filename = None
+        self._rootTag = None
+        self._fakeRootTagIfNeeded = fakeRootTagIfNeeded
+        self._usedFakeRootTag = False
+        self._tagStack = []
+        self._finished = False
+
+        <span class="PY_COMMENT"># Options</span>
+        self._printsStack = False
+        self._ignoreWS = True
+        self._endingTag = <span class="PY_STRING">'html'</span>
+
+        <span class="PY_COMMENT"># Handle optional args</span>
+        <span class="PY_KEYWORD">if</span> emptyTags <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self.setEmptyTags(emptyTags)
+        <span class="PY_KEYWORD">else</span>:
+            self.setEmptyTags(DefaultEmptyTags)
+        <span class="PY_KEYWORD">if</span> extraEmptyTags <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self.extendEmptyTags(extraEmptyTags)
+
+
+    <span class="PY_COMMENT">## Reading ##</span>
+
+    <span class="PY_KEYWORD">def</span> readFileNamed(self, filename, retainRootTag=True):
+        <span class="PY_STRING">"""Read the given file.
+
+        Relies on readString(). See that method for more information.
+
+        """</span>
+        self._filename = filename
+        contents = open(filename).read()
+        <span class="PY_KEYWORD">return</span> self.readString(contents, retainRootTag)
+
+    <span class="PY_KEYWORD">def</span> readString(self, string, retainRootTag=True):
+        <span class="PY_STRING">"""Read the given string, store the results and return the root tag.
+
+        You could continue to use HTMLReader object or disregard it and simply
+        use the root tag.
+
+        """</span>
+        self._rootTag = None
+        self._tagStack = []
+        self._finished = False
+        self.reset()
+        self._lineNumber = 1
+        self.computeTagContainmentConfig()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> string.splitlines():
+                self.feed(line + <span class="PY_STRING">'\n'</span>)
+                self._lineNumber += 1
+            self.close()
+        <span class="PY_KEYWORD">finally</span>:
+            self.reset()
+        <span class="PY_KEYWORD">if</span> retainRootTag:
+            <span class="PY_KEYWORD">return</span> self._rootTag
+        <span class="PY_KEYWORD">else</span>:
+            tag = self._rootTag
+            self._rootTag = None
+            <span class="PY_KEYWORD">return</span> tag
+
+
+    <span class="PY_COMMENT">## Printing ##</span>
+
+    <span class="PY_KEYWORD">def</span> pprint(self, out=None):
+        <span class="PY_STRING">"""Pretty prints the tag, its attributes and all its children.
+
+        Indentation is used for subtags.
+        Print 'Empty.' if there is no root tag.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._rootTag:
+            self._rootTag.pprint(out)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> out <span class="PY_KEYWORD">is</span> None:
+                out = sys.stdout
+            out.write(<span class="PY_STRING">'Empty.'</span>)
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> rootTag(self):
+        <span class="PY_STRING">"""Return the root tag.
+
+        May return None if no HTML has been read yet, or if the last
+        invocation of one of the read methods was passed retainRootTag=False.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._rootTag
+
+    <span class="PY_KEYWORD">def</span> filename(self):
+        <span class="PY_STRING">"""Return the filename that was read, or None if no file was processed."""</span>
+        <span class="PY_KEYWORD">return</span> self._filename
+
+    <span class="PY_KEYWORD">def</span> emptyTags(self):
+        <span class="PY_STRING">"""Return a list of empty tags.
+
+        See also: class docs and setEmptyTags().
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._emptyTagList
+
+    <span class="PY_KEYWORD">def</span> setEmptyTags(self, tagList):
+        <span class="PY_STRING">"""Set the HTML tags that are considered empty such as &lt;br&gt; and &lt;hr&gt;.
+
+        The default is found in the global, DefaultEmptyTags, and is fairly
+        thorough, but does not include &lt;p&gt;, &lt;li&gt; and some other tags that
+        HTML authors often use as empty tags.
+
+        """</span>
+        self._emptyTagList = list(tagList)
+        self._updateEmptyTagSet()
+
+    <span class="PY_KEYWORD">def</span> extendEmptyTags(self, tagList):
+        <span class="PY_STRING">"""Extend the current list of empty tags with the given list."""</span>
+        self._emptyTagList.extend(tagList)
+        self._updateEmptyTagSet()
+
+
+    <span class="PY_COMMENT">## Debugging ##</span>
+
+    <span class="PY_KEYWORD">def</span> printsStack(self):
+        <span class="PY_KEYWORD">return</span> self._printsStack
+
+    <span class="PY_KEYWORD">def</span> setPrintsStack(self, flag):
+        <span class="PY_STRING">"""Set the boolean value of the "prints stack" option.
+
+        This is a debugging option which will print the internal tag stack
+        during HTML processing. The default value is False.
+
+        """</span>
+        self._printsStack = flag
+
+
+    <span class="PY_COMMENT">## Command line ##</span>
+
+    <span class="PY_KEYWORD">def</span> main(self, args=None):
+        <span class="PY_STRING">"""The command line equivalent of readFileNamed().
+
+        Invoked when HTMLTag is run as a program.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">is</span> None:
+            args = sys.argv
+        <span class="PY_KEYWORD">if</span> len(args) &lt; 2:
+            self.usage()
+        <span class="PY_KEYWORD">return</span> self.readFileNamed(args[1])
+
+    <span class="PY_KEYWORD">def</span> usage(self):
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'HTMLTag: usage:  HTMLTag &lt;html file&gt;'</span>
+        sys.exit(1)
+
+
+    <span class="PY_COMMENT">## SGMLParser handlers ##</span>
+
+    <span class="PY_KEYWORD">def</span> handle_data(self, data):
+        <span class="PY_KEYWORD">if</span> self._finished:
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">assert</span> isinstance(data, basestring)
+        <span class="PY_KEYWORD">if</span> self._ignoreWS:
+            data = data.strip()
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> data:
+                <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">if</span> self._tagStack:
+            self._tagStack[-1].addChild(data)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&lt;&gt; data=%r'</span> % repr(data)
+
+
+    <span class="PY_KEYWORD">def</span> handle_pi(self, data):
+        <span class="PY_KEYWORD">raise</span> HTMLTagProcessingInstructionError(
+            <span class="PY_STRING">'Was not expecting a processing instruction: %r'</span> % data)
+
+    <span class="PY_KEYWORD">def</span> unknown_starttag(self, name, attrs):
+        <span class="PY_KEYWORD">if</span> self._finished:
+            <span class="PY_KEYWORD">return</span>
+        tag = HTMLTag(name, lineNumber=self._lineNumber)
+        <span class="PY_KEYWORD">for</span> attrName, value <span class="PY_KEYWORD">in</span> attrs:
+            tag.readAttr(attrName, value)
+        <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> self._emptyTagSet:
+            <span class="PY_COMMENT"># We'll never have any children. Boo hoo.</span>
+            <span class="PY_KEYWORD">assert</span> self._rootTag, <span class="PY_STRING">'Cannot start HTML with an empty tag: %r'</span> % tag
+            self._tagStack[-1].addChild(tag)
+            empty = True
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># We could have children, so we go on the stack</span>
+            <span class="PY_COMMENT"># Also, if this is the first tag, then make it the root.</span>
+            <span class="PY_COMMENT"># If it's the first tag and it isn't an &lt;html&gt; tag,</span>
+            <span class="PY_COMMENT"># create a fake "container" html tag.</span>
+            <span class="PY_KEYWORD">if</span> self._tagStack:
+                lastTag = self._tagStack[-1]
+                <span class="PY_COMMENT"># is this legal?</span>
+                tagConfig = self._tagContainmentConfig.get(lastTag.name())
+                <span class="PY_KEYWORD">if</span> tagConfig:
+                    tagConfig.encounteredTag(name, self._lineNumber)
+                <span class="PY_COMMENT"># tell last tag about his new child</span>
+                lastTag.addChild(tag)
+            <span class="PY_KEYWORD">elif</span> name != <span class="PY_STRING">'html'</span> <span class="PY_KEYWORD">and</span> self._fakeRootTagIfNeeded:
+                self._rootTag = HTMLTag(<span class="PY_STRING">'html'</span>)
+                self._tagStack.append(self._rootTag)
+                self._tagStack[-1].addChild(tag)
+                self._usedFakeRootTag = True
+            <span class="PY_KEYWORD">else</span>:
+                self._rootTag = tag
+            self._tagStack.append(tag)
+            empty = False
+        <span class="PY_KEYWORD">if</span> self._printsStack:
+            prefix = (<span class="PY_STRING">'START'</span>, <span class="PY_STRING">'-----'</span>)[empty]
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%s %s: %r'</span> % (prefix, name.ljust(6), self._tagStack)
+
+    <span class="PY_KEYWORD">def</span> unknown_endtag(self, name):
+        <span class="PY_KEYWORD">if</span> self._finished:
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">if</span> name == self._endingTag:
+            self._finished = True
+        openingTag = self._tagStack.pop()
+        <span class="PY_KEYWORD">if</span> self._printsStack:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'END   %s: %r'</span> % (name.ljust(6), self._tagStack)
+        <span class="PY_KEYWORD">if</span> openingTag.name() != name:
+            <span class="PY_KEYWORD">raise</span> HTMLTagUnbalancedError(
+                <span class="PY_STRING">'line %i: opening is %r, but closing is &lt;%s&gt;.'</span>
+                % (self._lineNumber, openingTag, name),
+                line=self._lineNumber, opening=openingTag.name(),
+                closing=name, tagStack=self._tagStack)
+        <span class="PY_KEYWORD">else</span>:
+            openingTag.closedBy(name, self._lineNumber)
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_KEYWORD">if</span> len(self._tagStack) &gt; 0 <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> (
+                len(self._tagStack) == 1 <span class="PY_KEYWORD">and</span> self._usedFakeRootTag):
+            <span class="PY_KEYWORD">raise</span> HTMLTagIncompleteError(
+                <span class="PY_STRING">'line %i: tagStack = %r'</span> % (self._lineNumber, self._tagStack),
+                line=self._lineNumber, tagStack=repr(self._tagStack))
+        SGMLParser.close(self)
+
+
+    <span class="PY_COMMENT">## Self utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> _updateEmptyTagSet(self):
+        <span class="PY_STRING">"""Create a set out of the empty tag list for quick look up."""</span>
+        self._emptyTagSet = set(self._emptyTagList)
+
+    <span class="PY_COMMENT"># The following dict defines for various tags either:</span>
+    <span class="PY_COMMENT">#    + the complete set of tags that can be contained within</span>
+    <span class="PY_COMMENT">#    - a set of tags that cannot be contained within</span>
+    <span class="PY_COMMENT"># This information helps HTMLReader detect some types of errors</span>
+    <span class="PY_COMMENT"># earlier and other types of errors, it would never detect.</span>
+    tagContainmentConfig = {
+        <span class="PY_STRING">'html'</span>:   <span class="PY_STRING">'canOnlyHave head body'</span>,
+        <span class="PY_STRING">'head'</span>:   <span class="PY_STRING">'cannotHave  html head body'</span>,
+        <span class="PY_STRING">'body'</span>:   <span class="PY_STRING">'cannotHave  html head body'</span>,
+        <span class="PY_STRING">'table'</span>:  <span class="PY_STRING">'canOnlyHave tr thead tbody tfoot a'</span>,
+        <span class="PY_COMMENT"># a because in IE you can wrap a row in &lt;a&gt; to make the entire row clickable</span>
+        <span class="PY_STRING">'tr'</span>:     <span class="PY_STRING">'canOnlyHave th td'</span>,
+        <span class="PY_STRING">'td'</span>:     <span class="PY_STRING">'cannotHave  td tr'</span>,
+        <span class="PY_STRING">'select'</span>: <span class="PY_STRING">'canOnlyHave option'</span>,
+    }
+
+    <span class="PY_KEYWORD">def</span> computeTagContainmentConfig(self):
+        config = {}
+        <span class="PY_KEYWORD">for</span> key, value <span class="PY_KEYWORD">in</span> self.tagContainmentConfig.items():
+            <span class="PY_KEYWORD">if</span> isinstance(value, basestring):
+                value = value.split()
+                configClass = configClassForName.get(value.pop(0))
+                <span class="PY_KEYWORD">if</span> configClass <span class="PY_KEYWORD">is</span> None:
+                    <span class="PY_KEYWORD">raise</span> KeyError(<span class="PY_STRING">'Unknown config name %r for value %r'</span>
+                        <span class="PY_STRING">' in %s.tagContainmentConfig'</span>
+                        % (key, value, self.__class__.__name__))
+                config[key] = configClass(key, value)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">assert</span> isinstance(value, TagConfig), <span class="PY_STRING">'key=%r, value=%r'</span> % (key, value)
+                config[key] = value
+        self._tagContainmentConfig = config
+
+
+    <span class="PY_COMMENT">## Optimizations ##</span>
+
+    <span class="PY_KEYWORD">if</span> runFast:
+        finish_starttag = unknown_starttag
+        finish_endtag = unknown_endtag
+
+
+<span class="PY_KEYWORD">class</span> TagConfig(object):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, name, tags):
+        self.name = name
+        <span class="PY_COMMENT"># turn tag list into a set for fast lookup (avoid linear searches)</span>
+        self.tags = set(tags)
+
+    <span class="PY_KEYWORD">def</span> encounteredTag(self, tag, lineNum):
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+
+<span class="PY_KEYWORD">class</span> TagCanOnlyHaveConfig(TagConfig):
+
+    <span class="PY_KEYWORD">def</span> encounteredTag(self, tag, lineNum):
+        <span class="PY_KEYWORD">if</span> tag.lower() <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self.tags:
+            <span class="PY_KEYWORD">raise</span> HTMLNotAllowedError(<span class="PY_STRING">'line %i: the tag %r'</span>
+                <span class="PY_STRING">' is not allowed in %r which can only have %r.'</span>
+                % (lineNum, tag, self.name, sorted(self.tags)),
+                line=lineNum, encounteredTag=tag, containingTag=self.name,
+                canOnlyHave=self.tags)
+
+
+<span class="PY_KEYWORD">class</span> TagCannotHaveConfig(TagConfig):
+
+    <span class="PY_KEYWORD">def</span> encounteredTag(self, tag, lineNum):
+        <span class="PY_KEYWORD">if</span> tag.lower() <span class="PY_KEYWORD">in</span> self.tags:
+            <span class="PY_KEYWORD">raise</span> HTMLNotAllowedError(<span class="PY_STRING">'line %i: The tag %r'</span>
+                <span class="PY_STRING">' is not allowed in %r which cannot have %r.'</span>
+                % (lineNum, tag, self.name, sorted(self.tags)),
+                line=lineNum, enounteredTag=tag, containingTag=self.name,
+                cannotHave=self.tags)
+
+
+configClassForName = dict(
+    canOnlyHave=TagCanOnlyHaveConfig, cannotHave=TagCannotHaveConfig)
+
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+    html = HTMLReader().main()
+    html.pprint()
+</pre>
+<!--footer-->
+
+</body>
+</html>

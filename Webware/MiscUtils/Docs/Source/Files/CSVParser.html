@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/CSVParser.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""CSVParser.py
+
+A parser for CSV files.
+
+"""</span>
+
+<span class="PY_COMMENT"># The states of the parser</span>
+(StartRecord, StartField, InField, QuoteInField,
+InQuotedField, QuoteInQuotedField, EndQuotedField) = range(7)
+
+<span class="PY_COMMENT"># State handlers can return Finished to terminate parsing early</span>
+Finished = 10
+
+
+<span class="PY_KEYWORD">class</span> ParseError(Exception):
+    <span class="PY_STRING">"""CSV file parse error."""</span>
+
+
+<span class="PY_KEYWORD">class</span> CSVParser(object):
+    <span class="PY_STRING">"""Parser for CSV files.
+
+    Parses CSV files including all subtleties such as:
+      * commas in fields
+      * double quotes in fields
+      * embedded newlines in fields
+          - Examples of programs that produce such beasts include
+            MySQL and Excel
+
+    For a higher-level, friendlier CSV class with many conveniences,
+    see DataTable (which uses this class for its parsing).
+
+    Example:
+        records = []
+        parse = CSVParser().parse
+        for line in lines:
+            results = parse(line)
+            if results is not None:
+                records.append(results)
+
+    CREDIT
+
+    The algorithm was taken directly from the open source Python
+    C-extension, csv:
+        http://www.object-craft.com.au/projects/csv/
+
+    It would be nice to use the csv module when present, since it is
+    substantially faster. Before that can be done, it needs to support
+    allowComments and stripWhitespace, and pass the TestCSVParser.py
+    test suite.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, allowComments=True, stripWhitespace=True, fieldSep=<span class="PY_STRING">','</span>,
+                    autoReset=True, doubleQuote=True):
+        <span class="PY_STRING">"""Create a new CSV parser.
+
+        allowComments: If true (the default), then comment lines using
+                       the Python comment marker are allowed.
+        stripWhitespace: If true (the default), then left and right whitespace
+                         is stripped off from all fields.
+        fieldSep: Defines the field separator string (a comma by default).
+        autoReset: If true (the default), recover from errors automatically.
+        doubleQuote: If true (the default), assume quotes in fields are
+                     escaped by appearing doubled.
+
+        """</span>
+        <span class="PY_COMMENT"># settings</span>
+        self._allowComments = allowComments
+        self._stripWhitespace = stripWhitespace
+        self._doubleQuote = doubleQuote
+        self._fieldSep = fieldSep
+        self._autoReset = autoReset
+
+        <span class="PY_COMMENT"># Other</span>
+        self._state = StartRecord
+        self._fields = []
+        self._hadParseError = False
+        self._field = [] <span class="PY_COMMENT"># a list of chars for the cur field</span>
+        self.addChar = self._field.append
+
+        <span class="PY_COMMENT"># The handlers for the various states</span>
+        self._handlers = [
+            self.startRecord,
+            self.startField,
+            self.inField,
+            self.quoteInField,
+            self.inQuotedField,
+            self.quoteInQuotedField,
+            self.endQuotedField,
+        ]
+
+
+    <span class="PY_COMMENT">## Parse ##</span>
+
+    <span class="PY_KEYWORD">def</span> parse(self, line):
+        <span class="PY_STRING">"""Parse a single line and return a list of string fields.
+
+        Returns None if the CSV record contains embedded newlines and
+        the record is not yet complete.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._autoReset <span class="PY_KEYWORD">and</span> self._hadParseError:
+            self.reset()
+        handlers = self._handlers
+
+        i = 0
+        lineLen = len(line)
+        <span class="PY_KEYWORD">while</span> i &lt; lineLen:
+            c = line[i]
+            <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'\r'</span>:
+                i += 1
+                <span class="PY_KEYWORD">if</span> i == lineLen:
+                    <span class="PY_KEYWORD">break</span> <span class="PY_COMMENT"># Mac end of line</span>
+                c = line[i]
+                <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'\n'</span>:
+                    i += 1
+                    <span class="PY_KEYWORD">if</span> i == lineLen:
+                        <span class="PY_KEYWORD">break</span> <span class="PY_COMMENT"># Win end of line</span>
+
+                self._hadParseError = True
+                <span class="PY_KEYWORD">raise</span> ParseError(<span class="PY_STRING">'Newline inside string'</span>)
+
+            <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\n'</span>:
+                i += 1
+                <span class="PY_KEYWORD">if</span> i == lineLen:
+                    <span class="PY_KEYWORD">break</span> <span class="PY_COMMENT"># unix end of line</span>
+
+                self._hadParseError = True
+                <span class="PY_KEYWORD">raise</span> ParseError(<span class="PY_STRING">'Newline inside string'</span>)
+
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> handlers[self._state](c) == Finished:
+                    <span class="PY_KEYWORD">break</span> <span class="PY_COMMENT"># process a character</span>
+
+            i += 1
+
+        handlers[self._state](<span class="PY_STRING">'\0'</span>) <span class="PY_COMMENT"># signal the end of the input</span>
+
+        <span class="PY_KEYWORD">if</span> self._state == StartRecord:
+            fields = self._fields
+            self._fields = []
+            <span class="PY_KEYWORD">if</span> self._stripWhitespace:
+                fields = [field.strip() <span class="PY_KEYWORD">for</span> field <span class="PY_KEYWORD">in</span> fields]
+            <span class="PY_KEYWORD">return</span> fields
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> None <span class="PY_COMMENT"># indicates multi-line record; e.g. not finished</span>
+
+
+    <span class="PY_COMMENT">## Reset ##</span>
+
+    <span class="PY_KEYWORD">def</span> reset(self):
+        <span class="PY_STRING">"""Reset the parser.
+
+        Resets the parser to a fresh state in order to recover from
+        exceptions. But if autoReset is true (the default), this is
+        done automatically.
+
+        """</span>
+        self._fields = []
+        self._state = StartRecord
+        self._hadParseError = False
+
+
+    <span class="PY_COMMENT">## State Handlers ##</span>
+
+    <span class="PY_KEYWORD">def</span> startRecord(self, c):
+        <span class="PY_KEYWORD">if</span> c != <span class="PY_STRING">'\0'</span>: <span class="PY_COMMENT"># not empty line</span>
+            <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'#'</span> <span class="PY_KEYWORD">and</span> self._allowComments:
+                <span class="PY_KEYWORD">return</span> Finished
+            <span class="PY_KEYWORD">else</span>:
+                self._state = StartField
+                self.startField(c)
+
+    <span class="PY_KEYWORD">def</span> startField(self, c):
+        <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'"'</span>:
+            self._state = InQuotedField <span class="PY_COMMENT"># start quoted field</span>
+        <span class="PY_KEYWORD">elif</span> c == self._fieldSep:
+            self.saveField() <span class="PY_COMMENT"># save empty field</span>
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">' '</span> <span class="PY_KEYWORD">and</span> self._stripWhitespace:
+            <span class="PY_KEYWORD">pass</span> <span class="PY_COMMENT"># skip over preceding whitespace</span>
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\0'</span>:
+            self.saveField() <span class="PY_COMMENT"># save empty field</span>
+            self._state = StartRecord
+        <span class="PY_KEYWORD">else</span>:
+            self.addChar(c) <span class="PY_COMMENT"># begin new unquoted field</span>
+            self._state = InField
+
+    <span class="PY_KEYWORD">def</span> inField(self, c):
+        <span class="PY_COMMENT"># in unquoted field</span>
+        <span class="PY_KEYWORD">if</span> c == self._fieldSep:
+            self.saveField()
+            self._state = StartField
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\0'</span>:
+            self.saveField() <span class="PY_COMMENT"># end of line</span>
+            self._state = StartRecord
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'"'</span> <span class="PY_KEYWORD">and</span> self._doubleQuote:
+            self._state = QuoteInField
+        <span class="PY_KEYWORD">else</span>:
+            self.addChar(c) <span class="PY_COMMENT"># normal character</span>
+
+    <span class="PY_KEYWORD">def</span> quoteInField(self, c):
+        self.addChar(<span class="PY_STRING">'"'</span>)
+        <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'"'</span>:
+            self._state = InField <span class="PY_COMMENT"># save "" as "</span>
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\0'</span>:
+            self.saveField() <span class="PY_COMMENT"># end of line</span>
+            self._state = StartRecord
+        <span class="PY_KEYWORD">elif</span> c == self._fieldSep:
+            self.saveField()
+            self._state = StartField
+        <span class="PY_KEYWORD">else</span>:
+            self.addChar(c) <span class="PY_COMMENT"># normal character</span>
+            self._state = InField
+
+    <span class="PY_KEYWORD">def</span> inQuotedField(self, c):
+        <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'"'</span>:
+            <span class="PY_KEYWORD">if</span> self._doubleQuote:
+                self._state = QuoteInQuotedField
+            <span class="PY_KEYWORD">else</span>:
+                self.saveField() <span class="PY_COMMENT"># end of field</span>
+                self._state = EndQuotedField
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\0'</span>:
+            self.addChar(<span class="PY_STRING">'\n'</span>) <span class="PY_COMMENT"># end of line</span>
+        <span class="PY_KEYWORD">else</span>:
+            self.addChar(c) <span class="PY_COMMENT"># normal character</span>
+
+    <span class="PY_KEYWORD">def</span> quoteInQuotedField(self, c):
+        <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">'"'</span>:
+            self.addChar(<span class="PY_STRING">'"'</span>) <span class="PY_COMMENT"># save "" as "</span>
+            self._state = InQuotedField
+        <span class="PY_KEYWORD">elif</span> c == self._fieldSep:
+            self.saveField()
+            self._state = StartField
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">' '</span> <span class="PY_KEYWORD">and</span> self._stripWhitespace:
+            <span class="PY_KEYWORD">pass</span> <span class="PY_COMMENT"># skip it</span>
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\0'</span>:
+            self.saveField() <span class="PY_COMMENT"># end of line</span>
+            self._state = StartRecord
+        <span class="PY_KEYWORD">else</span>:
+            self._hadParseError = True <span class="PY_COMMENT"># illegal</span>
+            <span class="PY_KEYWORD">raise</span> ParseError(<span class="PY_STRING">'%s expected after "'</span> % self._fieldSep)
+
+    <span class="PY_KEYWORD">def</span> endQuotedField(self, c):
+        <span class="PY_KEYWORD">if</span> c == self._fieldSep: <span class="PY_COMMENT"># seen closing " on quoted field</span>
+            self._state = StartField <span class="PY_COMMENT"># wait for new field</span>
+        <span class="PY_KEYWORD">elif</span> c == <span class="PY_STRING">'\0'</span>:
+            self._state = StartRecord <span class="PY_COMMENT"># end of line</span>
+        <span class="PY_KEYWORD">else</span>:
+            self._hadParseError = True
+            <span class="PY_KEYWORD">raise</span> ParseError(<span class="PY_STRING">'%s expected after "'</span> % self._fieldSep)
+
+    <span class="PY_KEYWORD">def</span> saveField(self):
+        self._fields.append(<span class="PY_STRING">''</span>.join(self._field))
+        self._field = []
+        self.addChar = self._field.append
+
+
+<span class="PY_COMMENT"># Call the global function parse() if you like the default settings of the CSVParser</span>
+_parser = CSVParser()
+parse = _parser.parse
+</pre>
+<!--footer-->
+
+</body>
+</html>

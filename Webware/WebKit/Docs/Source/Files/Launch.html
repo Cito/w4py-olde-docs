@@ -1,0 +1,504 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Launch.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""Launch.py
+
+DESCRIPTION
+
+Python launch script for the WebKit application server.
+
+This launch script will run in its standard location in the Webware/WebKit
+directory as well as in a WebKit work directory outside of the Webware tree.
+
+USAGE
+
+Launch.py [StartOptions] [AppServer [AppServerOptions]]
+
+StartOptions:
+  -d, --work-dir=...     Set the path to the app server working directory.
+                         By default this is the directory containing Lauch.py.
+  -w, --webware-dir=...  Set the path to the Webware root directory.
+                         By default this is the parent directory.
+  -l, --library=...      Other directories to be included in the search path.
+                         You may specify this option multiple times.
+  -p, --run-profile      Set this to get profiling going (see Profiler.py).
+  -o, --log-file=...     Redirect standard output and error to this file.
+  -i, --pid-file=...     Set the file path to hold the app server process id.
+                         This option is fully supported under Unix only.
+  -u, --user=...         The name or uid of the user to run the app server.
+                         This option is supported under Unix only.
+  -g, --group=...        The name or gid of the group to run the app server.
+                         This option is supported under Unix only.
+
+AppServer:
+  The name of the application server module.
+  By default, the ThreadedAppServer will be used.
+
+AppServerOptions:
+  Options that shall be passed to the application server.
+  For instance, the ThreadedAppServer accepts: start, stop, daemon
+  You can also change configuration settings here by passing
+  arguments of the form ClassName.SettingName=value
+
+Please note that the default values for the StartOptions and the AppServer
+can be easily changed at the top of the Launch.py script.
+
+"""</span>
+
+<span class="PY_COMMENT"># FUTURE</span>
+<span class="PY_COMMENT"># * This shares a lot of code with ThreadedAppServer.py and AppServer.py.</span>
+<span class="PY_COMMENT">#   Try to consolidate these things. The default settings below in the</span>
+<span class="PY_COMMENT">#   global variables could go completely into AppServer.config.</span>
+<span class="PY_COMMENT"># CREDITS</span>
+<span class="PY_COMMENT"># * Contributed to Webware for Python by Chuck Esterbrook</span>
+<span class="PY_COMMENT"># * Improved by Ian Bicking</span>
+<span class="PY_COMMENT"># * Improved by Christoph Zwerschke</span>
+
+
+<span class="PY_COMMENT">## Default options ##</span>
+
+<span class="PY_COMMENT"># You can change the following default values:</span>
+
+<span class="PY_COMMENT"># The path to the app server working directory, if you do not</span>
+<span class="PY_COMMENT"># want to use the directory containing this script:</span>
+workDir = None
+
+<span class="PY_COMMENT"># The path to the Webware root directory; by default this will</span>
+<span class="PY_COMMENT"># be the parent directory of the directory containing this script:</span>
+webwareDir = None
+
+<span class="PY_COMMENT"># A list of additional directories (usually some libraries)</span>
+<span class="PY_COMMENT"># that you want to include into the search path for modules:</span>
+libraryDirs = []
+
+<span class="PY_COMMENT"># To get profiling going, set runProfile = True (see also</span>
+<span class="PY_COMMENT"># the description in the docstring of Profiler.py):</span>
+runProfile = False
+
+<span class="PY_COMMENT"># The path to the log file, if you want to redirect the</span>
+<span class="PY_COMMENT"># standard output and error to a log file:</span>
+logFile = None
+
+<span class="PY_COMMENT"># The pass to the pid file, if you want to check and terminate</span>
+<span class="PY_COMMENT"># a running server by storing its server process id:</span>
+pidFile = None
+
+<span class="PY_COMMENT"># The name or uid of the server process user, if you want</span>
+<span class="PY_COMMENT"># to run the server under a different user:</span>
+user = None
+
+<span class="PY_COMMENT"># The name or uid of the server process group, if you want</span>
+<span class="PY_COMMENT"># to run the server under a different group:</span>
+group = None
+
+<span class="PY_COMMENT"># The default app server to be used:</span>
+appServer = <span class="PY_STRING">'ThreadedAppServer'</span>
+
+
+<span class="PY_COMMENT">## Launch app server ##</span>
+
+<span class="PY_KEYWORD">import</span> os, sys
+
+<span class="PY_KEYWORD">def</span> usage():
+    <span class="PY_STRING">"""Print the docstring and exit with error."""</span>
+    sys.stdout.write(__doc__)
+    sys.exit(2)
+
+<span class="PY_KEYWORD">def</span> launchWebKit(appServer=appServer, workDir=None, args=None):
+    <span class="PY_STRING">"""Import and launch the specified WebKit app server.
+
+    appServer  -- the name of the WebKit app server module
+    workDir -- the server-side work directory of the app server
+    args -- other options that will be given to the app server
+
+    """</span>
+    <span class="PY_COMMENT"># Set up the arguments for the app server:</span>
+    <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">is</span> None:
+        args = []
+    <span class="PY_KEYWORD">if</span> workDir:
+        args.append(<span class="PY_STRING">'workdir='</span> + workDir)
+    <span class="PY_COMMENT"># Allow for a .py on the server name:</span>
+    <span class="PY_KEYWORD">if</span> appServer[-3:] == <span class="PY_STRING">'.py'</span>:
+        appServer = appServer[:-3]
+    <span class="PY_COMMENT"># Import the app server's main() function:</span>
+    <span class="PY_KEYWORD">try</span>:
+        appServerMain = __import__(<span class="PY_STRING">'WebKit.'</span> + appServer, None, None, <span class="PY_STRING">'main'</span>).main
+    <span class="PY_KEYWORD">except</span> ImportError, e:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: Cannot import the AppServer module.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Reason:'</span>, str(e)
+        sys.exit(1)
+    <span class="PY_COMMENT"># Set Profiler.startTime if this has not been done already:</span>
+    <span class="PY_KEYWORD">from</span> WebKit <span class="PY_KEYWORD">import</span> Profiler
+    <span class="PY_KEYWORD">if</span> Profiler.startTime <span class="PY_KEYWORD">is</span> None:
+        <span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+        Profiler.startTime = time()
+    <span class="PY_COMMENT"># Run the app server:</span>
+    <span class="PY_KEYWORD">return</span> appServerMain(args) <span class="PY_COMMENT"># go!</span>
+
+
+<span class="PY_COMMENT">## Main ##</span>
+
+<span class="PY_KEYWORD">def</span> main(args=None):
+    <span class="PY_STRING">"""Evaluate the command line arguments and call launchWebKit."""</span>
+    <span class="PY_KEYWORD">global</span> workDir, webwareDir, libraryDirs, runProfile, \
+        logFile, pidFile, user, group, appServer
+    <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">is</span> None:
+        args = sys.argv[1:]
+    <span class="PY_COMMENT"># Accept AppServer even if placed before StartOptions:</span>
+    <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> args[0].startswith(<span class="PY_STRING">'-'</span>):
+        arg2 = args.pop(0)
+    <span class="PY_KEYWORD">else</span>:
+        arg2 = None
+    <span class="PY_COMMENT"># Accept AppServerOptions that look like StartOptions:</span>
+    args1 = []
+    args2 = []
+    <span class="PY_KEYWORD">while</span> args:
+        arg = args.pop(0)
+        <span class="PY_KEYWORD">if</span> (arg.startswith(<span class="PY_STRING">'--'</span>)
+                <span class="PY_KEYWORD">and</span> 2 &lt; arg.find(<span class="PY_STRING">'.'</span>, 2) &lt; arg.find(<span class="PY_STRING">'='</span>, 5)):
+            args2.append(arg)
+        <span class="PY_KEYWORD">else</span>:
+            args1.append(arg)
+    <span class="PY_COMMENT"># Get all launch options:</span>
+    <span class="PY_KEYWORD">from</span> getopt <span class="PY_KEYWORD">import</span> getopt, GetoptError
+    <span class="PY_KEYWORD">try</span>:
+        opts, args1 = getopt(args1, <span class="PY_STRING">'d:w:l:po:i:u:g:'</span>, [
+            <span class="PY_STRING">'work-dir='</span>, <span class="PY_STRING">'webware-dir='</span>, <span class="PY_STRING">'library='</span>, <span class="PY_STRING">'run-profile'</span>,
+            <span class="PY_STRING">'log-file='</span>, <span class="PY_STRING">'pid-file='</span>, <span class="PY_STRING">'user='</span>, <span class="PY_STRING">'group='</span>])
+    <span class="PY_KEYWORD">except</span> GetoptError, error:
+        <span class="PY_KEYWORD">print</span> str(error)
+        <span class="PY_KEYWORD">print</span>
+        usage()
+    <span class="PY_KEYWORD">for</span> opt, arg <span class="PY_KEYWORD">in</span> opts:
+        <span class="PY_KEYWORD">if</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-d'</span>, <span class="PY_STRING">'--work-dir'</span>):
+            workDir = arg
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-w'</span>, <span class="PY_STRING">'--webware-dir'</span>):
+            webwareDir = arg
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-l'</span>, <span class="PY_STRING">'--library'</span>):
+            libraryDirs.append(arg)
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-p'</span>, <span class="PY_STRING">'--run-profile'</span>):
+            runProfile = True
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-o'</span>, <span class="PY_STRING">'--log-file'</span>):
+            logFile = arg
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-i'</span>, <span class="PY_STRING">'--pid-file'</span>):
+            pidFile = arg
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-u'</span>, <span class="PY_STRING">'--user'</span>):
+            user = arg
+        <span class="PY_KEYWORD">elif</span> opt <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'-g'</span>, <span class="PY_STRING">'--group'</span>):
+            group = arg
+    <span class="PY_KEYWORD">if</span> arg2:
+        appServer = arg2
+    <span class="PY_KEYWORD">elif</span> args1 <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> args1[0].startswith(<span class="PY_STRING">'-'</span>) <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'='</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> args1[0]:
+        appServer = args1.pop(0)
+    args = args2 + args1
+    <span class="PY_COMMENT"># Figure out the group id:</span>
+    gid = group
+    <span class="PY_KEYWORD">if</span> gid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+        <span class="PY_KEYWORD">try</span>:
+            gid = int(gid)
+        <span class="PY_KEYWORD">except</span> ValueError:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">import</span> grp
+                entry = grp.getgrnam(gid)
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: Group %r does not exist.'</span> % gid
+                sys.exit(2)
+            <span class="PY_KEYWORD">except</span> ImportError:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: Group names are not supported.'</span>
+                sys.exit(2)
+            gid = entry[2]
+    <span class="PY_COMMENT"># Figure out the user id:</span>
+    uid = user
+    <span class="PY_KEYWORD">if</span> uid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+        <span class="PY_KEYWORD">try</span>:
+            uid = int(uid)
+        <span class="PY_KEYWORD">except</span> ValueError:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">import</span> pwd
+                entry = pwd.getpwnam(uid)
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: User %r does not exist.'</span> % uid
+                sys.exit(2)
+            <span class="PY_KEYWORD">except</span> ImportError:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: User names are not supported.'</span>
+                sys.exit(2)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> gid:
+                gid = entry[3]
+            uid = entry[2]
+    <span class="PY_COMMENT"># Figure out the work directory and make it the current directory:</span>
+    <span class="PY_KEYWORD">if</span> workDir:
+        workDir = os.path.expanduser(workDir)
+    <span class="PY_KEYWORD">else</span>:
+        scriptName = sys.argv <span class="PY_KEYWORD">and</span> sys.argv[0]
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> scriptName <span class="PY_KEYWORD">or</span> scriptName == <span class="PY_STRING">'-c'</span>:
+            scriptName = <span class="PY_STRING">'Launch.py'</span>
+        workDir = os.path.dirname(os.path.abspath(scriptName))
+    <span class="PY_KEYWORD">try</span>:
+        os.chdir(workDir)
+    <span class="PY_KEYWORD">except</span> OSError, error:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: Could not set working directory.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The path %r cannot be used.'</span> % workDir
+        <span class="PY_KEYWORD">print</span> error.strerror
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Check the --work-dir option.'</span>
+        sys.exit(1)
+    workDir = os.curdir
+    <span class="PY_COMMENT"># Expand user components in directories:</span>
+    <span class="PY_KEYWORD">if</span> webwareDir:
+        webwareDir = os.path.expanduser(webwareDir)
+    <span class="PY_KEYWORD">else</span>:
+        webwareDir = os.pardir
+    <span class="PY_KEYWORD">if</span> libraryDirs:
+        libraryDirs = map(os.path.expanduser, libraryDirs)
+    <span class="PY_COMMENT"># If this module is inside a package, make it a standalone module,</span>
+    <span class="PY_COMMENT"># because otherwise the package path will be used for imports, too:</span>
+    <span class="PY_KEYWORD">global</span> __name__, __package__
+    name = __name__.rsplit(<span class="PY_STRING">'.'</span>, 1)[-1]
+    <span class="PY_KEYWORD">if</span> name != __name__:
+        sys.modules[name] = sys.modules[__name__]
+        <span class="PY_KEYWORD">del</span> sys.modules[__name__]
+        __name__ = name
+        __package__ = None
+    <span class="PY_COMMENT"># Check the validity of the Webware directory:</span>
+    sysPath = sys.path <span class="PY_COMMENT"># memorize the standard Python search path</span>
+    sys.path = [webwareDir] <span class="PY_COMMENT"># now include only the Webware directory</span>
+    <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># check whether Webware is really located here</span>
+        <span class="PY_KEYWORD">from</span> Properties <span class="PY_KEYWORD">import</span> name <span class="PY_KEYWORD">as</span> webwareName
+        <span class="PY_KEYWORD">from</span> WebKit.Properties <span class="PY_KEYWORD">import</span> name <span class="PY_KEYWORD">as</span> webKitName
+    <span class="PY_KEYWORD">except</span> ImportError:
+        webwareName = None
+    <span class="PY_KEYWORD">if</span> webwareName != <span class="PY_STRING">'Webware for Python'</span> <span class="PY_KEYWORD">or</span> webKitName != <span class="PY_STRING">'WebKit'</span>:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: Cannot find the Webware directory.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The path %r seems to be wrong.'</span> % webwareDir
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Check the --webware-dir option.'</span>
+        sys.exit(1)
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(os.path.join(webwareDir, <span class="PY_STRING">'install.log'</span>)):
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error: Webware has not been installed.'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Please run install.py in the Webware directory:'</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt; cd'</span>, os.path.abspath(webwareDir)
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt; python install.py'</span>
+        sys.exit(1)
+    <span class="PY_COMMENT"># Now assemble a new clean Python search path:</span>
+    path = [] <span class="PY_COMMENT"># the new search path will be collected here</span>
+    webKitDir = os.path.abspath(os.path.join(webwareDir, <span class="PY_STRING">'WebKit'</span>))
+    <span class="PY_KEYWORD">for</span> p <span class="PY_KEYWORD">in</span> [workDir, webwareDir] + libraryDirs + sysPath:
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> p:
+            <span class="PY_KEYWORD">continue</span> <span class="PY_COMMENT"># do not include the empty ("current") directory</span>
+        p = os.path.abspath(p)
+        <span class="PY_KEYWORD">if</span> p == webKitDir <span class="PY_KEYWORD">or</span> p <span class="PY_KEYWORD">in</span> path <span class="PY_KEYWORD">or</span> <span class="PY_KEYWORD">not</span> os.path.exists(p):
+            <span class="PY_KEYWORD">continue</span> <span class="PY_COMMENT"># do not include WebKit and duplicates</span>
+        path.append(p)
+    sys.path = path <span class="PY_COMMENT"># set the new search path</span>
+    <span class="PY_COMMENT"># Prepare the arguments for launchWebKit:</span>
+    args = (appServer, workDir, args)
+    <span class="PY_COMMENT"># Handle special case where app server shall be stopped:</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'stop'</span> <span class="PY_KEYWORD">in</span> args[2]:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Stopping WebKit.%s...'</span> % appServer
+        errorlevel = launchWebKit(*args)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> errorlevel:
+            <span class="PY_KEYWORD">if</span> pidFile <span class="PY_KEYWORD">and</span> os.path.exists(pidFile):
+                <span class="PY_KEYWORD">try</span>:
+                    os.remove(pidFile)
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The pid file could not be removed.'</span>
+                    <span class="PY_KEYWORD">print</span>
+        sys.exit(errorlevel)
+    <span class="PY_COMMENT"># Handle the pid file:</span>
+    <span class="PY_KEYWORD">if</span> pidFile:
+        pidFile = os.path.expanduser(pidFile)
+        <span class="PY_COMMENT"># Read the old pid file:</span>
+        <span class="PY_KEYWORD">try</span>:
+            pid = int(open(pidFile).read())
+        <span class="PY_KEYWORD">except</span> Exception:
+            pid = None
+        <span class="PY_KEYWORD">if</span> pid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'According to the pid file, the server is still running.'</span>
+            <span class="PY_COMMENT"># Try to kill an already running server:</span>
+            killed = False
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">from</span> signal <span class="PY_KEYWORD">import</span> SIGTERM, SIGKILL
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Trying to terminate the server with pid %d...'</span> % pid
+                os.kill(pid, SIGTERM)
+            <span class="PY_KEYWORD">except</span> OSError, error:
+                <span class="PY_KEYWORD">from</span> errno <span class="PY_KEYWORD">import</span> ESRCH
+                <span class="PY_KEYWORD">if</span> error.errno == ESRCH: <span class="PY_COMMENT"># no such process</span>
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The pid file was stale, continuing with startup...'</span>
+                    killed = True
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cannot terminate server with pid %d.'</span> % pid
+                    <span class="PY_KEYWORD">print</span> error.strerror
+                    sys.exit(1)
+            <span class="PY_KEYWORD">except</span> (ImportError, AttributeError):
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cannot check or terminate server with pid %d.'</span> % pid
+                sys.exit(1)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> killed:
+                <span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> sleep
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(100):
+                        sleep(0.1)
+                        os.kill(pid, SIGTERM)
+                <span class="PY_KEYWORD">except</span> OSError, error:
+                    <span class="PY_KEYWORD">from</span> errno <span class="PY_KEYWORD">import</span> ESRCH
+                    <span class="PY_KEYWORD">if</span> error.errno == ESRCH:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Server with pid %d has been terminated.'</span> % pid
+                        killed = True
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> killed:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(100):
+                        sleep(0.1)
+                        os.kill(pid, SIGKILL)
+                <span class="PY_KEYWORD">except</span> OSError, error:
+                    <span class="PY_KEYWORD">from</span> errno <span class="PY_KEYWORD">import</span> ESRCH
+                    <span class="PY_KEYWORD">if</span> error.errno == ESRCH:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Server with pid %d has been killed by force.'</span> % pid
+                        killed = True
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> killed:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Server with pid %d cannot be terminated.'</span> % pid
+                sys.exit(1)
+        <span class="PY_COMMENT"># Write a new pid file:</span>
+        <span class="PY_KEYWORD">try</span>:
+            open(pidFile, <span class="PY_STRING">'w'</span>).write(str(os.getpid()))
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The pid file %r could not be written.'</span> % pidFile
+            sys.exit(1)
+    olduid = oldgid = stdout = stderr = log = None
+    errorlevel = 1
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_COMMENT"># Change server process group:</span>
+        <span class="PY_KEYWORD">if</span> gid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">try</span>:
+                oldgid = os.getgid()
+                <span class="PY_KEYWORD">if</span> gid != oldgid:
+                    os.setgid(gid)
+                    <span class="PY_KEYWORD">if</span> group:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Changed server process group to %r.'</span> % group
+                <span class="PY_KEYWORD">else</span>:
+                    oldgid = None
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">if</span> group:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Could not set server process group to %r.'</span> % group
+                    oldgid = None
+                    sys.exit(1)
+        <span class="PY_COMMENT"># Change server process user:</span>
+        <span class="PY_KEYWORD">if</span> uid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">try</span>:
+                olduid = os.getuid()
+                <span class="PY_KEYWORD">if</span> uid != olduid:
+                    os.setuid(uid)
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Changed server process user to %r.'</span> % user
+                <span class="PY_KEYWORD">else</span>:
+                    olduid = None
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Could not change server process user to %r.'</span> % user
+                olduid = None
+                sys.exit(1)
+        msg = <span class="PY_STRING">'WebKit.'</span> + appServer
+        <span class="PY_KEYWORD">if</span> args[2]:
+            msg = <span class="PY_STRING">'%s %s'</span> % (msg, <span class="PY_STRING">' '</span>.join(args[2]))
+        <span class="PY_KEYWORD">else</span>:
+            msg = <span class="PY_STRING">'Starting %s...'</span> % msg
+        <span class="PY_KEYWORD">print</span> msg
+        <span class="PY_COMMENT"># Handle the log file:</span>
+        <span class="PY_KEYWORD">if</span> logFile:
+            logFile = os.path.expanduser(logFile)
+            <span class="PY_KEYWORD">try</span>:
+                log = open(logFile, <span class="PY_STRING">'a'</span>, 1) <span class="PY_COMMENT"># append, line buffered mode</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Output has been redirected to %r...'</span> % logFile
+                stdout, stderr = sys.stdout, sys.stderr
+                sys.stdout = sys.stderr = log
+            <span class="PY_KEYWORD">except</span> IOError, error:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cannot redirect output to %r.'</span> % logFile
+                <span class="PY_KEYWORD">print</span> error.strerror
+                log = None
+                sys.exit(1)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">print</span>
+        <span class="PY_COMMENT"># Set up a reference to our profiler so apps can import and use it:</span>
+        <span class="PY_KEYWORD">from</span> WebKit <span class="PY_KEYWORD">import</span> Profiler
+        <span class="PY_KEYWORD">if</span> Profiler.startTime <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+            Profiler.startTime = time()
+        <span class="PY_COMMENT"># Now start the app server:</span>
+        <span class="PY_KEYWORD">if</span> runProfile:
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'Profiling is on. '</span>
+                <span class="PY_STRING">'See docstring in Profiler.py for more info.'</span>)
+            <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">from</span> cProfile <span class="PY_KEYWORD">import</span> Profile
+            <span class="PY_KEYWORD">except</span> ImportError:
+                <span class="PY_KEYWORD">from</span> profile <span class="PY_KEYWORD">import</span> Profile
+            profiler = Profile()
+            Profiler.profiler = profiler
+            errorlevel = Profiler.runCall(launchWebKit, *args)
+            <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Writing profile stats to %s...'</span> % Profiler.statsFilename
+            Profiler.dumpStats()
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WARNING: Applications run much slower when profiled,'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'so turn off profiling in Launch.py when you are finished.'</span>
+        <span class="PY_KEYWORD">else</span>:
+            errorlevel = launchWebKit(*args)
+    <span class="PY_KEYWORD">finally</span>:
+        <span class="PY_KEYWORD">print</span>
+        <span class="PY_COMMENT"># Close the log file properly:</span>
+        <span class="PY_KEYWORD">if</span> log:
+            sys.stdout, sys.stderr = stdout, stderr
+            log.close()
+        <span class="PY_COMMENT"># Restore server process group and user.</span>
+        <span class="PY_COMMENT"># Note that because we changed the real group and</span>
+        <span class="PY_COMMENT"># user id of the process (most secure thing), we</span>
+        <span class="PY_COMMENT"># cannot change them back now, but we try anyway:</span>
+        <span class="PY_KEYWORD">if</span> oldgid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">try</span>:
+                os.setgid(oldgid)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">else</span>:
+                oldgid = None
+        <span class="PY_KEYWORD">if</span> olduid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">try</span>:
+                os.setuid(olduid)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">else</span>:
+                olduid = None
+        <span class="PY_COMMENT"># Remove the pid file again.</span>
+        <span class="PY_COMMENT"># Note that this may fail when the group or user id</span>
+        <span class="PY_COMMENT"># has been changed, but we try anyway:</span>
+        <span class="PY_KEYWORD">if</span> pidFile <span class="PY_KEYWORD">and</span> os.path.exists(pidFile):
+            <span class="PY_KEYWORD">try</span>:
+                os.remove(pidFile)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">if</span> oldgid <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">and</span> olduid <span class="PY_KEYWORD">is</span> None:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'The pid file could not be removed.'</span>
+                    <span class="PY_KEYWORD">print</span>
+    sys.exit(errorlevel)
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+    main()
+</pre>
+<!--footer-->
+
+</body>
+</html>

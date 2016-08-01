@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/PidFile.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Process id file management"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> atexit
+
+<span class="PY_KEYWORD">if</span> os.name == <span class="PY_STRING">'nt'</span>:
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">import</span> win32api
+    <span class="PY_KEYWORD">except</span> ImportError:
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">import</span> ctypes
+            win32api = ctypes.windll.kernel32
+        <span class="PY_KEYWORD">except</span> (AttributeError, ImportError):
+            win32api = None
+<span class="PY_KEYWORD">else</span>:
+    win32api = None
+
+
+<span class="PY_KEYWORD">class</span> ProcessRunning(Exception):
+    <span class="PY_STRING">"""Error when creating pid file for already running process."""</span>
+
+
+<span class="PY_KEYWORD">class</span> PidFile(object):
+    <span class="PY_STRING">"""Process id file management."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path, create=True):
+        <span class="PY_STRING">"""Create a pid file with the given path for the current process."""</span>
+        self._path = path
+        self._created = False
+        self._pid = None
+        <span class="PY_KEYWORD">if</span> os.path.exists(path):
+            <span class="PY_KEYWORD">try</span>:
+                self._pid = int(open(path).read())
+                <span class="PY_KEYWORD">if</span> self._pid &lt;= 1:
+                    self._pid = None
+                    <span class="PY_KEYWORD">raise</span> ValueError
+            <span class="PY_KEYWORD">except</span> (IOError, ValueError, TypeError):
+                <span class="PY_COMMENT"># Can't open file or read PID from file.</span>
+                <span class="PY_COMMENT"># File is probably  invalid or stale, so try to delete it.</span>
+                <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"%s is invalid or cannot be opened;"</span>
+                    <span class="PY_STRING">" attempting to remove it."</span> % path)
+                self.remove(stale=True)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> self.pidRunning(self._pid):
+                    <span class="PY_KEYWORD">if</span> create:
+                        <span class="PY_KEYWORD">raise</span> ProcessRunning()
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"%s is stale; removing."</span> % path
+                    self.remove(stale=True)
+        <span class="PY_KEYWORD">if</span> create:
+            self._pid = self.currentPID()
+            <span class="PY_KEYWORD">if</span> self._pid <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+                self.write()
+                <span class="PY_COMMENT"># Delete the pid file when Python exits, so that the pid file</span>
+                <span class="PY_COMMENT"># is removed if the process exits abnormally. If the process</span>
+                <span class="PY_COMMENT"># crashes, though, the pid file will be left behind.</span>
+                atexit.register(self.remove)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> pidRunning(pid):
+        <span class="PY_STRING">"""Check whether process with given pid is running."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            os.kill(pid, 0)
+        <span class="PY_KEYWORD">except</span> OSError, e:
+            <span class="PY_KEYWORD">if</span> e.errno == 3: <span class="PY_COMMENT"># no such process</span>
+                <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">if</span> win32api:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> win32api.OpenProcess(1024, False, pid):
+                        <span class="PY_KEYWORD">return</span> False
+                <span class="PY_KEYWORD">except</span> win32api.error, e:
+                    <span class="PY_KEYWORD">if</span> e.winerror == 87: <span class="PY_COMMENT"># wrong parameter (no such process)</span>
+                        <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">return</span> True
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> currentPID():
+        <span class="PY_STRING">"""Get the current process id."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> os.getpid()
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">if</span> win32api:
+                <span class="PY_KEYWORD">return</span> win32api.GetCurrentProcessId()
+        <span class="PY_KEYWORD">return</span> None
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> killPID(pid, sig=None):
+        <span class="PY_STRING">"""Kill the process with the given pid."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> sig <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">from</span> signal <span class="PY_KEYWORD">import</span> SIGTERM
+                sig = SIGTERM
+            os.kill(pid, sig)
+        <span class="PY_KEYWORD">except</span> (AttributeError, ImportError):
+            <span class="PY_KEYWORD">if</span> win32api:
+                handle = win32api.OpenProcess(1, False, pid)
+                win32api.TerminateProcess(handle, -1)
+                win32api.CloseHandle(handle)
+
+    <span class="PY_KEYWORD">def</span> pid(self):
+        <span class="PY_STRING">"""Return our process id."""</span>
+        <span class="PY_KEYWORD">return</span> self._pid
+
+    <span class="PY_KEYWORD">def</span> running(self):
+        <span class="PY_STRING">"""Check whether our process is running."""</span>
+        <span class="PY_KEYWORD">return</span> self.pidRunning(self._pid)
+
+    <span class="PY_KEYWORD">def</span> kill(self):
+        <span class="PY_STRING">"""Kill our process."""</span>
+        <span class="PY_KEYWORD">if</span> self._pid <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">return</span> self.killPID(self._pid)
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Remove pid file together with our instance."""</span>
+        self.remove()
+
+    <span class="PY_KEYWORD">def</span> remove(self, stale=False):
+        <span class="PY_STRING">"""Remove our pid file."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> stale:
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._created:
+                <span class="PY_COMMENT"># Only remove the file if we created it. Otherwise starting</span>
+                <span class="PY_COMMENT"># a second process will remove the file created by the first.</span>
+                <span class="PY_KEYWORD">return</span>
+            stale = os.path.exists(self._path)
+        <span class="PY_KEYWORD">if</span> stale:
+            <span class="PY_KEYWORD">try</span>:
+                os.unlink(self._path)
+            <span class="PY_KEYWORD">except</span> (AttributeError, OSError):
+                <span class="PY_KEYWORD">pass</span>
+        self._created = False <span class="PY_COMMENT"># remove only once</span>
+
+    <span class="PY_KEYWORD">def</span> write(self):
+        <span class="PY_STRING">"""Write our pid file."""</span>
+        <span class="PY_KEYWORD">if</span> self._created:
+            <span class="PY_KEYWORD">return</span>
+        pidfile = open(self._path, <span class="PY_STRING">'w'</span>)
+        pidfile.write(str(self._pid))
+        pidfile.close()
+        self._created = True <span class="PY_COMMENT"># write only one</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

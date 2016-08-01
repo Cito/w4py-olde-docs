@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of DBUtils.SteadyDB</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of DBUtils.SteadyDB</h2>
+<p>You can also browse the <a href="../Files/SteadyDB.html">complete source file</a>
+or the <a href="../Docs/DBUtils.SteadyDB.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">SteadyDBError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">InvalidCursor</span>(SteadyDBError):</span>
+<span class="line_def">def <span class="name_def">connect</span>(creator, maxusage=None, setsession=None,</span>
+
+
+<span class="line_class">class <span class="name_class">SteadyDBConnection</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, creator, maxusage=None, setsession=None,</span>
+<span class="line_def">    def <span class="name_def">dbapi</span>(self)</span>
+<span class="line_def">    def <span class="name_def">threadsafety</span>(self)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">begin</span>(self, *args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">commit</span>(self)</span>
+<span class="line_def">    def <span class="name_def">rollback</span>(self)</span>
+<span class="line_def">    def <span class="name_def">cancel</span>(self)</span>
+<span class="line_def">    def <span class="name_def">ping</span>(self, *args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">cursor</span>(self, *args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">__del__</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">SteadyDBCursor</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, con, *args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">setinputsizes</span>(self, sizes)</span>
+<span class="line_def">    def <span class="name_def">setoutputsize</span>(self, size, column=None)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">        def <span class="name_def">tough_method</span>(*args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">__getattr__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__del__</span>(self)</span>
+
+</pre>
+</body>
+</html>

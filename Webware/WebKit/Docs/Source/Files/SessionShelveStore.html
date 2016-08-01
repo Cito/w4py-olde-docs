@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/SessionShelveStore.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Session store using the shelve module."""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> shelve
+<span class="PY_KEYWORD">import</span> threading
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+<span class="PY_KEYWORD">from</span> SessionStore <span class="PY_KEYWORD">import</span> maxPickleProtocol, SessionStore
+
+
+<span class="PY_KEYWORD">class</span> SessionShelveStore(SessionStore):
+    <span class="PY_STRING">"""A session store implemented with a shelve object.
+
+    To use this store, set SessionStore in Application.config to 'Shelve'.
+
+    """</span>
+
+    _filename = <span class="PY_STRING">'Session.Store'</span>
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, app, restoreFiles=True, filename=None):
+        <span class="PY_STRING">"""Initialize the session shelf.
+
+        If restoreFiles is true, existing shelve file(s) will be reused.
+
+        """</span>
+        SessionStore.__init__(self, app)
+        filename = os.path.join(app._sessionDir, filename <span class="PY_KEYWORD">or</span> self._filename)
+        flag = restoreFiles <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'c'</span> <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'n'</span>
+        self._store = shelve.open(filename,
+            flag=flag, protocol=maxPickleProtocol)
+        self._lock = threading.RLock()
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_STRING">"""Return the number of sessions."""</span>
+        <span class="PY_KEYWORD">return</span> len(self._store)
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, key):
+        <span class="PY_STRING">"""Get a session item, reading it from the store."""</span>
+        <span class="PY_COMMENT"># multiple simultaneous read accesses are safe</span>
+        <span class="PY_KEYWORD">return</span> self._store[key]
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, key, value):
+        <span class="PY_STRING">"""Set a session item, writing it to the store."""</span>
+        <span class="PY_COMMENT"># concurrent write access is not supported</span>
+        dirty = value.isDirty()
+        <span class="PY_KEYWORD">if</span> self._alwaysSave <span class="PY_KEYWORD">or</span> dirty:
+            self._lock.acquire()
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> dirty:
+                    value.setDirty(False)
+                <span class="PY_KEYWORD">try</span>:
+                    self._store[key] = value
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">if</span> dirty:
+                        value.setDirty()
+                    <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># raise original exception</span>
+            <span class="PY_KEYWORD">finally</span>:
+                self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, key):
+        <span class="PY_STRING">"""Delete a session item from the store."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            session = self[key]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> session.isExpired():
+                session.expiring()
+            <span class="PY_KEYWORD">del</span> self._store[key]
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, key):
+        <span class="PY_STRING">"""Check whether the session store has a given key."""</span>
+        <span class="PY_KEYWORD">return</span> key <span class="PY_KEYWORD">in</span> self._store
+
+    <span class="PY_KEYWORD">def</span> __iter__(self):
+        <span class="PY_STRING">"""Return an iterator over the stored session keys."""</span>
+        <span class="PY_KEYWORD">return</span> iter(self._store)
+
+    <span class="PY_KEYWORD">def</span> keys(self):
+        <span class="PY_STRING">"""Return a list with the keys of all the stored sessions."""</span>
+        <span class="PY_KEYWORD">return</span> self._store.keys()
+
+    <span class="PY_KEYWORD">def</span> clear(self):
+        <span class="PY_STRING">"""Clear the session store, removing all of its items."""</span>
+        self._store.clear()
+
+    <span class="PY_KEYWORD">def</span> setdefault(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else default (also setting it)."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._store.setdefault(key, default)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> pop(self, key, default=NoDefault):
+        <span class="PY_STRING">"""Return value if key available, else default (also remove key)."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+                <span class="PY_KEYWORD">return</span> self._store.pop(key)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> self._store.pop(key, default)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+
+    <span class="PY_COMMENT">## Application support ##</span>
+
+    <span class="PY_KEYWORD">def</span> storeSession(self, session):
+        <span class="PY_STRING">"""Save potentially changed session in the store."""</span>
+        key = session.identifier()
+        <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self <span class="PY_KEYWORD">or</span> self[key] <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> session:
+            self[key] = session
+
+    <span class="PY_KEYWORD">def</span> storeAllSessions(self):
+        <span class="PY_STRING">"""Permanently save all sessions in the store.
+
+        Should be used (only) when the application server is shut down.
+
+        """</span>
+        self._store.close()
+
+    <span class="PY_KEYWORD">def</span> cleanStaleSessions(self, task=None):
+        <span class="PY_STRING">"""Clean stale sessions."""</span>
+        SessionStore.cleanStaleSessions(self, task)
+        self.intervalSweep()
+
+    <span class="PY_KEYWORD">def</span> intervalSweep(self):
+        <span class="PY_STRING">"""The session sweeper interval function."""</span>
+        self._store.sync()
+</pre>
+<!--footer-->
+
+</body>
+</html>

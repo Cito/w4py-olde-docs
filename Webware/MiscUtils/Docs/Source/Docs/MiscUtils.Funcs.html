@@ -1,0 +1,135 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.Funcs</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.Funcs</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/Funcs.py">/var/www/docs/Webware-1.1.1/MiscUtils/Funcs.py</a></font></td></tr></table>
+    <p><tt>MiscUtils.Funcs<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;holds&nbsp;functions&nbsp;that&nbsp;don't&nbsp;fit&nbsp;in&nbsp;anywhere&nbsp;else.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;safely&nbsp;import&nbsp;*&nbsp;from&nbsp;MiscUtils.Funcs&nbsp;if&nbsp;you&nbsp;like.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="datetime.html">datetime</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="random.html">random</a><br>
+<a href="textwrap.html">textwrap</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-asclocaltime"><strong>asclocaltime</strong></a>(t<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;a&nbsp;readable&nbsp;string&nbsp;of&nbsp;the&nbsp;current,&nbsp;local&nbsp;time.<br>
+&nbsp;<br>
+Useful&nbsp;for&nbsp;time&nbsp;stamps&nbsp;in&nbsp;log&nbsp;files.</tt></dd></dl>
+ <dl><dt><a name="-charWrap"><strong>charWrap</strong></a>(s, width, hanging<font color="#909090">=0</font>)</dt><dd><tt>Word&nbsp;wrap&nbsp;a&nbsp;string.<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;new&nbsp;version&nbsp;of&nbsp;the&nbsp;string&nbsp;word&nbsp;wrapped&nbsp;with&nbsp;the&nbsp;given&nbsp;width<br>
+and&nbsp;hanging&nbsp;indent.&nbsp;The&nbsp;font&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;monospaced.<br>
+&nbsp;<br>
+This&nbsp;can&nbsp;be&nbsp;useful&nbsp;for&nbsp;including&nbsp;text&nbsp;between&nbsp;&lt;pre&gt;&nbsp;&lt;/pre&gt;&nbsp;tags,<br>
+since&nbsp;&lt;pre&gt;&nbsp;will&nbsp;not&nbsp;word&nbsp;wrap,&nbsp;and&nbsp;for&nbsp;lengthly&nbsp;lines,<br>
+will&nbsp;increase&nbsp;the&nbsp;width&nbsp;of&nbsp;a&nbsp;web&nbsp;page.<br>
+&nbsp;<br>
+It&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;to&nbsp;help&nbsp;delineate&nbsp;the&nbsp;entries&nbsp;in&nbsp;log-style<br>
+output&nbsp;by&nbsp;passing&nbsp;hanging=4.</tt></dd></dl>
+ <dl><dt><a name="-commas"><strong>commas</strong></a>(number)</dt><dd><tt>Insert&nbsp;commas&nbsp;in&nbsp;a&nbsp;number.<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;given&nbsp;number&nbsp;as&nbsp;a&nbsp;string&nbsp;with&nbsp;commas&nbsp;to&nbsp;separate<br>
+the&nbsp;thousands&nbsp;positions.<br>
+&nbsp;<br>
+The&nbsp;number&nbsp;can&nbsp;be&nbsp;a&nbsp;float,&nbsp;int,&nbsp;long&nbsp;or&nbsp;string.&nbsp;Returns&nbsp;None&nbsp;for&nbsp;None.</tt></dd></dl>
+ <dl><dt><a name="-excstr"><strong>excstr</strong></a>(e)</dt><dd><tt>Return&nbsp;a&nbsp;string&nbsp;for&nbsp;the&nbsp;exception.<br>
+&nbsp;<br>
+The&nbsp;string&nbsp;will&nbsp;be&nbsp;in&nbsp;the&nbsp;format&nbsp;that&nbsp;Python&nbsp;normally&nbsp;outputs<br>
+in&nbsp;interactive&nbsp;shells&nbsp;and&nbsp;such:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ExceptionName&gt;:&nbsp;&lt;message&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;AttributeError:&nbsp;'object'&nbsp;object&nbsp;has&nbsp;no&nbsp;attribute&nbsp;'bar'<br>
+Neither&nbsp;str(e)&nbsp;nor&nbsp;repr(e)&nbsp;do&nbsp;that.</tt></dd></dl>
+ <dl><dt><a name="-hostName"><strong>hostName</strong></a>()</dt><dd><tt>Return&nbsp;the&nbsp;host&nbsp;name.<br>
+&nbsp;<br>
+The&nbsp;name&nbsp;is&nbsp;taken&nbsp;first&nbsp;from&nbsp;the&nbsp;os&nbsp;environment&nbsp;and&nbsp;failing&nbsp;that,<br>
+from&nbsp;the&nbsp;'hostname'&nbsp;executable.&nbsp;May&nbsp;return&nbsp;None&nbsp;if&nbsp;neither&nbsp;attempt<br>
+succeeded.&nbsp;The&nbsp;environment&nbsp;keys&nbsp;checked&nbsp;are&nbsp;HOST&nbsp;and&nbsp;HOSTNAME,<br>
+both&nbsp;upper&nbsp;and&nbsp;lower&nbsp;case.</tt></dd></dl>
+ <dl><dt><a name="-localIP"><strong>localIP</strong></a>(remote<font color="#909090">=('www.yahoo.com', 80)</font>, useCache<font color="#909090">=True</font>)</dt><dd><tt>Get&nbsp;the&nbsp;"public"&nbsp;address&nbsp;of&nbsp;the&nbsp;local&nbsp;machine.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;address&nbsp;which&nbsp;is&nbsp;connected&nbsp;to&nbsp;the&nbsp;general&nbsp;Internet.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;connects&nbsp;to&nbsp;a&nbsp;remote&nbsp;HTTP&nbsp;server&nbsp;the&nbsp;first&nbsp;time&nbsp;it&nbsp;is<br>
+invoked&nbsp;(or&nbsp;every&nbsp;time&nbsp;it&nbsp;is&nbsp;invoked&nbsp;with&nbsp;useCache=0).&nbsp;If&nbsp;that&nbsp;is<br>
+not&nbsp;acceptable,&nbsp;pass&nbsp;remote=None,&nbsp;but&nbsp;be&nbsp;warned&nbsp;that&nbsp;the&nbsp;result&nbsp;is<br>
+less&nbsp;likely&nbsp;to&nbsp;be&nbsp;externally&nbsp;visible.<br>
+&nbsp;<br>
+Getting&nbsp;your&nbsp;local&nbsp;ip&nbsp;is&nbsp;actually&nbsp;quite&nbsp;complex.&nbsp;If&nbsp;this&nbsp;function<br>
+is&nbsp;not&nbsp;serving&nbsp;your&nbsp;needs&nbsp;then&nbsp;you&nbsp;probably&nbsp;need&nbsp;to&nbsp;think&nbsp;deeply<br>
+about&nbsp;what&nbsp;you&nbsp;really&nbsp;want&nbsp;and&nbsp;how&nbsp;your&nbsp;network&nbsp;is&nbsp;really&nbsp;set&nbsp;up.<br>
+Search&nbsp;comp.lang.python&nbsp;for&nbsp;"local&nbsp;ip"&nbsp;for&nbsp;more&nbsp;information.<br>
+<a href="http://groups.google.com/groups?q=%22local+ip%22+group:comp.lang.python">http://groups.google.com/groups?q=%22local+ip%22+group:comp.lang.python</a>.*</tt></dd></dl>
+ <dl><dt><a name="-localTimeDelta"><strong>localTimeDelta</strong></a>(t<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;timedelta&nbsp;of&nbsp;local&nbsp;zone&nbsp;from&nbsp;GMT.</tt></dd></dl>
+ <dl><dt><a name="-positiveId"><strong>positiveId</strong></a>(obj)</dt><dd><tt>Return&nbsp;id(obj)&nbsp;as&nbsp;a&nbsp;non-negative&nbsp;integer.</tt></dd></dl>
+ <dl><dt><a name="-safeDescription"><strong>safeDescription</strong></a>(obj, what<font color="#909090">='what'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;repr()&nbsp;of&nbsp;obj&nbsp;and&nbsp;its&nbsp;class&nbsp;(or&nbsp;type)&nbsp;for&nbsp;help&nbsp;in&nbsp;debugging.<br>
+&nbsp;<br>
+A&nbsp;major&nbsp;benefit&nbsp;here&nbsp;is&nbsp;that&nbsp;exceptions&nbsp;from&nbsp;repr()&nbsp;are&nbsp;consumed.<br>
+This&nbsp;is&nbsp;important&nbsp;in&nbsp;places&nbsp;like&nbsp;"assert"&nbsp;where&nbsp;you&nbsp;don't&nbsp;want<br>
+to&nbsp;lose&nbsp;the&nbsp;assertion&nbsp;exception&nbsp;in&nbsp;your&nbsp;attempt&nbsp;to&nbsp;get&nbsp;more&nbsp;information.<br>
+&nbsp;<br>
+Example&nbsp;use:<br>
+assert&nbsp;isinstance(foo,&nbsp;Foo),&nbsp;<a href="#-safeDescription">safeDescription</a>(foo)<br>
+print&nbsp;"foo:",&nbsp;<a href="#-safeDescription">safeDescription</a>(foo)&nbsp;#&nbsp;won't&nbsp;raise&nbsp;exceptions<br>
+&nbsp;<br>
+#&nbsp;better&nbsp;output&nbsp;format:<br>
+assert&nbsp;isinstance(foo,&nbsp;Foo),&nbsp;<a href="#-safeDescription">safeDescription</a>(foo,&nbsp;'foo')<br>
+print&nbsp;<a href="#-safeDescription">safeDescription</a>(foo,&nbsp;'foo')</tt></dd></dl>
+ <dl><dt><a name="-timestamp"><strong>timestamp</strong></a>(t<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;whose&nbsp;keys&nbsp;give&nbsp;different&nbsp;versions&nbsp;of&nbsp;the&nbsp;timestamp.<br>
+&nbsp;<br>
+The&nbsp;dictionary&nbsp;will&nbsp;contain&nbsp;the&nbsp;following&nbsp;timestamp&nbsp;versions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'tuple':&nbsp;(year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;min,&nbsp;sec)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'pretty':&nbsp;'YYYY-MM-DD&nbsp;HH:MM:SS'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'condensed':&nbsp;'YYYYMMDDHHMMSS'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'dashed':&nbsp;'YYYY-MM-DD-HH-MM-SS'<br>
+&nbsp;<br>
+The&nbsp;focus&nbsp;is&nbsp;on&nbsp;the&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour&nbsp;and&nbsp;second,&nbsp;with&nbsp;no&nbsp;additional<br>
+information&nbsp;such&nbsp;as&nbsp;timezone&nbsp;or&nbsp;day&nbsp;of&nbsp;year.&nbsp;This&nbsp;form&nbsp;of&nbsp;timestamp&nbsp;is<br>
+often&nbsp;ideal&nbsp;for&nbsp;print&nbsp;statements,&nbsp;logs&nbsp;and&nbsp;filenames.&nbsp;If&nbsp;the&nbsp;current&nbsp;number<br>
+of&nbsp;seconds&nbsp;is&nbsp;not&nbsp;passed,&nbsp;then&nbsp;the&nbsp;current&nbsp;time&nbsp;is&nbsp;taken.&nbsp;The&nbsp;'pretty'<br>
+format&nbsp;is&nbsp;ideal&nbsp;for&nbsp;print&nbsp;statements,&nbsp;while&nbsp;the&nbsp;'condensed'&nbsp;and&nbsp;'dashed'<br>
+formats&nbsp;are&nbsp;generally&nbsp;more&nbsp;appropriate&nbsp;for&nbsp;filenames.</tt></dd></dl>
+ <dl><dt><a name="-uniqueId"><strong>uniqueId</strong></a>(forObject<font color="#909090">=None</font>, sha<font color="#909090">=False</font>)</dt><dd><tt>Generate&nbsp;an&nbsp;opaque,&nbsp;identifier&nbsp;string.<br>
+&nbsp;<br>
+The&nbsp;string&nbsp;is&nbsp;practically&nbsp;guaranteed&nbsp;to&nbsp;be&nbsp;unique<br>
+If&nbsp;an&nbsp;object&nbsp;is&nbsp;passed,&nbsp;then&nbsp;its&nbsp;id()&nbsp;is&nbsp;incorporated&nbsp;into&nbsp;the&nbsp;generation.<br>
+Returns&nbsp;a&nbsp;32&nbsp;character&nbsp;long&nbsp;string&nbsp;relying&nbsp;on&nbsp;md5&nbsp;or,<br>
+if&nbsp;sha&nbsp;is&nbsp;True,&nbsp;a&nbsp;40&nbsp;character&nbsp;long&nbsp;string&nbsp;relying&nbsp;on&nbsp;sha-1.</tt></dd></dl>
+ <dl><dt><a name="-valueForString"><strong>valueForString</strong></a>(s)</dt><dd><tt>Return&nbsp;value&nbsp;for&nbsp;a&nbsp;string.<br>
+&nbsp;<br>
+For&nbsp;a&nbsp;given&nbsp;string,&nbsp;returns&nbsp;the&nbsp;most&nbsp;appropriate&nbsp;Pythonic&nbsp;value<br>
+such&nbsp;as&nbsp;None,&nbsp;a&nbsp;long,&nbsp;an&nbsp;int,&nbsp;a&nbsp;list,&nbsp;etc.&nbsp;If&nbsp;none&nbsp;of&nbsp;those<br>
+make&nbsp;sense,&nbsp;then&nbsp;returns&nbsp;the&nbsp;string&nbsp;as-is.<br>
+&nbsp;<br>
+"None",&nbsp;"True"&nbsp;and&nbsp;"False"&nbsp;are&nbsp;case-insensitive&nbsp;because&nbsp;there&nbsp;is<br>
+already&nbsp;too&nbsp;much&nbsp;case&nbsp;sensitivity&nbsp;in&nbsp;computing,&nbsp;damn&nbsp;it!</tt></dd></dl>
+ <dl><dt><a name="-wordWrap"><strong>wordWrap</strong></a>(s, width<font color="#909090">=78</font>)</dt><dd><tt>Return&nbsp;a&nbsp;version&nbsp;of&nbsp;the&nbsp;string&nbsp;word&nbsp;wrapped&nbsp;to&nbsp;the&nbsp;given&nbsp;width.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['commas', 'charWrap', 'wordWrap', 'excstr', 'hostName', 'localIP', 'positiveId', 'safeDescription', 'asclocaltime', 'timestamp', 'localTimeDelta', 'uniqueId', 'valueForString']</td></tr></table>
+</body></html>

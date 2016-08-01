@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.HTTPContent</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.HTTPContent</h2>
+<p>You can also browse the <a href="../Files/HTTPContent.html">complete source file</a>
+or the <a href="../Docs/WebKit.HTTPContent.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">HTTPContentError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPContent</span>(HTTPServlet):</span>
+
+<span class="line_category">    ## Transactions ##</span>
+<span class="line_def">    def <span class="name_def">awake</span>(self, transaction)</span>
+<span class="line_def">    def <span class="name_def">respondToGet</span>(self, transaction)</span>
+<span class="line_def">    def <span class="name_def">respondToPost</span>(self, transaction)</span>
+<span class="line_def">    def <span class="name_def">defaultAction</span>(self)</span>
+<span class="line_def">    def <span class="name_def">sleep</span>(self, transaction)</span>
+
+<span class="line_category">    ## Access ##</span>
+<span class="line_def">    def <span class="name_def">application</span>(self)</span>
+<span class="line_def">    def <span class="name_def">transaction</span>(self)</span>
+<span class="line_def">    def <span class="name_def">request</span>(self)</span>
+<span class="line_def">    def <span class="name_def">response</span>(self)</span>
+<span class="line_def">    def <span class="name_def">session</span>(self)</span>
+
+<span class="line_category">    ## Writing ##</span>
+<span class="line_def">    def <span class="name_def">write</span>(self, *args)</span>
+<span class="line_def">    def <span class="name_def">writeln</span>(self, *args)</span>
+
+<span class="line_category">    ## Threading ##</span>
+<span class="line_def">    def <span class="name_def">canBeThreaded</span>(self)</span>
+
+<span class="line_category">    ## Actions ##</span>
+<span class="line_def">    def <span class="name_def">handleAction</span>(self, action)</span>
+<span class="line_def">    def <span class="name_def">actions</span>(self)</span>
+<span class="line_def">    def <span class="name_def">preAction</span>(self, actionName)</span>
+<span class="line_def">    def <span class="name_def">postAction</span>(self, actionName)</span>
+<span class="line_def">    def <span class="name_def">methodNameForAction</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">urlEncode</span>(s)</span>
+<span class="line_def">    def <span class="name_def">urlDecode</span>(s)</span>
+<span class="line_def">    def <span class="name_def">forward</span>(self, url)</span>
+<span class="line_def">    def <span class="name_def">includeURL</span>(self, url)</span>
+<span class="line_def">    def <span class="name_def">callMethodOfServlet</span>(self, url, method, *args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">endResponse</span>()</span>
+<span class="line_def">    def <span class="name_def">sendRedirectAndEnd</span>(self, url, status=None)</span>
+<span class="line_def">    def <span class="name_def">sendRedirectPermanentAndEnd</span>(self, url)</span>
+<span class="line_def">    def <span class="name_def">sendRedirectSeeOtherAndEnd</span>(self, url)</span>
+<span class="line_def">    def <span class="name_def">sendRedirectTemporaryAndEnd</span>(self, url)</span>
+
+<span class="line_category">    ## Utility ##</span>
+<span class="line_def">    def <span class="name_def">sessionEncode</span>(self, url=None)</span>
+
+<span class="line_category">    ## Exception Reports ##</span>
+<span class="line_def">    def <span class="name_def">writeExceptionReport</span>(self, handler)</span>
+
+</pre>
+</body>
+</html>

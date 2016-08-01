@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/ModelUser.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">from</span> types <span class="PY_KEYWORD">import</span> ModuleType
+
+<span class="PY_KEYWORD">from</span> MiscUtils.MixIn <span class="PY_KEYWORD">import</span> MixIn
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+
+<span class="PY_KEYWORD">class</span> ModelUser(object):
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self._model = None
+
+
+    <span class="PY_COMMENT">## Settings ##</span>
+
+    <span class="PY_KEYWORD">def</span> setting(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the given setting which is actually just taken from the model."""</span>
+        <span class="PY_KEYWORD">return</span> self._model.setting(name, default)
+
+
+    <span class="PY_COMMENT">## Models ##</span>
+
+    <span class="PY_KEYWORD">def</span> model(self):
+        <span class="PY_KEYWORD">return</span> self._model
+
+    <span class="PY_KEYWORD">def</span> setModel(self, model):
+        <span class="PY_KEYWORD">assert</span> model
+        <span class="PY_KEYWORD">assert</span> self._model <span class="PY_KEYWORD">is</span> None, <span class="PY_STRING">'Can only set model once.'</span>
+        self._model = model
+        self.modelWasSet()
+
+    <span class="PY_KEYWORD">def</span> readModelFileNamed(self, filename, modelClass=None, **keywords):
+        <span class="PY_KEYWORD">assert</span> self._model <span class="PY_KEYWORD">is</span> None, <span class="PY_STRING">'Cannot re-read a model.'</span>
+        <span class="PY_KEYWORD">if</span> modelClass <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">from</span> MiddleKit.Core.Model <span class="PY_KEYWORD">import</span> Model <span class="PY_KEYWORD">as</span> modelClass
+        self._model = modelClass(**keywords)
+        self._model.read(filename)
+        self.modelWasSet()
+
+    <span class="PY_KEYWORD">def</span> modelWasSet(self):
+        <span class="PY_STRING">"""Perform additional set up of the store after the model is set.
+
+        Invoked by setModel() or readModelFileNamed() as a hook for taking
+        action on this event. Invokes installMixIns().
+
+        """</span>
+        self.installMixIns()
+
+
+    <span class="PY_COMMENT">## Mix-ins ##</span>
+
+    <span class="PY_KEYWORD">def</span> installMixIns(self, verbose=False):
+        <span class="PY_KEYWORD">if</span> verbose:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; installMixIns()'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'class ='</span>, self.__class__
+
+        modules = self.modulesForClass(self.__class__)
+        <span class="PY_KEYWORD">if</span> verbose:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'modules ='</span>, <span class="PY_STRING">', '</span>.join(modules)
+
+        <span class="PY_COMMENT"># reverse order so that mix-ins in subclasses override super</span>
+        <span class="PY_KEYWORD">for</span> module <span class="PY_KEYWORD">in</span> reversed(modules):
+            module = sys.modules[module]
+            <span class="PY_KEYWORD">assert</span> type(module) <span class="PY_KEYWORD">is</span> ModuleType
+            self.installMixInsForModule(module, verbose)
+
+        <span class="PY_KEYWORD">if</span> verbose:
+            <span class="PY_KEYWORD">print</span>
+
+    <span class="PY_KEYWORD">def</span> installMixInsForModule(self, module, verbose=False):
+        <span class="PY_COMMENT"># @@ 2000-10-18 ce: perhaps MixIns should be applied to the actual</span>
+        <span class="PY_COMMENT"># MiddleKit.Core class and not the custom one that possibly was</span>
+        <span class="PY_COMMENT"># passed into model. This would help with "invoking super" which</span>
+        <span class="PY_COMMENT"># may be a non-trivial operation in a mix-in of a generator module.</span>
+        coreClassNames = self._model.coreClassNames()
+        <span class="PY_KEYWORD">if</span> verbose:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt;'</span>, module
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> dir(module):
+            generatorThing = getattr(module, name)
+            <span class="PY_KEYWORD">if</span> isinstance(generatorThing, type):
+                <span class="PY_COMMENT"># See if a class with the same name exists in MiddleKit.Core</span>
+                <span class="PY_KEYWORD">import</span> MiddleKit.Core <span class="PY_KEYWORD">as</span> Core
+                <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> coreClassNames:
+                    baseClass = self._model.coreClass(name)
+                    <span class="PY_KEYWORD">if</span> baseClass <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> generatorThing:
+                        <span class="PY_KEYWORD">if</span> verbose:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; mixing %s into %s'</span> % (generatorThing, baseClass)
+                        <span class="PY_KEYWORD">assert</span> isinstance(baseClass, type)
+                        <span class="PY_KEYWORD">assert</span> isinstance(generatorThing, type)
+                        MixIn(baseClass, generatorThing, mixInSuperMethods=True)
+
+
+    <span class="PY_COMMENT">## Warning ##</span>
+
+    <span class="PY_KEYWORD">def</span> warning(self, msg):
+        <span class="PY_STRING">"""Output a warning.
+
+        Invoked by self for any kind of appropriate warning that doesn't
+        warrant an exception being thrown. Preferably, this should be invoked
+        from a method that is invoked when the "bad event" occurs. This allows
+        subclasses to override that method and potentially customize the
+        behavior, including providing more debugging information.
+
+        This implementation writes the msg to stdout.
+
+        """</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WARNING:'</span>, msg
+
+
+    <span class="PY_COMMENT">## Self utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> modulesForClass(self, pyClass, modules=None):
+        <span class="PY_STRING">"""Return the modules for the class.
+
+        Returns a list of modules for pyClass, going up the chain of ancestor
+        classes, stopping short before ModelUser. Utility method for installMixIns.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> modules <span class="PY_KEYWORD">is</span> None:
+            modules = []
+        className = pyClass.__name__
+        <span class="PY_KEYWORD">if</span> className != <span class="PY_STRING">'ModelUser'</span>:
+            modules.append(pyClass.__module__)
+            <span class="PY_KEYWORD">for</span> baseClass <span class="PY_KEYWORD">in</span> pyClass.__bases__:
+                self.modulesForClass(baseClass, modules)
+        <span class="PY_KEYWORD">return</span> modules
+</pre>
+<!--footer-->
+
+</body>
+</html>

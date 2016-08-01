@@ -1,0 +1,426 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.PSPPage</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.PSPPage</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/PSPPage.py">/var/www/docs/Webware-1.1.1/PSP/PSPPage.py</a></font></td></tr></table>
+    <p><tt>Default&nbsp;base&nbsp;class&nbsp;for&nbsp;PSP&nbsp;pages.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;is&nbsp;intended&nbsp;to&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;future&nbsp;as&nbsp;the&nbsp;default&nbsp;base&nbsp;class<br>
+for&nbsp;PSP&nbsp;pages&nbsp;in&nbsp;the&nbsp;event&nbsp;that&nbsp;some&nbsp;special&nbsp;processing&nbsp;is&nbsp;needed.<br>
+Right&nbsp;now,&nbsp;no&nbsp;special&nbsp;processing&nbsp;is&nbsp;needed,&nbsp;so&nbsp;the&nbsp;default&nbsp;base&nbsp;class<br>
+for&nbsp;PSP&nbsp;pages&nbsp;is&nbsp;the&nbsp;standard&nbsp;WebKit&nbsp;<a href="WebKit.Page.html#Page">Page</a>.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="WebKit.Page.html#Page">WebKit.Page.Page</a>(<a href="WebKit.HTTPContent.html#HTTPContent">WebKit.HTTPContent.HTTPContent</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.PSPPage.html#PSPPage">PSPPage</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PSPPage">class <strong>PSPPage</strong></a>(<a href="WebKit.Page.html#Page">WebKit.Page.Page</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.PSPPage.html#PSPPage">PSPPage</a></dd>
+<dd><a href="WebKit.Page.html#Page">WebKit.Page.Page</a></dd>
+<dd><a href="WebKit.HTTPContent.html#HTTPContent">WebKit.HTTPContent.HTTPContent</a></dd>
+<dd><a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a></dd>
+<dd><a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PSPPage-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPPage-awake"><strong>awake</strong></a>(self, trans)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Page.html#Page">WebKit.Page.Page</a>:<br>
+<dl><dt><a name="PSPPage-defaultAction"><strong>defaultAction</strong></a>(self)</dt><dd><tt>The&nbsp;default&nbsp;action&nbsp;in&nbsp;a&nbsp;<a href="WebKit.Page.html#Page">Page</a>&nbsp;is&nbsp;to&nbsp;<a href="#PSPPage-writeHTML">writeHTML</a>().</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-htBodyArgs"><strong>htBodyArgs</strong></a>(self)</dt><dd><tt>The&nbsp;atrributes&nbsp;for&nbsp;the&nbsp;&lt;body&gt;&nbsp;element.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;arguments&nbsp;used&nbsp;for&nbsp;the&nbsp;HTML&nbsp;&lt;body&gt;&nbsp;tag.<br>
+Invoked&nbsp;by&nbsp;<a href="#PSPPage-writeBody">writeBody</a>().<br>
+&nbsp;<br>
+With&nbsp;the&nbsp;prevalence&nbsp;of&nbsp;stylesheets&nbsp;(CSS),&nbsp;you&nbsp;can&nbsp;probably&nbsp;skip<br>
+this&nbsp;particular&nbsp;HTML&nbsp;feature,&nbsp;but&nbsp;for&nbsp;historical&nbsp;reasons&nbsp;this&nbsp;sets<br>
+the&nbsp;page&nbsp;to&nbsp;black&nbsp;text&nbsp;on&nbsp;white.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;page&nbsp;title&nbsp;as&nbsp;HTML.<br>
+&nbsp;<br>
+Return&nbsp;<a href="#PSPPage-title">title</a>().&nbsp;Subclasses&nbsp;sometimes&nbsp;override&nbsp;this&nbsp;to&nbsp;provide<br>
+an&nbsp;HTML&nbsp;enhanced&nbsp;version&nbsp;of&nbsp;the&nbsp;title.&nbsp;This&nbsp;is&nbsp;the&nbsp;method&nbsp;that&nbsp;should<br>
+be&nbsp;used&nbsp;when&nbsp;including&nbsp;the&nbsp;page&nbsp;title&nbsp;in&nbsp;the&nbsp;actual&nbsp;page&nbsp;contents.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-postAction"><strong>postAction</strong></a>(self, actionName)</dt><dd><tt>Things&nbsp;to&nbsp;do&nbsp;after&nbsp;actions.<br>
+&nbsp;<br>
+Simply&nbsp;close&nbsp;the&nbsp;html&nbsp;tag&nbsp;(&lt;/html&gt;).</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-preAction"><strong>preAction</strong></a>(self, actionName)</dt><dd><tt>Things&nbsp;to&nbsp;do&nbsp;before&nbsp;actions.<br>
+&nbsp;<br>
+For&nbsp;a&nbsp;page,&nbsp;we&nbsp;first&nbsp;<a href="#PSPPage-writeDocType">writeDocType</a>(),&nbsp;&lt;html&gt;,&nbsp;and&nbsp;then&nbsp;<a href="#PSPPage-writeHead">writeHead</a>().</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;page&nbsp;title.<br>
+&nbsp;<br>
+Subclasses&nbsp;often&nbsp;override&nbsp;this&nbsp;method&nbsp;to&nbsp;provide&nbsp;a&nbsp;custom&nbsp;title.<br>
+This&nbsp;title&nbsp;should&nbsp;be&nbsp;absent&nbsp;of&nbsp;HTML&nbsp;tags.&nbsp;This&nbsp;implementation<br>
+returns&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;class,&nbsp;which&nbsp;is&nbsp;sometimes&nbsp;appropriate<br>
+and&nbsp;at&nbsp;least&nbsp;informative.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-validateHTML"><strong>validateHTML</strong></a>(self, closingTags<font color="#909090">='&lt;/body&gt;&lt;/html&gt;'</font>)</dt><dd><tt>Validate&nbsp;the&nbsp;response.<br>
+&nbsp;<br>
+Validate&nbsp;the&nbsp;current&nbsp;response&nbsp;data&nbsp;using&nbsp;Web&nbsp;Design&nbsp;Group's<br>
+HTML&nbsp;validator&nbsp;available&nbsp;at<br>
+<a href="http://www.htmlhelp.com/tools/validator/">http://www.htmlhelp.com/tools/validator/</a><br>
+&nbsp;<br>
+Make&nbsp;sure&nbsp;you&nbsp;install&nbsp;the&nbsp;offline&nbsp;validator&nbsp;(called<br>
+``validate``)&nbsp;which&nbsp;can&nbsp;be&nbsp;called&nbsp;from&nbsp;the&nbsp;command-line.<br>
+The&nbsp;``validate``&nbsp;script&nbsp;must&nbsp;be&nbsp;in&nbsp;your&nbsp;path.<br>
+&nbsp;<br>
+Add&nbsp;this&nbsp;method&nbsp;to&nbsp;your&nbsp;SitePage&nbsp;(the&nbsp;servlet&nbsp;from<br>
+which&nbsp;all&nbsp;your&nbsp;servlets&nbsp;inherit),&nbsp;override<br>
+<a href="WebKit.Page.html#Page">Page</a>.<a href="#PSPPage-writeBodyParts">writeBodyParts</a>()&nbsp;in&nbsp;your&nbsp;SitePage&nbsp;like&nbsp;so::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#PSPPage-writeBodyParts">writeBodyParts</a>(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="WebKit.Page.html#Page">Page</a>.<a href="#PSPPage-writeBodyParts">writeBodyParts</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#PSPPage-validateHTML">validateHTML</a>()<br>
+&nbsp;<br>
+The&nbsp;``closingtags``&nbsp;param&nbsp;is&nbsp;a&nbsp;string&nbsp;which&nbsp;is&nbsp;appended<br>
+to&nbsp;the&nbsp;page&nbsp;before&nbsp;validation.&nbsp;&nbsp;Typically,&nbsp;it&nbsp;would&nbsp;be<br>
+the&nbsp;string&nbsp;``&lt;/body&gt;&lt;/html&gt;``.&nbsp;&nbsp;At&nbsp;the&nbsp;point&nbsp;this&nbsp;method<br>
+is&nbsp;called&nbsp;(e.g.&nbsp;from&nbsp;`writeBodyParts`)&nbsp;the&nbsp;page&nbsp;is&nbsp;not<br>
+yet&nbsp;100%&nbsp;complete,&nbsp;so&nbsp;we&nbsp;have&nbsp;to&nbsp;fake&nbsp;it.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeBody"><strong>writeBody</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;&lt;body&gt;&nbsp;element&nbsp;of&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;``&lt;body&gt;``&nbsp;portion&nbsp;of&nbsp;the&nbsp;page&nbsp;by&nbsp;writing&nbsp;the<br>
+``&lt;body&gt;...&lt;/body&gt;``&nbsp;(making&nbsp;use&nbsp;of&nbsp;`htBodyArgs`)&nbsp;and<br>
+invoking&nbsp;`writeBodyParts`&nbsp;in&nbsp;between.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeBodyParts"><strong>writeBodyParts</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;parts&nbsp;included&nbsp;in&nbsp;the&nbsp;&lt;body&gt;&nbsp;element.<br>
+&nbsp;<br>
+Invokes&nbsp;`writeContent`.&nbsp;Subclasses&nbsp;should&nbsp;only&nbsp;override&nbsp;this&nbsp;method<br>
+to&nbsp;provide&nbsp;additional&nbsp;page&nbsp;parts&nbsp;such&nbsp;as&nbsp;a&nbsp;header,&nbsp;sidebar&nbsp;and&nbsp;footer,<br>
+that&nbsp;a&nbsp;subclass&nbsp;doesn't&nbsp;normally&nbsp;have&nbsp;to&nbsp;worry&nbsp;about&nbsp;writing.<br>
+&nbsp;<br>
+For&nbsp;writing&nbsp;page-specific&nbsp;content,&nbsp;subclasses&nbsp;should&nbsp;override<br>
+`writeContent`()&nbsp;instead.&nbsp;This&nbsp;method&nbsp;is&nbsp;intended&nbsp;to&nbsp;be&nbsp;overridden<br>
+by&nbsp;your&nbsp;SitePage.<br>
+&nbsp;<br>
+See&nbsp;`SidebarPage`&nbsp;for&nbsp;an&nbsp;example&nbsp;override&nbsp;of&nbsp;this&nbsp;method.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;`writeBody`.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeContent"><strong>writeContent</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;unique,&nbsp;central&nbsp;content&nbsp;for&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;override&nbsp;this&nbsp;method&nbsp;(not&nbsp;invoking&nbsp;super)&nbsp;to&nbsp;write<br>
+their&nbsp;unique&nbsp;page&nbsp;content.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;`writeBodyParts`.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeDocType"><strong>writeDocType</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;DOCTYPE&nbsp;tag.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;`writeHTML`&nbsp;to&nbsp;write&nbsp;the&nbsp;``&lt;!DOCTYPE&nbsp;...&gt;``&nbsp;tag.<br>
+&nbsp;<br>
+By&nbsp;default&nbsp;this&nbsp;gives&nbsp;the&nbsp;HTML&nbsp;4.01&nbsp;Transitional&nbsp;DOCTYPE,<br>
+which&nbsp;is&nbsp;a&nbsp;good&nbsp;guess&nbsp;for&nbsp;what&nbsp;most&nbsp;people&nbsp;send.&nbsp;&nbsp;Be<br>
+warned,&nbsp;though,&nbsp;that&nbsp;some&nbsp;browsers&nbsp;render&nbsp;HTML&nbsp;differently<br>
+based&nbsp;on&nbsp;the&nbsp;DOCTYPE&nbsp;(particular&nbsp;newer&nbsp;browsers,&nbsp;like<br>
+Mozilla,&nbsp;do&nbsp;this).<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;to&nbsp;specify&nbsp;something&nbsp;else.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;find&nbsp;out&nbsp;more&nbsp;about&nbsp;doc&nbsp;types&nbsp;by&nbsp;searching&nbsp;for<br>
+DOCTYPE&nbsp;on&nbsp;the&nbsp;web,&nbsp;or&nbsp;visiting:<br>
+<a href="http://www.htmlhelp.com/tools/validator/doctype.html">http://www.htmlhelp.com/tools/validator/doctype.html</a></tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeHTML"><strong>writeHTML</strong></a>(self)</dt><dd><tt>Write&nbsp;all&nbsp;the&nbsp;HTML&nbsp;for&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;this&nbsp;method&nbsp;(which&nbsp;is&nbsp;invoked&nbsp;by&nbsp;`_respond`)<br>
+or&nbsp;more&nbsp;commonly&nbsp;its&nbsp;constituent&nbsp;methods,&nbsp;`writeDocType`,&nbsp;`writeHead`<br>
+and&nbsp;`writeBody`.<br>
+&nbsp;<br>
+You&nbsp;will&nbsp;want&nbsp;to&nbsp;override&nbsp;this&nbsp;method&nbsp;if:<br>
+&nbsp;&nbsp;*&nbsp;you&nbsp;want&nbsp;to&nbsp;format&nbsp;the&nbsp;entire&nbsp;HTML&nbsp;page&nbsp;yourself<br>
+&nbsp;&nbsp;*&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;send&nbsp;an&nbsp;HTML&nbsp;page&nbsp;that&nbsp;has&nbsp;already&nbsp;been&nbsp;generated<br>
+&nbsp;&nbsp;*&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;use&nbsp;a&nbsp;template&nbsp;that&nbsp;generates&nbsp;the&nbsp;entire&nbsp;page<br>
+&nbsp;&nbsp;*&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;send&nbsp;non-HTML&nbsp;content;&nbsp;in&nbsp;this&nbsp;case,&nbsp;be&nbsp;sure&nbsp;to&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#PSPPage-response">response</a>().setHeader('Content-Type',&nbsp;'mime/type').</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeHead"><strong>writeHead</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;&lt;head&gt;&nbsp;element&nbsp;of&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;``&lt;head&gt;``&nbsp;portion&nbsp;of&nbsp;the&nbsp;page&nbsp;by&nbsp;writing&nbsp;the<br>
+``&lt;head&gt;...&lt;/head&gt;``&nbsp;tags&nbsp;and&nbsp;invoking&nbsp;`writeHeadParts`&nbsp;in&nbsp;between.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeHeadParts"><strong>writeHeadParts</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;parts&nbsp;included&nbsp;in&nbsp;the&nbsp;&lt;head&gt;&nbsp;element.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;parts&nbsp;inside&nbsp;the&nbsp;``&lt;head&gt;...&lt;/head&gt;``&nbsp;tags.<br>
+Invokes&nbsp;`writeTitle`&nbsp;and&nbsp;then&nbsp;`writeMetaData`,&nbsp;`writeStyleSheet`<br>
+and&nbsp;`writeJavaScript`.&nbsp;Subclasses&nbsp;should&nbsp;override&nbsp;the&nbsp;`title`<br>
+method&nbsp;and&nbsp;the&nbsp;three&nbsp;latter&nbsp;methods&nbsp;only.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeJavaScript"><strong>writeJavaScript</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;JavaScript&nbsp;for&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+This&nbsp;default&nbsp;implementation&nbsp;does&nbsp;nothing.<br>
+Subclasses&nbsp;should&nbsp;override&nbsp;if&nbsp;necessary.<br>
+&nbsp;<br>
+A&nbsp;typical&nbsp;implementation&nbsp;is:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#PSPPage-writeln">writeln</a>('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;script&nbsp;type="text/javascript"&nbsp;src="ajax.js"&gt;&lt;/script&gt;')</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeMetaData"><strong>writeMetaData</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;meta&nbsp;data&nbsp;for&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+This&nbsp;default&nbsp;implementation&nbsp;does&nbsp;nothing.<br>
+Subclasses&nbsp;should&nbsp;override&nbsp;if&nbsp;necessary.<br>
+&nbsp;<br>
+A&nbsp;typical&nbsp;implementation&nbsp;is:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#PSPPage-writeln">writeln</a>('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;meta&nbsp;http-equiv="content-type"&nbsp;content="text/html;&nbsp;charset=ISO-8859-1"&gt;')</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeStyleSheet"><strong>writeStyleSheet</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;CSS&nbsp;for&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+This&nbsp;default&nbsp;implementation&nbsp;does&nbsp;nothing.<br>
+Subclasses&nbsp;should&nbsp;override&nbsp;if&nbsp;necessary.<br>
+&nbsp;<br>
+A&nbsp;typical&nbsp;implementation&nbsp;is:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#PSPPage-writeln">writeln</a>('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;link&nbsp;rel="stylesheet"&nbsp;href="StyleSheet.css"&nbsp;type="text/css"&gt;')</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeTitle"><strong>writeTitle</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;&lt;title&gt;&nbsp;element&nbsp;of&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;``&lt;title&gt;``&nbsp;portion&nbsp;of&nbsp;the&nbsp;page.<br>
+Uses&nbsp;`title`,&nbsp;which&nbsp;is&nbsp;where&nbsp;you&nbsp;should&nbsp;override.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Page.html#Page">WebKit.Page.Page</a>:<br>
+<dl><dt><a name="PSPPage-htmlDecode"><strong>htmlDecode</strong></a>(s)</dt><dd><tt>HTML&nbsp;decode&nbsp;special&nbsp;characters.<br>
+&nbsp;<br>
+Alias&nbsp;for&nbsp;`WebUtils.Funcs.htmlDecode`.&nbsp;Decodes&nbsp;HTML&nbsp;entities.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-htmlEncode"><strong>htmlEncode</strong></a>(s)</dt><dd><tt>HTML&nbsp;encode&nbsp;special&nbsp;characters.<br>
+Alias&nbsp;for&nbsp;`WebUtils.Funcs.htmlEncode`,&nbsp;quotes&nbsp;the&nbsp;special&nbsp;characters<br>
+&amp;,&nbsp;&lt;,&nbsp;&gt;,&nbsp;and&nbsp;"</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPContent.html#HTTPContent">WebKit.HTTPContent.HTTPContent</a>:<br>
+<dl><dt><a name="PSPPage-actions"><strong>actions</strong></a>(self)</dt><dd><tt>The&nbsp;allowed&nbsp;actions.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;list&nbsp;or&nbsp;a&nbsp;set&nbsp;of&nbsp;method&nbsp;names&nbsp;that&nbsp;are&nbsp;allowable<br>
+actions&nbsp;from&nbsp;HTML&nbsp;forms.&nbsp;The&nbsp;default&nbsp;implementation&nbsp;returns&nbsp;[].<br>
+See&nbsp;`_respond`&nbsp;for&nbsp;more&nbsp;about&nbsp;actions.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-application"><strong>application</strong></a>(self)</dt><dd><tt>The&nbsp;`Application`&nbsp;instance&nbsp;we're&nbsp;using.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-callMethodOfServlet"><strong>callMethodOfServlet</strong></a>(self, url, method, *args, **kwargs)</dt><dd><tt>Call&nbsp;a&nbsp;method&nbsp;of&nbsp;another&nbsp;servlet.<br>
+&nbsp;<br>
+See&nbsp;`Application.callMethodOfServlet`&nbsp;for&nbsp;details.<br>
+The&nbsp;main&nbsp;difference&nbsp;is&nbsp;that&nbsp;here&nbsp;you&nbsp;don't&nbsp;have<br>
+to&nbsp;pass&nbsp;in&nbsp;the&nbsp;transaction&nbsp;as&nbsp;the&nbsp;first&nbsp;argument.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-canBeThreaded"><strong>canBeThreaded</strong></a>(self)</dt><dd><tt>Declares&nbsp;whether&nbsp;servlet&nbsp;can&nbsp;be&nbsp;threaded.<br>
+&nbsp;<br>
+Returns&nbsp;False&nbsp;because&nbsp;of&nbsp;the&nbsp;instance&nbsp;variables&nbsp;we&nbsp;set&nbsp;up&nbsp;in&nbsp;`awake`.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-forward"><strong>forward</strong></a>(self, url)</dt><dd><tt>Forward&nbsp;request.<br>
+&nbsp;<br>
+Forwards&nbsp;this&nbsp;request&nbsp;to&nbsp;another&nbsp;servlet.<br>
+See&nbsp;`Application.forward`&nbsp;for&nbsp;details.<br>
+The&nbsp;main&nbsp;difference&nbsp;is&nbsp;that&nbsp;here&nbsp;you&nbsp;don't&nbsp;have<br>
+to&nbsp;pass&nbsp;in&nbsp;the&nbsp;transaction&nbsp;as&nbsp;the&nbsp;first&nbsp;argument.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-handleAction"><strong>handleAction</strong></a>(self, action)</dt><dd><tt>Handle&nbsp;action.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;`_respond`&nbsp;when&nbsp;a&nbsp;legitimate&nbsp;action&nbsp;has<br>
+been&nbsp;found&nbsp;in&nbsp;a&nbsp;form.&nbsp;Invokes&nbsp;`preAction`,&nbsp;the&nbsp;actual<br>
+action&nbsp;method&nbsp;and&nbsp;`postAction`.<br>
+&nbsp;<br>
+Subclasses&nbsp;rarely&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-includeURL"><strong>includeURL</strong></a>(self, url)</dt><dd><tt>Include&nbsp;output&nbsp;from&nbsp;other&nbsp;servlet.<br>
+&nbsp;<br>
+Includes&nbsp;the&nbsp;response&nbsp;of&nbsp;another&nbsp;servlet<br>
+in&nbsp;the&nbsp;current&nbsp;servlet's&nbsp;response.<br>
+See&nbsp;`Application.includeURL`&nbsp;for&nbsp;details.<br>
+The&nbsp;main&nbsp;difference&nbsp;is&nbsp;that&nbsp;here&nbsp;you&nbsp;don't&nbsp;have<br>
+to&nbsp;pass&nbsp;in&nbsp;the&nbsp;transaction&nbsp;as&nbsp;the&nbsp;first&nbsp;argument.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-methodNameForAction"><strong>methodNameForAction</strong></a>(self, name)</dt><dd><tt>Return&nbsp;method&nbsp;name&nbsp;for&nbsp;an&nbsp;action&nbsp;name.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;_respond()&nbsp;to&nbsp;determine&nbsp;the&nbsp;method&nbsp;name&nbsp;for&nbsp;a&nbsp;given&nbsp;action<br>
+name&nbsp;which&nbsp;has&nbsp;been&nbsp;derived&nbsp;as&nbsp;the&nbsp;value&nbsp;of&nbsp;an&nbsp;``_action_``&nbsp;field.<br>
+Since&nbsp;this&nbsp;is&nbsp;usually&nbsp;the&nbsp;label&nbsp;of&nbsp;an&nbsp;HTML&nbsp;submit&nbsp;button&nbsp;in&nbsp;a&nbsp;form,<br>
+it&nbsp;is&nbsp;often&nbsp;needed&nbsp;to&nbsp;transform&nbsp;it&nbsp;in&nbsp;order&nbsp;to&nbsp;get&nbsp;a&nbsp;valid&nbsp;method&nbsp;name<br>
+(for&nbsp;instance,&nbsp;blanks&nbsp;could&nbsp;be&nbsp;replaced&nbsp;by&nbsp;underscores&nbsp;and&nbsp;the&nbsp;like).<br>
+This&nbsp;default&nbsp;implementation&nbsp;of&nbsp;the&nbsp;name&nbsp;transformation&nbsp;is&nbsp;the&nbsp;identity,<br>
+it&nbsp;simply&nbsp;returns&nbsp;the&nbsp;name.&nbsp;Subclasses&nbsp;should&nbsp;override&nbsp;this&nbsp;method<br>
+when&nbsp;action&nbsp;names&nbsp;don't&nbsp;match&nbsp;their&nbsp;method&nbsp;names;&nbsp;they&nbsp;could&nbsp;"mangle"<br>
+the&nbsp;action&nbsp;names&nbsp;or&nbsp;look&nbsp;the&nbsp;method&nbsp;names&nbsp;up&nbsp;in&nbsp;a&nbsp;dictionary.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-request"><strong>request</strong></a>(self)</dt><dd><tt>The&nbsp;request&nbsp;(`HTTPRequest`)&nbsp;we're&nbsp;handling.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-respondToGet"><strong>respondToGet</strong></a>(self, transaction)</dt><dd><tt>Respond&nbsp;to&nbsp;GET.<br>
+&nbsp;<br>
+Invoked&nbsp;in&nbsp;response&nbsp;to&nbsp;a&nbsp;GET&nbsp;request&nbsp;method.&nbsp;All&nbsp;methods<br>
+are&nbsp;passed&nbsp;to&nbsp;`_respond`.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-respondToPost"><strong>respondToPost</strong></a>(self, transaction)</dt><dd><tt>Respond&nbsp;to&nbsp;POST.<br>
+&nbsp;<br>
+Invoked&nbsp;in&nbsp;response&nbsp;to&nbsp;a&nbsp;POST&nbsp;request&nbsp;method.&nbsp;All&nbsp;methods<br>
+are&nbsp;passed&nbsp;to&nbsp;`_respond`.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-response"><strong>response</strong></a>(self)</dt><dd><tt>The&nbsp;response&nbsp;(`HTTPResponse`)&nbsp;we're&nbsp;handling.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-sendRedirectAndEnd"><strong>sendRedirectAndEnd</strong></a>(self, url, status<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;redirect&nbsp;and&nbsp;end.<br>
+&nbsp;<br>
+Sends&nbsp;a&nbsp;redirect&nbsp;back&nbsp;to&nbsp;the&nbsp;client&nbsp;and&nbsp;ends&nbsp;the&nbsp;response.<br>
+This&nbsp;is&nbsp;a&nbsp;very&nbsp;popular&nbsp;pattern.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-sendRedirectPermanentAndEnd"><strong>sendRedirectPermanentAndEnd</strong></a>(self, url)</dt><dd><tt>Send&nbsp;permanent&nbsp;redirect&nbsp;and&nbsp;end.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-sendRedirectSeeOtherAndEnd"><strong>sendRedirectSeeOtherAndEnd</strong></a>(self, url)</dt><dd><tt>Send&nbsp;redirect&nbsp;to&nbsp;a&nbsp;URL&nbsp;to&nbsp;be&nbsp;retrieved&nbsp;with&nbsp;GET&nbsp;and&nbsp;end.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;proper&nbsp;method&nbsp;for&nbsp;the&nbsp;Post/Redirect/Get&nbsp;pattern.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-sendRedirectTemporaryAndEnd"><strong>sendRedirectTemporaryAndEnd</strong></a>(self, url)</dt><dd><tt>Send&nbsp;temporary&nbsp;redirect&nbsp;and&nbsp;end.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-session"><strong>session</strong></a>(self)</dt><dd><tt>The&nbsp;session&nbsp;object.<br>
+&nbsp;<br>
+This&nbsp;provides&nbsp;a&nbsp;state&nbsp;for&nbsp;the&nbsp;current&nbsp;user<br>
+(associated&nbsp;with&nbsp;a&nbsp;browser&nbsp;instance,&nbsp;really).<br>
+If&nbsp;no&nbsp;session&nbsp;exists,&nbsp;then&nbsp;a&nbsp;session&nbsp;will&nbsp;be&nbsp;created.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-sessionEncode"><strong>sessionEncode</strong></a>(self, url<font color="#909090">=None</font>)</dt><dd><tt>Utility&nbsp;function&nbsp;to&nbsp;access&nbsp;`Session.sessionEncode`.<br>
+&nbsp;<br>
+Takes&nbsp;a&nbsp;url&nbsp;and&nbsp;adds&nbsp;the&nbsp;session&nbsp;ID&nbsp;as&nbsp;a&nbsp;parameter.<br>
+This&nbsp;is&nbsp;for&nbsp;cases&nbsp;where&nbsp;you&nbsp;don't&nbsp;know&nbsp;if&nbsp;the&nbsp;client<br>
+will&nbsp;accepts&nbsp;cookies.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-sleep"><strong>sleep</strong></a>(self, transaction)</dt><dd><tt>Let&nbsp;servlet&nbsp;sleep&nbsp;again.<br>
+&nbsp;<br>
+We&nbsp;unset&nbsp;some&nbsp;variables.&nbsp;Very&nbsp;boring.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-transaction"><strong>transaction</strong></a>(self)</dt><dd><tt>The&nbsp;`Transaction`&nbsp;we're&nbsp;currently&nbsp;handling.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-write"><strong>write</strong></a>(self, *args)</dt><dd><tt>Write&nbsp;to&nbsp;output.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;arguments,&nbsp;which&nbsp;are&nbsp;turned&nbsp;to&nbsp;strings&nbsp;(with&nbsp;`str`)<br>
+and&nbsp;concatenated&nbsp;before&nbsp;being&nbsp;written&nbsp;to&nbsp;the&nbsp;response.<br>
+Unicode&nbsp;strings&nbsp;must&nbsp;be&nbsp;encoded&nbsp;before&nbsp;they&nbsp;can&nbsp;be&nbsp;written.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeExceptionReport"><strong>writeExceptionReport</strong></a>(self, handler)</dt><dd><tt>Write&nbsp;extra&nbsp;information&nbsp;to&nbsp;the&nbsp;exception&nbsp;report.<br>
+&nbsp;<br>
+The&nbsp;`handler`&nbsp;argument&nbsp;is&nbsp;the&nbsp;exception&nbsp;handler,&nbsp;and<br>
+information&nbsp;is&nbsp;written&nbsp;there&nbsp;(using&nbsp;`writeTitle`,<br>
+`write`,&nbsp;and&nbsp;`writeln`).&nbsp;&nbsp;This&nbsp;information&nbsp;is&nbsp;added<br>
+to&nbsp;the&nbsp;exception&nbsp;report.<br>
+&nbsp;<br>
+See&nbsp;`WebKit.ExceptionHandler`&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-writeln"><strong>writeln</strong></a>(self, *args)</dt><dd><tt>Write&nbsp;to&nbsp;output&nbsp;with&nbsp;newline.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;arguments&nbsp;(like&nbsp;`write`),&nbsp;adding&nbsp;a&nbsp;newline&nbsp;after.<br>
+Unicode&nbsp;strings&nbsp;must&nbsp;be&nbsp;encoded&nbsp;before&nbsp;they&nbsp;can&nbsp;be&nbsp;written.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.HTTPContent.html#HTTPContent">WebKit.HTTPContent.HTTPContent</a>:<br>
+<dl><dt><a name="PSPPage-endResponse"><strong>endResponse</strong></a>()</dt><dd><tt>End&nbsp;response.<br>
+&nbsp;<br>
+When&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;during&nbsp;`awake`&nbsp;or&nbsp;`respond`,<br>
+servlet&nbsp;processing&nbsp;will&nbsp;end&nbsp;immediately,<br>
+and&nbsp;the&nbsp;accumulated&nbsp;response&nbsp;will&nbsp;be&nbsp;sent.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;`sleep`&nbsp;will&nbsp;still&nbsp;be&nbsp;called,&nbsp;providing&nbsp;a<br>
+chance&nbsp;to&nbsp;clean&nbsp;up&nbsp;or&nbsp;free&nbsp;any&nbsp;resources.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-urlDecode"><strong>urlDecode</strong></a>(s)</dt><dd><tt>Turn&nbsp;special&nbsp;%&nbsp;characters&nbsp;into&nbsp;actual&nbsp;characters.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;does&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;`urllib.unquote_plus()`&nbsp;function.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-urlEncode"><strong>urlEncode</strong></a>(s)</dt><dd><tt>Quotes&nbsp;special&nbsp;characters&nbsp;using&nbsp;the&nbsp;%&nbsp;substitutions.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;does&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;`urllib.quote_plus()`&nbsp;function.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>:<br>
+<dl><dt><a name="PSPPage-respond"><strong>respond</strong></a>(self, trans)</dt><dd><tt>Respond&nbsp;to&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Invokes&nbsp;the&nbsp;appropriate&nbsp;respondToSomething()&nbsp;method&nbsp;depending&nbsp;on&nbsp;the<br>
+type&nbsp;of&nbsp;request&nbsp;(e.g.,&nbsp;GET,&nbsp;POST,&nbsp;PUT,&nbsp;...).</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-respondToHead"><strong>respondToHead</strong></a>(self, trans)</dt><dd><tt>Respond&nbsp;to&nbsp;a&nbsp;HEAD&nbsp;request.<br>
+&nbsp;<br>
+A&nbsp;correct&nbsp;but&nbsp;inefficient&nbsp;implementation.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>:<br>
+<dl><dt><a name="PSPPage-lastModified"><strong>lastModified</strong></a>(trans)</dt><dd><tt>Get&nbsp;time&nbsp;of&nbsp;last&nbsp;modification.<br>
+&nbsp;<br>
+Return&nbsp;this&nbsp;object's&nbsp;Last-Modified&nbsp;time&nbsp;(as&nbsp;a&nbsp;float),<br>
+or&nbsp;None&nbsp;(meaning&nbsp;don't&nbsp;know&nbsp;or&nbsp;not&nbsp;applicable).</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-notImplemented"><strong>notImplemented</strong></a>(trans)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><a name="PSPPage-close"><strong>close</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPPage-log"><strong>log</strong></a>(self, message)</dt><dd><tt>Log&nbsp;a&nbsp;message.<br>
+&nbsp;<br>
+This&nbsp;can&nbsp;be&nbsp;invoked&nbsp;to&nbsp;print&nbsp;messages&nbsp;concerning&nbsp;the&nbsp;servlet.<br>
+This&nbsp;is&nbsp;often&nbsp;used&nbsp;by&nbsp;self&nbsp;to&nbsp;relay&nbsp;important&nbsp;information&nbsp;back<br>
+to&nbsp;developers.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-name"><strong>name</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;which&nbsp;is&nbsp;simple&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;class.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;*not*&nbsp;override&nbsp;this&nbsp;method.<br>
+It&nbsp;is&nbsp;used&nbsp;for&nbsp;logging&nbsp;and&nbsp;debugging.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-open"><strong>open</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPPage-runMethodForTransaction"><strong>runMethodForTransaction</strong></a>(self, trans, method, *args, **kw)</dt></dl>
+
+<dl><dt><a name="PSPPage-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;filesystem&nbsp;path&nbsp;of&nbsp;the&nbsp;page&nbsp;on&nbsp;the&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-setFactory"><strong>setFactory</strong></a>(self, factory)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><a name="PSPPage-canBeReused"><strong>canBeReused</strong></a>()</dt><dd><tt>Returns&nbsp;whether&nbsp;a&nbsp;single&nbsp;servlet&nbsp;instance&nbsp;can&nbsp;be&nbsp;reused.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;is&nbsp;True,&nbsp;but&nbsp;subclasses&nbsp;con&nbsp;override&nbsp;to&nbsp;return&nbsp;False.<br>
+Keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;performance&nbsp;may&nbsp;seriously&nbsp;be&nbsp;degraded&nbsp;if&nbsp;instances<br>
+can't&nbsp;be&nbsp;reused.&nbsp;Also,&nbsp;there's&nbsp;no&nbsp;known&nbsp;good&nbsp;reasons&nbsp;not&nbsp;to&nbsp;reuse<br>
+an&nbsp;instance.&nbsp;Remember&nbsp;the&nbsp;<a href="#PSPPage-awake">awake</a>()&nbsp;and&nbsp;<a href="#PSPPage-sleep">sleep</a>()&nbsp;methods&nbsp;are&nbsp;invoked<br>
+for&nbsp;every&nbsp;transaction.&nbsp;But&nbsp;just&nbsp;in&nbsp;case,&nbsp;your&nbsp;servlet&nbsp;can&nbsp;refuse<br>
+to&nbsp;be&nbsp;reused.</tt></dd></dl>
+
+<dl><dt><a name="PSPPage-runTransaction"><strong>runTransaction</strong></a>(trans)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

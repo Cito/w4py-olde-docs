@@ -1,0 +1,886 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/DataTable.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""DataTable.py
+
+
+INTRODUCTION
+
+This class is useful for representing a table of data arranged by named
+columns, where each row in the table can be thought of as a record:
+
+    name   phoneNumber
+    ------ -----------
+    Chuck  893-3498
+    Bill   893-0439
+    John   893-5901
+
+This data often comes from delimited text files which typically
+have well defined columns or fields with several rows each of which can
+be thought of as a record.
+
+Using a DataTable can be as easy as using lists and dictionaries:
+
+    table = DataTable('users.csv')
+    for row in table:
+        print row['name'], row['phoneNumber']
+
+Or even:
+
+    table = DataTable('users.csv')
+    for row in table:
+        print '%(name)s %(phoneNumber)s' % row
+
+The above print statement relies on the fact that rows can be treated
+like dictionaries, using the column headings as keys.
+
+You can also treat a row like an array:
+
+    table = DataTable('something.tabbed', delimiter='\t')
+    for row in table:
+        for item in row:
+            print item,
+        print
+
+
+COLUMNS
+
+Column headings can have a type specification like so:
+    name, age:int, zip:int
+
+Possible types include string, int, float and datetime.
+
+String is assumed if no type is specified but you can set that
+assumption when you create the table:
+
+    table = DataTable(headings, defaultType='float')
+
+Using types like int and float will cause DataTable to actually
+convert the string values (perhaps read from a file) to these types
+so that you can use them in natural operations. For example:
+
+    if row['age'] &gt; 120:
+        self.flagData(row, 'age looks high')
+
+As you can see, each row can be accessed as a dictionary with keys
+according the column headings. Names are case sensitive.
+
+
+ADDING ROWS
+
+Like Python lists, data tables have an append() method. You can append
+TableRecords, or you pass a dictionary, list or object, in which case a
+TableRecord is created based on given values. See the method docs below
+for more details.
+
+
+FILES
+
+By default, the files that DataTable reads from are expected to be
+comma-separated value files.
+
+Limited comments are supported: A comment is any line whose very first
+character is a #. This allows you to easily comment out lines in your
+data files without having to remove them.
+
+Whitespace around field values is stripped.
+
+You can control all this behavior through the arguments found in the
+initializer and the various readFoo() methods:
+
+    ...delimiter=',', allowComments=True, stripWhite=True
+
+For example:
+
+    table = DataTable('foo.tabbed', delimiter='\t',
+        allowComments=False, stripWhite=False)
+
+You should access these parameters by their name since additional ones
+could appear in the future, thereby changing the order.
+
+If you are creating these text files, we recommend the
+comma-separated-value format, or CSV. This format is better defined
+than the tab delimited format, and can easily be edited and manipulated
+by popular spreadsheets and databases.
+
+
+MICROSOFT EXCEL
+
+On Microsoft Windows systems with Excel and the win32all package
+(http://starship.python.net/crew/mhammond/), DataTable will use Excel
+(via COM) to read ".xls" files.
+
+from MiscUtils import DataTable
+assert DataTable.canReadExcel()
+table = DataTable.DataTable('foo.xls')
+
+With consistency to its CSV processing, DataTable will ignore any row
+whose first cell is '#' and strip surrounding whitespace around strings.
+
+
+TABLES FROM SCRATCH
+
+Here's an example that constructs a table from scratch:
+
+    table = DataTable(['name', 'age:int'])
+    table.append(['John', 80])
+    table.append({'name': 'John', 'age': 80})
+    print table
+
+
+QUERIES
+
+A simple query mechanism is supported for equality of fields:
+
+    matches = table.recordsEqualTo({'uid': 5})
+    if matches:
+        for match in matches:
+            print match
+    else:
+        print 'No matches.'
+
+
+COMMON USES
+
+  * Programs can keep configuration and other data in simple comma-
+    separated text files and use DataTable to access them. For example, a
+    web site could read its sidebar links from such a file, thereby allowing
+    people who don't know Python (or even HTML) to edit these links without
+    having to understand other implementation parts of the site.
+
+  * Servers can use DataTable to read and write log files.
+
+
+FROM THE COMMAND LINE
+
+The only purpose in invoking DataTable from the command line is to see
+if it will read a file:
+
+  &gt; python DataTable.py foo.csv
+
+The data table is printed to stdout.
+
+
+CACHING
+
+DataTable uses "pickle caching" so that it can read .csv files faster
+on subsequent loads. You can disable this across the board with:
+    from MiscUtils.DataTable import DataTable
+    DataTable._usePickleCache = False
+
+Or per instance by passing "usePickleCache=False" to the constructor.
+
+See the docstring of PickleCache.py for more information.
+
+
+MORE DOCS
+
+Some of the methods in this module have worthwhile doc strings to look at.
+See below.
+
+
+TO DO
+
+  * Allow callback parameter or setting for parsing CSV records.
+  * Perhaps TableRecord should inherit list and dict and override
+    methods as appropriate?
+  * _types and _blankValues aren't really packaged, advertised or
+    documented for customization by the user of this module.
+  * DataTable:
+      * Parameterize the TextColumn class.
+      * Parameterize the TableRecord class.
+      * More list-like methods such as insert()
+      * writeFileNamed() is flawed: it doesn't write the table column type
+      * Should it inherit from list?
+  * Add error checking that a column name is not a number (which could
+    cause problems).
+  * Reading Excel sheets with xlrd, not only with win32com.
+
+"""</span>
+
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">from</span> datetime <span class="PY_KEYWORD">import</span> date, datetime, time, timedelta, tzinfo
+<span class="PY_KEYWORD">from</span> decimal <span class="PY_KEYWORD">import</span> Decimal
+
+<span class="PY_KEYWORD">from</span> CSVParser <span class="PY_KEYWORD">import</span> CSVParser
+<span class="PY_KEYWORD">from</span> CSVJoiner <span class="PY_KEYWORD">import</span> joinCSVFields
+<span class="PY_KEYWORD">from</span> Funcs <span class="PY_KEYWORD">import</span> positiveId
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+
+<span class="PY_COMMENT">## Types and blank Values ##</span>
+
+_types = {
+    <span class="PY_STRING">'str'</span>: str,
+    <span class="PY_STRING">'string'</span>: str,
+    <span class="PY_STRING">'unicode'</span>: unicode,
+    <span class="PY_STRING">'basestring'</span>: basestring,
+    <span class="PY_STRING">'int'</span>: int,
+    <span class="PY_STRING">'bool'</span>: bool,
+    <span class="PY_STRING">'long'</span>: long,
+    <span class="PY_STRING">'decimal'</span>: Decimal,
+    <span class="PY_STRING">'float'</span>: float,
+    <span class="PY_STRING">'date'</span>: date,
+    <span class="PY_STRING">'datetime'</span>: datetime,
+    <span class="PY_STRING">'time'</span>: time,
+    <span class="PY_STRING">'timedelta'</span>: timedelta,
+    <span class="PY_STRING">'tzinfo'</span>: tzinfo
+}
+
+_blankValues = {
+    str: <span class="PY_STRING">''</span>,
+    unicode: u<span class="PY_STRING">''</span>,
+    basestring: <span class="PY_STRING">''</span>,
+    bool: False,
+    int: 0,
+    long: 0L,
+    float: 0.0,
+    Decimal: Decimal(<span class="PY_STRING">'0'</span>)
+}
+
+
+<span class="PY_COMMENT">## Functions ##</span>
+
+<span class="PY_KEYWORD">def</span> canReadExcel():
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">from</span> win32com.client <span class="PY_KEYWORD">import</span> Dispatch
+        Dispatch(<span class="PY_STRING">"Excel.Application"</span>)
+    <span class="PY_KEYWORD">except</span> Exception:
+        <span class="PY_KEYWORD">return</span> False
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">return</span> True
+
+
+<span class="PY_COMMENT">## Classes ##</span>
+
+
+<span class="PY_KEYWORD">class</span> DataTableError(Exception):
+    <span class="PY_STRING">"""Data table error."""</span>
+
+
+<span class="PY_KEYWORD">class</span> TableColumn(object):
+    <span class="PY_STRING">"""Representation of a table column.
+
+    A table column represents a column of the table including name and type.
+    It does not contain the actual values of the column. These are stored
+    individually in the rows.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, spec):
+        <span class="PY_STRING">"""Initialize the table column.
+
+        The spec parameter is a string such as 'name' or 'name:type'.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">':'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> spec:
+            name, type = spec, None
+        <span class="PY_KEYWORD">else</span>:
+            name, type = spec.split(<span class="PY_STRING">':'</span>, 1)
+        self._name = name
+        self.setType(type)
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> type(self):
+        <span class="PY_KEYWORD">return</span> self._type
+
+    <span class="PY_KEYWORD">def</span> setType(self, type):
+        <span class="PY_STRING">"""Set the type (by a string containing the name) of the heading.
+
+        Usually invoked by DataTable to set the default type for columns
+        whose types were not specified.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> type:
+            <span class="PY_KEYWORD">try</span>:
+                self._type = _types[type.lower()]
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">raise</span> DataTableError(
+                    <span class="PY_STRING">'Unknown type %r. types=%r'</span> % (type, _types.keys()))
+        <span class="PY_KEYWORD">else</span>:
+            self._type = None
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;%s %r with %r at %x&gt;'</span> % (self.__class__.__name__,
+            self._name, self._type, positiveId(self))
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+
+    <span class="PY_COMMENT">## Utilities ##</span>
+
+    <span class="PY_KEYWORD">def</span> valueForRawValue(self, value):
+        <span class="PY_STRING">"""Set correct type for raw value.
+
+        The rawValue is typically a string or value already of the appropriate
+        type. TableRecord invokes this method to ensure that values (especially
+        strings that come from files) are the correct types (e.g., ints are
+        ints and floats are floats).
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._type:
+            <span class="PY_KEYWORD">if</span> isinstance(value, unicode) <span class="PY_KEYWORD">and</span> self._type <span class="PY_KEYWORD">is</span> str:
+                <span class="PY_KEYWORD">return</span> value.encode(<span class="PY_STRING">'utf-8'</span>)
+            <span class="PY_KEYWORD">elif</span> isinstance(value, str) <span class="PY_KEYWORD">and</span> self._type <span class="PY_KEYWORD">is</span> unicode:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">return</span> value.decode(<span class="PY_STRING">'utf-8'</span>)
+                <span class="PY_KEYWORD">except</span> UnicodeDecodeError:
+                    <span class="PY_KEYWORD">return</span> value.decode(<span class="PY_STRING">'latin-1'</span>)
+            <span class="PY_KEYWORD">elif</span> value == <span class="PY_STRING">''</span> <span class="PY_KEYWORD">and</span> self._type <span class="PY_KEYWORD">in</span> (int, long, float, Decimal):
+                value = <span class="PY_STRING">'0'</span>
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(value, self._type):
+                value = self._type(value)
+        <span class="PY_KEYWORD">return</span> value
+
+
+<span class="PY_KEYWORD">class</span> DataTable(object):
+    <span class="PY_STRING">"""Representation of a data table.
+
+    See the doc string for this module.
+
+    """</span>
+
+    _usePickleCache = True
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, filenameOrHeadings=None, delimiter=<span class="PY_STRING">','</span>,
+            allowComments=True, stripWhite=True,
+            defaultType=None, usePickleCache=None):
+        <span class="PY_KEYWORD">if</span> usePickleCache <span class="PY_KEYWORD">is</span> None:
+            self._usePickleCache = self._usePickleCache
+        <span class="PY_KEYWORD">else</span>:
+            self._usePickleCache = usePickleCache
+        <span class="PY_KEYWORD">if</span> defaultType <span class="PY_KEYWORD">and</span> defaultType <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> _types:
+            <span class="PY_KEYWORD">raise</span> DataTableError(
+                <span class="PY_STRING">'Unknown type for default type: %r'</span> % defaultType)
+        self._defaultType = defaultType
+        self._filename = None
+        self._headings = []
+        self._rows = []
+        <span class="PY_KEYWORD">if</span> filenameOrHeadings:
+            <span class="PY_KEYWORD">if</span> isinstance(filenameOrHeadings, basestring):
+                self.readFileNamed(filenameOrHeadings, delimiter, allowComments, stripWhite)
+            <span class="PY_KEYWORD">else</span>:
+                self.setHeadings(filenameOrHeadings)
+
+
+    <span class="PY_COMMENT">## File I/O ##</span>
+
+    <span class="PY_KEYWORD">def</span> readFileNamed(self, filename, delimiter=<span class="PY_STRING">','</span>,
+            allowComments=True, stripWhite=True, worksheet=1, row=1, column=1):
+        self._filename = filename
+        data = None
+        <span class="PY_KEYWORD">if</span> self._usePickleCache:
+            <span class="PY_KEYWORD">from</span> PickleCache <span class="PY_KEYWORD">import</span> readPickleCache, writePickleCache
+            data = readPickleCache(filename, source=<span class="PY_STRING">'MiscUtils.DataTable'</span>)
+        <span class="PY_KEYWORD">if</span> data <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">if</span> self._filename.lower().endswith(<span class="PY_STRING">'.xls'</span>):
+                self.readExcel(worksheet, row, column)
+            <span class="PY_KEYWORD">else</span>:
+                file = open(self._filename, <span class="PY_STRING">'r'</span>)
+                self.readFile(file, delimiter, allowComments, stripWhite)
+                file.close()
+            <span class="PY_KEYWORD">if</span> self._usePickleCache:
+                writePickleCache(self, filename, source=<span class="PY_STRING">'MiscUtils.DataTable'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self.__dict__ = data.__dict__
+        <span class="PY_KEYWORD">return</span> self
+
+    <span class="PY_KEYWORD">def</span> readFile(self, file, delimiter=<span class="PY_STRING">','</span>,
+            allowComments=True, stripWhite=True):
+        <span class="PY_KEYWORD">return</span> self.readLines(file.readlines(), delimiter,
+            allowComments, stripWhite)
+
+    <span class="PY_KEYWORD">def</span> readString(self, string, delimiter=<span class="PY_STRING">','</span>,
+            allowComments=True, stripWhite=True):
+        <span class="PY_KEYWORD">return</span> self.readLines(string.splitlines(), delimiter,
+            allowComments, stripWhite)
+
+    <span class="PY_KEYWORD">def</span> readLines(self, lines, delimiter=<span class="PY_STRING">','</span>,
+            allowComments=True, stripWhite=True):
+        <span class="PY_KEYWORD">if</span> self._defaultType <span class="PY_KEYWORD">is</span> None:
+            self._defaultType = <span class="PY_STRING">'str'</span>
+        haveReadHeadings = False
+        parse = CSVParser(fieldSep=delimiter, allowComments=allowComments,
+            stripWhitespace=stripWhite).parse
+        <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+            <span class="PY_COMMENT"># process a row, either headings or data</span>
+            values = parse(line)
+            <span class="PY_KEYWORD">if</span> values:
+                <span class="PY_KEYWORD">if</span> haveReadHeadings:
+                    row = TableRecord(self, values)
+                    self._rows.append(row)
+                <span class="PY_KEYWORD">else</span>:
+                    self.setHeadings(values)
+                    haveReadHeadings = True
+        <span class="PY_KEYWORD">if</span> values <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">raise</span> DataTableError(<span class="PY_STRING">"Unfinished multiline record."</span>)
+        <span class="PY_KEYWORD">return</span> self
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> canReadExcel():
+        <span class="PY_KEYWORD">return</span> canReadExcel()
+
+    <span class="PY_KEYWORD">def</span> readExcel(self, worksheet=1, row=1, column=1):
+        maxBlankRows = 10
+        numRowsToReadPerCall = 20
+        <span class="PY_KEYWORD">from</span> win32com.client <span class="PY_KEYWORD">import</span> Dispatch
+        xl = Dispatch(<span class="PY_STRING">"Excel.Application"</span>)
+        wb = xl.Workbooks.Open(os.path.abspath(self._filename))
+        <span class="PY_KEYWORD">try</span>:
+            sh = wb.Worksheets(worksheet)
+            sh.Cells(row, column)
+            <span class="PY_COMMENT"># determine max column</span>
+            numCols = 1
+            <span class="PY_KEYWORD">while</span> 1:
+                <span class="PY_KEYWORD">if</span> sh.Cells(row, numCols).Value <span class="PY_KEYWORD">in</span> (None, <span class="PY_STRING">''</span>):
+                    numCols -= 1
+                    <span class="PY_KEYWORD">break</span>
+                numCols += 1
+            <span class="PY_KEYWORD">if</span> numCols &lt;= 0:
+                <span class="PY_KEYWORD">return</span>
+
+            <span class="PY_KEYWORD">def</span> strip(x):
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">return</span> x.strip()
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">return</span> x
+
+            <span class="PY_COMMENT"># read rows of data</span>
+            maxCol = chr(ord(<span class="PY_STRING">'A'</span>) + numCols - 1)
+            haveReadHeadings = False
+            rowNum = row
+            numBlankRows = 0
+            valuesBuffer = {} <span class="PY_COMMENT"># keyed by row number</span>
+            <span class="PY_KEYWORD">while</span> 1:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_COMMENT"># grab a single row</span>
+                    values = valuesBuffer[rowNum]
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_COMMENT"># woops. read buffer is out of fresh rows</span>
+                    valuesRows = sh.Range(<span class="PY_STRING">'A%i:%s%i'</span> % (rowNum, maxCol,
+                        rowNum + numRowsToReadPerCall - 1)).Value
+                    valuesBuffer.clear()
+                    j = rowNum
+                    <span class="PY_KEYWORD">for</span> valuesRow <span class="PY_KEYWORD">in</span> valuesRows:
+                        valuesBuffer[j] = valuesRow
+                        j += 1
+                    values = valuesBuffer[rowNum]
+                values = [strip(v) <span class="PY_KEYWORD">for</span> v <span class="PY_KEYWORD">in</span> values]
+                nonEmpty = [v <span class="PY_KEYWORD">for</span> v <span class="PY_KEYWORD">in</span> values <span class="PY_KEYWORD">if</span> v]
+                <span class="PY_KEYWORD">if</span> nonEmpty:
+                    <span class="PY_KEYWORD">if</span> values[0] != <span class="PY_STRING">'#'</span>:
+                        <span class="PY_KEYWORD">if</span> haveReadHeadings:
+                            row = TableRecord(self, values)
+                            self._rows.append(row)
+                        <span class="PY_KEYWORD">else</span>:
+                            self.setHeadings(values)
+                            haveReadHeadings = True
+                    numBlankRows = 0
+                <span class="PY_KEYWORD">else</span>:
+                    numBlankRows += 1
+                    <span class="PY_KEYWORD">if</span> numBlankRows &gt; maxBlankRows:
+                        <span class="PY_COMMENT"># consider end of spreadsheet</span>
+                        <span class="PY_KEYWORD">break</span>
+                rowNum += 1
+        <span class="PY_KEYWORD">finally</span>:
+            wb.Close()
+
+    <span class="PY_KEYWORD">def</span> save(self):
+        self.writeFileNamed(self._filename)
+
+    <span class="PY_KEYWORD">def</span> writeFileNamed(self, filename):
+        file = open(filename, <span class="PY_STRING">'w'</span>)
+        self.writeFile(file)
+        file.close()
+
+    <span class="PY_KEYWORD">def</span> writeFile(self, file):
+        <span class="PY_STRING">"""Write the table out as a file.
+
+        This doesn't write the column types (like int) back out.
+
+        It's notable that a blank numeric value gets read as zero
+        and written out that way. Also, values None are written as blanks.
+
+        """</span>
+        <span class="PY_COMMENT"># write headings</span>
+        file.write(<span class="PY_STRING">','</span>.join(map(str, self._headings)))
+        file.write(<span class="PY_STRING">'\n'</span>)
+
+        <span class="PY_KEYWORD">def</span> valueWritingMapper(item):
+            <span class="PY_COMMENT"># So that None gets written as a blank and everything else as a string</span>
+            <span class="PY_KEYWORD">if</span> item <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>
+            <span class="PY_KEYWORD">elif</span> isinstance(item, unicode):
+                <span class="PY_KEYWORD">return</span> item.encode(<span class="PY_STRING">'utf-8'</span>)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> str(item)
+
+        <span class="PY_COMMENT"># write rows</span>
+        <span class="PY_KEYWORD">for</span> row <span class="PY_KEYWORD">in</span> self._rows:
+            file.write(joinCSVFields(map(valueWritingMapper, row)))
+            file.write(<span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> commit(self):
+        <span class="PY_KEYWORD">if</span> self._changed:
+            self.save()
+            self._changed = False
+
+
+    <span class="PY_COMMENT">## Headings ##</span>
+
+    <span class="PY_KEYWORD">def</span> heading(self, index):
+        <span class="PY_KEYWORD">if</span> isinstance(index, basestring):
+            index = self._nameToIndexMap[index]
+        <span class="PY_KEYWORD">return</span> self._headings[index]
+
+    <span class="PY_KEYWORD">def</span> hasHeading(self, name):
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._nameToIndexMap
+
+    <span class="PY_KEYWORD">def</span> numHeadings(self):
+        <span class="PY_KEYWORD">return</span> len(self._headings)
+
+    <span class="PY_KEYWORD">def</span> headings(self):
+        <span class="PY_KEYWORD">return</span> self._headings
+
+    <span class="PY_KEYWORD">def</span> setHeadings(self, headings):
+        <span class="PY_STRING">"""Set table headings.
+
+        Headings can be a list of strings (like ['name', 'age:int'])
+        or a list of TableColumns or None.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> headings:
+            self._headings = []
+        <span class="PY_KEYWORD">elif</span> isinstance(headings[0], basestring):
+            self._headings = map(TableColumn, headings)
+        <span class="PY_KEYWORD">elif</span> isinstance(headings[0], TableColumn):
+            self._headings = list(headings)
+        <span class="PY_KEYWORD">for</span> heading <span class="PY_KEYWORD">in</span> self._headings:
+            <span class="PY_KEYWORD">if</span> heading.type() <span class="PY_KEYWORD">is</span> None:
+                heading.setType(self._defaultType)
+        self.createNameToIndexMap()
+
+
+    <span class="PY_COMMENT">## Row access (list like) ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_KEYWORD">return</span> len(self._rows)
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, index):
+        <span class="PY_KEYWORD">return</span> self._rows[index]
+
+    <span class="PY_KEYWORD">def</span> append(self, obj):
+        <span class="PY_STRING">"""Append an object to the table.
+
+        If obj is not a TableRecord, then one is created,
+        passing the object to initialize the TableRecord.
+        Therefore, obj can be a TableRecord, list, dictionary or object.
+        See TableRecord for details.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(obj, TableRecord):
+            obj = TableRecord(self, obj)
+        self._rows.append(obj)
+        self._changed = True
+
+
+    <span class="PY_COMMENT">## Queries ##</span>
+
+    <span class="PY_KEYWORD">def</span> recordsEqualTo(self, record):
+        records = []
+        <span class="PY_KEYWORD">for</span> row <span class="PY_KEYWORD">in</span> self._rows:
+            <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> row:
+                <span class="PY_KEYWORD">if</span> record[key] != row[key]:
+                    <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                records.append(row)
+        <span class="PY_KEYWORD">return</span> records
+
+
+    <span class="PY_COMMENT">## As a string ##</span>
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_COMMENT"># Initial info</span>
+        s = [<span class="PY_STRING">'DataTable: %s\n%d rows\n'</span> % (self._filename, len(self._rows))]
+        <span class="PY_COMMENT"># Headings</span>
+        s.append(<span class="PY_STRING">'     '</span>)
+        s.append(<span class="PY_STRING">', '</span>.join(map(str, self._headings)))
+        s.append(<span class="PY_STRING">'\n'</span>)
+        <span class="PY_COMMENT"># Records</span>
+        <span class="PY_KEYWORD">for</span> i, row <span class="PY_KEYWORD">in</span> enumerate(self._rows):
+            s.append(<span class="PY_STRING">'%3d. '</span> % i)
+            s.append(<span class="PY_STRING">', '</span>.join(map(str, row)))
+            s.append(<span class="PY_STRING">'\n'</span>)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(s)
+
+
+    <span class="PY_COMMENT">## As a dictionary ##</span>
+
+    <span class="PY_KEYWORD">def</span> dictKeyedBy(self, key):
+        <span class="PY_STRING">"""Return a dictionary containing the contents of the table.
+
+        The content is indexed by the particular key. This is useful
+        for tables that have a column which represents a unique key
+        (such as a name, serial number, etc.).
+
+        """</span>
+        content = {}
+        <span class="PY_KEYWORD">for</span> row <span class="PY_KEYWORD">in</span> self:
+            content[row[key]] = row
+        <span class="PY_KEYWORD">return</span> content
+
+
+    <span class="PY_COMMENT">## Misc access ##</span>
+
+    <span class="PY_KEYWORD">def</span> filename(self):
+        <span class="PY_KEYWORD">return</span> self._filename
+
+    <span class="PY_KEYWORD">def</span> nameToIndexMap(self):
+        <span class="PY_STRING">"""Speed-up index.
+
+        Table rows keep a reference to this map in order to speed up
+        index-by-names (as in row['name']).
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._nameToIndexMap
+
+
+    <span class="PY_COMMENT">## Self utilities ##</span>
+
+    <span class="PY_KEYWORD">def</span> createNameToIndexMap(self):
+        <span class="PY_STRING">"""Create speed-up index.
+
+        Invoked by self to create the nameToIndexMap after the table's
+        headings have been read/initialized.
+
+        """</span>
+        map = {}
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(len(self._headings)):
+            map[self._headings[i].name()] = i
+        self._nameToIndexMap = map
+
+
+<span class="PY_KEYWORD">class</span> TableRecord(object):
+    <span class="PY_STRING">"""Representation of a table record."""</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, table, values=None, headings=None):
+        <span class="PY_STRING">"""Initialize table record.
+
+        Dispatches control to one of the other init methods based on the type
+        of values. Values can be one of three things:
+            1. A TableRecord
+            2. A list
+            3. A dictionary
+            4. Any object responding to hasValueForKey() and valueForKey().
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> headings <span class="PY_KEYWORD">is</span> None:
+            self._headings = table.headings()
+        <span class="PY_KEYWORD">else</span>:
+            self._headings = headings
+        self._nameToIndexMap = table.nameToIndexMap()
+        <span class="PY_KEYWORD">if</span> values <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">if</span> isinstance(values, (list, tuple)):
+                self.initFromSequence(values)
+            <span class="PY_KEYWORD">elif</span> isinstance(values, dict):
+                self.initFromDict(values)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    self.initFromObject(values)
+                <span class="PY_KEYWORD">except</span> AttributeError:
+                    <span class="PY_KEYWORD">raise</span> DataTableError(<span class="PY_STRING">'Unknown type for values %r.'</span> % values)
+
+    <span class="PY_KEYWORD">def</span> initFromSequence(self, values):
+        <span class="PY_KEYWORD">if</span> len(self._headings) &lt; len(values):
+            <span class="PY_KEYWORD">raise</span> DataTableError(<span class="PY_STRING">'There are more values than headings.\n'</span>
+                <span class="PY_STRING">'headings(%d, %s)\nvalues(%d, %s)'</span> % (len(self._headings),
+                self._headings, len(values), values))
+        self._values = []
+        numHeadings = len(self._headings)
+        numValues = len(values)
+        <span class="PY_KEYWORD">assert</span> numValues &lt;= numHeadings
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(numHeadings):
+            heading = self._headings[i]
+            <span class="PY_KEYWORD">if</span> i &gt;= numValues:
+                self._values.append(_blankValues.get(heading.type()))
+            <span class="PY_KEYWORD">else</span>:
+                self._values.append(heading.valueForRawValue(values[i]))
+
+    <span class="PY_KEYWORD">def</span> initFromDict(self, values):
+        self._values = []
+        <span class="PY_KEYWORD">for</span> heading <span class="PY_KEYWORD">in</span> self._headings:
+            name = heading.name()
+            <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> values:
+                self._values.append(heading.valueForRawValue(values[name]))
+            <span class="PY_KEYWORD">else</span>:
+                self._values.append(_blankValues.get(heading.type()))
+
+    <span class="PY_KEYWORD">def</span> initFromObject(self, obj):
+        <span class="PY_STRING">"""Initialize from object.
+
+        The object is expected to response to hasValueForKey(name) and
+        valueForKey(name) for each of the headings in the table. It's alright
+        if the object returns False for hasValueForKey(). In that case, a
+        "blank" value is assumed (such as zero or an empty string). If
+        hasValueForKey() returns True, then valueForKey() must return a value.
+
+        """</span>
+        self._values = []
+        <span class="PY_KEYWORD">for</span> heading <span class="PY_KEYWORD">in</span> self._headings:
+            name = heading.name()
+            <span class="PY_KEYWORD">if</span> obj.hasValueForKey(name):
+                self._values.append(heading.valueForRawValue(
+                    obj.valueForKey(name)))
+            <span class="PY_KEYWORD">else</span>:
+                self._values.append(_blankValues.get(heading.type()))
+
+
+    <span class="PY_COMMENT">## Accessing like a sequence or dictionary ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_KEYWORD">return</span> len(self._values)
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, key):
+        <span class="PY_KEYWORD">if</span> isinstance(key, basestring):
+            key = self._nameToIndexMap[key]
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._values[key]
+        <span class="PY_KEYWORD">except</span> TypeError:
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">'key=%r, key type=%r, self._values=%r'</span>
+                % (key, type(key), self._values))
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, key, value):
+        <span class="PY_KEYWORD">if</span> isinstance(key, basestring):
+            key = self._nameToIndexMap[key]
+        self._values[key] = value
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, key):
+        <span class="PY_KEYWORD">if</span> isinstance(key, basestring):
+            key = self._nameToIndexMap[key]
+        <span class="PY_KEYWORD">del</span> self._values[key]
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, key):
+        <span class="PY_KEYWORD">return</span> key <span class="PY_KEYWORD">in</span> self._nameToIndexMap
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'%s'</span> % self._values
+
+    <span class="PY_KEYWORD">def</span> __iter__(self):
+        <span class="PY_KEYWORD">for</span> value <span class="PY_KEYWORD">in</span> self._values:
+            <span class="PY_KEYWORD">yield</span> value
+
+    <span class="PY_KEYWORD">def</span> get(self, key, default=None):
+        index = self._nameToIndexMap.get(key)
+        <span class="PY_KEYWORD">if</span> index <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span> default
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._values[index]
+
+    <span class="PY_KEYWORD">def</span> has_key(self, key):
+        <span class="PY_KEYWORD">return</span> key <span class="PY_KEYWORD">in</span> self
+
+    <span class="PY_KEYWORD">def</span> keys(self):
+        <span class="PY_KEYWORD">return</span> self._nameToIndexMap.keys()
+
+    <span class="PY_KEYWORD">def</span> values(self):
+        <span class="PY_KEYWORD">return</span> self._values
+
+    <span class="PY_KEYWORD">def</span> items(self):
+        items = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self._nameToIndexMap:
+            items.append((key, self[key]))
+        <span class="PY_KEYWORD">return</span> items
+
+    <span class="PY_KEYWORD">def</span> iterkeys(self):
+        <span class="PY_KEYWORD">return</span> iter(self._nameToIndexMap)
+
+    <span class="PY_KEYWORD">def</span> itervalues(self):
+        <span class="PY_KEYWORD">return</span> iter(self)
+
+    <span class="PY_KEYWORD">def</span> iteritems(self):
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self.self._nameToIndexMap:
+            <span class="PY_KEYWORD">yield</span> key, self[key]
+
+
+    <span class="PY_COMMENT">## Additional access ##</span>
+
+    <span class="PY_KEYWORD">def</span> asList(self):
+        <span class="PY_STRING">"""Return a sequence whose values are the same as the record's.
+
+        The order of the sequence is the one defined by the table.
+
+        """</span>
+        <span class="PY_COMMENT"># It just so happens that our implementation already has this</span>
+        <span class="PY_KEYWORD">return</span> self._values[:]
+
+    <span class="PY_KEYWORD">def</span> asDict(self):
+        <span class="PY_STRING">"""Return a dictionary whose key-values match the table record."""</span>
+        record = {}
+        nameToIndexMap = self._nameToIndexMap
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> nameToIndexMap:
+            record[key] = self._values[nameToIndexMap[key]]
+        <span class="PY_KEYWORD">return</span> record
+
+
+    <span class="PY_COMMENT">## valueForFoo() family ##</span>
+
+    <span class="PY_KEYWORD">def</span> valueForKey(self, key, default=NoDefault):
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self[key]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self.get(key, default)
+
+    <span class="PY_KEYWORD">def</span> valueForAttr(self, attr, default=NoDefault):
+        <span class="PY_KEYWORD">return</span> self.valueForKey(attr[<span class="PY_STRING">'Name'</span>], default)
+
+
+<span class="PY_KEYWORD">def</span> main(args=None):
+    <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">is</span> None:
+        args = sys.argv
+    <span class="PY_KEYWORD">for</span> arg <span class="PY_KEYWORD">in</span> args[1:]:
+        dt = DataTable(arg)
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'*** %s ***'</span> % arg
+        <span class="PY_KEYWORD">print</span> dt
+        <span class="PY_KEYWORD">print</span>
+
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+    main()
+</pre>
+<!--footer-->
+
+</body>
+</html>

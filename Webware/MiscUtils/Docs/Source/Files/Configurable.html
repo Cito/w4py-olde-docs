@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/Configurable.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Configurable.py
+
+Provides configuration file functionality.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError, NoDefault
+
+<span class="PY_KEYWORD">from</span> Funcs <span class="PY_KEYWORD">import</span> valueForString
+
+
+<span class="PY_KEYWORD">class</span> ConfigurationError(Exception):
+    <span class="PY_STRING">"""Error in configuration file."""</span>
+
+
+<span class="PY_KEYWORD">class</span> Configurable(object):
+    <span class="PY_STRING">"""Abstract superclass for configuration file functionality.
+
+    Subclasses should override:
+
+      * defaultConfig()  to return a dictionary of default settings
+                         such as {'Frequency': 5}
+
+      * configFilename() to return the filename by which users can
+                         override the configuration such as 'Pinger.config'
+
+    Subclasses typically use the setting() method, for example:
+
+        time.sleep(self.setting('Frequency'))
+
+    They might also use the printConfig() method, for example:
+
+        self.printConfig()     # or
+        self.printConfig(file)
+
+    Users of your software can create a file with the same name as
+    configFilename() and selectively override settings. The format of
+    the file is a Python dictionary.
+
+    Subclasses can also override userConfig() in order to obtain the
+    user configuration settings from another source.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self._config = None
+
+
+    <span class="PY_COMMENT">## Configuration</span>
+
+    <span class="PY_KEYWORD">def</span> config(self):
+        <span class="PY_STRING">"""Return the configuration of the object as a dictionary.
+
+        This is a combination of defaultConfig() and userConfig().
+        This method caches the config.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._config <span class="PY_KEYWORD">is</span> None:
+            self._config = self.defaultConfig()
+            self._config.update(self.userConfig())
+            self._config.update(self.commandLineConfig())
+        <span class="PY_KEYWORD">return</span> self._config
+
+    <span class="PY_KEYWORD">def</span> setting(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the value of a particular setting in the configuration."""</span>
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> self.config()[name]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">raise</span> KeyError(<span class="PY_STRING">'%s config keys are: %s'</span>
+                    % (name, self.config().keys()))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self.config().get(name, default)
+
+    <span class="PY_KEYWORD">def</span> setSetting(self, name, value):
+        <span class="PY_STRING">"""Set a particular configuration setting."""</span>
+        self.config()[name] = value
+
+    <span class="PY_KEYWORD">def</span> hasSetting(self, name):
+        <span class="PY_STRING">"""Check whether a configuration setting has been changed."""</span>
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self.config()
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""Return a dictionary with all the default values for the settings.
+
+        This implementation returns {}. Subclasses should override.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> {}
+
+    <span class="PY_KEYWORD">def</span> configFilename(self):
+        <span class="PY_STRING">"""Return the full name of the user config file.
+
+        Users can override the configuration by this config file.
+        Subclasses must override to specify a name.
+        Returning None is valid, in which case no user config file
+        will be loaded.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> configName(self):
+        <span class="PY_STRING">"""Return the name of the configuration file without the extension.
+
+        This is the portion of the config file name before the '.config'.
+        This is used on the command-line.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> os.path.splitext(os.path.basename(self.configFilename()))[0]
+
+    <span class="PY_KEYWORD">def</span> configReplacementValues(self):
+        <span class="PY_STRING">"""Return a dictionary for substitutions in the config file.
+
+        This must be a dictionary suitable for use with "string % dict"
+        that should be used on the text in the config file.
+        If an empty dictionary (or None) is returned, then no substitution
+        will be attempted.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> {}
+
+    <span class="PY_KEYWORD">def</span> userConfig(self):
+        <span class="PY_STRING">"""Return the user config overrides.
+
+        These settings can be found in the optional config file.
+        Returns {} if there is no such file.
+
+        The config filename is taken from configFilename().
+
+        """</span>
+        filename = self.configFilename()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> filename:
+            <span class="PY_KEYWORD">return</span> {}
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_COMMENT"># open the config file in universal newline mode,</span>
+            <span class="PY_COMMENT"># in case it has been edited on a different platform</span>
+            contents = open(filename, <span class="PY_STRING">'rU'</span>).read()
+        <span class="PY_KEYWORD">except</span> IOError, e:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WARNING:'</span>, \
+                <span class="PY_STRING">'Config file'</span>, filename, <span class="PY_STRING">'not loaded:'</span>, e.strerror
+            <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">return</span> {}
+        isDict = contents.lstrip().startswith(<span class="PY_STRING">'{'</span>)
+        <span class="PY_KEYWORD">from</span> WebKit.AppServer <span class="PY_KEYWORD">import</span> globalAppServer
+        <span class="PY_KEYWORD">if</span> globalAppServer:
+            globalAppServer._imp.watchFile(filename)
+        replacements = self.configReplacementValues()
+        <span class="PY_KEYWORD">if</span> replacements <span class="PY_KEYWORD">and</span> isDict:
+            <span class="PY_KEYWORD">try</span>:
+                contents %= replacements
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">raise</span> ConfigurationError(
+                    <span class="PY_STRING">'Unable to embed replacement text in %s.'</span> % filename)
+        evalContext = replacements.copy()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> isDict:
+                config = eval(contents, evalContext)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">exec</span> contents <span class="PY_KEYWORD">in</span> evalContext
+                config = evalContext
+                <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> config.keys(): <span class="PY_COMMENT"># keys() since dict is changed</span>
+                    <span class="PY_KEYWORD">if</span> name.startswith(<span class="PY_STRING">'_'</span>):
+                        <span class="PY_KEYWORD">del</span> config[name]
+        <span class="PY_KEYWORD">except</span> Exception, e:
+            <span class="PY_KEYWORD">raise</span> ConfigurationError(
+                <span class="PY_STRING">'Invalid configuration file, %s (%s).'</span> % (filename, e))
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(config, dict):
+            <span class="PY_KEYWORD">raise</span> ConfigurationError(<span class="PY_STRING">'Invalid type of configuration.'</span>
+                <span class="PY_STRING">' Expecting dictionary, but got %s.'</span> % type(config))
+        <span class="PY_KEYWORD">return</span> config
+
+    <span class="PY_KEYWORD">def</span> printConfig(self, dest=None):
+        <span class="PY_STRING">"""Print the configuration to the given destination.
+
+        The default destination is stdout. A fixed with font is assumed
+        for aligning the values to start at the same column.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> dest <span class="PY_KEYWORD">is</span> None:
+            dest = sys.stdout
+        width = max(map(len, self.config()))
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> sorted(self.config()):
+            dest.write(<span class="PY_STRING">'%s = %s\n'</span>
+                % (key.ljust(width), str(self.setting(key))))
+        dest.write(<span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> commandLineConfig(self):
+        <span class="PY_STRING">"""Return the settings that came from the command-line.
+
+        These settings come via addCommandLineSetting().
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> _settings.get(self.configName(), {})
+
+
+<span class="PY_COMMENT">## Command line settings ##</span>
+
+_settings = {}
+
+<span class="PY_KEYWORD">def</span> addCommandLineSetting(name, value):
+    <span class="PY_STRING">"""Override the configuration with a command-line setting.
+
+    Take a setting, like "AppServer.Verbose=0", and call
+    addCommandLineSetting('AppServer.Verbose', '0'), and
+    it will override any settings in AppServer.config
+
+    """</span>
+    configName, settingName = name.split(<span class="PY_STRING">'.'</span>, 1)
+    value = valueForString(value)
+    <span class="PY_KEYWORD">if</span> configName <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> _settings:
+        _settings[configName] = {}
+    _settings[configName][settingName] = value
+
+<span class="PY_KEYWORD">def</span> commandLineSetting(configName, settingName, default=NoDefault):
+    <span class="PY_STRING">"""Retrieve a command-line setting.
+
+    You can use this with non-existent classes, like "Context.Root=/WK",
+    and then fetch it back with commandLineSetting('Context', 'Root').
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+        <span class="PY_KEYWORD">return</span> _settings[configName][settingName]
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">return</span> _settings.get(configName, {}).get(settingName, default)
+</pre>
+<!--footer-->
+
+</body>
+</html>

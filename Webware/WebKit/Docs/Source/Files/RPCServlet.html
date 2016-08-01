@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/RPCServlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""RPC servlets."""</span>
+
+<span class="PY_KEYWORD">import</span> traceback, sys
+
+<span class="PY_KEYWORD">from</span> HTTPServlet <span class="PY_KEYWORD">import</span> HTTPServlet
+
+
+<span class="PY_KEYWORD">class</span> RPCServlet(HTTPServlet):
+    <span class="PY_STRING">"""RPCServlet is a base class for RPC servlets."""</span>
+
+    <span class="PY_KEYWORD">def</span> call(self, methodName, *args, **keywords):
+        <span class="PY_STRING">"""Call custom method.
+
+        Subclasses may override this class for custom handling of methods.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> methodName <span class="PY_KEYWORD">in</span> self.exposedMethods():
+            <span class="PY_KEYWORD">return</span> getattr(self, methodName)(*args, **keywords)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> NotImplementedError(methodName)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> exposedMethods():
+        <span class="PY_STRING">"""Get exposed methods.
+
+        Subclasses should return a list of methods that will be exposed
+        through XML-RPC.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> [<span class="PY_STRING">'exposedMethods'</span>]
+
+    <span class="PY_KEYWORD">def</span> resultForException(self, e, trans):
+        <span class="PY_STRING">"""Get text for exception.
+
+        Given an unhandled exception, returns the string that should be
+        sent back in the RPC response as controlled by the
+        RPCExceptionReturn setting.
+
+        """</span>
+        <span class="PY_COMMENT"># report exception back to server</span>
+        setting = trans.application().setting(<span class="PY_STRING">'RPCExceptionReturn'</span>)
+        <span class="PY_KEYWORD">assert</span> setting <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'occurred'</span>, <span class="PY_STRING">'exception'</span>, <span class="PY_STRING">'traceback'</span>), \
+            <span class="PY_STRING">'setting = %r'</span> % setting
+        <span class="PY_KEYWORD">if</span> setting == <span class="PY_STRING">'occurred'</span>:
+            result = <span class="PY_STRING">'unhandled exception'</span>
+        <span class="PY_KEYWORD">elif</span> setting == <span class="PY_STRING">'exception'</span>:
+            result = str(e)
+        <span class="PY_KEYWORD">elif</span> setting == <span class="PY_STRING">'traceback'</span>:
+            result = <span class="PY_STRING">''</span>.join(traceback.format_exception(*sys.exc_info()))
+        <span class="PY_KEYWORD">return</span> result
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> sendOK(contentType, contents, trans, contentEncoding=None):
+        <span class="PY_STRING">"""Send a 200 OK response with the given contents."""</span>
+        response = trans.response()
+        response.setStatus(200, <span class="PY_STRING">'OK'</span>)
+        response.setHeader(<span class="PY_STRING">'Content-Type'</span>, contentType)
+        response.setHeader(<span class="PY_STRING">'Content-Length'</span>, str(len(contents)))
+        <span class="PY_KEYWORD">if</span> contentEncoding:
+            response.setHeader(<span class="PY_STRING">'Content-Encoding'</span>, contentEncoding)
+        response.write(contents)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> handleException(transaction):
+        <span class="PY_STRING">"""Handle exception.
+
+        If ReportRPCExceptionsInWebKit is set to True, then flush the response
+        (because we don't want the standard HTML traceback to be appended to
+        the response) and then handle the exception in the standard WebKit way.
+        This means logging it to the console, storing it in the error log,
+        sending error email, etc. depending on the settings.
+
+        """</span>
+        setting = transaction.application().setting(<span class="PY_STRING">'ReportRPCExceptionsInWebKit'</span>)
+        <span class="PY_KEYWORD">if</span> setting:
+            transaction.response().flush()
+            transaction.application().handleExceptionInTransaction(
+                sys.exc_info(), transaction)
+
+    <span class="PY_KEYWORD">def</span> transaction(self):
+        <span class="PY_STRING">"""Get the corresponding transaction.
+
+        Most uses of RPC will not need this.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._transaction
+
+    <span class="PY_KEYWORD">def</span> awake(self, transaction):
+        <span class="PY_STRING">"""Begin transaction."""</span>
+        HTTPServlet.awake(self, transaction)
+        self._transaction = transaction
+
+    <span class="PY_KEYWORD">def</span> sleep(self, transaction):
+        <span class="PY_STRING">"""End transaction."""</span>
+        self._transaction = None
+        HTTPServlet.sleep(self, transaction)
+</pre>
+<!--footer-->
+
+</body>
+</html>

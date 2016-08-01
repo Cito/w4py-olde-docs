@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/Klass.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">from</span> ModelObject <span class="PY_KEYWORD">import</span> ModelObject
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiddleKit.Core.ListAttr <span class="PY_KEYWORD">import</span> ListAttr
+<span class="PY_KEYWORD">from</span> MiddleKit.Core.ObjRefAttr <span class="PY_KEYWORD">import</span> ObjRefAttr
+<span class="PY_KEYWORD">from</span> MiddleDict <span class="PY_KEYWORD">import</span> MiddleDict
+
+
+<span class="PY_KEYWORD">class</span> Klass(MiddleDict, ModelObject):
+    <span class="PY_STRING">"""A Klass represents a class specification.
+
+    It is consisting primarily of a name and a list of attributes.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, klassContainer, rawDict=None):
+        <span class="PY_STRING">"""Initialize a Klass definition with a raw dictionary.
+
+        This is typically read from a file. The 'Class' field contains the name
+        and can also contain the name of the superclass (like "Name : SuperName").
+        Multiple inheritance is not yet supported.
+
+        """</span>
+        MiddleDict.__init__(self, {})
+        self._klassContainer = klassContainer
+        self._attrsList = []
+        self._attrsByName = {}
+        self._superklass = None
+        self._subklasses = []
+        <span class="PY_COMMENT"># False means never computed; None would mean computed, but not found:</span>
+        self._pyClass = False
+        self._backObjRefAttrs = None
+        self._allAttrs = None
+        <span class="PY_KEYWORD">if</span> rawDict <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self.readDict(rawDict)
+
+
+    <span class="PY_COMMENT">## Reading ##</span>
+
+    <span class="PY_KEYWORD">def</span> readDict(self, rawDict):
+        name = rawDict[<span class="PY_STRING">'Class'</span>]
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'('</span> <span class="PY_KEYWORD">in</span> name:
+            <span class="PY_KEYWORD">assert</span> <span class="PY_STRING">')'</span> <span class="PY_KEYWORD">in</span> name, <span class="PY_STRING">'Invalid class spec. Missing ).'</span>
+            self._name, rest = name.split(<span class="PY_STRING">'('</span>, 1)
+            self._supername, rest = rest.split(<span class="PY_STRING">')'</span>, 1)
+            <span class="PY_KEYWORD">assert</span> rest.strip() == <span class="PY_STRING">''</span>
+            self._name = self._name.strip()
+            self._supername = self._supername.strip()
+        <span class="PY_KEYWORD">elif</span> <span class="PY_STRING">':'</span> <span class="PY_KEYWORD">in</span> name:
+            <span class="PY_COMMENT"># deprecated: we used to use a C++-like syntax involving colons</span>
+            <span class="PY_COMMENT"># instead of a Python-like syntax with parens</span>
+            parts = [part.strip() <span class="PY_KEYWORD">for</span> part <span class="PY_KEYWORD">in</span> name.split(<span class="PY_STRING">':'</span>, 2)]
+            <span class="PY_KEYWORD">if</span> len(parts) != 2:
+                <span class="PY_KEYWORD">raise</span> RuntimeError(<span class="PY_STRING">'Invalid class spec: %s'</span> % string)
+            self._name, self._supername = parts
+        <span class="PY_KEYWORD">else</span>:
+            self._name = name
+            self._supername = rawDict.get(<span class="PY_STRING">'Super'</span>, <span class="PY_STRING">'MiddleObject'</span>)
+        self._isAbstract = rawDict.get(<span class="PY_STRING">'isAbstract'</span>, False)
+
+        <span class="PY_COMMENT"># fill in dictionary (self) with the contents of the dict argument</span>
+        <span class="PY_KEYWORD">for</span> key, value <span class="PY_KEYWORD">in</span> rawDict.items():
+            <span class="PY_COMMENT"># @@ 2001-02-21 ce: should we always strip string fields? Probably.</span>
+            <span class="PY_KEYWORD">if</span> isinstance(value, basestring) <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> value.strip():
+                value = None
+            self[key] = value
+
+    <span class="PY_KEYWORD">def</span> awakeFromRead(self, klasses):
+        <span class="PY_STRING">"""Perform further initialization.
+
+        Invoked by Klasses after all basic Klass definitions have been read.
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> self._klasses <span class="PY_KEYWORD">is</span> klasses
+
+        self._makeAllAttrs()
+        <span class="PY_COMMENT"># Python classes need to know their MiddleKit classes in</span>
+        <span class="PY_COMMENT"># order for MiddleKit.Run.MiddleObject methods to work.</span>
+        <span class="PY_COMMENT"># Invoking pyClass() makes that happen.</span>
+        self.pyClass()
+        <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> self.attrs():
+            attr.awakeFromRead()
+
+    <span class="PY_KEYWORD">def</span> _makeAllAttrs(self):
+        <span class="PY_STRING">"""Make all attributes.
+
+        Makes list attributes accessible via methods for the following:
+            allAttrs - every attr of the klass including inherited and derived attributes
+            allDataAttrs - every attr of the klass including inherited, but NOT derived
+            allDataRefAttrs - same as allDataAttrs, but only obj refs and lists
+
+        ...and a dictionary attribute used by lookupAttr().
+
+        Does nothing if called extra times.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._allAttrs <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">return</span>
+
+        klass = self
+        klasses = []
+        <span class="PY_KEYWORD">while</span> klass:
+            klasses.append(klass)
+            klass = klass.superklass()
+        klasses.reverse()
+
+        allAttrs = []
+        allDataAttrs = []
+        allDataRefAttrs = []
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> klasses:
+            attrs = klass.attrs()
+            allAttrs.extend(attrs)
+            <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> attrs:
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> attr.get(<span class="PY_STRING">'isDerived'</span>, False):
+                    allDataAttrs.append(attr)
+                    <span class="PY_KEYWORD">if</span> isinstance(attr, (ObjRefAttr, ListAttr)):
+                        allDataRefAttrs.append(attr)
+
+        self._allAttrs = allAttrs
+        self._allDataAttrs = allDataAttrs
+        self._allDataRefAttrs = allDataRefAttrs
+
+        <span class="PY_COMMENT"># set up _allAttrsByName which is used by lookupAttr()</span>
+        self._allAttrsByName = {}
+        <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> allAttrs:
+            self._allAttrsByName[attr.name()] = attr
+
+
+    <span class="PY_COMMENT">## Names ##</span>
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> supername(self):
+        <span class="PY_KEYWORD">return</span> self._supername
+
+
+    <span class="PY_COMMENT">## Id ##</span>
+
+    <span class="PY_KEYWORD">def</span> id(self):
+        <span class="PY_STRING">"""Return the id of the class, which is an integer.
+
+        Ids can be fundamental to storing object references in concrete object stores.
+        This method will throw an exception if setId() was not previously invoked.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._id
+
+    <span class="PY_KEYWORD">def</span> setId(self, id):
+        <span class="PY_KEYWORD">if</span> isinstance(id, set):
+            <span class="PY_COMMENT"># create an id that is a hash of the klass name</span>
+            <span class="PY_COMMENT"># see Klasses.assignClassIds()</span>
+            allIds = id
+            <span class="PY_COMMENT"># the limit of 2 billion keeps the id easily in the range</span>
+            <span class="PY_COMMENT"># of a 32 bit signed int without going negative</span>
+            limit = 2000000000
+            id = abs(hash(self.name()) % limit)
+            <span class="PY_KEYWORD">assert</span> 0 &lt; id &lt; limit
+            <span class="PY_KEYWORD">while</span> id <span class="PY_KEYWORD">in</span> allIds:
+                <span class="PY_COMMENT"># adjust for collision</span>
+                id += 1
+            <span class="PY_KEYWORD">assert</span> 0 &lt; id &lt; limit
+            self._id = id
+        <span class="PY_KEYWORD">else</span>:
+            self._id = id
+
+
+    <span class="PY_COMMENT">## Superklass ##</span>
+
+    <span class="PY_KEYWORD">def</span> superklass(self):
+        <span class="PY_KEYWORD">return</span> self._superklass
+
+    <span class="PY_KEYWORD">def</span> setSuperklass(self, klass):
+        <span class="PY_KEYWORD">assert</span> self._superklass <span class="PY_KEYWORD">is</span> None, <span class="PY_STRING">"Can't set superklass twice."</span>
+        self._superklass = klass
+        klass.addSubklass(self)
+
+
+    <span class="PY_COMMENT">## Ancestors ##</span>
+
+    <span class="PY_KEYWORD">def</span> lookupAncestorKlass(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Search for and return the ancestor klass with the given name.
+
+        Raises an exception if no such klass exists, unless a default
+        is specified (in which case it is returned).
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._superklass:
+            <span class="PY_KEYWORD">if</span> self._superklass.name() == name:
+                <span class="PY_KEYWORD">return</span> self._superklass
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> self._superklass.lookupAncestorKlass(name, default)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+                <span class="PY_KEYWORD">raise</span> KeyError(name)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> isKindOfKlassNamed(self, name):
+        <span class="PY_STRING">"""Check whether the klass is from the given kind.
+
+        Returns true if the klass is the same as, or inherits from,
+        the klass with the given name.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self.name() == name:
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self.lookupAncestorKlass(name, None) <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+
+
+    <span class="PY_COMMENT">## Subklasses ##</span>
+
+    <span class="PY_KEYWORD">def</span> subklasses(self):
+        <span class="PY_KEYWORD">return</span> self._subklasses
+
+    <span class="PY_KEYWORD">def</span> addSubklass(self, klass):
+        self._subklasses.append(klass)
+
+    <span class="PY_KEYWORD">def</span> descendants(self, init=1, memo=None):
+        <span class="PY_STRING">"""Return all descendant klasses of this klass."""</span>
+        <span class="PY_KEYWORD">if</span> memo <span class="PY_KEYWORD">is</span> None:
+            memo = set()
+        <span class="PY_KEYWORD">if</span> self <span class="PY_KEYWORD">in</span> memo:
+            <span class="PY_KEYWORD">return</span>
+        memo.add(self)
+        <span class="PY_KEYWORD">for</span> k <span class="PY_KEYWORD">in</span> self.subklasses():
+            k.descendants(init=0, memo=memo)
+        <span class="PY_KEYWORD">if</span> init:
+            memo.remove(self)
+        <span class="PY_KEYWORD">return</span> memo
+
+
+    <span class="PY_COMMENT">## Accessing attributes ##</span>
+
+    <span class="PY_KEYWORD">def</span> addAttr(self, attr):
+        self._attrsList.append(attr)
+        self._attrsByName[attr.name()] = attr
+        attr.setKlass(self)
+
+    <span class="PY_KEYWORD">def</span> attrs(self):
+        <span class="PY_STRING">"""Return a list of all the klass' attributes not including inheritance."""</span>
+        <span class="PY_KEYWORD">return</span> self._attrsList
+
+    <span class="PY_KEYWORD">def</span> hasAttr(self, name):
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._attrsByName
+
+    <span class="PY_KEYWORD">def</span> attr(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the attribute with the given name.
+
+        If no such attribute exists, an exception is raised unless a default
+        was provided (which is then returned).
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._attrsByName[name]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._attrsByName.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> lookupAttr(self, name, default=NoDefault):
+        <span class="PY_KEYWORD">if</span> self._allAttrs <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_COMMENT"># happens sometimes during awakeFromRead()</span>
+            self._makeAllAttrs()
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._allAttrsByName[name]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._allAttrsByName.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> allAttrs(self):
+        <span class="PY_STRING">"""Returns a list of all attributes.
+
+        This includes those attributes that are inherited and derived.
+        The order is top down; that is, ancestor attributes come first.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._allAttrs
+
+    <span class="PY_KEYWORD">def</span> allDataAttrs(self):
+        <span class="PY_STRING">"""Return a list of all data attributes.
+
+        This includes those attributes that are inherited.
+        The order is top down; that is, ancestor attributes come first.
+        Derived attributes are not included in the list.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._allDataAttrs
+
+    <span class="PY_KEYWORD">def</span> allDataRefAttrs(self):
+        <span class="PY_STRING">"""Return a list of all data referencing attributes.
+
+        Returns a list of all data attributes that are obj refs or lists,
+        including those that are inherited.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._allDataRefAttrs
+
+
+    <span class="PY_COMMENT">## Klasses access ##</span>
+
+    <span class="PY_KEYWORD">def</span> klasses(self):
+        <span class="PY_KEYWORD">return</span> self._klasses
+
+    <span class="PY_KEYWORD">def</span> setKlasses(self, klasses):
+        <span class="PY_STRING">"""Set the klasses object of the klass. This is the klass' owner."""</span>
+        self._klasses = klasses
+
+    <span class="PY_KEYWORD">def</span> model(self):
+        <span class="PY_KEYWORD">return</span> self._klasses.model()
+
+
+    <span class="PY_COMMENT">## Other access ##</span>
+
+    <span class="PY_KEYWORD">def</span> isAbstract(self):
+        <span class="PY_KEYWORD">return</span> self._isAbstract
+
+    <span class="PY_KEYWORD">def</span> pyClass(self):
+        <span class="PY_STRING">"""Return the Python class that corresponds to this class.
+
+        This request will even result in the Python class' module being
+        imported if necessary. It will also set the Python class
+        attribute _mk_klass which is used by MiddleKit.Run.MiddleObject.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._pyClass == False:
+            <span class="PY_KEYWORD">if</span> self._klassContainer._model._havePythonClasses:
+                self._pyClass = self._klassContainer._model.pyClassForName(self.name())
+                <span class="PY_KEYWORD">assert</span> self._pyClass.__name__ == self.name(), (
+                    <span class="PY_STRING">'self.name()=%r, self._pyClass=%r'</span> % (self.name(), self._pyClass))
+                self._pyClass._mk_klass = self
+            <span class="PY_KEYWORD">else</span>:
+                self._pyClass = None
+        <span class="PY_KEYWORD">return</span> self._pyClass
+
+    <span class="PY_KEYWORD">def</span> backObjRefAttrs(self):
+        <span class="PY_STRING">"""Return a list of all potentially referencing attributes.
+
+        Returns a list of all ObjRefAttrs in the given object model that can
+        potentially refer to this object. The list does NOT include attributes
+        inherited from superclasses.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._backObjRefAttrs <span class="PY_KEYWORD">is</span> None:
+            backObjRefAttrs = []
+            <span class="PY_COMMENT"># Construct targetKlasses = a list of this object's klass and all superklasses</span>
+            targetKlasses = {}
+            super = self
+            <span class="PY_KEYWORD">while</span> super:
+                targetKlasses[super.name()] = super
+                super = super.superklass()
+            <span class="PY_COMMENT"># Look at all klasses in the model</span>
+            <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._klassContainer._model.allKlassesInOrder():
+                <span class="PY_COMMENT"># find all ObjRefAttrs of klass that refer to one of our targetKlasses</span>
+                <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> klass.attrs():
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> attr.get(<span class="PY_STRING">'isDerived'</span>, False):
+                        <span class="PY_KEYWORD">if</span> (isinstance(attr, ObjRefAttr)
+                                <span class="PY_KEYWORD">and</span> attr.targetClassName() <span class="PY_KEYWORD">in</span> targetKlasses):
+                            backObjRefAttrs.append(attr)
+            self._backObjRefAttrs = backObjRefAttrs
+        <span class="PY_KEYWORD">return</span> self._backObjRefAttrs
+
+    <span class="PY_KEYWORD">def</span> setting(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the value of a particular configuration setting taken from the model."""</span>
+        <span class="PY_KEYWORD">return</span> self._klassContainer.setting(name, default)
+
+
+    <span class="PY_COMMENT">## As string ##</span>
+
+    <span class="PY_KEYWORD">def</span> asShortString(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;Klass, %s, %x, %d attrs&gt;'</span> % (self._name, id(self), len(self._attrsList))
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> self.asShortString()
+
+
+    <span class="PY_COMMENT">## As a dictionary key (for "set" purposes) ##</span>
+
+    <span class="PY_KEYWORD">def</span> __hash__(self):
+        <span class="PY_KEYWORD">return</span> hash(self.name()) <span class="PY_COMMENT"># | hash(self.model().name())</span>
+
+    <span class="PY_KEYWORD">def</span> __cmp__(self, other):
+        <span class="PY_KEYWORD">if</span> other <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span> 1
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(other, Klass):
+            <span class="PY_KEYWORD">return</span> 1
+        <span class="PY_KEYWORD">if</span> self.model() <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> other.model():
+            value = cmp(self.model().name(), other.model().name())
+            <span class="PY_KEYWORD">if</span> value == 0:
+                value = cmp(self.name(), other.name())
+            <span class="PY_KEYWORD">return</span> value
+        <span class="PY_KEYWORD">return</span> cmp(self.name(), other.name())
+
+
+    <span class="PY_COMMENT">## Warnings ##</span>
+
+    <span class="PY_KEYWORD">def</span> printWarnings(self, out):
+        <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> self.attrs():
+            attr.printWarnings(out)
+
+
+    <span class="PY_COMMENT">## Model support ##</span>
+
+    <span class="PY_KEYWORD">def</span> willBuildDependencies(self):
+        <span class="PY_STRING">"""Preps the klass for buildDependencies()."""</span>
+        self._dependencies = set() <span class="PY_COMMENT"># who self depends on</span>
+        self._dependents = set() <span class="PY_COMMENT"># who depends on self</span>
+
+    <span class="PY_KEYWORD">def</span> buildDependencies(self):
+        <span class="PY_STRING">"""Build dependencies of the klass.
+
+        A klass' immediate dependencies are its ancestor classes (which may
+        have auxilliary tables such as enums), the target klasses of all its
+        obj ref attrs and their descendant classes.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._dependents <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_COMMENT"># already done</span>
+            <span class="PY_KEYWORD">pass</span>
+        klass = self.superklass()
+        <span class="PY_KEYWORD">while</span> klass <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            self._dependencies.add(klass)
+            klass._dependents.add(self)
+            klass = klass.superklass()
+        <span class="PY_KEYWORD">from</span> MiddleKit.Core.ObjRefAttr <span class="PY_KEYWORD">import</span> ObjRefAttr
+        <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> self.allAttrs():
+            <span class="PY_KEYWORD">if</span> isinstance(attr, ObjRefAttr):
+                klass = attr.targetKlass()
+                <span class="PY_KEYWORD">if</span> klass <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> self <span class="PY_KEYWORD">and</span> attr.boolForKey(<span class="PY_STRING">'Ref'</span>, True):
+                    self._dependencies.add(klass)
+                    klass._dependents.add(self)
+                    <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> klass.descendants():
+                        self._dependencies.add(klass)
+                        klass._dependents.add(self)
+
+    <span class="PY_KEYWORD">def</span> recordDependencyOrder(self, order, visited, indent=0):
+        <span class="PY_COMMENT"># print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())</span>
+        <span class="PY_KEYWORD">if</span> self <span class="PY_KEYWORD">in</span> visited:
+            <span class="PY_KEYWORD">return</span>
+        visited.add(self)
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._dependencies:
+            klass.recordDependencyOrder(order, visited, indent+1)
+        order.append(self)
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module TaskKit.Task</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="TaskKit.html"><font color="#ffffff">TaskKit</font></a>.Task</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/TaskKit/Task.py">/var/www/docs/Webware-1.1.1/TaskKit/Task.py</a></font></td></tr></table>
+    <p><tt>Base&nbsp;class&nbsp;for&nbsp;tasks.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="TaskKit.Task.html#Task">Task</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Task">class <strong>Task</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Abstract&nbsp;base&nbsp;class&nbsp;from&nbsp;which&nbsp;you&nbsp;have&nbsp;to&nbsp;derive&nbsp;your&nbsp;own&nbsp;tasks.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Task-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Subclasses&nbsp;should&nbsp;invoke&nbsp;super&nbsp;for&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="Task-handle"><strong>handle</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;task&nbsp;handle.<br>
+&nbsp;<br>
+A&nbsp;task&nbsp;is&nbsp;scheduled&nbsp;by&nbsp;wrapping&nbsp;a&nbsp;handler&nbsp;around&nbsp;it.&nbsp;It&nbsp;knows<br>
+everything&nbsp;about&nbsp;the&nbsp;scheduling&nbsp;(periodicity&nbsp;and&nbsp;the&nbsp;like).<br>
+Under&nbsp;normal&nbsp;circumstances&nbsp;you&nbsp;should&nbsp;not&nbsp;need&nbsp;the&nbsp;handler,<br>
+but&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;write&nbsp;period&nbsp;modifying&nbsp;<a href="#Task-run">run</a>()&nbsp;methods,<br>
+it&nbsp;is&nbsp;useful&nbsp;to&nbsp;have&nbsp;access&nbsp;to&nbsp;the&nbsp;handler.&nbsp;Use&nbsp;it&nbsp;with&nbsp;care.</tt></dd></dl>
+
+<dl><dt><a name="Task-name"><strong>name</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;unique&nbsp;name&nbsp;under&nbsp;which&nbsp;the&nbsp;task&nbsp;was&nbsp;scheduled.</tt></dd></dl>
+
+<dl><dt><a name="Task-proceed"><strong>proceed</strong></a>(self)</dt><dd><tt>Check&nbsp;whether&nbsp;this&nbsp;task&nbsp;should&nbsp;continue&nbsp;running.<br>
+&nbsp;<br>
+Should&nbsp;be&nbsp;called&nbsp;periodically&nbsp;by&nbsp;long&nbsp;tasks&nbsp;to&nbsp;check&nbsp;if&nbsp;the&nbsp;system<br>
+wants&nbsp;them&nbsp;to&nbsp;exit.&nbsp;Returns&nbsp;True&nbsp;if&nbsp;its&nbsp;OK&nbsp;to&nbsp;continue,&nbsp;False&nbsp;if<br>
+it's&nbsp;time&nbsp;to&nbsp;quit.</tt></dd></dl>
+
+<dl><dt><a name="Task-run"><strong>run</strong></a>(self)</dt><dd><tt>Override&nbsp;this&nbsp;method&nbsp;for&nbsp;you&nbsp;own&nbsp;tasks.<br>
+&nbsp;<br>
+Long&nbsp;running&nbsp;tasks&nbsp;can&nbsp;periodically&nbsp;use&nbsp;the&nbsp;<a href="#Task-proceed">proceed</a>()&nbsp;method&nbsp;to&nbsp;check<br>
+if&nbsp;a&nbsp;task&nbsp;should&nbsp;stop.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

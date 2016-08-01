@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/PSPPage.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Default base class for PSP pages.
+
+This class is intended to be used in the future as the default base class
+for PSP pages in the event that some special processing is needed.
+Right now, no special processing is needed, so the default base class
+for PSP pages is the standard WebKit Page.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> WebKit.Page <span class="PY_KEYWORD">import</span> Page
+
+
+<span class="PY_KEYWORD">class</span> PSPPage(Page):
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self._parent = Page
+        self._parent.__init__(self)
+
+    <span class="PY_KEYWORD">def</span> awake(self, trans):
+        self._parent.awake(self, trans)
+        self.out = trans.response()
+</pre>
+<!--footer-->
+
+</body>
+</html>

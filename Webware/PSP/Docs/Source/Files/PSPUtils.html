@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/PSPUtils.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""A bunch of utility functions for the PSP generator.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_COMMENT"># PSP Error classes</span>
+
+<span class="PY_KEYWORD">class</span> PSPParserException(Exception):
+    <span class="PY_STRING">"""PSP parser error."""</span>
+
+
+<span class="PY_COMMENT"># Various utility functions</span>
+
+<span class="PY_KEYWORD">def</span> removeQuotes(s):
+    <span class="PY_KEYWORD">return</span> s.replace(r<span class="PY_STRING">'%\\&gt;'</span>, <span class="PY_STRING">'%&gt;'</span>)
+
+
+<span class="PY_KEYWORD">def</span> isExpression(s):
+    <span class="PY_STRING">"""Check whether this is a PSP expression."""</span>
+    <span class="PY_KEYWORD">if</span> s.startswith(<span class="PY_STRING">'&lt;%='</span>) <span class="PY_KEYWORD">and</span> s.endswith(<span class="PY_STRING">'%&gt;'</span>):
+        <span class="PY_KEYWORD">return</span> True
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">return</span> False
+
+
+<span class="PY_KEYWORD">def</span> getExpr(s):
+    <span class="PY_STRING">"""Get the content of a PSP expression."""</span>
+    <span class="PY_KEYWORD">if</span> s.startswith(<span class="PY_STRING">'&lt;%='</span>) <span class="PY_KEYWORD">and</span> s.endswith(<span class="PY_STRING">'%&gt;'</span>):
+        <span class="PY_KEYWORD">return</span> s[3:-2]
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>
+
+
+<span class="PY_KEYWORD">def</span> checkAttributes(tagType, attrs, validAttrs):
+    <span class="PY_STRING">"""Check for mandatory and optional atributes."""</span>
+    attrs = set(attrs)
+    mandatoryAttrs = validAttrs[0]
+    <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> mandatoryAttrs: <span class="PY_COMMENT"># mandatory</span>
+        <span class="PY_KEYWORD">try</span>:
+            attrs.remove(attr)
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'%s: Mandatory attribute %s missing'</span>
+                % (tagType, attr))
+    optionalAttrs = validAttrs[1]
+    <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> attrs:
+        <span class="PY_KEYWORD">if</span> attr <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> optionalAttrs:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'%s: Invalid attribute %s'</span>
+                % (tagType, attr))
+
+
+<span class="PY_KEYWORD">def</span> splitLines(text, keepends=False):
+    <span class="PY_STRING">"""Split text into lines."""</span>
+    <span class="PY_KEYWORD">return</span> text.splitlines(keepends)
+
+
+<span class="PY_KEYWORD">def</span> startsNewBlock(line):
+    <span class="PY_STRING">"""Determine whether a code line starts a new block.
+
+    Added by Christoph Zwerschke.
+
+    """</span>
+    line = line.strip()
+    <span class="PY_KEYWORD">if</span> line.startswith(<span class="PY_STRING">'#'</span>):
+        <span class="PY_KEYWORD">return</span> False
+    <span class="PY_KEYWORD">try</span>:
+        compile(line, <span class="PY_STRING">'&lt;string&gt;'</span>, <span class="PY_STRING">'exec'</span>)
+    <span class="PY_KEYWORD">except</span> SyntaxError:
+        <span class="PY_KEYWORD">try</span>:
+            compile(line + <span class="PY_STRING">'\n    pass'</span>, <span class="PY_STRING">'&lt;string&gt;'</span>, <span class="PY_STRING">'exec'</span>)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> True
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">return</span> False
+    <span class="PY_KEYWORD">return</span> line.endswith(<span class="PY_STRING">':'</span>)
+
+
+<span class="PY_KEYWORD">def</span> normalizeIndentation(pySource):
+    <span class="PY_STRING">"""Take a code block that may be too indented, and move it all to the left.
+
+    See PSPUtilsTest for examples.
+
+    First written by Winston Wolff; improved version by Christoph Zwerschke.
+
+    """</span>
+    lines = splitLines(pySource, True)
+    minIndent = None
+    indents = []
+    <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+        strippedLine = line.lstrip(<span class="PY_STRING">' \t'</span>)
+        indent = len(line) - len(strippedLine)
+        indents.append(len(line) - len(strippedLine))
+        <span class="PY_KEYWORD">if</span> strippedLine.lstrip(<span class="PY_STRING">'\r\n'</span>) <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> strippedLine.startswith(<span class="PY_STRING">'#'</span>):
+            <span class="PY_KEYWORD">if</span> minIndent <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">or</span> indent &lt; minIndent:
+                minIndent = indent
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> minIndent:
+                    <span class="PY_KEYWORD">break</span>
+    <span class="PY_KEYWORD">if</span> minIndent:
+        pySource = <span class="PY_STRING">''</span>.join([line[min(minIndent, indent):]
+            <span class="PY_KEYWORD">for</span> line, indent <span class="PY_KEYWORD">in</span> zip(lines, indents)])
+    <span class="PY_KEYWORD">return</span> pySource
+</pre>
+<!--footer-->
+
+</body>
+</html>

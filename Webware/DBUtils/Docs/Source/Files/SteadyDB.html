@@ -1,0 +1,682 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>DBUtils/SteadyDB.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""SteadyDB - hardened DB-API 2 connections.
+
+Implements steady connections to a database based on an
+arbitrary DB-API 2 compliant database interface module.
+
+The connections are transparently reopened when they are
+closed or the database connection has been lost or when
+they are used more often than an optional usage limit.
+Database cursors are transparently reopened as well when
+the execution of a database operation cannot be performed
+due to a lost connection. Only if the connection is lost
+after the execution, when rows are already fetched from the
+database, this will give an error and the cursor will not
+be reopened automatically, because there is no reliable way
+to recover the state of the cursor in such a situation.
+Connections which have been marked as being in a transaction
+with a begin() call will not be silently replaced either.
+
+A typical situation where database connections are lost
+is when the database server or an intervening firewall is
+shutdown and restarted for maintenance reasons. In such a
+case, all database connections would become unusable, even
+though the database service may be already available again.
+
+The "hardened" connections provided by this module will
+make the database connections immediately available again.
+
+This approach results in a steady database connection that
+can be used by PooledDB or PersistentDB to create pooled or
+persistent connections to a database in a threaded environment
+such as the application server of "Webware for Python."
+Note, however, that the connections themselves may not be
+thread-safe (depending on the used DB-API module).
+
+For the Python DB-API 2 specification, see:
+    http://www.python.org/peps/pep-0249.html
+For information on Webware for Python, see:
+    http://www.webwareforpython.org
+
+Usage:
+
+You can use the connection constructor connect() in the same
+way as you would use the connection constructor of a DB-API 2
+module if you specify the DB-API 2 module to be used as the
+first parameter, or alternatively you can specify an arbitrary
+constructor function returning new DB-API 2 compliant connection
+objects as the first parameter. Passing just a function allows
+implementing failover mechanisms and load balancing strategies.
+
+You may also specify a usage limit as the second parameter
+(set it to None if you prefer unlimited usage), an optional
+list of commands that may serve to prepare the session as a
+third parameter, the exception classes for which the failover
+mechanism shall be applied, and you can specify whether is is
+allowed to close the connection (by default this is true).
+When the connection to the database is lost or has been used
+too often, it will be transparently reset in most situations,
+without further notice.
+
+    import pgdb # import used DB-API 2 module
+    from DBUtils.SteadyDB import connect
+    db = connect(pgdb, 10000, ["set datestyle to german"],
+        host=..., database=..., user=..., ...)
+    ...
+    cursor = db.cursor()
+    ...
+    cursor.execute('select ...')
+    result = cursor.fetchall()
+    ...
+    cursor.close()
+    ...
+    db.close()
+
+
+Ideas for improvement:
+
+* Alternatively to the maximum number of uses,
+  implement a maximum time to live for connections.
+* Optionally log usage and loss of connection.
+
+
+Copyright, credits and license:
+
+* Contributed as supplement for Webware for Python and PyGreSQL
+  by Christoph Zwerschke in September 2005
+* Allowing creator functions as first parameter as in SQLAlchemy
+  suggested by Ezio Vernacotola in December 2006
+
+Licensed under the Open Software License version 2.1.
+
+"""</span>
+
+__version__ = <span class="PY_STRING">'1.1'</span>
+__revision__ = <span class="PY_STRING">"$Rev: 8218 $"</span>
+__date__ = <span class="PY_STRING">"$Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $"</span>
+
+
+<span class="PY_KEYWORD">import</span> sys
+
+
+<span class="PY_KEYWORD">class</span> SteadyDBError(Exception):
+    <span class="PY_STRING">"""General SteadyDB error."""</span>
+
+<span class="PY_KEYWORD">class</span> InvalidCursor(SteadyDBError):
+    <span class="PY_STRING">"""Database cursor is invalid."""</span>
+
+
+<span class="PY_KEYWORD">def</span> connect(creator, maxusage=None, setsession=None,
+        failures=None, ping=1, closeable=True, *args, **kwargs):
+    <span class="PY_STRING">"""A tough version of the connection constructor of a DB-API 2 module.
+
+    creator: either an arbitrary function returning new DB-API 2 compliant
+        connection objects or a DB-API 2 compliant database module
+    maxusage: maximum usage limit for the underlying DB-API 2 connection
+        (number of database operations, 0 or None means unlimited usage)
+        callproc(), execute() and executemany() count as one operation.
+        When the limit is reached, the connection is automatically reset.
+    setsession: an optional list of SQL commands that may serve to prepare
+        the session, e.g. ["set datestyle to german", "set time zone mez"]
+    failures: an optional exception class or a tuple of exception classes
+        for which the failover mechanism shall be applied, if the default
+        (OperationalError, InternalError) is not adequate
+    ping: determines when the connection should be checked with ping()
+        (0 = None = never, 1 = default = when _ping_check() is called,
+        2 = whenever a cursor is created, 4 = when a query is executed,
+        7 = always, and all other bit combinations of these values)
+    closeable: if this is set to false, then closing the connection will
+        be silently ignored, but by default the connection can be closed
+    args, kwargs: the parameters that shall be passed to the creator
+        function or the connection constructor of the DB-API 2 module
+
+    """</span>
+    <span class="PY_KEYWORD">return</span> SteadyDBConnection(creator, maxusage, setsession,
+        failures, ping, closeable, *args, **kwargs)
+
+
+<span class="PY_KEYWORD">class</span> SteadyDBConnection:
+    <span class="PY_STRING">"""A "tough" version of DB-API 2 connections."""</span>
+
+    version = __version__
+
+    <span class="PY_KEYWORD">def</span> __init__(self, creator, maxusage=None, setsession=None,
+            failures=None, ping=1, closeable=True, *args, **kwargs):
+        <span class="PY_STRING">"""Create a "tough" DB-API 2 connection."""</span>
+        <span class="PY_COMMENT"># basic initialization to make finalizer work</span>
+        self._con = None
+        self._closed = True
+        <span class="PY_COMMENT"># proper initialization of the connection</span>
+        <span class="PY_KEYWORD">try</span>:
+            self._creator = creator.connect
+            self._dbapi = creator
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_COMMENT"># try finding the DB-API 2 module via the connection creator</span>
+            self._creator = creator
+            <span class="PY_KEYWORD">try</span>:
+                self._dbapi = creator.dbapi
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                <span class="PY_KEYWORD">try</span>:
+                    self._dbapi = sys.modules[creator.__module__]
+                    <span class="PY_KEYWORD">if</span> self._dbapi.connect != creator:
+                        <span class="PY_KEYWORD">raise</span> AttributeError
+                <span class="PY_KEYWORD">except</span> (AttributeError, KeyError):
+                    self._dbapi = None
+        <span class="PY_KEYWORD">try</span>:
+            self._threadsafety = creator.threadsafety
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">try</span>:
+                self._threadsafety = self._dbapi.threadsafety
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                self._threadsafety = None
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> callable(self._creator):
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">"%r is not a connection provider."</span> % (creator,))
+        <span class="PY_KEYWORD">if</span> maxusage <span class="PY_KEYWORD">is</span> None:
+            maxusage = 0
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(maxusage, (int, long)):
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">"'maxusage' must be an integer value."</span>)
+        self._maxusage = maxusage
+        self._setsession_sql = setsession
+        <span class="PY_KEYWORD">if</span> failures <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> isinstance(
+                failures, tuple) <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> issubclass(failures, Exception):
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">"'failures' must be a tuple of exceptions."</span>)
+        self._failures = failures
+        self._ping = isinstance(ping, int) <span class="PY_KEYWORD">and</span> ping <span class="PY_KEYWORD">or</span> 0
+        self._closeable = closeable
+        self._args, self._kwargs = args, kwargs
+        self._store(self._create())
+
+    <span class="PY_KEYWORD">def</span> _create(self):
+        <span class="PY_STRING">"""Create a new connection using the creator function."""</span>
+        con = self._creator(*self._args, **self._kwargs)
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> self._dbapi.connect != self._creator:
+                    <span class="PY_KEYWORD">raise</span> AttributeError
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                <span class="PY_COMMENT"># try finding the DB-API 2 module via the connection itself</span>
+                <span class="PY_KEYWORD">try</span>:
+                    mod = con.__module__
+                <span class="PY_KEYWORD">except</span> AttributeError:
+                    mod = None
+                <span class="PY_KEYWORD">while</span> mod:
+                    <span class="PY_KEYWORD">try</span>:
+                        self._dbapi = sys.modules[mod]
+                        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> callable(self._dbapi.connect):
+                            <span class="PY_KEYWORD">raise</span> AttributeError
+                    <span class="PY_KEYWORD">except</span> (AttributeError, KeyError):
+                        <span class="PY_KEYWORD">pass</span>
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">break</span>
+                    i = mod.rfind(<span class="PY_STRING">'.'</span>)
+                    <span class="PY_KEYWORD">if</span> i &lt; 0:
+                        mod = None
+                    <span class="PY_KEYWORD">else</span>:
+                        mod = mod[:i]
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">try</span>:
+                        mod = con.OperationalError.__module__
+                    <span class="PY_KEYWORD">except</span> AttributeError:
+                        mod = None
+                    <span class="PY_KEYWORD">while</span> mod:
+                        <span class="PY_KEYWORD">try</span>:
+                            self._dbapi = sys.modules[mod]
+                            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> callable(self._dbapi.connect):
+                                <span class="PY_KEYWORD">raise</span> AttributeError
+                        <span class="PY_KEYWORD">except</span> (AttributeError, KeyError):
+                            <span class="PY_KEYWORD">pass</span>
+                        <span class="PY_KEYWORD">else</span>:
+                            <span class="PY_KEYWORD">break</span>
+                        i = mod.rfind(<span class="PY_STRING">'.'</span>)
+                        <span class="PY_KEYWORD">if</span> i &lt; 0:
+                            mod = None
+                        <span class="PY_KEYWORD">else</span>:
+                            mod = mod[:i]
+                    <span class="PY_KEYWORD">else</span>:
+                        self._dbapi = None
+            <span class="PY_KEYWORD">if</span> self._threadsafety <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">try</span>:
+                    self._threadsafety = self._dbapi.threadsafety
+                <span class="PY_KEYWORD">except</span> AttributeError:
+                    <span class="PY_KEYWORD">try</span>:
+                        self._threadsafety = con.threadsafety
+                    <span class="PY_KEYWORD">except</span> AttributeError:
+                        <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">if</span> self._failures <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">try</span>:
+                    self._failures = (self._dbapi.OperationalError,
+                        self._dbapi.InternalError)
+                <span class="PY_KEYWORD">except</span> AttributeError:
+                    <span class="PY_KEYWORD">try</span>:
+                        self._failures = (self._creator.OperationalError,
+                            self._creator.InternalError)
+                    <span class="PY_KEYWORD">except</span> AttributeError:
+                        <span class="PY_KEYWORD">try</span>:
+                            self._failures = (con.OperationalError,
+                                con.InternalError)
+                        <span class="PY_KEYWORD">except</span> AttributeError:
+                            <span class="PY_KEYWORD">raise</span> AttributeError(
+                                <span class="PY_STRING">"Could not determine failure exceptions"</span>
+                                <span class="PY_STRING">" (please set failures or creator.dbapi)."</span>)
+            <span class="PY_KEYWORD">if</span> isinstance(self._failures, tuple):
+                self._failure = self._failures[0]
+            <span class="PY_KEYWORD">else</span>:
+                self._failure = self._failures
+            self._setsession(con)
+        <span class="PY_KEYWORD">except</span> Exception, error:
+            <span class="PY_COMMENT"># the database module could not be determined</span>
+            <span class="PY_COMMENT"># or the session could not be prepared</span>
+            <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># close the connection first</span>
+                con.close()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">raise</span> error <span class="PY_COMMENT"># reraise the original error again</span>
+        <span class="PY_KEYWORD">return</span> con
+
+    <span class="PY_KEYWORD">def</span> _setsession(self, con=None):
+        <span class="PY_STRING">"""Execute the SQL commands for session preparation."""</span>
+        <span class="PY_KEYWORD">if</span> con <span class="PY_KEYWORD">is</span> None:
+            con = self._con
+        <span class="PY_KEYWORD">if</span> self._setsession_sql:
+            cursor = con.cursor()
+            <span class="PY_KEYWORD">for</span> sql <span class="PY_KEYWORD">in</span> self._setsession_sql:
+                cursor.execute(sql)
+            cursor.close()
+
+    <span class="PY_KEYWORD">def</span> _store(self, con):
+        <span class="PY_STRING">"""Store a database connection for subsequent use."""</span>
+        self._con = con
+        self._transaction = False
+        self._closed = False
+        self._usage = 0
+
+    <span class="PY_KEYWORD">def</span> _close(self):
+        <span class="PY_STRING">"""Close the tough connection.
+
+        You can always close a tough connection with this method
+        and it will not complain if you close it more than once.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._closed:
+            <span class="PY_KEYWORD">try</span>:
+                self._con.close()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            self._transaction = False
+            self._closed = True
+
+    <span class="PY_KEYWORD">def</span> _reset(self, force=False):
+        <span class="PY_STRING">"""Reset a tough connection.
+
+        Rollback if forced or the connection was in a transaction.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> force <span class="PY_KEYWORD">or</span> self._transaction:
+            <span class="PY_KEYWORD">try</span>:
+                self.rollback()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> _ping_check(self, ping=1, reconnect=True):
+        <span class="PY_STRING">"""Check whether the connection is still alive using ping().
+
+        If the the underlying connection is not active and the ping
+        parameter is set accordingly, the connection will be recreated
+        unless the connection is currently inside a transaction.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> ping &amp; self._ping:
+            <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># if possible, ping the connection</span>
+                alive = self._con.ping()
+            <span class="PY_KEYWORD">except</span> (AttributeError, IndexError, TypeError, ValueError):
+                self._ping = 0 <span class="PY_COMMENT"># ping() is not available</span>
+                alive = None
+                reconnect = False
+            <span class="PY_KEYWORD">except</span> Exception:
+                alive = False
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> alive <span class="PY_KEYWORD">is</span> None:
+                    alive = True
+                <span class="PY_KEYWORD">if</span> alive:
+                    reconnect = False
+            <span class="PY_KEYWORD">if</span> reconnect <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> self._transaction:
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># try to reopen the connection</span>
+                    con = self._create()
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">else</span>:
+                    self._close()
+                    self._store(con)
+                    alive = True
+            <span class="PY_KEYWORD">return</span> alive
+
+    <span class="PY_KEYWORD">def</span> dbapi(self):
+        <span class="PY_STRING">"""Return the underlying DB-API 2 module of the connection."""</span>
+        <span class="PY_KEYWORD">if</span> self._dbapi <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">raise</span> AttributeError(<span class="PY_STRING">"Could not determine DB-API 2 module"</span>
+                <span class="PY_STRING">" (please set creator.dbapi)."</span>)
+        <span class="PY_KEYWORD">return</span> self._dbapi
+
+    <span class="PY_KEYWORD">def</span> threadsafety(self):
+        <span class="PY_STRING">"""Return the thread safety level of the connection."""</span>
+        <span class="PY_KEYWORD">if</span> self._threadsafety <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">if</span> self._dbapi <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">raise</span> AttributeError(<span class="PY_STRING">"Could not determine threadsafety"</span>
+                    <span class="PY_STRING">" (please set creator.dbapi or creator.threadsafety)."</span>)
+            <span class="PY_KEYWORD">return</span> 0
+        <span class="PY_KEYWORD">return</span> self._threadsafety
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close the tough connection.
+
+        You are allowed to close a tough connection by default
+        and it will not complain if you close it more than once.
+
+        You can disallow closing connections by setting
+        the closeable parameter to something false. In this case,
+        closing tough connections will be silently ignored.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._closeable:
+            self._close()
+        <span class="PY_KEYWORD">elif</span> self._transaction:
+            self._reset()
+
+    <span class="PY_KEYWORD">def</span> begin(self, *args, **kwargs):
+        <span class="PY_STRING">"""Indicate the beginning of a transaction.
+
+        During a transaction, connections will not not transparently
+        replaced, and all errors will be raised to the application.
+
+        If the underlying driver supports this method, it will be called
+        with the given parameters (e.g. for distributed transactions).
+
+        """</span>
+        self._transaction = True
+        <span class="PY_KEYWORD">try</span>:
+            begin = self._con.begin
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">else</span>:
+            begin(*args, **kwargs)
+
+    <span class="PY_KEYWORD">def</span> commit(self):
+        <span class="PY_STRING">"""Commit any pending transaction."""</span>
+        self._transaction = False
+        self._con.commit()
+
+    <span class="PY_KEYWORD">def</span> rollback(self):
+        <span class="PY_STRING">"""Rollback pending transaction."""</span>
+        self._transaction = False
+        self._con.rollback()
+
+    <span class="PY_KEYWORD">def</span> cancel(self):
+        <span class="PY_STRING">"""Cancel a long-running transaction.
+
+        If the underlying driver supports this method, it will be called.
+
+        """</span>
+        self._transaction = False
+        <span class="PY_KEYWORD">try</span>:
+            cancel = self._con.cancel
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">else</span>:
+            cancel()
+
+    <span class="PY_KEYWORD">def</span> ping(self, *args, **kwargs):
+        <span class="PY_STRING">"""Ping connection."""</span>
+        <span class="PY_KEYWORD">return</span> self._con.ping(*args, **kwargs)
+
+    <span class="PY_KEYWORD">def</span> _cursor(self, *args, **kwargs):
+        <span class="PY_STRING">"""A "tough" version of the method cursor()."""</span>
+        <span class="PY_COMMENT"># The args and kwargs are not part of the standard,</span>
+        <span class="PY_COMMENT"># but some database modules seem to use these.</span>
+        transaction = self._transaction
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> transaction:
+            self._ping_check(2)
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> self._maxusage:
+                <span class="PY_KEYWORD">if</span> self._usage &gt;= self._maxusage:
+                    <span class="PY_COMMENT"># the connection was used too often</span>
+                    <span class="PY_KEYWORD">raise</span> self._failure
+            cursor = self._con.cursor(*args, **kwargs) <span class="PY_COMMENT"># try to get a cursor</span>
+        <span class="PY_KEYWORD">except</span> self._failures, error: <span class="PY_COMMENT"># error in getting cursor</span>
+            <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># try to reopen the connection</span>
+                con = self._create()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># and try one more time to get a cursor</span>
+                    cursor = con.cursor(*args, **kwargs)
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">else</span>:
+                    self._close()
+                    self._store(con)
+                    <span class="PY_KEYWORD">if</span> transaction:
+                        <span class="PY_KEYWORD">raise</span> error <span class="PY_COMMENT"># reraise the original error again</span>
+                    <span class="PY_KEYWORD">return</span> cursor
+                <span class="PY_KEYWORD">try</span>:
+                    con.close()
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">if</span> transaction:
+                self._transaction = False
+            <span class="PY_KEYWORD">raise</span> error <span class="PY_COMMENT"># reraise the original error again</span>
+        <span class="PY_KEYWORD">return</span> cursor
+
+    <span class="PY_KEYWORD">def</span> cursor(self, *args, **kwargs):
+        <span class="PY_STRING">"""Return a new Cursor Object using the connection."""</span>
+        <span class="PY_KEYWORD">return</span> SteadyDBCursor(self, *args, **kwargs)
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Delete the steady connection."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self._close() <span class="PY_COMMENT"># make sure the connection is closed</span>
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">class</span> SteadyDBCursor:
+    <span class="PY_STRING">"""A "tough" version of DB-API 2 cursors."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, con, *args, **kwargs):
+        <span class="PY_STRING">"""Create a "tough" DB-API 2 cursor."""</span>
+        <span class="PY_COMMENT"># basic initialization to make finalizer work</span>
+        self._cursor = None
+        self._closed = True
+        <span class="PY_COMMENT"># proper initialization of the cursor</span>
+        self._con = con
+        self._args, self._kwargs = args, kwargs
+        self._clearsizes()
+        <span class="PY_KEYWORD">try</span>:
+            self._cursor = con._cursor(*args, **kwargs)
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">"%r is not a SteadyDBConnection."</span> % (con,))
+        self._closed = False
+
+    <span class="PY_KEYWORD">def</span> setinputsizes(self, sizes):
+        <span class="PY_STRING">"""Store input sizes in case cursor needs to be reopened."""</span>
+        self._inputsizes = sizes
+
+    <span class="PY_KEYWORD">def</span> setoutputsize(self, size, column=None):
+        <span class="PY_STRING">"""Store output sizes in case cursor needs to be reopened."""</span>
+        self._outputsizes[column] = size
+
+    <span class="PY_KEYWORD">def</span> _clearsizes(self):
+        <span class="PY_STRING">"""Clear stored input and output sizes."""</span>
+        self._inputsizes = []
+        self._outputsizes = {}
+
+    <span class="PY_KEYWORD">def</span> _setsizes(self, cursor=None):
+        <span class="PY_STRING">"""Set stored input and output sizes for cursor execution."""</span>
+        <span class="PY_KEYWORD">if</span> cursor <span class="PY_KEYWORD">is</span> None:
+            cursor = self._cursor
+        <span class="PY_KEYWORD">if</span> self._inputsizes:
+            cursor.setinputsizes(self._inputsizes)
+        <span class="PY_KEYWORD">for</span> column, size <span class="PY_KEYWORD">in</span> self._outputsizes.iteritems():
+            <span class="PY_KEYWORD">if</span> column <span class="PY_KEYWORD">is</span> None:
+                cursor.setoutputsize(size)
+            <span class="PY_KEYWORD">else</span>:
+                cursor.setoutputsize(size, column)
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close the tough cursor.
+
+        It will not complain if you close it more than once.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._closed:
+            <span class="PY_KEYWORD">try</span>:
+                self._cursor.close()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            self._closed = True
+
+    <span class="PY_KEYWORD">def</span> _get_tough_method(self, name):
+        <span class="PY_STRING">"""Return a "tough" version of the given cursor method."""</span>
+        <span class="PY_KEYWORD">def</span> tough_method(*args, **kwargs):
+            execute = name.startswith(<span class="PY_STRING">'execute'</span>)
+            con = self._con
+            transaction = con._transaction
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> transaction:
+                con._ping_check(4)
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> con._maxusage:
+                    <span class="PY_KEYWORD">if</span> con._usage &gt;= con._maxusage:
+                        <span class="PY_COMMENT"># the connection was used too often</span>
+                        <span class="PY_KEYWORD">raise</span> con._failure
+                <span class="PY_KEYWORD">if</span> execute:
+                    self._setsizes()
+                method = getattr(self._cursor, name)
+                result = method(*args, **kwargs) <span class="PY_COMMENT"># try to execute</span>
+                <span class="PY_KEYWORD">if</span> execute:
+                    self._clearsizes()
+            <span class="PY_KEYWORD">except</span> con._failures, error: <span class="PY_COMMENT"># execution error</span>
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> transaction:
+                    <span class="PY_KEYWORD">try</span>:
+                        cursor2 = con._cursor(
+                            *self._args, **self._kwargs) <span class="PY_COMMENT"># open new cursor</span>
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">pass</span>
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># and try one more time to execute</span>
+                            <span class="PY_KEYWORD">if</span> execute:
+                                self._setsizes(cursor2)
+                            method = getattr(cursor2, name)
+                            result = method(*args, **kwargs)
+                            <span class="PY_KEYWORD">if</span> execute:
+                                self._clearsizes()
+                        <span class="PY_KEYWORD">except</span> Exception:
+                            <span class="PY_KEYWORD">pass</span>
+                        <span class="PY_KEYWORD">else</span>:
+                            self.close()
+                            self._cursor = cursor2
+                            con._usage += 1
+                            <span class="PY_KEYWORD">return</span> result
+                        <span class="PY_KEYWORD">try</span>:
+                            cursor2.close()
+                        <span class="PY_KEYWORD">except</span> Exception:
+                            <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># try to reopen the connection</span>
+                    con2 = con._create()
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">try</span>:
+                        cursor2 = con2.cursor(
+                            *self._args, **self._kwargs) <span class="PY_COMMENT"># open new cursor</span>
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">pass</span>
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">if</span> transaction:
+                            self.close()
+                            con._close()
+                            con._store(con2)
+                            self._cursor = cursor2
+                            <span class="PY_KEYWORD">raise</span> error <span class="PY_COMMENT"># raise the original error again</span>
+                        <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># try one more time to execute</span>
+                            <span class="PY_KEYWORD">if</span> execute:
+                                self._setsizes(cursor2)
+                            method2 = getattr(cursor2, name)
+                            result = method2(*args, **kwargs)
+                            <span class="PY_KEYWORD">if</span> execute:
+                                self._clearsizes()
+                        <span class="PY_KEYWORD">except</span> error.__class__: <span class="PY_COMMENT"># same execution error</span>
+                            use2 = False
+                        <span class="PY_KEYWORD">except</span> Exception, error: <span class="PY_COMMENT"># other execution errors</span>
+                            use2 = True
+                        <span class="PY_KEYWORD">else</span>:
+                            use2 = True
+                            error = None
+                        <span class="PY_KEYWORD">if</span> use2:
+                            self.close()
+                            con._close()
+                            con._store(con2)
+                            self._cursor = cursor2
+                            con._usage += 1
+                            <span class="PY_KEYWORD">if</span> error:
+                                <span class="PY_KEYWORD">raise</span> error <span class="PY_COMMENT"># raise the other error</span>
+                            <span class="PY_KEYWORD">return</span> result
+                        <span class="PY_KEYWORD">try</span>:
+                            cursor2.close()
+                        <span class="PY_KEYWORD">except</span> Exception:
+                            <span class="PY_KEYWORD">pass</span>
+                    <span class="PY_KEYWORD">try</span>:
+                        con2.close()
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">if</span> transaction:
+                    self._transaction = False
+                <span class="PY_KEYWORD">raise</span> error <span class="PY_COMMENT"># reraise the original error again</span>
+            <span class="PY_KEYWORD">else</span>:
+                con._usage += 1
+                <span class="PY_KEYWORD">return</span> result
+        <span class="PY_KEYWORD">return</span> tough_method
+
+    <span class="PY_KEYWORD">def</span> __getattr__(self, name):
+        <span class="PY_STRING">"""Inherit methods and attributes of underlying cursor."""</span>
+        <span class="PY_KEYWORD">if</span> self._cursor:
+            <span class="PY_KEYWORD">if</span> name.startswith(<span class="PY_STRING">'execute'</span>) <span class="PY_KEYWORD">or</span> name.startswith(<span class="PY_STRING">'call'</span>):
+                <span class="PY_COMMENT"># make execution methods "tough"</span>
+                <span class="PY_KEYWORD">return</span> self._get_tough_method(name)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> getattr(self._cursor, name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> InvalidCursor
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Delete the steady cursor."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self.close() <span class="PY_COMMENT"># make sure the cursor is closed</span>
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

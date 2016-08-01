@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/PickleRPCServlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Dict-RPC servlets."""</span>
+
+<span class="PY_KEYWORD">import</span> sys, traceback
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cPickle <span class="PY_KEYWORD">import</span> dumps, PickleError
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> pickle <span class="PY_KEYWORD">import</span> dumps, PickleError
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">import</span> zlib
+<span class="PY_KEYWORD">except</span> ImportError:
+    zlib = None
+
+<span class="PY_KEYWORD">from</span> RPCServlet <span class="PY_KEYWORD">import</span> RPCServlet
+<span class="PY_KEYWORD">from</span> MiscUtils.PickleRPC <span class="PY_KEYWORD">import</span> RequestError, SafeUnpickler
+
+
+<span class="PY_KEYWORD">class</span> PickleRPCServlet(RPCServlet, SafeUnpickler):
+    <span class="PY_STRING">"""PickleRPCServlet is a base class for Dict-RPC servlets.
+
+    The "Pickle" refers to Python's pickle module. This class is
+    similar to XMLRPCServlet. By using Python pickles you get their
+    convenience (assuming the client is Pythonic), but lose
+    language independence. Some of us don't mind that last one.  ;-)
+
+    Conveniences over XML-RPC include the use of all of the following:
+      * Any pickle-able Python type (datetime for example)
+      * Python instances (aka objects)
+      * None
+      * Longs that are outside the 32-bit int boundaries
+      * Keyword arguments
+
+    Pickles should also be faster than XML, especially now that
+    we support binary pickling and compression.
+
+    To make your own PickleRPCServlet, create a subclass and implement a
+    method which is then named in exposedMethods():
+
+        from WebKit.PickleRPCServlet import PickleRPCServlet
+        class Math(PickleRPCServlet):
+            def multiply(self, x, y):
+                return x * y
+            def exposedMethods(self):
+                return ['multiply']
+
+    To make a PickleRPC call from another Python program, do this:
+        from MiscUtils.PickleRPC import Server
+        server = Server('http://localhost/WebKit.cgi/Context/Math')
+        print server.multiply(3, 4)    # 12
+        print server.multiply('-', 10) # ----------
+
+    If a request error is raised by the server, then
+    MiscUtils.PickleRPC.RequestError is raised. If an unhandled
+    exception is raised by the server, or the server response is
+    malformed, then MiscUtils.PickleRPC.ResponseError (or one of
+    its subclasses) is raised.
+
+    Tip: If you want callers of the RPC servlets to be able to
+    introspect what methods are available, then include
+    'exposedMethods' in exposedMethods().
+
+    If you wanted the actual response dictionary for some reason:
+        print server._request('multiply', 3, 4)
+            # {'value': 12, 'timeReceived': ...}
+
+    In which case, an exception is not purposefully raised if the
+    dictionary contains one. Instead, examine the dictionary.
+
+    For the dictionary formats and more information see the docs
+    for MiscUtils.PickleRPC.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> respondToPost(self, trans):
+        <span class="PY_KEYWORD">try</span>:
+            request = trans.request()
+            data = request.rawInput(rewind=1)
+            response = dict(timeReceived=trans.request().time())
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    encoding = request.environ().get(<span class="PY_STRING">'HTTP_CONTENT_ENCODING'</span>)
+                    <span class="PY_KEYWORD">if</span> encoding == <span class="PY_STRING">'x-gzip'</span>:
+                        <span class="PY_KEYWORD">if</span> zlib <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+                            <span class="PY_KEYWORD">try</span>:
+                                rawstring = data.read()
+                                req = self.loads(zlib.decompress(rawstring))
+                            <span class="PY_KEYWORD">except</span> zlib.error:
+                                <span class="PY_KEYWORD">raise</span> RequestError(
+                                    <span class="PY_STRING">'Cannot uncompress compressed dict-rpc request'</span>)
+                        <span class="PY_KEYWORD">else</span>:
+                            <span class="PY_KEYWORD">raise</span> RequestError(
+                                <span class="PY_STRING">'Cannot handle compressed dict-rpc request'</span>)
+                    <span class="PY_KEYWORD">elif</span> encoding:
+                        <span class="PY_KEYWORD">raise</span> RequestError(
+                            <span class="PY_STRING">'Cannot handle Content-Encoding of %s'</span> % encoding)
+                    <span class="PY_KEYWORD">else</span>:
+                        req = self.load(data)
+                <span class="PY_KEYWORD">except</span> PickleError:
+                    <span class="PY_KEYWORD">raise</span> RequestError(<span class="PY_STRING">'Cannot unpickle dict-rpc request.'</span>)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(req, dict):
+                    <span class="PY_KEYWORD">raise</span> RequestError(
+                        <span class="PY_STRING">'Expecting a dictionary for dict-rpc requests, '</span>
+                        <span class="PY_STRING">'but got %s instead.'</span> % type(req))
+                <span class="PY_KEYWORD">if</span> req.get(<span class="PY_STRING">'version'</span>, 1) != 1:
+                    <span class="PY_KEYWORD">raise</span> RequestError(<span class="PY_STRING">'Cannot handle version %s requests.'</span>
+                        % req[<span class="PY_STRING">'version'</span>])
+                <span class="PY_KEYWORD">if</span> req.get(<span class="PY_STRING">'action'</span>, <span class="PY_STRING">'call'</span>) != <span class="PY_STRING">'call'</span>:
+                    <span class="PY_KEYWORD">raise</span> RequestError(
+                        <span class="PY_STRING">'Cannot handle the request action, %r.'</span> % req[<span class="PY_STRING">'action'</span>])
+                <span class="PY_KEYWORD">try</span>:
+                    methodName = req[<span class="PY_STRING">'methodName'</span>]
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_KEYWORD">raise</span> RequestError(<span class="PY_STRING">'Missing method in request'</span>)
+                args = req.get(<span class="PY_STRING">'args'</span>, ())
+                <span class="PY_KEYWORD">if</span> methodName == <span class="PY_STRING">'__methods__.__getitem__'</span>:
+                    <span class="PY_COMMENT"># support PythonWin autoname completion</span>
+                    response[<span class="PY_STRING">'value'</span>] = self.exposedMethods()[args[0]]
+                <span class="PY_KEYWORD">else</span>:
+                    response[<span class="PY_STRING">'value'</span>] = self.call(methodName, *args,
+                        **req.get(<span class="PY_STRING">'keywords'</span>, {}))
+            <span class="PY_KEYWORD">except</span> RequestError, e:
+                response[<span class="PY_STRING">'requestError'</span>] = str(e)
+                self.sendResponse(trans, response)
+                self.handleException(trans)
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                response[<span class="PY_STRING">'exception'</span>] = self.resultForException(e, trans)
+                self.sendResponse(trans, response)
+                self.handleException(trans)
+            <span class="PY_KEYWORD">except</span>: <span class="PY_COMMENT"># if it's a string exception, this gets triggered</span>
+                response[<span class="PY_STRING">'exception'</span>] = self.resultForException(
+                    sys.exc_info()[0], trans)
+                self.sendResponse(trans, response)
+                self.handleException(trans)
+            <span class="PY_KEYWORD">else</span>:
+                self.sendResponse(trans, response)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_COMMENT"># internal error, report as HTTP server error</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'PickleRPCServlet internal error'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">''</span>.join(traceback.format_exception(*sys.exc_info()))
+            trans.response().setStatus(500, <span class="PY_STRING">'Server Error'</span>)
+            self.handleException(trans)
+
+    <span class="PY_KEYWORD">def</span> sendResponse(self, trans, response):
+        <span class="PY_STRING">"""Timestamp the response dict and send it."""</span>
+        <span class="PY_COMMENT"># Generated a pickle string</span>
+        response[<span class="PY_STRING">'timeResponded'</span>] = time()
+        <span class="PY_KEYWORD">if</span> self.useBinaryPickle():
+            contentType = <span class="PY_STRING">'application/x-python-binary-pickled-dict'</span>
+            response = dumps(response, -1)
+        <span class="PY_KEYWORD">else</span>:
+            contentType = <span class="PY_STRING">'text/x-python-pickled-dict'</span>
+            response = dumps(response, 0)
+
+        <span class="PY_COMMENT"># Get list of accepted encodings</span>
+        <span class="PY_KEYWORD">try</span>:
+            acceptEncoding = trans.request().environ()[<span class="PY_STRING">"HTTP_ACCEPT_ENCODING"</span>]
+            <span class="PY_KEYWORD">if</span> acceptEncoding:
+                acceptEncoding = [enc.strip()
+                    <span class="PY_KEYWORD">for</span> enc <span class="PY_KEYWORD">in</span> acceptEncoding.split(<span class="PY_STRING">','</span>)]
+            <span class="PY_KEYWORD">else</span>:
+                acceptEncoding = []
+        <span class="PY_KEYWORD">except</span> KeyError:
+            acceptEncoding = []
+
+        <span class="PY_COMMENT"># Compress the output if we are allowed to.</span>
+        <span class="PY_COMMENT"># We'll avoid compressing short responses and</span>
+        <span class="PY_COMMENT"># we'll use the fastest possible compression -- level 1.</span>
+        <span class="PY_KEYWORD">if</span> zlib <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'gzip'</span> <span class="PY_KEYWORD">in</span> acceptEncoding <span class="PY_KEYWORD">and</span> len(response) &gt; 1000:
+            contentEncoding = <span class="PY_STRING">'x-gzip'</span>
+            response = zlib.compress(response, 1)
+        <span class="PY_KEYWORD">else</span>:
+            contentEncoding = None
+        self.sendOK(contentType, response, trans, contentEncoding)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> useBinaryPickle():
+        <span class="PY_STRING">"""Determine whether binary pickling format shall be used.
+
+        When this returns True, the highest available binary pickling format
+        will be used. Override this to return False to use the less-efficient
+        text pickling format.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> True
+</pre>
+<!--footer-->
+
+</body>
+</html>

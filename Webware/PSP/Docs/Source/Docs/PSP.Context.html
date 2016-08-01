@@ -1,0 +1,181 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.Context</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.Context</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/Context.py">/var/www/docs/Webware-1.1.1/PSP/Context.py</a></font></td></tr></table>
+    <p><tt>Utility&nbsp;class&nbsp;for&nbsp;keeping&nbsp;track&nbsp;of&nbsp;the&nbsp;context.<br>
+&nbsp;<br>
+A&nbsp;utility&nbsp;class&nbsp;that&nbsp;holds&nbsp;information&nbsp;about&nbsp;the&nbsp;file&nbsp;we&nbsp;are&nbsp;parsing<br>
+and&nbsp;the&nbsp;environment&nbsp;we&nbsp;are&nbsp;doing&nbsp;it&nbsp;in.<br>
+&nbsp;<br>
+(c)&nbsp;Copyright&nbsp;by&nbsp;Jay&nbsp;Love,&nbsp;2000&nbsp;(mailto:jsliv@jslove.org)<br>
+&nbsp;<br>
+Permission&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;and&nbsp;distribute&nbsp;this&nbsp;software&nbsp;and&nbsp;its<br>
+documentation&nbsp;for&nbsp;any&nbsp;purpose&nbsp;and&nbsp;without&nbsp;fee&nbsp;or&nbsp;royalty&nbsp;is&nbsp;hereby&nbsp;granted,<br>
+provided&nbsp;that&nbsp;the&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;appear&nbsp;in&nbsp;all&nbsp;copies&nbsp;and&nbsp;that<br>
+both&nbsp;that&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;appear&nbsp;in<br>
+supporting&nbsp;documentation&nbsp;or&nbsp;portions&nbsp;thereof,&nbsp;including&nbsp;modifications,<br>
+that&nbsp;you&nbsp;make.<br>
+&nbsp;<br>
+This&nbsp;software&nbsp;is&nbsp;based&nbsp;in&nbsp;part&nbsp;on&nbsp;work&nbsp;done&nbsp;by&nbsp;the&nbsp;Jakarta&nbsp;group.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.Context.html#PSPContext">PSPContext</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.Context.html#PSPCLContext">PSPCLContext</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PSPCLContext">class <strong>PSPCLContext</strong></a>(<a href="PSP.Context.html#PSPContext">PSPContext</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;context&nbsp;for&nbsp;command&nbsp;line&nbsp;compilation.<br>
+&nbsp;<br>
+Currently&nbsp;used&nbsp;for&nbsp;both&nbsp;command&nbsp;line&nbsp;and&nbsp;PSPServletEngine&nbsp;compilation.<br>
+This&nbsp;class&nbsp;provides&nbsp;all&nbsp;the&nbsp;information&nbsp;necessary&nbsp;during&nbsp;the&nbsp;parsing<br>
+and&nbsp;page&nbsp;generation&nbsp;steps&nbsp;of&nbsp;the&nbsp;PSP&nbsp;compilation&nbsp;process.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Context.html#PSPCLContext">PSPCLContext</a></dd>
+<dd><a href="PSP.Context.html#PSPContext">PSPContext</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PSPCLContext-__init__"><strong>__init__</strong></a>(self, pspfile)</dt></dl>
+
+<dl><dt><a name="PSPCLContext-getBaseUri"><strong>getBaseUri</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;base&nbsp;URI&nbsp;for&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getClassPath"><strong>getClassPath</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPCLContext-getFullClassName"><strong>getFullClassName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;class&nbsp;name&nbsp;including&nbsp;package&nbsp;prefixes.<br>
+&nbsp;<br>
+Won't&nbsp;use&nbsp;this&nbsp;for&nbsp;now.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getFullPspFileName"><strong>getFullPspFileName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;PSP&nbsp;file&nbsp;including&nbsp;its&nbsp;file&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getOutputDirectory"><strong>getOutputDirectory</strong></a>(self)</dt><dd><tt>Provide&nbsp;directory&nbsp;to&nbsp;dump&nbsp;PSP&nbsp;source&nbsp;file&nbsp;to.<br>
+&nbsp;<br>
+I&nbsp;am&nbsp;probably&nbsp;doing&nbsp;this&nbsp;in&nbsp;reverse&nbsp;order&nbsp;at&nbsp;the&nbsp;moment.<br>
+I&nbsp;should&nbsp;start&nbsp;with&nbsp;this&nbsp;and&nbsp;get&nbsp;the&nbsp;Python&nbsp;filename&nbsp;from&nbsp;it.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getPspFileName"><strong>getPspFileName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;PSP&nbsp;file&nbsp;from&nbsp;which&nbsp;we&nbsp;are&nbsp;generating.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getPythonFileEncoding"><strong>getPythonFileEncoding</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;encoding&nbsp;of&nbsp;the&nbsp;file&nbsp;that&nbsp;we&nbsp;are&nbsp;generating.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getPythonFileName"><strong>getPythonFileName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;filename&nbsp;that&nbsp;we&nbsp;are&nbsp;generating&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getReader"><strong>getReader</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;PSPReader&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;assigned&nbsp;to&nbsp;this&nbsp;context.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getServletClassName"><strong>getServletClassName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;class&nbsp;name&nbsp;of&nbsp;the&nbsp;servlet&nbsp;being&nbsp;generated.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-getServletWriter"><strong>getServletWriter</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;ServletWriter&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;assigned&nbsp;to&nbsp;this&nbsp;context.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-resolveRelativeURI"><strong>resolveRelativeURI</strong></a>(self, uri)</dt><dd><tt>This&nbsp;is&nbsp;used&nbsp;mainly&nbsp;for&nbsp;including&nbsp;files.<br>
+&nbsp;<br>
+It&nbsp;simply&nbsp;returns&nbsp;the&nbsp;location&nbsp;relative&nbsp;to&nbsp;the&nbsp;base&nbsp;context<br>
+directory,&nbsp;ie&nbsp;Examples/.&nbsp;If&nbsp;the&nbsp;filename&nbsp;has&nbsp;a&nbsp;leading&nbsp;/,<br>
+it&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;an&nbsp;absolute&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-setClassName"><strong>setClassName</strong></a>(self, name)</dt><dd><tt>Set&nbsp;the&nbsp;class&nbsp;name&nbsp;to&nbsp;create.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-setPSPReader"><strong>setPSPReader</strong></a>(self, reader)</dt><dd><tt>Set&nbsp;the&nbsp;PSPReader&nbsp;for&nbsp;this&nbsp;context.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-setPythonFileEncoding"><strong>setPythonFileEncoding</strong></a>(self, encoding)</dt><dd><tt>Set&nbsp;the&nbsp;encoding&nbsp;of&nbsp;the&nbsp;.py&nbsp;file&nbsp;to&nbsp;generate.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-setPythonFileName"><strong>setPythonFileName</strong></a>(self, name)</dt><dd><tt>Set&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;.py&nbsp;file&nbsp;to&nbsp;generate.</tt></dd></dl>
+
+<dl><dt><a name="PSPCLContext-setServletWriter"><strong>setServletWriter</strong></a>(self, writer)</dt><dd><tt>Set&nbsp;the&nbsp;ServletWriter&nbsp;instance&nbsp;for&nbsp;this&nbsp;context.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="PSP.Context.html#PSPContext">PSPContext</a>:<br>
+<dl><dt><a name="PSPCLContext-getWriter"><strong>getWriter</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Context.html#PSPContext">PSPContext</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PSPContext">class <strong>PSPContext</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#PSPContext">PSPContext</a>&nbsp;is&nbsp;an&nbsp;abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;Context&nbsp;classes.<br>
+&nbsp;<br>
+Holds&nbsp;all&nbsp;the&nbsp;common&nbsp;stuff&nbsp;that&nbsp;various&nbsp;parts&nbsp;of&nbsp;the&nbsp;compilation<br>
+will&nbsp;need&nbsp;access&nbsp;to.&nbsp;The&nbsp;items&nbsp;in&nbsp;this&nbsp;class&nbsp;will&nbsp;be&nbsp;used&nbsp;by&nbsp;both<br>
+the&nbsp;compiler&nbsp;and&nbsp;the&nbsp;class&nbsp;generator.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PSPContext-getClassPath"><strong>getClassPath</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPContext-getFullClassName"><strong>getFullClassName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;class&nbsp;name&nbsp;including&nbsp;package&nbsp;prefixes.<br>
+&nbsp;<br>
+Won't&nbsp;use&nbsp;this&nbsp;for&nbsp;now.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-getOutputDirectory"><strong>getOutputDirectory</strong></a>(self)</dt><dd><tt>Provide&nbsp;directory&nbsp;to&nbsp;dump&nbsp;PSP&nbsp;source&nbsp;file&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-getPythonFileEncoding"><strong>getPythonFileEncoding</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;encoding&nbsp;of&nbsp;the&nbsp;file&nbsp;that&nbsp;we&nbsp;are&nbsp;generating.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-getPythonFileName"><strong>getPythonFileName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;filename&nbsp;that&nbsp;we&nbsp;are&nbsp;generating&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-getReader"><strong>getReader</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPContext-getServletClassName"><strong>getServletClassName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;class&nbsp;name&nbsp;of&nbsp;the&nbsp;servlet&nbsp;being&nbsp;generated.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-getWriter"><strong>getWriter</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PSPContext-setPSPReader"><strong>setPSPReader</strong></a>(self, reader)</dt><dd><tt>Set&nbsp;the&nbsp;PSPReader&nbsp;for&nbsp;this&nbsp;context.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-setPythonFileEncoding"><strong>setPythonFileEncoding</strong></a>(self, encoding)</dt><dd><tt>Set&nbsp;the&nbsp;encoding&nbsp;of&nbsp;the&nbsp;.py&nbsp;file&nbsp;to&nbsp;generate.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-setPythonFileName"><strong>setPythonFileName</strong></a>(self, name)</dt><dd><tt>Set&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;.py&nbsp;file&nbsp;to&nbsp;generate.</tt></dd></dl>
+
+<dl><dt><a name="PSPContext-setServletWriter"><strong>setServletWriter</strong></a>(self, writer)</dt><dd><tt>Set&nbsp;the&nbsp;PSPWriter&nbsp;instance&nbsp;for&nbsp;this&nbsp;context.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>CGIWrapper/_admin.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""CGIWrapper main admin script."""</span>
+
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time, localtime, gmtime, asctime
+
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> urlEncode
+<span class="PY_KEYWORD">from</span> AdminPage <span class="PY_KEYWORD">import</span> AdminPage
+
+
+<span class="PY_KEYWORD">class</span> Page(AdminPage):
+    <span class="PY_STRING">"""CGIWrapper main administration page."""</span>
+
+    <span class="PY_KEYWORD">def</span> title(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'Admin'</span>
+
+    <span class="PY_KEYWORD">def</span> writeBody(self):
+        curTime = time()
+        self.writeln(<span class="PY_STRING">'''
+        &lt;table align="center" cellspacing="2" cellpadding="2" border="0"&gt;
+            &lt;tr&gt;&lt;th&gt;Version:&lt;/th&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;th&gt;Local time:&lt;/th&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;th&gt;Global time:&lt;/th&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;'''</span> % (self._wrapper.version(),
+        asctime(localtime(curTime)), asctime(gmtime(curTime))))
+        self.startMenu()
+        self.menuItem(<span class="PY_STRING">'Script log contents'</span>, <span class="PY_STRING">'_dumpCSV?filename=%s'</span>
+            % urlEncode(self._wrapper.setting(<span class="PY_STRING">'ScriptLogFilename'</span>)))
+        self.menuItem(<span class="PY_STRING">'Error log contents'</span>, <span class="PY_STRING">'_dumpErrors?filename=%s'</span>
+            % urlEncode(self._wrapper.setting(<span class="PY_STRING">'ErrorLogFilename'</span>)))
+        self.menuItem(<span class="PY_STRING">'Show config'</span>, <span class="PY_STRING">'_showConfig'</span>)
+        self.endMenu()
+
+        self.writeln(<span class="PY_STRING">'''
+&lt;!--
+begin-parse
+{
+'Version': %r,
+'LocalTime': %r,
+'GlobalTime': %r
+}
+end-parse
+--&gt;'''</span> % (self._wrapper.version(), localtime(curTime), gmtime(curTime)))
+
+    <span class="PY_KEYWORD">def</span> startMenu(self):
+        self.write(<span class="PY_STRING">'''
+        &lt;div style="font-size:12pt;font-family:Arial,Helvetica,sans-serif"&gt;
+        &lt;table align="center" border="0" cellspacing="2" cellpadding="2" bgcolor="#E8E8F0"&gt;
+            &lt;tr bgcolor="#101040"&gt;&lt;th align="center" style="color:white"&gt;Menu&lt;/th&gt;&lt;/tr&gt;'''</span>)
+
+    <span class="PY_KEYWORD">def</span> menuItem(self, title, url):
+        self.write(<span class="PY_STRING">'''
+            &lt;tr&gt;&lt;td align="center"&gt;&lt;a href="%s"&gt;%s&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;'''</span>
+            % (url, title))
+
+    <span class="PY_KEYWORD">def</span> endMenu(self):
+        self.writeln(<span class="PY_STRING">'''
+        &lt;/table&gt;
+        &lt;/div&gt;'''</span>)
+</pre>
+<!--footer-->
+
+</body>
+</html>

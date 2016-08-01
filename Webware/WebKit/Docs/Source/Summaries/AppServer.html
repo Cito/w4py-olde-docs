@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.AppServer</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.AppServer</h2>
+<p>You can also browse the <a href="../Files/AppServer.html">complete source file</a>
+or the <a href="../Docs/WebKit.AppServer.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">AppServer</span>(ConfigurableForServerSidePath):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">checkForInstall</span>(self)</span>
+<span class="line_def">    def <span class="name_def">readyForRequests</span>(self)</span>
+<span class="line_def">    def <span class="name_def">closeThread</span>(self)</span>
+<span class="line_def">    def <span class="name_def">initiateShutdown</span>(self)</span>
+<span class="line_def">    def <span class="name_def">recordPID</span>(self)</span>
+<span class="line_def">    def <span class="name_def">shutDown</span>(self)</span>
+
+<span class="line_category">    ## Configuration ##</span>
+<span class="line_def">    def <span class="name_def">defaultConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">configFilename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">configReplacementValues</span>(self)</span>
+
+<span class="line_category">    ## Network Server ##</span>
+<span class="line_def">    def <span class="name_def">createApplication</span>(self)</span>
+<span class="line_def">    def <span class="name_def">printStartUpMessage</span>(self)</span>
+
+<span class="line_category">    ## Plug-in loading ##</span>
+<span class="line_def">    def <span class="name_def">plugIns</span>(self)</span>
+<span class="line_def">    def <span class="name_def">plugIn</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">loadPlugIn</span>(self, path)</span>
+<span class="line_def">    def <span class="name_def">loadPlugIns</span>(self)</span>
+
+<span class="line_category">    ## Accessors ##</span>
+<span class="line_def">    def <span class="name_def">version</span>(self)</span>
+<span class="line_def">    def <span class="name_def">application</span>(self)</span>
+<span class="line_def">    def <span class="name_def">startTime</span>(self)</span>
+<span class="line_def">    def <span class="name_def">numRequests</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isPersistent</span>(self)</span>
+<span class="line_def">    def <span class="name_def">serverSidePath</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">webwarePath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">webKitPath</span>(self)</span>
+
+
+<span class="line_category">## Main ##</span>
+<span class="line_def">def <span class="name_def">main</span>()</span>
+<span class="line_def">def <span class="name_def">stop</span>(*args, **kw)</span>
+
+</pre>
+</body>
+</html>

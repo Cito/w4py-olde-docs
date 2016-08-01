@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/EnumAttr.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">from</span> Attr <span class="PY_KEYWORD">import</span> Attr
+
+
+<span class="PY_KEYWORD">class</span> EnumAttr(Attr):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        Attr.__init__(self, attr)
+        <span class="PY_COMMENT"># We expect that an 'Enums' key holds the enumeration values</span>
+        self._enums = [enum.strip() <span class="PY_KEYWORD">for</span> enum <span class="PY_KEYWORD">in</span> self[<span class="PY_STRING">'Enums'</span>].split(<span class="PY_STRING">','</span>)]
+        self._enumSet = dict((enum, i) <span class="PY_KEYWORD">for</span> i, enum <span class="PY_KEYWORD">in</span> enumerate(self._enums))
+
+    <span class="PY_KEYWORD">def</span> enums(self):
+        <span class="PY_STRING">"""Return a sequence of the enum values in their string form."""</span>
+        <span class="PY_KEYWORD">return</span> self._enums
+
+    <span class="PY_KEYWORD">def</span> hasEnum(self, value):
+        <span class="PY_KEYWORD">if</span> isinstance(value, basestring):
+            <span class="PY_KEYWORD">return</span> value <span class="PY_KEYWORD">in</span> self._enumSet
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> 0 &lt;= value &lt; len(self._enums)
+
+    <span class="PY_KEYWORD">def</span> intValueForString(self, s):
+        <span class="PY_KEYWORD">return</span> self._enumSet[s]
+</pre>
+<!--footer-->
+
+</body>
+</html>

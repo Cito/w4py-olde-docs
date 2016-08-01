@@ -1,0 +1,219 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module CGIWrapper.CGIWrapper</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="CGIWrapper.html"><font color="#ffffff">CGIWrapper</font></a>.CGIWrapper</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/CGIWrapper/CGIWrapper.py">/var/www/docs/Webware-1.1.1/CGIWrapper/CGIWrapper.py</a></font></td></tr></table>
+    <p><tt><a href="#CGIWrapper">CGIWrapper</a>.py<br>
+&nbsp;<br>
+Webware&nbsp;for&nbsp;Python<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;<a href="#CGIWrapper">CGIWrapper</a>.html&nbsp;documentation&nbsp;for&nbsp;more&nbsp;information.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="WebUtils.html">WebUtils</a><br>
+<a href="cgi.html">cgi</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="traceback.html">traceback</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="CGIWrapper.CGIWrapper.html#CGIWrapper">CGIWrapper</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="CGIWrapper">class <strong>CGIWrapper</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;CGI&nbsp;Wrapper&nbsp;class.<br>
+&nbsp;<br>
+A&nbsp;CGI&nbsp;wrapper&nbsp;executes&nbsp;a&nbsp;target&nbsp;script&nbsp;and&nbsp;provides&nbsp;various&nbsp;services<br>
+for&nbsp;both&nbsp;the&nbsp;script&nbsp;and&nbsp;website&nbsp;developer&nbsp;and&nbsp;the&nbsp;administrator.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;<a href="#CGIWrapper">CGIWrapper</a>.html&nbsp;documentation&nbsp;for&nbsp;full&nbsp;information.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="CGIWrapper-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CGIWrapper-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;configuration&nbsp;for&nbsp;the&nbsp;<a href="#CGIWrapper">CGIWrapper</a>.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;combination&nbsp;of&nbsp;<a href="#CGIWrapper-defaultConfig">defaultConfig</a>()&nbsp;and&nbsp;<a href="#CGIWrapper-userConfig">userConfig</a>().<br>
+This&nbsp;method&nbsp;does&nbsp;no&nbsp;caching.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-configFilename"><strong>configFilename</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;filename&nbsp;of&nbsp;the&nbsp;optional&nbsp;configuration&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;the&nbsp;default&nbsp;configuration.<br>
+&nbsp;<br>
+Subclasses&nbsp;could&nbsp;override&nbsp;to&nbsp;customize&nbsp;the&nbsp;values<br>
+or&nbsp;where&nbsp;they're&nbsp;taken&nbsp;from.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-deliver"><strong>deliver</strong></a>(self)</dt><dd><tt>Deliver&nbsp;the&nbsp;HTML.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;used&nbsp;for&nbsp;the&nbsp;output&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;script&nbsp;being&nbsp;served,<br>
+or&nbsp;from&nbsp;our&nbsp;own&nbsp;error&nbsp;reporting.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-docType"><strong>docType</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CGIWrapper-emailException"><strong>emailException</strong></a>(self, html, excInfo<font color="#909090">=None</font>)</dt><dd><tt>Email&nbsp;an&nbsp;exception.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-enhanceThePath"><strong>enhanceThePath</strong></a>(self)</dt><dd><tt>Enhance&nbsp;sys.path&nbsp;according&nbsp;to&nbsp;our&nbsp;configuration.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-environ"><strong>environ</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;environment&nbsp;for&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-handleException"><strong>handleException</strong></a>(self, excInfo)</dt><dd><tt>Handle&nbsp;an&nbsp;exception&nbsp;in&nbsp;the&nbsp;target&nbsp;script.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;self&nbsp;when&nbsp;an&nbsp;exception&nbsp;occurs&nbsp;in&nbsp;the&nbsp;target&nbsp;script.<br>
+&lt;code&gt;excInfo&lt;/code&gt;&nbsp;is&nbsp;a&nbsp;sys.exc_info()-style&nbsp;tuple&nbsp;of&nbsp;information<br>
+about&nbsp;the&nbsp;exception.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-htmlDebugInfo"><strong>htmlDebugInfo</strong></a>(self)</dt><dd><tt>Return&nbsp;an&nbsp;HTML&nbsp;page&nbsp;with&nbsp;debugging&nbsp;info&nbsp;on&nbsp;the&nbsp;current&nbsp;exception.<br>
+&nbsp;<br>
+Used&nbsp;by&nbsp;<a href="#CGIWrapper-handleException">handleException</a>().</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-htmlErrorPage"><strong>htmlErrorPage</strong></a>(self, showDebugInfo<font color="#909090">=True</font>)</dt><dd><tt>Return&nbsp;an&nbsp;HTML&nbsp;page&nbsp;explaining&nbsp;that&nbsp;there&nbsp;is&nbsp;an&nbsp;error.<br>
+&nbsp;<br>
+There&nbsp;could&nbsp;be&nbsp;more&nbsp;options&nbsp;in&nbsp;the&nbsp;future,&nbsp;so&nbsp;using&nbsp;named&nbsp;arguments<br>
+(e.g.&nbsp;showDebugInfo=False)&nbsp;is&nbsp;recommended.&nbsp;Invoked&nbsp;by&nbsp;<a href="#CGIWrapper-handleException">handleException</a>().</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-htmlErrorPageFilename"><strong>htmlErrorPageFilename</strong></a>(self)</dt><dd><tt>Construct&nbsp;a&nbsp;filename&nbsp;for&nbsp;an&nbsp;HTML&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+This&nbsp;filename&nbsp;does&nbsp;not&nbsp;include&nbsp;the&nbsp;'ErrorMessagesDir'&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-logExceptionToConsole"><strong>logExceptionToConsole</strong></a>(self, stderr<font color="#909090">=&lt;__main__.OutputCatcher object&gt;</font>)</dt><dd><tt>Log&nbsp;an&nbsp;exception&nbsp;in&nbsp;the&nbsp;target&nbsp;script.<br>
+&nbsp;<br>
+Logs&nbsp;the&nbsp;time,&nbsp;script&nbsp;name&nbsp;and&nbsp;traceback&nbsp;to&nbsp;the&nbsp;console<br>
+(typically&nbsp;stderr).&nbsp;This&nbsp;usually&nbsp;results&nbsp;in&nbsp;the&nbsp;information<br>
+appearing&nbsp;in&nbsp;the&nbsp;web&nbsp;server's&nbsp;error&nbsp;log.&nbsp;Used&nbsp;by&nbsp;<a href="#CGIWrapper-handleException">handleException</a>().</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-logExceptionToDisk"><strong>logExceptionToDisk</strong></a>(self, errorMsgFilename<font color="#909090">=None</font>, excInfo<font color="#909090">=None</font>)</dt><dd><tt>Write&nbsp;exception&nbsp;info&nbsp;to&nbsp;the&nbsp;log&nbsp;file.<br>
+&nbsp;<br>
+Writes&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;(date-time,&nbsp;filename,&nbsp;pathname,<br>
+exception-name,&nbsp;exception-data,&nbsp;error&nbsp;report&nbsp;filename)<br>
+to&nbsp;the&nbsp;errors&nbsp;file&nbsp;(typically&nbsp;'Errors.csv')&nbsp;in&nbsp;CSV&nbsp;format.<br>
+Invoked&nbsp;by&nbsp;<a href="#CGIWrapper-handleException">handleException</a>().</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-makeFieldStorage"><strong>makeFieldStorage</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;default&nbsp;field&nbsp;storage&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;created&nbsp;from&nbsp;the&nbsp;cgi&nbsp;module.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-makeHeaders"><strong>makeHeaders</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;default&nbsp;header&nbsp;dictionary&nbsp;with&nbsp;Content-Type&nbsp;entry.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-requireEnvs"><strong>requireEnvs</strong></a>(self, names)</dt><dd><tt>Check&nbsp;that&nbsp;given&nbsp;environment&nbsp;variable&nbsp;names&nbsp;exist.<br>
+&nbsp;<br>
+If&nbsp;they&nbsp;don't,&nbsp;a&nbsp;basic&nbsp;HTML&nbsp;error&nbsp;message&nbsp;is&nbsp;printed&nbsp;and&nbsp;we&nbsp;exit.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-reset"><strong>reset</strong></a>(self)</dt><dd><tt>Reset&nbsp;CGI&nbsp;output.<br>
+&nbsp;<br>
+Used&nbsp;by&nbsp;<a href="#CGIWrapper-handleException">handleException</a>()&nbsp;to&nbsp;clear&nbsp;out&nbsp;the&nbsp;current&nbsp;CGI&nbsp;output&nbsp;results<br>
+in&nbsp;preparation&nbsp;of&nbsp;delivering&nbsp;an&nbsp;HTML&nbsp;error&nbsp;message&nbsp;page.<br>
+Currently&nbsp;resets&nbsp;headers&nbsp;and&nbsp;deletes&nbsp;cookies,&nbsp;if&nbsp;present.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-saveHTMLErrorPage"><strong>saveHTMLErrorPage</strong></a>(self, html)</dt><dd><tt>Save&nbsp;the&nbsp;given&nbsp;HTML&nbsp;error&nbsp;page&nbsp;for&nbsp;later&nbsp;viewing&nbsp;by&nbsp;the&nbsp;developer.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;filename&nbsp;used.&nbsp;Invoked&nbsp;by&nbsp;<a href="#CGIWrapper-handleException">handleException</a>().</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-scriptPathname"><strong>scriptPathname</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;full&nbsp;pathname&nbsp;of&nbsp;the&nbsp;target&nbsp;script.<br>
+&nbsp;<br>
+Scripts&nbsp;that&nbsp;start&nbsp;with&nbsp;an&nbsp;underscore&nbsp;are&nbsp;special&nbsp;--&nbsp;they&nbsp;run<br>
+out&nbsp;of&nbsp;the&nbsp;same&nbsp;directory&nbsp;as&nbsp;the&nbsp;CGI&nbsp;Wrapper&nbsp;and&nbsp;are&nbsp;typically<br>
+CGI&nbsp;Wrapper&nbsp;support&nbsp;scripts.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-serve"><strong>serve</strong></a>(self, environ<font color="#909090">={'LANG': 'en_US.UTF-8', 'TERM': 'linux', 'SHELL'...NECTION': '217.224.200.178 63565 66.35.48.53 22'}</font>)</dt><dd><tt>Serve&nbsp;a&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-setting"><strong>setting</strong></a>(self, name)</dt><dd><tt>Return&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;particular&nbsp;setting&nbsp;in&nbsp;the&nbsp;configuration.</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;the&nbsp;user&nbsp;configuration.<br>
+&nbsp;<br>
+This&nbsp;are&nbsp;overrides&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;configuration&nbsp;file,<br>
+or&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.&nbsp;The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken<br>
+from&nbsp;<a href="#CGIWrapper-configFilename">configFilename</a>().</tt></dd></dl>
+
+<dl><dt><a name="CGIWrapper-version"><strong>version</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CGIWrapper-writeScriptLog"><strong>writeScriptLog</strong></a>(self)</dt><dd><tt>Write&nbsp;an&nbsp;entry&nbsp;to&nbsp;the&nbsp;script&nbsp;log&nbsp;file.<br>
+&nbsp;<br>
+Uses&nbsp;settings&nbsp;ScriptLogFilename&nbsp;and&nbsp;ScriptLogColumns.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-StringIO"><strong>StringIO</strong></a>(...)</dt><dd><tt><a href="#-StringIO">StringIO</a>([s])&nbsp;--&nbsp;Return&nbsp;a&nbsp;StringIO-like&nbsp;stream&nbsp;for&nbsp;reading&nbsp;or&nbsp;writing</tt></dd></dl>
+ <dl><dt><a name="-asctime"><strong>asctime</strong></a>(...)</dt><dd><tt><a href="#-asctime">asctime</a>([tuple])&nbsp;-&gt;&nbsp;string<br>
+&nbsp;<br>
+Convert&nbsp;a&nbsp;time&nbsp;tuple&nbsp;to&nbsp;a&nbsp;string,&nbsp;e.g.&nbsp;'Sat&nbsp;Jun&nbsp;06&nbsp;16:26:11&nbsp;1998'.<br>
+When&nbsp;the&nbsp;time&nbsp;tuple&nbsp;is&nbsp;not&nbsp;present,&nbsp;current&nbsp;time&nbsp;as&nbsp;returned&nbsp;by&nbsp;<a href="#-localtime">localtime</a>()<br>
+is&nbsp;used.</tt></dd></dl>
+ <dl><dt><a name="-docType"><strong>docType</strong></a>()</dt><dd><tt>Return&nbsp;a&nbsp;standard&nbsp;HTML&nbsp;document&nbsp;type</tt></dd></dl>
+ <dl><dt><a name="-htDictionary"><strong>htDictionary</strong></a>(d, addSpace<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;an&nbsp;HTML&nbsp;table&nbsp;where&nbsp;each&nbsp;row&nbsp;is&nbsp;a&nbsp;key-value&nbsp;pair.</tt></dd></dl>
+ <dl><dt><a name="-htTable"><strong>htTable</strong></a>(listOfDicts, keys<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;an&nbsp;HTML&nbsp;table&nbsp;for&nbsp;a&nbsp;list&nbsp;of&nbsp;dictionaries.<br>
+&nbsp;<br>
+The&nbsp;listOfDicts&nbsp;parameter&nbsp;is&nbsp;expected&nbsp;to&nbsp;be&nbsp;a&nbsp;list&nbsp;of<br>
+dictionaries&nbsp;whose&nbsp;keys&nbsp;are&nbsp;always&nbsp;the&nbsp;same.&nbsp;This&nbsp;function<br>
+returns&nbsp;an&nbsp;HTML&nbsp;string&nbsp;with&nbsp;the&nbsp;contents&nbsp;of&nbsp;the&nbsp;table.<br>
+If&nbsp;keys&nbsp;is&nbsp;None,&nbsp;the&nbsp;headings&nbsp;are&nbsp;taken&nbsp;from&nbsp;the&nbsp;first&nbsp;row&nbsp;in<br>
+alphabetical&nbsp;order.<br>
+&nbsp;<br>
+Returns&nbsp;an&nbsp;empty&nbsp;string&nbsp;if&nbsp;listOfDicts&nbsp;is&nbsp;none&nbsp;or&nbsp;empty.<br>
+&nbsp;<br>
+Deficiencies:&nbsp;There's&nbsp;no&nbsp;way&nbsp;to&nbsp;influence&nbsp;the&nbsp;formatting&nbsp;or&nbsp;to<br>
+use&nbsp;column&nbsp;titles&nbsp;that&nbsp;are&nbsp;different&nbsp;from&nbsp;the&nbsp;keys.</tt></dd></dl>
+ <dl><dt><a name="-htTitle"><strong>htTitle</strong></a>(name)</dt><dd><tt>Return&nbsp;an&nbsp;HTML&nbsp;section&nbsp;title.</tt></dd></dl>
+ <dl><dt><a name="-localtime"><strong>localtime</strong></a>(...)</dt><dd><tt><a href="#-localtime">localtime</a>([seconds])&nbsp;-&gt;&nbsp;(tm_year,tm_mon,tm_mday,tm_hour,tm_min,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tm_sec,tm_wday,tm_yday,tm_isdst)<br>
+&nbsp;<br>
+Convert&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch&nbsp;to&nbsp;a&nbsp;time&nbsp;tuple&nbsp;expressing&nbsp;local&nbsp;time.<br>
+When&nbsp;'seconds'&nbsp;is&nbsp;not&nbsp;passed&nbsp;in,&nbsp;convert&nbsp;the&nbsp;current&nbsp;time&nbsp;instead.</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>()</dt></dl>
+ <dl><dt><a name="-osIdTable"><strong>osIdTable</strong></a>()</dt><dd><tt>Get&nbsp;all&nbsp;OS&nbsp;id&nbsp;information.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;dictionaries&nbsp;containing&nbsp;id&nbsp;information&nbsp;such<br>
+as&nbsp;uid,&nbsp;gid,&nbsp;etc.,&nbsp;all&nbsp;obtained&nbsp;from&nbsp;the&nbsp;os&nbsp;module.<br>
+&nbsp;<br>
+Dictionary&nbsp;keys&nbsp;are&nbsp;'name'&nbsp;and&nbsp;'value'.</tt></dd></dl>
+ <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>serverStartTime</strong> = 1358510838.013165<br>
+<strong>version</strong> = (1, 1, 1)</td></tr></table>
+</body></html>

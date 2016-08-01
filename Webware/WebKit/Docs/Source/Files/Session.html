@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Session.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Implementation of client sessions."""</span>
+
+<span class="PY_KEYWORD">import</span> re
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time, localtime
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> uniqueId
+
+
+<span class="PY_KEYWORD">class</span> SessionError(Exception):
+    <span class="PY_STRING">"""Client session error"""</span>
+
+
+<span class="PY_KEYWORD">class</span> Session(object):
+    <span class="PY_STRING">"""Implementation of client sessions.
+
+    All methods that deal with time stamps, such as creationTime(),
+    treat time as the number of seconds since January 1, 1970.
+
+    Session identifiers are stored in cookies. Therefore, clients
+    must have cookies enabled.
+
+    Unlike Response and Request, which have HTTP subclass versions
+    (e.g., HTTPRequest and HTTPResponse respectively), Session does
+    not. This is because there is nothing protocol specific in
+    Session. (Is that true considering cookies? @@ 2000-04-09 ce)
+    2000-04-27 ce: With regards to ids/cookies, maybe the notion
+    of a session id should be part of the interface of a Request.
+
+    Note that the session id should be a string that is valid
+    as part of a filename. This is currently true, and should
+    be maintained if the session id generation technique is
+    modified. Session ids can be used in filenames.
+
+    FUTURE
+
+      * invalidate()
+      * Sessions don't actually time out and invalidate themselves.
+      * Should this be called 'HTTPSession'?
+      * Should "numTransactions" be exposed as a method? Should it
+        be common to all transaction objects that do the
+        awake()-respond()-sleep() thing? And should there be an
+        abstract super class to codify that?
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, trans, identifier=None):
+        self._lastAccessTime = self._creationTime = time()
+        self._isExpired = self._dirty = False
+        self._numTrans = 0
+        self._values = {}
+        app = trans.application()
+        self._timeout = app.sessionTimeout(trans)
+        self._prefix = app.sessionPrefix(trans)
+        self._sessionName = app.sessionName(trans)
+
+        <span class="PY_KEYWORD">if</span> identifier:
+            <span class="PY_KEYWORD">if</span> re.search(r<span class="PY_STRING">'[^\w\.\-]'</span>, identifier) <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+                <span class="PY_KEYWORD">raise</span> SessionError(<span class="PY_STRING">"Illegal characters in session identifier"</span>)
+            <span class="PY_KEYWORD">if</span> len(identifier) &gt; 80:
+                <span class="PY_KEYWORD">raise</span> SessionError(<span class="PY_STRING">"Session identifier too long"</span>)
+            self._identifier = identifier
+        <span class="PY_KEYWORD">else</span>:
+            attempts = 0
+            <span class="PY_KEYWORD">while</span> attempts &lt; 10000:
+                self._identifier = self._prefix + <span class="PY_STRING">''</span>.join(
+                    map(<span class="PY_KEYWORD">lambda</span> x: <span class="PY_STRING">'%02d'</span> % x,
+                        localtime()[:6])) + <span class="PY_STRING">'-'</span> + uniqueId(self)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> app.hasSession(self._identifier):
+                    <span class="PY_KEYWORD">break</span>
+                attempts += 1
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">raise</span> SessionError(
+                    <span class="PY_STRING">"Can't create valid session id after %d attempts."</span> % attempts)
+
+        <span class="PY_KEYWORD">if</span> app.setting(<span class="PY_STRING">'Debug'</span>)[<span class="PY_STRING">'Sessions'</span>]:
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'&gt;&gt; [session] Created session, '</span>
+                <span class="PY_STRING">'timeout = %s, id = %s, self = %s'</span>
+                % (self._timeout, self._identifier, self))
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> creationTime(self):
+        <span class="PY_STRING">"""Return the time when this session was created."""</span>
+        <span class="PY_KEYWORD">return</span> self._creationTime
+
+    <span class="PY_KEYWORD">def</span> lastAccessTime(self):
+        <span class="PY_STRING">"""Get last access time.
+
+        Returns the last time the user accessed the session through
+        interaction. This attribute is updated in awake(), which is
+        invoked at the beginning of a transaction.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._lastAccessTime
+
+    <span class="PY_KEYWORD">def</span> identifier(self):
+        <span class="PY_STRING">"""Return a string that uniquely identifies the session.
+
+        This method will create the identifier if needed.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._identifier
+
+    <span class="PY_KEYWORD">def</span> isDirty(self):
+        <span class="PY_STRING">"""Check whether the session is dirty (has unsaved changes)."""</span>
+        <span class="PY_KEYWORD">return</span> self._dirty
+
+    <span class="PY_KEYWORD">def</span> setDirty(self, dirty=True):
+        <span class="PY_STRING">"""Set the dirty status of the session."""</span>
+        self._dirty = dirty
+
+    <span class="PY_KEYWORD">def</span> isExpired(self):
+        <span class="PY_STRING">"""Check whether the session has been previously expired.
+
+        See also: expiring()
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> getattr(self, <span class="PY_STRING">'_isExpired'</span>, False) <span class="PY_KEYWORD">or</span> self._timeout == 0
+
+    <span class="PY_KEYWORD">def</span> isNew(self):
+        <span class="PY_STRING">"""Check whether the session is new."""</span>
+        <span class="PY_KEYWORD">return</span> self._numTrans &lt; 2
+
+    <span class="PY_KEYWORD">def</span> timeout(self):
+        <span class="PY_STRING">"""Return the timeout for this session in seconds."""</span>
+        <span class="PY_KEYWORD">return</span> self._timeout
+
+    <span class="PY_KEYWORD">def</span> setTimeout(self, timeout):
+        <span class="PY_STRING">"""Set the timeout on this session in seconds."""</span>
+        self._timeout = timeout
+
+
+    <span class="PY_COMMENT">## Invalidate ##</span>
+
+    <span class="PY_KEYWORD">def</span> invalidate(self):
+        <span class="PY_STRING">"""Invalidate the session.
+
+        It will be discarded the next time it is accessed.
+
+        """</span>
+        self._lastAccessTime = 0
+        self._values = {}
+        self._dirty = False
+        self._timeout = 0
+
+
+    <span class="PY_COMMENT">## Values ##</span>
+
+    <span class="PY_KEYWORD">def</span> value(self, name, default=NoDefault):
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._values[name]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._values.get(name, default)
+
+    <span class="PY_KEYWORD">def</span> hasValue(self, name):
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._values
+
+    <span class="PY_KEYWORD">def</span> setValue(self, name, value):
+        self._values[name] = value
+        self._dirty = True
+
+    <span class="PY_KEYWORD">def</span> delValue(self, name):
+        <span class="PY_KEYWORD">del</span> self._values[name]
+        self._dirty = True
+
+    <span class="PY_KEYWORD">def</span> values(self):
+        <span class="PY_KEYWORD">return</span> self._values
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, name):
+        <span class="PY_KEYWORD">return</span> self.value(name)
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, name, value):
+        self.setValue(name, value)
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, name):
+        self.delValue(name)
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, name):
+        <span class="PY_KEYWORD">return</span> self.hasValue(name)
+
+
+    <span class="PY_COMMENT">## Transactions ##</span>
+
+    <span class="PY_KEYWORD">def</span> awake(self, trans):
+        <span class="PY_STRING">"""Let the session awake.
+
+        Invoked during the beginning of a transaction, giving a Session an
+        opportunity to perform any required setup. The default implementation
+        updates the 'lastAccessTime'.
+
+        """</span>
+        self._lastAccessTime = time()
+        self._numTrans += 1
+
+    <span class="PY_KEYWORD">def</span> respond(self, trans):
+        <span class="PY_STRING">"""Let the session respond to a request.
+
+        The default implementation does nothing, but could do something
+        in the future. Subclasses should invoke super.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> sleep(self, trans):
+        <span class="PY_STRING">"""Let the session sleep again.
+
+        Invoked during the ending of a transaction, giving a Session an
+        opportunity to perform any required shutdown. The default
+        implementation does nothing, but could do something in the future.
+        Subclasses should invoke super.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> expiring(self):
+        <span class="PY_STRING">"""Let the session expire.
+
+        Called when session is expired by the application.
+        Subclasses should invoke super.
+        Session store __delitem__()s should invoke if not isExpired().
+
+        """</span>
+        self._isExpired = True
+
+
+    <span class="PY_COMMENT">## Utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> sessionEncode(self, url):
+        <span class="PY_STRING">"""Encode the session ID as a parameter to a url."""</span>
+        <span class="PY_KEYWORD">import</span> urlparse
+        url = list(urlparse.urlparse(url)) <span class="PY_COMMENT"># make a list</span>
+        <span class="PY_KEYWORD">if</span> url[4]:
+            url[4] += <span class="PY_STRING">'&amp;'</span>
+        url[4] += <span class="PY_STRING">'%s=%s'</span> % (self._sessionName, self.identifier())
+        url = urlparse.urlunparse(url)
+        <span class="PY_KEYWORD">return</span> url
+
+
+    <span class="PY_COMMENT">## Exception reports ##</span>
+
+    _exceptionReportAttrNames = \
+        <span class="PY_STRING">'isDirty isExpired lastAccessTime numTrans timeout values'</span>.split()
+
+    <span class="PY_KEYWORD">def</span> writeExceptionReport(self, handler):
+        handler.writeTitle(self.__class__.__name__)
+        handler.writeAttrs(self, self._exceptionReportAttrNames)
+</pre>
+<!--footer-->
+
+</body>
+</html>

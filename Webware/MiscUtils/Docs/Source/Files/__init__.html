@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/__init__.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT"># MiscUtils</span>
+<span class="PY_COMMENT"># Webware for Python</span>
+<span class="PY_COMMENT"># See Docs/index.html</span>
+
+__all__ = [
+    <span class="PY_STRING">'Configurable'</span>, <span class="PY_STRING">'DBPool'</span>, <span class="PY_STRING">'DataTable'</span>, <span class="PY_STRING">'DictForArgs'</span>, <span class="PY_STRING">'Error'</span>,
+    <span class="PY_STRING">'Funcs'</span>, <span class="PY_STRING">'MixIn'</span>, <span class="PY_STRING">'NamedValueAccess'</span>, <span class="PY_STRING">'PropertiesObject'</span>, <span class="PY_STRING">'unittest'</span>]
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cStringIO <span class="PY_KEYWORD">import</span> StringIO
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> StringIO <span class="PY_KEYWORD">import</span> StringIO
+
+
+<span class="PY_KEYWORD">class</span> AbstractError(NotImplementedError):
+    <span class="PY_STRING">"""Abstract method error.
+
+    This exception is raised by abstract methods in abstract classes.
+    It is a special case of NotImplementedError, that indicates that the
+    implementation won't ever be provided at that location in the future
+    -- instead the subclass should provide it.
+
+    Typical usage:
+
+        from MiscUtils import AbstractError
+
+        class Foo(object):
+            def bar(self):
+                raise AbstractError(self.__class__)
+
+    Note that adding the self.__class__ makes the resulting exception
+    *much* more useful.
+
+    """</span>
+    <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">class</span> NoDefault(object):
+    <span class="PY_STRING">"""Singleton for parameters with no default.
+
+    This provides a singleton "thing" which can be used to initialize
+    the "default=" arguments for different retrieval methods.
+
+    For example:
+
+        from MiscUtils import NoDefault
+        def bar(self, name, default=NoDefault):
+            if default is NoDefault:
+                return self._bars[name] # will raise exception for invalid key
+            else:
+                return self._bars.get(name, default)
+
+    The value None does not suffice for "default=" because it does not
+    indicate whether or not a value was passed.
+
+    Consistently using this singleton is valuable due to subclassing
+    situations:
+
+        def bar(self, name, default=NoDefault):
+            if someCondition:
+                return self.specialBar(name)
+            else:
+                return SuperClass.bar(name, default)
+
+    It's also useful if one method that uses "default=NoDefault" relies
+    on another object and method to which it must pass the default.
+    (This is similar to the subclassing situation.)
+
+    """</span>
+    <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">def</span> InstallInWebKit(appServer):
+    <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

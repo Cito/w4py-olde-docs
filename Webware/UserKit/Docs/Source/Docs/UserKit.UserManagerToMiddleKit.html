@@ -1,0 +1,151 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module UserKit.UserManagerToMiddleKit</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="UserKit.html"><font color="#ffffff">UserKit</font></a>.UserManagerToMiddleKit</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/UserKit/UserManagerToMiddleKit.py">/var/www/docs/Webware-1.1.1/UserKit/UserManagerToMiddleKit.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;<a href="#UserManagerToMiddleKit">UserManagerToMiddleKit</a>&nbsp;class.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="UserKit.UserManagerToMiddleKit.html#UserManagerToMiddleKit">UserManagerToMiddleKit</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UserManagerToMiddleKit">class <strong>UserManagerToMiddleKit</strong></a>(<a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#UserManagerToMiddleKit">UserManagerToMiddleKit</a>&nbsp;stores&nbsp;users&nbsp;in&nbsp;a&nbsp;given&nbsp;MiddleKit&nbsp;object&nbsp;store.<br>
+&nbsp;<br>
+However,&nbsp;the&nbsp;manager&nbsp;itself&nbsp;does&nbsp;not&nbsp;keep&nbsp;any&nbsp;information&nbsp;there.<br>
+This&nbsp;might&nbsp;change&nbsp;in&nbsp;the&nbsp;future.<br>
+&nbsp;<br>
+In&nbsp;your&nbsp;MiddleKit&nbsp;model,&nbsp;your&nbsp;User&nbsp;class&nbsp;should&nbsp;have&nbsp;the&nbsp;attributes:<br>
+name,&nbsp;password&nbsp;and&nbsp;externalId;&nbsp;all&nbsp;of&nbsp;type&nbsp;string.<br>
+The&nbsp;max&nbsp;len&nbsp;for&nbsp;external&nbsp;id&nbsp;should&nbsp;be&nbsp;at&nbsp;least&nbsp;14.<br>
+You&nbsp;can&nbsp;decide&nbsp;what&nbsp;you&nbsp;like&nbsp;for&nbsp;the&nbsp;others.<br>
+Only&nbsp;name&nbsp;and&nbsp;password&nbsp;have&nbsp;to&nbsp;be&nbsp;required.<br>
+&nbsp;<br>
+Then&nbsp;you&nbsp;must&nbsp;edit&nbsp;User.py&nbsp;so&nbsp;that:<br>
+&nbsp;&nbsp;*&nbsp;In&nbsp;addition&nbsp;to&nbsp;inheriting&nbsp;GenUser,&nbsp;it&nbsp;also&nbsp;inherits&nbsp;UserKit.User<br>
+&nbsp;&nbsp;*&nbsp;It&nbsp;invokes&nbsp;both&nbsp;base&nbsp;class'&nbsp;<a href="#UserManagerToMiddleKit-__init__">__init__</a>()s<br>
+&nbsp;&nbsp;*&nbsp;The&nbsp;__init__&nbsp;takes&nbsp;manager,&nbsp;name&nbsp;and&nbsp;password,&nbsp;and&nbsp;passes&nbsp;them&nbsp;on.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;UserKit.User&nbsp;import&nbsp;User<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;User(GenUser,&nbsp;User):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManagerToMiddleKit-__init__">__init__</a>(self,&nbsp;manager=None,&nbsp;name=None,&nbsp;password=None):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GenUser.<a href="#UserManagerToMiddleKit-__init__">__init__</a>(self)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;User.<a href="#UserManagerToMiddleKit-__init__">__init__</a>(self,&nbsp;manager,&nbsp;name,&nbsp;password)<br>
+&nbsp;<br>
+If&nbsp;your&nbsp;user&nbsp;class&nbsp;is&nbsp;called&nbsp;something&nbsp;other&nbsp;than&nbsp;'User',&nbsp;then&nbsp;you&nbsp;must<br>
+pass&nbsp;it&nbsp;to&nbsp;the&nbsp;store:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;MyUser&nbsp;import&nbsp;MyUser<br>
+&nbsp;&nbsp;&nbsp;&nbsp;userMgr&nbsp;=&nbsp;<a href="#UserManagerToMiddleKit">UserManagerToMiddleKit</a>(userClass=MyUser,&nbsp;store=store)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="UserKit.UserManagerToMiddleKit.html#UserManagerToMiddleKit">UserManagerToMiddleKit</a></dd>
+<dd><a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="UserManagerToMiddleKit-__init__"><strong>__init__</strong></a>(self, userClass<font color="#909090">=None</font>, store<font color="#909090">=None</font>, useSQL<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-activeUsers"><strong>activeUsers</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-addUser"><strong>addUser</strong></a>(self, user)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-inactiveUsers"><strong>inactiveUsers</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-loadUser"><strong>loadUser</strong></a>(self, serialNum, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-setUserClass"><strong>setUserClass</strong></a>(self, userClass)</dt><dd><tt>Overridden&nbsp;to&nbsp;verify&nbsp;that&nbsp;our&nbsp;userClass&nbsp;is&nbsp;really&nbsp;a&nbsp;MiddleObject.</tt></dd></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-userForExternalId"><strong>userForExternalId</strong></a>(self, externalId, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-userForName"><strong>userForName</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-userForSerialNum"><strong>userForSerialNum</strong></a>(self, id, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-users"><strong>users</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>:<br>
+<dl><dt><a name="UserManagerToMiddleKit-activeUserTimeout"><strong>activeUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-cachedUserTimeout"><strong>cachedUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-clearCache"><strong>clearCache</strong></a>(self)</dt><dd><tt>Clear&nbsp;the&nbsp;cache&nbsp;of&nbsp;the&nbsp;manager.<br>
+&nbsp;<br>
+Use&nbsp;with&nbsp;extreme&nbsp;caution.&nbsp;If&nbsp;your&nbsp;program&nbsp;maintains&nbsp;a&nbsp;reference<br>
+to&nbsp;a&nbsp;user&nbsp;object,&nbsp;but&nbsp;the&nbsp;manager&nbsp;loads&nbsp;in&nbsp;a&nbsp;new&nbsp;copy&nbsp;later&nbsp;on,<br>
+then&nbsp;consistency&nbsp;problems&nbsp;could&nbsp;occur.<br>
+&nbsp;<br>
+The&nbsp;most&nbsp;popular&nbsp;use&nbsp;of&nbsp;this&nbsp;method&nbsp;is&nbsp;in&nbsp;the&nbsp;regression&nbsp;test&nbsp;suite.</tt></dd></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-createUser"><strong>createUser</strong></a>(self, name, password, userClass<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;a&nbsp;newly&nbsp;created&nbsp;user&nbsp;that&nbsp;is&nbsp;added&nbsp;to&nbsp;the&nbsp;manager.<br>
+&nbsp;<br>
+If&nbsp;userClass&nbsp;is&nbsp;not&nbsp;specified,&nbsp;the&nbsp;manager's&nbsp;default&nbsp;user&nbsp;class<br>
+is&nbsp;instantiated.&nbsp;This&nbsp;not&nbsp;imply&nbsp;that&nbsp;the&nbsp;user&nbsp;is&nbsp;logged&nbsp;in.<br>
+This&nbsp;method&nbsp;invokes&nbsp;<a href="#UserManagerToMiddleKit-addUser">addUser</a>().<br>
+&nbsp;<br>
+See&nbsp;also:&nbsp;<a href="#UserManagerToMiddleKit-userClass">userClass</a>(),&nbsp;<a href="#UserManagerToMiddleKit-setUserClass">setUserClass</a>()</tt></dd></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-login"><strong>login</strong></a>(self, user, password)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;if&nbsp;the&nbsp;login&nbsp;is&nbsp;successful,&nbsp;otherwise&nbsp;return&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-loginExternalId"><strong>loginExternalId</strong></a>(self, externalId, password)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-loginName"><strong>loginName</strong></a>(self, userName, password)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-loginSerialNum"><strong>loginSerialNum</strong></a>(self, serialNum, password)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-logout"><strong>logout</strong></a>(self, user)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-modifiedUserTimeout"><strong>modifiedUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-numActiveUsers"><strong>numActiveUsers</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;active&nbsp;users,&nbsp;e.g.,&nbsp;users&nbsp;that&nbsp;are&nbsp;logged&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-setActiveUserTimeout"><strong>setActiveUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-setCachedUserTimeout"><strong>setCachedUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-setModifiedUserTimeout"><strong>setModifiedUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Perform&nbsp;any&nbsp;tasks&nbsp;necessary&nbsp;to&nbsp;shut&nbsp;down&nbsp;the&nbsp;user&nbsp;manager.<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;and&nbsp;must&nbsp;invoke&nbsp;super&nbsp;as&nbsp;their&nbsp;*last*&nbsp;step.</tt></dd></dl>
+
+<dl><dt><a name="UserManagerToMiddleKit-userClass"><strong>userClass</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;userClass,&nbsp;which&nbsp;is&nbsp;used&nbsp;by&nbsp;createUser.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;value&nbsp;is&nbsp;UserKit.User.User.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="UserKit.UserManager.html#UserManager">UserKit.UserManager.UserManager</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

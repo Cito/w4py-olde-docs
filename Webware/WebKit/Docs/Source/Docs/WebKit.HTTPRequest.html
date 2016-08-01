@@ -1,0 +1,447 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.HTTPRequest</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.HTTPRequest</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/HTTPRequest.py">/var/www/docs/Webware-1.1.1/WebKit/HTTPRequest.py</a></font></td></tr></table>
+    <p><tt>HTTP&nbsp;requests</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Cookie.html">Cookie</a><br>
+<a href="WebUtils.FieldStorage.html">WebUtils.FieldStorage</a><br>
+</td><td width="25%" valign=top><a href="WebKit.HTTPResponse.html">WebKit.HTTPResponse</a><br>
+<a href="cgi.html">cgi</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="traceback.html">traceback</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="WebKit.Request.html#Request">WebKit.Request.Request</a>(<a href="WebKit.Message.html#Message">WebKit.Message.Message</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPRequest.html#HTTPRequest">HTTPRequest</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPRequest">class <strong>HTTPRequest</strong></a>(<a href="WebKit.Request.html#Request">WebKit.Request.Request</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;type&nbsp;of&nbsp;Message&nbsp;for&nbsp;HTTP&nbsp;requests.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPRequest.html#HTTPRequest">HTTPRequest</a></dd>
+<dd><a href="WebKit.Request.html#Request">WebKit.Request.Request</a></dd>
+<dd><a href="WebKit.Message.html#Message">WebKit.Message.Message</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPRequest-__init__"><strong>__init__</strong></a>(self, requestDict<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-accept"><strong>accept</strong></a>(self, which<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;preferences&nbsp;as&nbsp;requested&nbsp;by&nbsp;the&nbsp;user&nbsp;agent.<br>
+&nbsp;<br>
+The&nbsp;accepted&nbsp;preferences&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;codes<br>
+in&nbsp;the&nbsp;same&nbsp;order&nbsp;as&nbsp;they&nbsp;appeared&nbsp;in&nbsp;the&nbsp;header.<br>
+In&nbsp;other&nbsp;words,&nbsp;the&nbsp;explicit&nbsp;weighting&nbsp;criteria&nbsp;are&nbsp;ignored.<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;do&nbsp;not&nbsp;define&nbsp;otherwise&nbsp;which&nbsp;preferences&nbsp;you&nbsp;are<br>
+interested&nbsp;in&nbsp;('language',&nbsp;'charset',&nbsp;'encoding'),&nbsp;by&nbsp;default<br>
+you&nbsp;will&nbsp;get&nbsp;the&nbsp;user&nbsp;preferences&nbsp;for&nbsp;the&nbsp;content&nbsp;types.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-adapterFileName"><strong>adapterFileName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;filesystem&nbsp;path&nbsp;of&nbsp;the&nbsp;adapter.<br>
+&nbsp;<br>
+Equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;SCRIPT_FILENAME.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-adapterName"><strong>adapterName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;adapter&nbsp;as&nbsp;it&nbsp;appears&nbsp;in&nbsp;the&nbsp;URL.<br>
+&nbsp;<br>
+Example:&nbsp;'/WK'&nbsp;or&nbsp;'/WebKit.cgi'<br>
+Does&nbsp;not&nbsp;reflect&nbsp;redirection&nbsp;by&nbsp;the&nbsp;webserver.<br>
+Equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;SCRIPT_NAME.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-contextName"><strong>contextName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;this&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;isn't&nbsp;necessarily&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;directory<br>
+containing&nbsp;the&nbsp;context.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-contextPath"><strong>contextPath</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;URI&nbsp;that&nbsp;is&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-cookie"><strong>cookie</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;specified&nbsp;cookie.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-cookies"><strong>cookies</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dict&nbsp;of&nbsp;all&nbsp;cookies&nbsp;the&nbsp;client&nbsp;sent&nbsp;with&nbsp;this&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-delField"><strong>delField</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-environ"><strong>environ</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;environment&nbsp;for&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-extraURLPath"><strong>extraURLPath</strong></a>(self)</dt><dd><tt>Return&nbsp;additional&nbsp;path&nbsp;components&nbsp;in&nbsp;the&nbsp;URL.<br>
+&nbsp;<br>
+Only&nbsp;works&nbsp;if&nbsp;the&nbsp;Application.config&nbsp;setting&nbsp;"ExtraPathInfo"<br>
+is&nbsp;set&nbsp;to&nbsp;true;&nbsp;otherwise&nbsp;you&nbsp;will&nbsp;get&nbsp;a&nbsp;page&nbsp;not&nbsp;found&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-field"><strong>field</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-fieldStorage"><strong>fieldStorage</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-fields"><strong>fields</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-fsPath"><strong>fsPath</strong></a>(self)</dt><dd><tt>The&nbsp;filesystem&nbsp;path&nbsp;of&nbsp;the&nbsp;request&nbsp;according&nbsp;to&nbsp;the&nbsp;webserver.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-hasCookie"><strong>hasCookie</strong></a>(self, name)</dt><dd><tt>Return&nbsp;whether&nbsp;a&nbsp;cookie&nbsp;with&nbsp;the&nbsp;given&nbsp;name&nbsp;exists.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-hasField"><strong>hasField</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-hasValue"><strong>hasValue</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;there&nbsp;is&nbsp;a&nbsp;value&nbsp;with&nbsp;the&nbsp;given&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-hostAndPort"><strong>hostAndPort</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;hostname&nbsp;and&nbsp;port&nbsp;part&nbsp;from&nbsp;the&nbsp;URL&nbsp;of&nbsp;this&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-htmlInfo"><strong>htmlInfo</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;single&nbsp;HTML&nbsp;string&nbsp;that&nbsp;represents&nbsp;<a href="#HTTPRequest-info">info</a>().<br>
+&nbsp;<br>
+Useful&nbsp;for&nbsp;inspecting&nbsp;objects&nbsp;via&nbsp;web&nbsp;browsers.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-info"><strong>info</strong></a>(self)</dt><dd><tt>Return&nbsp;request&nbsp;info.<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;list&nbsp;of&nbsp;tuples&nbsp;where&nbsp;each&nbsp;tuple&nbsp;has&nbsp;a&nbsp;key/label&nbsp;(a&nbsp;string)<br>
+and&nbsp;a&nbsp;value&nbsp;(any&nbsp;kind&nbsp;of&nbsp;object).<br>
+&nbsp;<br>
+Values&nbsp;are&nbsp;typically&nbsp;atomic&nbsp;values&nbsp;such&nbsp;as&nbsp;numbers&nbsp;and&nbsp;strings&nbsp;or<br>
+another&nbsp;list&nbsp;of&nbsp;tuples&nbsp;in&nbsp;the&nbsp;same&nbsp;fashion.&nbsp;This&nbsp;is&nbsp;for&nbsp;debugging&nbsp;only.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-isSecure"><strong>isSecure</strong></a>(self)</dt><dd><tt>Check&nbsp;whether&nbsp;this&nbsp;is&nbsp;a&nbsp;HTTPS&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-isSessionExpired"><strong>isSessionExpired</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;request&nbsp;originally&nbsp;had&nbsp;an&nbsp;expired&nbsp;session&nbsp;ID.<br>
+&nbsp;<br>
+Only&nbsp;works&nbsp;if&nbsp;the&nbsp;Application.config&nbsp;setting&nbsp;"IgnoreInvalidSession"<br>
+is&nbsp;set&nbsp;to&nbsp;true;&nbsp;otherwise&nbsp;you&nbsp;get&nbsp;a&nbsp;canned&nbsp;error&nbsp;page&nbsp;on&nbsp;an&nbsp;invalid<br>
+session,&nbsp;so&nbsp;your&nbsp;servlet&nbsp;never&nbsp;gets&nbsp;processed.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-method"><strong>method</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;HTTP&nbsp;request&nbsp;method&nbsp;(in&nbsp;all&nbsp;uppercase).<br>
+&nbsp;<br>
+Typically&nbsp;from&nbsp;the&nbsp;set&nbsp;GET,&nbsp;POST,&nbsp;PUT,&nbsp;DELETE,&nbsp;OPTIONS&nbsp;and&nbsp;TRACE.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-originalContextName"><strong>originalContextName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;original&nbsp;context&nbsp;before&nbsp;any&nbsp;forwarding.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-originalServlet"><strong>originalServlet</strong></a>(self)</dt><dd><tt>Get&nbsp;original&nbsp;servlet&nbsp;before&nbsp;any&nbsp;forwarding.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-originalURI"><strong>originalURI</strong></a>(self)</dt><dd><tt>Get&nbsp;URI&nbsp;of&nbsp;the&nbsp;original&nbsp;servlet&nbsp;before&nbsp;any&nbsp;forwarding.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-originalURLPath"><strong>originalURLPath</strong></a>(self)</dt><dd><tt>Get&nbsp;URL&nbsp;path&nbsp;of&nbsp;the&nbsp;original&nbsp;servlet&nbsp;before&nbsp;any&nbsp;forwarding.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-parent"><strong>parent</strong></a> = <a href="#HTTPRequest-previousServlet">previousServlet</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-parents"><strong>parents</strong></a> = <a href="#HTTPRequest-previousServlets">previousServlets</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-pathInfo"><strong>pathInfo</strong></a>(self)</dt><dd><tt>Return&nbsp;any&nbsp;extra&nbsp;path&nbsp;information&nbsp;as&nbsp;sent&nbsp;by&nbsp;the&nbsp;client.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;anything&nbsp;after&nbsp;the&nbsp;servlet&nbsp;name&nbsp;but&nbsp;before&nbsp;the&nbsp;query&nbsp;string.<br>
+Equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;PATH_INFO.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-pathTranslated"><strong>pathTranslated</strong></a>(self)</dt><dd><tt>Return&nbsp;extra&nbsp;path&nbsp;information&nbsp;translated&nbsp;as&nbsp;file&nbsp;system&nbsp;path.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;<a href="#HTTPRequest-pathInfo">pathInfo</a>()&nbsp;but&nbsp;translated&nbsp;to&nbsp;the&nbsp;file&nbsp;system.<br>
+Equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;PATH_TRANSLATED.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-pop"><strong>pop</strong></a>(self)</dt><dd><tt>Pop&nbsp;URL&nbsp;path&nbsp;and&nbsp;servlet&nbsp;from&nbsp;the&nbsp;stack,&nbsp;returning&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousContextName"><strong>previousContextName</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;previous&nbsp;context&nbsp;name,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousContextNames"><strong>previousContextNames</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;list&nbsp;of&nbsp;all&nbsp;previous&nbsp;context&nbsp;names.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousServlet"><strong>previousServlet</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;servlet&nbsp;that&nbsp;passed&nbsp;this&nbsp;request&nbsp;to&nbsp;us,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousServlets"><strong>previousServlets</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;list&nbsp;of&nbsp;all&nbsp;previous&nbsp;servlets.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousURI"><strong>previousURI</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;previous&nbsp;URI,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousURIs"><strong>previousURIs</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;list&nbsp;of&nbsp;all&nbsp;previous&nbsp;URIs.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousURLPath"><strong>previousURLPath</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;previous&nbsp;URL&nbsp;path,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-previousURLPaths"><strong>previousURLPaths</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;list&nbsp;of&nbsp;all&nbsp;previous&nbsp;URL&nbsp;paths.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-protocol"><strong>protocol</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;and&nbsp;version&nbsp;of&nbsp;the&nbsp;protocol.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-push"><strong>push</strong></a>(self, servlet, url<font color="#909090">=None</font>)</dt><dd><tt>Push&nbsp;servlet&nbsp;and&nbsp;URL&nbsp;path&nbsp;on&nbsp;a&nbsp;stack,&nbsp;setting&nbsp;a&nbsp;new&nbsp;URL.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-queryString"><strong>queryString</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;query&nbsp;string&nbsp;portion&nbsp;of&nbsp;the&nbsp;URL&nbsp;for&nbsp;this&nbsp;request.<br>
+&nbsp;<br>
+Equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;QUERY_STRING.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-rawInput"><strong>rawInput</strong></a>(self, rewind<font color="#909090">=False</font>)</dt><dd><tt>Get&nbsp;the&nbsp;raw&nbsp;input&nbsp;from&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;gives&nbsp;you&nbsp;a&nbsp;file-like&nbsp;object&nbsp;for&nbsp;the&nbsp;data&nbsp;that&nbsp;was&nbsp;sent&nbsp;with<br>
+the&nbsp;request&nbsp;(e.g.,&nbsp;the&nbsp;body&nbsp;of&nbsp;a&nbsp;POST&nbsp;request,&nbsp;or&nbsp;the&nbsp;document<br>
+uploaded&nbsp;in&nbsp;a&nbsp;PUT&nbsp;request).<br>
+&nbsp;<br>
+The&nbsp;file&nbsp;might&nbsp;not&nbsp;be&nbsp;rewound&nbsp;to&nbsp;the&nbsp;beginning&nbsp;if&nbsp;there&nbsp;was&nbsp;valid,<br>
+form-encoded&nbsp;POST&nbsp;data.&nbsp;Pass&nbsp;rewind=True&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;be&nbsp;sure<br>
+you&nbsp;get&nbsp;the&nbsp;entire&nbsp;body&nbsp;of&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-remoteAddress"><strong>remoteAddress</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;string&nbsp;containing&nbsp;the&nbsp;IP&nbsp;address&nbsp;of&nbsp;the&nbsp;client.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-remoteName"><strong>remoteName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;fully&nbsp;qualified&nbsp;name&nbsp;of&nbsp;the&nbsp;client&nbsp;that&nbsp;sent&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;IP&nbsp;address&nbsp;of&nbsp;the&nbsp;client&nbsp;if&nbsp;the&nbsp;name&nbsp;cannot&nbsp;be&nbsp;determined.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-remoteUser"><strong>remoteUser</strong></a>(self)</dt><dd><tt>Always&nbsp;returns&nbsp;None&nbsp;since&nbsp;authentication&nbsp;is&nbsp;not&nbsp;yet&nbsp;supported.<br>
+&nbsp;<br>
+Take&nbsp;from&nbsp;CGI&nbsp;variable&nbsp;REMOTE_USER.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-requestID"><strong>requestID</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;request&nbsp;ID.<br>
+&nbsp;<br>
+The&nbsp;request&nbsp;ID&nbsp;is&nbsp;a&nbsp;serial&nbsp;number&nbsp;unique&nbsp;to&nbsp;this&nbsp;request<br>
+(at&nbsp;least&nbsp;unique&nbsp;for&nbsp;one&nbsp;run&nbsp;of&nbsp;the&nbsp;AppServer).</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-responseClass"><strong>responseClass</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-scheme"><strong>scheme</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;URI&nbsp;scheme&nbsp;of&nbsp;the&nbsp;request&nbsp;(http&nbsp;or&nbsp;https).</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverDictionary"><strong>serverDictionary</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;the&nbsp;data&nbsp;the&nbsp;web&nbsp;server&nbsp;gave&nbsp;us.<br>
+&nbsp;<br>
+This&nbsp;data&nbsp;includes&nbsp;HTTP_HOST&nbsp;and&nbsp;HTTP_USER_AGENT,&nbsp;for&nbsp;example.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverPath"><strong>serverPath</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;webserver&nbsp;URL&nbsp;path&nbsp;of&nbsp;this&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;URL&nbsp;that&nbsp;was&nbsp;actually&nbsp;received&nbsp;by&nbsp;the&nbsp;webserver<br>
+before&nbsp;any&nbsp;rewriting&nbsp;took&nbsp;place.<br>
+&nbsp;<br>
+Same&nbsp;as&nbsp;serverURL,&nbsp;but&nbsp;without&nbsp;scheme&nbsp;and&nbsp;host.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverPathDir"><strong>serverPathDir</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;directory&nbsp;of&nbsp;the&nbsp;webserver&nbsp;URL&nbsp;path.<br>
+&nbsp;<br>
+Same&nbsp;as&nbsp;serverPath,&nbsp;but&nbsp;removes&nbsp;the&nbsp;actual&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverSideContextPath"><strong>serverSideContextPath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;absolute&nbsp;server-side&nbsp;path&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;this&nbsp;request.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;optional&nbsp;path&nbsp;is&nbsp;passed&nbsp;in,&nbsp;then&nbsp;it&nbsp;is&nbsp;joined&nbsp;with&nbsp;the&nbsp;server<br>
+side&nbsp;context&nbsp;directory&nbsp;to&nbsp;form&nbsp;a&nbsp;path&nbsp;relative&nbsp;to&nbsp;the&nbsp;object.<br>
+&nbsp;<br>
+This&nbsp;directory&nbsp;could&nbsp;be&nbsp;different&nbsp;from&nbsp;the&nbsp;result&nbsp;of&nbsp;<a href="#HTTPRequest-serverSidePath">serverSidePath</a>()<br>
+if&nbsp;the&nbsp;request&nbsp;is&nbsp;in&nbsp;a&nbsp;subdirectory&nbsp;of&nbsp;the&nbsp;main&nbsp;context&nbsp;directory.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;absolute&nbsp;server-side&nbsp;path&nbsp;of&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;optional&nbsp;path&nbsp;is&nbsp;passed&nbsp;in,&nbsp;then&nbsp;it&nbsp;is&nbsp;joined&nbsp;with&nbsp;the<br>
+server&nbsp;side&nbsp;directory&nbsp;to&nbsp;form&nbsp;a&nbsp;path&nbsp;relative&nbsp;to&nbsp;the&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverURL"><strong>serverURL</strong></a>(self, canonical<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;the&nbsp;full&nbsp;Internet&nbsp;path&nbsp;to&nbsp;this&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;URL&nbsp;that&nbsp;was&nbsp;actually&nbsp;received&nbsp;by&nbsp;the&nbsp;webserver<br>
+before&nbsp;any&nbsp;rewriting&nbsp;took&nbsp;place.&nbsp;If&nbsp;canonical&nbsp;is&nbsp;set&nbsp;to&nbsp;true,<br>
+then&nbsp;the&nbsp;canonical&nbsp;hostname&nbsp;of&nbsp;the&nbsp;server&nbsp;is&nbsp;used&nbsp;if&nbsp;possible.<br>
+&nbsp;<br>
+The&nbsp;path&nbsp;is&nbsp;returned&nbsp;without&nbsp;any&nbsp;extra&nbsp;path&nbsp;info&nbsp;or&nbsp;query&nbsp;strings,<br>
+i.e.&nbsp;<a href="http://www.my.own.host.com:8080/WebKit/TestPage.py">http://www.my.own.host.com:8080/WebKit/TestPage.py</a></tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-serverURLDir"><strong>serverURLDir</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;directory&nbsp;of&nbsp;the&nbsp;URL&nbsp;in&nbsp;full&nbsp;Internet&nbsp;form.<br>
+&nbsp;<br>
+Same&nbsp;as&nbsp;serverURL,&nbsp;but&nbsp;removes&nbsp;the&nbsp;actual&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-servlet"><strong>servlet</strong></a>(self)</dt><dd><tt>Get&nbsp;current&nbsp;servlet&nbsp;for&nbsp;this&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-servletPath"><strong>servletPath</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;base&nbsp;URL&nbsp;for&nbsp;the&nbsp;servlets,&nbsp;sans&nbsp;host.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;useful&nbsp;in&nbsp;cases&nbsp;when&nbsp;you&nbsp;are&nbsp;constructing&nbsp;URLs.<br>
+See&nbsp;Testing/Main.py&nbsp;for&nbsp;an&nbsp;example&nbsp;use.<br>
+&nbsp;<br>
+Roughly&nbsp;equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;SCRIPT_NAME,<br>
+but&nbsp;reflects&nbsp;redirection&nbsp;by&nbsp;the&nbsp;webserver.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-servletPathFromSiteRoot"><strong>servletPathFromSiteRoot</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;"servlet&nbsp;path"&nbsp;of&nbsp;this&nbsp;servlet&nbsp;relative&nbsp;to&nbsp;the&nbsp;siteRoot.<br>
+&nbsp;<br>
+In&nbsp;other&nbsp;words,&nbsp;everything&nbsp;after&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;context&nbsp;(if&nbsp;present).<br>
+If&nbsp;you&nbsp;append&nbsp;this&nbsp;to&nbsp;the&nbsp;result&nbsp;of&nbsp;<a href="#HTTPRequest-siteRoot">siteRoot</a>()&nbsp;you&nbsp;get&nbsp;back&nbsp;to<br>
+the&nbsp;current&nbsp;servlet.&nbsp;This&nbsp;is&nbsp;useful&nbsp;for&nbsp;saving&nbsp;the&nbsp;path&nbsp;to&nbsp;the&nbsp;current<br>
+servlet&nbsp;in&nbsp;a&nbsp;database,&nbsp;for&nbsp;example.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-servletURI"><strong>servletURI</strong></a>(self)</dt><dd><tt>Return&nbsp;servlet&nbsp;URI&nbsp;without&nbsp;any&nbsp;query&nbsp;strings&nbsp;or&nbsp;extra&nbsp;path&nbsp;info.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-session"><strong>session</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;session&nbsp;associated&nbsp;with&nbsp;this&nbsp;request.<br>
+&nbsp;<br>
+The&nbsp;session&nbsp;is&nbsp;either&nbsp;as&nbsp;specified&nbsp;by&nbsp;<a href="#HTTPRequest-sessionId">sessionId</a>()&nbsp;or&nbsp;newly&nbsp;created.<br>
+This&nbsp;is&nbsp;a&nbsp;convenience&nbsp;for&nbsp;transaction.<a href="#HTTPRequest-session">session</a>()</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-sessionId"><strong>sessionId</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;string&nbsp;with&nbsp;the&nbsp;session&nbsp;ID&nbsp;specified&nbsp;by&nbsp;the&nbsp;client.<br>
+&nbsp;<br>
+Returns&nbsp;None&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;session&nbsp;ID.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-setField"><strong>setField</strong></a>(self, name, value)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-setSessionExpired"><strong>setSessionExpired</strong></a>(self, sessionExpired)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-setSessionId"><strong>setSessionId</strong></a>(self, sessionID, force<font color="#909090">=False</font>)</dt><dd><tt>Set&nbsp;the&nbsp;session&nbsp;ID.<br>
+&nbsp;<br>
+This&nbsp;needs&nbsp;to&nbsp;be&nbsp;called&nbsp;_before_&nbsp;attempting&nbsp;to&nbsp;use&nbsp;the&nbsp;session.<br>
+This&nbsp;would&nbsp;be&nbsp;useful&nbsp;if&nbsp;the&nbsp;session&nbsp;ID&nbsp;is&nbsp;being&nbsp;passed&nbsp;in&nbsp;through<br>
+unusual&nbsp;means,&nbsp;for&nbsp;example&nbsp;via&nbsp;a&nbsp;field&nbsp;in&nbsp;an&nbsp;XML-RPC&nbsp;request.<br>
+&nbsp;<br>
+Pass&nbsp;in&nbsp;force=True&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;force&nbsp;this&nbsp;session&nbsp;ID&nbsp;to&nbsp;be&nbsp;used<br>
+even&nbsp;if&nbsp;the&nbsp;session&nbsp;doesn't&nbsp;exist.&nbsp;This&nbsp;would&nbsp;be&nbsp;useful&nbsp;in&nbsp;unusual<br>
+circumstances&nbsp;where&nbsp;the&nbsp;client&nbsp;is&nbsp;responsible&nbsp;for&nbsp;creating&nbsp;the&nbsp;unique<br>
+session&nbsp;ID&nbsp;rather&nbsp;than&nbsp;the&nbsp;server.<br>
+Be&nbsp;sure&nbsp;to&nbsp;use&nbsp;only&nbsp;legal&nbsp;filename&nbsp;characters&nbsp;in&nbsp;the&nbsp;session&nbsp;ID&nbsp;--<br>
+0-9,&nbsp;a-z,&nbsp;A-Z,&nbsp;_,&nbsp;-,&nbsp;and&nbsp;.&nbsp;are&nbsp;OK&nbsp;but&nbsp;everything&nbsp;else&nbsp;will&nbsp;be&nbsp;rejected,<br>
+as&nbsp;will&nbsp;identifiers&nbsp;longer&nbsp;than&nbsp;80&nbsp;characters.<br>
+(Without&nbsp;passing&nbsp;in&nbsp;force=True,&nbsp;a&nbsp;random&nbsp;session&nbsp;ID&nbsp;will&nbsp;be&nbsp;generated<br>
+if&nbsp;that&nbsp;session&nbsp;ID&nbsp;isn't&nbsp;already&nbsp;present&nbsp;in&nbsp;the&nbsp;session&nbsp;store.)</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-setURLPath"><strong>setURLPath</strong></a>(self, path)</dt><dd><tt>Set&nbsp;the&nbsp;URL&nbsp;path&nbsp;of&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+If&nbsp;self.<strong>_absolutepath</strong>&nbsp;is&nbsp;set,&nbsp;this&nbsp;refers&nbsp;to&nbsp;the&nbsp;filesystem&nbsp;path.<br>
+&nbsp;<br>
+There&nbsp;is&nbsp;rarely&nbsp;a&nbsp;need&nbsp;to&nbsp;do&nbsp;this.&nbsp;Proceed&nbsp;with&nbsp;caution.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-siteRoot"><strong>siteRoot</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;relative&nbsp;URL&nbsp;path&nbsp;of&nbsp;the&nbsp;home&nbsp;location.<br>
+&nbsp;<br>
+This&nbsp;includes&nbsp;all&nbsp;URL&nbsp;path&nbsp;components&nbsp;necessary&nbsp;to&nbsp;get&nbsp;back&nbsp;home<br>
+from&nbsp;the&nbsp;current&nbsp;location.<br>
+&nbsp;<br>
+Examples:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;''<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'../'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'../../'<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;use&nbsp;this&nbsp;as&nbsp;a&nbsp;prefix&nbsp;to&nbsp;a&nbsp;URL&nbsp;that&nbsp;you&nbsp;know&nbsp;is&nbsp;based&nbsp;off<br>
+the&nbsp;home&nbsp;location.&nbsp;Any&nbsp;time&nbsp;you&nbsp;are&nbsp;in&nbsp;a&nbsp;servlet&nbsp;that&nbsp;may&nbsp;have&nbsp;been<br>
+forwarded&nbsp;to&nbsp;from&nbsp;another&nbsp;servlet&nbsp;at&nbsp;a&nbsp;different&nbsp;level,&nbsp;you&nbsp;should<br>
+prefix&nbsp;your&nbsp;URL's&nbsp;with&nbsp;this.&nbsp;That&nbsp;is,&nbsp;if&nbsp;servlet&nbsp;"Foo/Bar"&nbsp;forwards<br>
+to&nbsp;"Qux",&nbsp;then&nbsp;the&nbsp;qux&nbsp;servlet&nbsp;should&nbsp;use&nbsp;<a href="#HTTPRequest-siteRoot">siteRoot</a>()&nbsp;to&nbsp;construct&nbsp;all<br>
+links&nbsp;to&nbsp;avoid&nbsp;broken&nbsp;links.&nbsp;This&nbsp;works&nbsp;properly&nbsp;because&nbsp;this&nbsp;method<br>
+computes&nbsp;the&nbsp;path&nbsp;based&nbsp;on&nbsp;the&nbsp;_original_&nbsp;servlet,&nbsp;not&nbsp;the&nbsp;location<br>
+of&nbsp;the&nbsp;servlet&nbsp;that&nbsp;you&nbsp;have&nbsp;forwarded&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-siteRootFromCurrentServlet"><strong>siteRootFromCurrentServlet</strong></a>(self)</dt><dd><tt>Return&nbsp;relative&nbsp;URL&nbsp;path&nbsp;to&nbsp;home&nbsp;seen&nbsp;from&nbsp;the&nbsp;current&nbsp;servlet.<br>
+&nbsp;<br>
+This&nbsp;includes&nbsp;all&nbsp;URL&nbsp;path&nbsp;components&nbsp;necessary&nbsp;to&nbsp;get&nbsp;back&nbsp;home<br>
+from&nbsp;the&nbsp;current&nbsp;servlet&nbsp;(not&nbsp;from&nbsp;the&nbsp;original&nbsp;request).<br>
+&nbsp;<br>
+Similar&nbsp;to&nbsp;<a href="#HTTPRequest-siteRoot">siteRoot</a>()&nbsp;but&nbsp;instead,&nbsp;it&nbsp;returns&nbsp;the&nbsp;site&nbsp;root<br>
+relative&nbsp;to&nbsp;the&nbsp;_current_&nbsp;servlet,&nbsp;not&nbsp;the&nbsp;_original_&nbsp;servlet.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-time"><strong>time</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;time&nbsp;that&nbsp;the&nbsp;request&nbsp;was&nbsp;received.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-uri"><strong>uri</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;URI&nbsp;for&nbsp;this&nbsp;request&nbsp;(everything&nbsp;after&nbsp;the&nbsp;host&nbsp;name).<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;URL&nbsp;that&nbsp;was&nbsp;actually&nbsp;received&nbsp;by&nbsp;the&nbsp;webserver<br>
+before&nbsp;any&nbsp;rewriting&nbsp;took&nbsp;place,&nbsp;including&nbsp;the&nbsp;query&nbsp;string.<br>
+Equivalent&nbsp;to&nbsp;the&nbsp;CGI&nbsp;variable&nbsp;REQUEST_URI.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-uriWebKitRoot"><strong>uriWebKitRoot</strong></a>(self)</dt><dd><tt>Return&nbsp;relative&nbsp;URL&nbsp;path&nbsp;of&nbsp;the&nbsp;WebKit&nbsp;root&nbsp;location.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-urlPath"><strong>urlPath</strong></a>(self)</dt><dd><tt>Return&nbsp;URL&nbsp;path&nbsp;without&nbsp;host,&nbsp;adapter&nbsp;and&nbsp;query&nbsp;string.<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;<a href="http://host/WebKit.cgi/Context/Servlet?x=1">http://host/WebKit.cgi/Context/Servlet?x=1</a><br>
+yields&nbsp;'/Context/Servlet'.<br>
+&nbsp;<br>
+If&nbsp;self.<strong>_absolutepath</strong>&nbsp;is&nbsp;set,&nbsp;this&nbsp;refers&nbsp;to&nbsp;the&nbsp;filesystem&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-urlPathDir"><strong>urlPathDir</strong></a>(self)</dt><dd><tt>Same&nbsp;as&nbsp;urlPath,&nbsp;but&nbsp;only&nbsp;gives&nbsp;the&nbsp;directory.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-value"><strong>value</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;value&nbsp;with&nbsp;the&nbsp;given&nbsp;name.<br>
+&nbsp;<br>
+Values&nbsp;are&nbsp;fields&nbsp;or&nbsp;cookies.<br>
+Use&nbsp;this&nbsp;method&nbsp;when&nbsp;you're&nbsp;field/cookie&nbsp;agnostic.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Request.html#Request">WebKit.Request.Request</a>:<br>
+<dl><dt><a name="HTTPRequest-clearTransaction"><strong>clearTransaction</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-input"><strong>input</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;file-style&nbsp;object&nbsp;that&nbsp;the&nbsp;contents&nbsp;can&nbsp;be&nbsp;read&nbsp;from.<br>
+&nbsp;<br>
+#&nbsp;@@&nbsp;2000-05-03&nbsp;ce:&nbsp;This&nbsp;is&nbsp;bogus.&nbsp;Disregard&nbsp;for&nbsp;now.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-localAddress"><strong>localAddress</strong></a>(self)</dt><dd><tt>Get&nbsp;local&nbsp;address.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;string&nbsp;containing&nbsp;the&nbsp;Internet&nbsp;Protocol&nbsp;(IP)&nbsp;address<br>
+of&nbsp;the&nbsp;local&nbsp;host&nbsp;(e.g.,&nbsp;the&nbsp;server)&nbsp;that&nbsp;received&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-localPort"><strong>localPort</strong></a>(self)</dt><dd><tt>Get&nbsp;local&nbsp;port.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;port&nbsp;of&nbsp;the&nbsp;local&nbsp;host&nbsp;(e.g.,&nbsp;the&nbsp;server)<br>
+that&nbsp;received&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;a&nbsp;transaction&nbsp;container.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-timeStamp"><strong>timeStamp</strong></a>(self)</dt><dd><tt>Return&nbsp;<a href="#HTTPRequest-time">time</a>()&nbsp;as&nbsp;a&nbsp;human&nbsp;readable&nbsp;string,&nbsp;useful&nbsp;for&nbsp;logging&nbsp;and&nbsp;debugging.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-transaction"><strong>transaction</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;transaction&nbsp;container.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Request.html#Request">WebKit.Request.Request</a>:<br>
+<dl><dt><a name="HTTPRequest-localName"><strong>localName</strong></a>()</dt><dd><tt>Get&nbsp;local&nbsp;name.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;fully&nbsp;qualified&nbsp;name&nbsp;of&nbsp;the&nbsp;local&nbsp;host&nbsp;(e.g.,&nbsp;the&nbsp;server)<br>
+that&nbsp;received&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Message.html#Message">WebKit.Message.Message</a>:<br>
+<dl><dt><a name="HTTPRequest-arg"><strong>arg</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-argNames"><strong>argNames</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;argument&nbsp;names.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-clearArgs"><strong>clearArgs</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-deleteArg"><strong>deleteArg</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-hasArg"><strong>hasArg</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-setArg"><strong>setArg</strong></a>(self, name, value)</dt></dl>
+
+<dl><dt><a name="HTTPRequest-writeExceptionReport"><strong>writeExceptionReport</strong></a>(self, handler)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Message.html#Message">WebKit.Message.Message</a>:<br>
+<dl><dt><a name="HTTPRequest-contentLength"><strong>contentLength</strong></a>()</dt><dd><tt>Return&nbsp;the&nbsp;length&nbsp;of&nbsp;the&nbsp;message&nbsp;body&nbsp;or&nbsp;-1&nbsp;if&nbsp;not&nbsp;known.</tt></dd></dl>
+
+<dl><dt><a name="HTTPRequest-contentType"><strong>contentType</strong></a>()</dt><dd><tt>Return&nbsp;the&nbsp;MIME&nbsp;type&nbsp;of&nbsp;the&nbsp;message&nbsp;body&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;known.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.Message.html#Message">WebKit.Message.Message</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-htmlInfo"><strong>htmlInfo</strong></a>(info)</dt><dd><tt>Return&nbsp;a&nbsp;single&nbsp;HTML&nbsp;string&nbsp;that&nbsp;represents&nbsp;the&nbsp;info&nbsp;structure.<br>
+&nbsp;<br>
+Useful&nbsp;for&nbsp;inspecting&nbsp;objects&nbsp;via&nbsp;web&nbsp;browsers.</tt></dd></dl>
+ <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>debug</strong> = False</td></tr></table>
+</body></html>

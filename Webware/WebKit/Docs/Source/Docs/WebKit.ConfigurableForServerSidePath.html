@@ -1,0 +1,125 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.ConfigurableForServerSidePath</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.ConfigurableForServerSidePath</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/ConfigurableForServerSidePath.py">/var/www/docs/Webware-1.1.1/WebKit/ConfigurableForServerSidePath.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">ConfigurableForServerSidePath</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ConfigurableForServerSidePath">class <strong>ConfigurableForServerSidePath</strong></a>(<a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Configuration&nbsp;file&nbsp;functionality&nbsp;incorporating&nbsp;a&nbsp;server&nbsp;side&nbsp;path.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;version&nbsp;of&nbsp;`MiscUtils.<a href="MiscUtils.Configurable.html#Configurable">Configurable</a>.<a href="MiscUtils.Configurable.html#Configurable">Configurable</a>`<br>
+that&nbsp;provides&nbsp;a&nbsp;customized&nbsp;`setting`&nbsp;method&nbsp;for&nbsp;classes&nbsp;which<br>
+have&nbsp;a&nbsp;`serverSidePath`&nbsp;method.&nbsp;If&nbsp;a&nbsp;setting's&nbsp;name&nbsp;ends&nbsp;with<br>
+``Filename``&nbsp;or&nbsp;``Dir``,&nbsp;its&nbsp;value&nbsp;is&nbsp;passed&nbsp;through<br>
+`serverSidePath`&nbsp;before&nbsp;being&nbsp;returned.<br>
+&nbsp;<br>
+In&nbsp;other&nbsp;words,&nbsp;relative&nbsp;filenames&nbsp;and&nbsp;directory&nbsp;names&nbsp;are&nbsp;expanded<br>
+with&nbsp;the&nbsp;location&nbsp;of&nbsp;the&nbsp;object,&nbsp;NOT&nbsp;the&nbsp;current&nbsp;directory.<br>
+&nbsp;<br>
+Application&nbsp;and&nbsp;AppServer&nbsp;are&nbsp;two&nbsp;well&nbsp;known&nbsp;users&nbsp;of&nbsp;this<br>
+mix-in.&nbsp;Any&nbsp;class&nbsp;that&nbsp;has&nbsp;a&nbsp;`serverSidePath`&nbsp;method&nbsp;and&nbsp;a<br>
+`<a href="MiscUtils.Configurable.html#Configurable">Configurable</a>`&nbsp;base&nbsp;class,&nbsp;should&nbsp;inherit&nbsp;this&nbsp;class&nbsp;instead.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;used&nbsp;with&nbsp;for&nbsp;MakeAppWorkDir,&nbsp;which&nbsp;changes&nbsp;the&nbsp;serverSidePath.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">ConfigurableForServerSidePath</a></dd>
+<dd><a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ConfigurableForServerSidePath-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;setting,&nbsp;using&nbsp;the&nbsp;server&nbsp;side&nbsp;path&nbsp;when&nbsp;indicated.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;setting,&nbsp;filtered&nbsp;by&nbsp;serverSidePath(),<br>
+if&nbsp;the&nbsp;name&nbsp;ends&nbsp;with&nbsp;``Filename``&nbsp;or&nbsp;``Dir``.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><a name="ConfigurableForServerSidePath-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-commandLineConfig"><strong>commandLineConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;settings&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;command-line.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;come&nbsp;via&nbsp;addCommandLineSetting().</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;configuration&nbsp;of&nbsp;the&nbsp;object&nbsp;as&nbsp;a&nbsp;dictionary.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;combination&nbsp;of&nbsp;<a href="#ConfigurableForServerSidePath-defaultConfig">defaultConfig</a>()&nbsp;and&nbsp;<a href="#ConfigurableForServerSidePath-userConfig">userConfig</a>().<br>
+This&nbsp;method&nbsp;caches&nbsp;the&nbsp;config.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-configFilename"><strong>configFilename</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;full&nbsp;name&nbsp;of&nbsp;the&nbsp;user&nbsp;config&nbsp;file.<br>
+&nbsp;<br>
+Users&nbsp;can&nbsp;override&nbsp;the&nbsp;configuration&nbsp;by&nbsp;this&nbsp;config&nbsp;file.<br>
+Subclasses&nbsp;must&nbsp;override&nbsp;to&nbsp;specify&nbsp;a&nbsp;name.<br>
+Returning&nbsp;None&nbsp;is&nbsp;valid,&nbsp;in&nbsp;which&nbsp;case&nbsp;no&nbsp;user&nbsp;config&nbsp;file<br>
+will&nbsp;be&nbsp;loaded.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-configName"><strong>configName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;configuration&nbsp;file&nbsp;without&nbsp;the&nbsp;extension.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;name&nbsp;before&nbsp;the&nbsp;'.config'.<br>
+This&nbsp;is&nbsp;used&nbsp;on&nbsp;the&nbsp;command-line.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-configReplacementValues"><strong>configReplacementValues</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;for&nbsp;substitutions&nbsp;in&nbsp;the&nbsp;config&nbsp;file.<br>
+&nbsp;<br>
+This&nbsp;must&nbsp;be&nbsp;a&nbsp;dictionary&nbsp;suitable&nbsp;for&nbsp;use&nbsp;with&nbsp;"string&nbsp;%&nbsp;dict"<br>
+that&nbsp;should&nbsp;be&nbsp;used&nbsp;on&nbsp;the&nbsp;text&nbsp;in&nbsp;the&nbsp;config&nbsp;file.<br>
+If&nbsp;an&nbsp;empty&nbsp;dictionary&nbsp;(or&nbsp;None)&nbsp;is&nbsp;returned,&nbsp;then&nbsp;no&nbsp;substitution<br>
+will&nbsp;be&nbsp;attempted.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;default&nbsp;values&nbsp;for&nbsp;the&nbsp;settings.<br>
+&nbsp;<br>
+This&nbsp;implementation&nbsp;returns&nbsp;{}.&nbsp;Subclasses&nbsp;should&nbsp;override.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-hasSetting"><strong>hasSetting</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;a&nbsp;configuration&nbsp;setting&nbsp;has&nbsp;been&nbsp;changed.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-printConfig"><strong>printConfig</strong></a>(self, dest<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;the&nbsp;configuration&nbsp;to&nbsp;the&nbsp;given&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;destination&nbsp;is&nbsp;stdout.&nbsp;A&nbsp;fixed&nbsp;with&nbsp;font&nbsp;is&nbsp;assumed<br>
+for&nbsp;aligning&nbsp;the&nbsp;values&nbsp;to&nbsp;start&nbsp;at&nbsp;the&nbsp;same&nbsp;column.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-setSetting"><strong>setSetting</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurableForServerSidePath-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;config&nbsp;overrides.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;config&nbsp;file.<br>
+Returns&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken&nbsp;from&nbsp;<a href="#ConfigurableForServerSidePath-configFilename">configFilename</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

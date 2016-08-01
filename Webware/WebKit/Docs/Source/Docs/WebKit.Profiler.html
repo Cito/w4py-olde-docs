@@ -1,0 +1,77 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.Profiler</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.Profiler</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/Profiler.py">/var/www/docs/Webware-1.1.1/WebKit/Profiler.py</a></font></td></tr></table>
+    <p><tt>Profiler.py<br>
+&nbsp;<br>
+Stores&nbsp;some&nbsp;values&nbsp;related&nbsp;to&nbsp;performance.<br>
+These&nbsp;are&nbsp;usually&nbsp;set&nbsp;by&nbsp;Launch.py&nbsp;or&nbsp;AppServer.py.<br>
+&nbsp;<br>
+To&nbsp;get&nbsp;profiling&nbsp;going,&nbsp;locate&nbsp;the&nbsp;"runProfile&nbsp;=&nbsp;False"&nbsp;line&nbsp;towards&nbsp;the&nbsp;top<br>
+of&nbsp;WebKit/Launch.py&nbsp;and&nbsp;change&nbsp;the&nbsp;"False"&nbsp;to&nbsp;"True",&nbsp;or&nbsp;start&nbsp;the&nbsp;Launch.py<br>
+script&nbsp;with&nbsp;the&nbsp;--run-profile&nbsp;option.&nbsp;When&nbsp;the&nbsp;app&nbsp;server&nbsp;shuts&nbsp;down&nbsp;it<br>
+will&nbsp;write&nbsp;a&nbsp;profiling&nbsp;report&nbsp;"profile.pstats"&nbsp;in&nbsp;the&nbsp;directory&nbsp;containing<br>
+the&nbsp;Launch.py&nbsp;script&nbsp;which&nbsp;can&nbsp;be&nbsp;quickly&nbsp;examined&nbsp;from&nbsp;the&nbsp;command&nbsp;line:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;$&nbsp;cd&nbsp;Webware<br>
+&nbsp;&nbsp;&nbsp;&nbsp;$&nbsp;bin/printprof.py&nbsp;WebKit/profile.pstats<br>
+&nbsp;<br>
+Using&nbsp;the&nbsp;RunSnakeRun&nbsp;(<a href="http://www.vrplumber.com/programming/runsnakerun/">http://www.vrplumber.com/programming/runsnakerun/</a>)<br>
+GUI&nbsp;utility&nbsp;you&nbsp;can&nbsp;even&nbsp;visualize&nbsp;the&nbsp;data&nbsp;in&nbsp;the&nbsp;profile.pstats&nbsp;file.<br>
+&nbsp;<br>
+You&nbsp;might&nbsp;also&nbsp;wish&nbsp;to&nbsp;dump&nbsp;the&nbsp;profiling&nbsp;stats&nbsp;on&nbsp;demand&nbsp;(as&nbsp;in,&nbsp;by<br>
+clicking&nbsp;or&nbsp;reloading&nbsp;a&nbsp;URL&nbsp;for&nbsp;that&nbsp;purpose).&nbsp;Read&nbsp;further&nbsp;for&nbsp;details.<br>
+&nbsp;<br>
+The&nbsp;variables&nbsp;in&nbsp;this&nbsp;module&nbsp;are:<br>
+&nbsp;<br>
+profiler<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;instance&nbsp;of&nbsp;Python's&nbsp;profile.Profiler,&nbsp;but&nbsp;only&nbsp;if&nbsp;Launch.py&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;started&nbsp;with&nbsp;profiling&nbsp;enabled.&nbsp;Otherwise,&nbsp;this&nbsp;is&nbsp;None.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;could&nbsp;access&nbsp;this&nbsp;from&nbsp;a&nbsp;servlet&nbsp;in&nbsp;order&nbsp;to&nbsp;dump&nbsp;stats:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;WebKit.Profiler&nbsp;import&nbsp;dumpStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-dumpStats">dumpStats</a>()<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;With&nbsp;some&nbsp;work,&nbsp;you&nbsp;could&nbsp;dump&nbsp;them&nbsp;directly&nbsp;to&nbsp;the&nbsp;page&nbsp;in&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readable&nbsp;format.<br>
+&nbsp;<br>
+startTime<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;earliest&nbsp;recordable&nbsp;time()&nbsp;when&nbsp;the&nbsp;app&nbsp;server&nbsp;program&nbsp;was<br>
+&nbsp;&nbsp;&nbsp;&nbsp;launched.<br>
+&nbsp;<br>
+readyTime<br>
+readyDuration<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;time()&nbsp;and&nbsp;duration&nbsp;from&nbsp;startTime&nbsp;for&nbsp;when&nbsp;the&nbsp;app&nbsp;server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;was&nbsp;ready&nbsp;to&nbsp;start&nbsp;accepting&nbsp;requests.&nbsp;A&nbsp;smaller&nbsp;readyDuration<br>
+&nbsp;&nbsp;&nbsp;&nbsp;makes&nbsp;application&nbsp;reloading&nbsp;faster&nbsp;which&nbsp;is&nbsp;useful&nbsp;when<br>
+&nbsp;&nbsp;&nbsp;&nbsp;developing&nbsp;with&nbsp;AutoReload&nbsp;on.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-dumpStats"><strong>dumpStats</strong></a>(file<font color="#909090">='profile.pstats'</font>)</dt></dl>
+ <dl><dt><a name="-reset"><strong>reset</strong></a>()</dt><dd><tt>Invoked&nbsp;by&nbsp;DebugAppServer&nbsp;in&nbsp;support&nbsp;of&nbsp;AutoReload.</tt></dd></dl>
+ <dl><dt><a name="-runCall"><strong>runCall</strong></a>(func, *args, **kwargs)</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>profiler</strong> = None<br>
+<strong>readyDuration</strong> = None<br>
+<strong>readyTime</strong> = None<br>
+<strong>startTime</strong> = None<br>
+<strong>statsFilename</strong> = 'profile.pstats'</td></tr></table>
+</body></html>

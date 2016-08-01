@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/RoleUser.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The RoleUser class."""</span>
+
+<span class="PY_KEYWORD">from</span> User <span class="PY_KEYWORD">import</span> User
+
+
+<span class="PY_KEYWORD">class</span> RoleUser(User):
+    <span class="PY_STRING">"""In conjunction with Role, provides role-based users and security.
+
+    See the doc for playsRole() for an example.
+
+    Note that this class plays nicely with both Role and HierRole,
+    e.g., no "HierRoleUser" is needed when making use of HierRoles.
+
+    See also:
+      * class Role
+      * class HierRole
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, manager=None, name=None, password=None):
+        User.__init__(self, manager, name, password)
+        self._roles = []
+        self._rolesByName = {}
+
+
+    <span class="PY_COMMENT">## Accessing roles ##</span>
+
+    <span class="PY_KEYWORD">def</span> roles(self):
+        <span class="PY_STRING">"""Return a direct list of the user's roles.
+
+        Do not modify.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._roles
+
+    <span class="PY_KEYWORD">def</span> setRoles(self, listOfRoles):
+        <span class="PY_STRING">"""Set all the roles for the user.
+
+        Each role in the list may be a valid role name or a Role object.
+
+        Implementation note: depends on addRoles().
+
+        """</span>
+        self._roles = []
+        self.addRoles(listOfRoles)
+
+    <span class="PY_KEYWORD">def</span> addRoles(self, listOfRoles):
+        <span class="PY_STRING">"""Add additional roles for the user.
+
+        Each role in the list may be a valid role name or a Role object.
+
+        """</span>
+        start = len(self._roles)
+        self._roles.extend(listOfRoles)
+
+        <span class="PY_COMMENT"># Convert names to role objects and update self._rolesByName</span>
+        index = start
+        numRoles = len(self._roles)
+        <span class="PY_KEYWORD">while</span> index &lt; numRoles:
+            role = self._roles[index]
+            <span class="PY_KEYWORD">if</span> isinstance(role, basestring):
+                role = self._manager.roleForName(role)
+                self._roles[index] = role
+            self._rolesByName[role.name()] = role
+            index += 1
+
+    <span class="PY_KEYWORD">def</span> playsRole(self, roleOrName):
+        <span class="PY_STRING">"""Check whether the user plays the given role.
+
+        More specifically, if any of the user's roles return true for
+        role.playsRole(otherRole), this method returns True.
+
+        The application of this popular method often looks like this:
+            if user.playsRole('admin'):
+                self.displayAdminMenuItems()
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> isinstance(roleOrName, basestring):
+            roleOrName = self._manager.roleForName(roleOrName)
+        <span class="PY_KEYWORD">for</span> role <span class="PY_KEYWORD">in</span> self._roles:
+            <span class="PY_KEYWORD">if</span> role.playsRole(roleOrName):
+                <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> False
+</pre>
+<!--footer-->
+
+</body>
+</html>

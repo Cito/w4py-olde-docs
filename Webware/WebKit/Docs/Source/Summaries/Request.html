@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.Request</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.Request</h2>
+<p>You can also browse the <a href="../Files/Request.html">complete source file</a>
+or the <a href="../Docs/WebKit.Request.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Request</span>(Message):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+
+<span class="line_category">    ## Access ##</span>
+<span class="line_def">    def <span class="name_def">time</span>(self)</span>
+<span class="line_def">    def <span class="name_def">timeStamp</span>(self)</span>
+
+<span class="line_category">    ## Input ##</span>
+<span class="line_def">    def <span class="name_def">input</span>(self)</span>
+
+<span class="line_category">    ## Remote info ##</span>
+<span class="line_def">    def <span class="name_def">remoteAddress</span>(self)</span>
+<span class="line_def">    def <span class="name_def">remoteName</span>(self)</span>
+
+<span class="line_category">    ## Local info ##</span>
+<span class="line_def">    def <span class="name_def">localAddress</span>(self)</span>
+<span class="line_def">    def <span class="name_def">localName</span>()</span>
+<span class="line_def">    def <span class="name_def">localPort</span>(self)</span>
+
+<span class="line_category">    ## Security ##</span>
+<span class="line_def">    def <span class="name_def">isSecure</span>()</span>
+
+<span class="line_category">    ## Transactions ##</span>
+<span class="line_def">    def <span class="name_def">responseClass</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setTransaction</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">transaction</span>(self)</span>
+
+<span class="line_category">    ## Cleanup ##</span>
+<span class="line_def">    def <span class="name_def">clearTransaction</span>(self)</span>
+
+</pre>
+</body>
+</html>

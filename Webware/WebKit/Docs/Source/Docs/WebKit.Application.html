@@ -1,0 +1,437 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.Application</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.Application</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/Application.py">/var/www/docs/Webware-1.1.1/WebKit/Application.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;<a href="#Application">Application</a>&nbsp;singleton.<br>
+&nbsp;<br>
+`<a href="#Application">Application</a>`&nbsp;and&nbsp;`AppServer`&nbsp;work&nbsp;together&nbsp;to&nbsp;setup&nbsp;up&nbsp;and&nbsp;dispatch&nbsp;requests.<br>
+The&nbsp;distinction&nbsp;between&nbsp;the&nbsp;two&nbsp;is&nbsp;largely&nbsp;historical,&nbsp;but&nbsp;AppServer<br>
+communicates&nbsp;directly&nbsp;with&nbsp;Adapters&nbsp;(or&nbsp;speaks&nbsp;protocols&nbsp;like&nbsp;HTTP),&nbsp;and<br>
+<a href="#Application">Application</a>&nbsp;receives&nbsp;the&nbsp;(slightly)&nbsp;processed&nbsp;input&nbsp;from&nbsp;AppServer&nbsp;and&nbsp;turns<br>
+it&nbsp;into&nbsp;`Transaction`,&nbsp;`HTTPRequest`,&nbsp;`HTTPResponse`,&nbsp;and&nbsp;`Session`.<br>
+&nbsp;<br>
+<a href="#Application">Application</a>&nbsp;is&nbsp;a&nbsp;singleton,&nbsp;which&nbsp;belongs&nbsp;to&nbsp;the&nbsp;AppServer.&nbsp;You&nbsp;can&nbsp;get&nbsp;access<br>
+through&nbsp;the&nbsp;Transaction&nbsp;object&nbsp;(`transaction.application()`),&nbsp;or&nbsp;you&nbsp;can&nbsp;do::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;AppServer&nbsp;import&nbsp;globalAppServer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;application&nbsp;=&nbsp;globalAppServer.application()<br>
+&nbsp;<br>
+Settings&nbsp;for&nbsp;<a href="#Application">Application</a>&nbsp;are&nbsp;taken&nbsp;from&nbsp;``Configs/<a href="#Application">Application</a>.config``,<br>
+which&nbsp;is&nbsp;used&nbsp;for&nbsp;many&nbsp;global&nbsp;settings,&nbsp;even&nbsp;if&nbsp;they&nbsp;aren't&nbsp;closely&nbsp;tied<br>
+to&nbsp;the&nbsp;<a href="#Application">Application</a>&nbsp;object&nbsp;itself.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="WebKit.URLParser.html">WebKit.URLParser</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>(<a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.Application.html#Application">Application</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.Application.html#EndResponse">EndResponse</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Application">class <strong>Application</strong></a>(<a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;<a href="#Application">Application</a>&nbsp;singleton.<br>
+&nbsp;<br>
+Purpose&nbsp;and&nbsp;usage&nbsp;are&nbsp;explained&nbsp;in&nbsp;the&nbsp;module&nbsp;docstring.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.Application.html#Application">Application</a></dd>
+<dd><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a></dd>
+<dd><a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Application-__init__"><strong>__init__</strong></a>(self, server, useSessionSweeper<font color="#909090">=True</font>)</dt><dd><tt>Called&nbsp;only&nbsp;by&nbsp;`AppServer`,&nbsp;sets&nbsp;up&nbsp;the&nbsp;<a href="#Application">Application</a>.</tt></dd></dl>
+
+<dl><dt><a name="Application-addContext"><strong>addContext</strong></a>(self, name, path)</dt><dd><tt>Add&nbsp;a&nbsp;context&nbsp;by&nbsp;named&nbsp;`name`,&nbsp;rooted&nbsp;at&nbsp;`path`.<br>
+&nbsp;<br>
+This&nbsp;gets&nbsp;imported&nbsp;as&nbsp;a&nbsp;package,&nbsp;and&nbsp;the&nbsp;last&nbsp;directory<br>
+of&nbsp;`path`&nbsp;does&nbsp;not&nbsp;have&nbsp;to&nbsp;match&nbsp;the&nbsp;context&nbsp;name.<br>
+(The&nbsp;package&nbsp;will&nbsp;be&nbsp;named&nbsp;`name`,&nbsp;regardless&nbsp;of&nbsp;`path`).<br>
+&nbsp;<br>
+Delegated&nbsp;to&nbsp;`URLParser.ContextParser`.</tt></dd></dl>
+
+<dl><dt><a name="Application-addShutDownHandler"><strong>addShutDownHandler</strong></a>(self, func)</dt><dd><tt>Add&nbsp;a&nbsp;shutdown&nbsp;handler.<br>
+&nbsp;<br>
+Functions&nbsp;added&nbsp;through&nbsp;`addShutDownHandler`&nbsp;will&nbsp;be&nbsp;called&nbsp;when<br>
+the&nbsp;AppServer&nbsp;is&nbsp;shutting&nbsp;down.&nbsp;You&nbsp;can&nbsp;use&nbsp;this&nbsp;hook&nbsp;to&nbsp;close<br>
+database&nbsp;connections,&nbsp;clean&nbsp;up&nbsp;resources,&nbsp;save&nbsp;data&nbsp;to&nbsp;disk,&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="Application-callMethodOfServlet"><strong>callMethodOfServlet</strong></a>(self, trans, url, method, *args, **kw)</dt><dd><tt>Call&nbsp;method&nbsp;of&nbsp;another&nbsp;servlet.<br>
+&nbsp;<br>
+Call&nbsp;a&nbsp;method&nbsp;of&nbsp;the&nbsp;servlet&nbsp;referred&nbsp;to&nbsp;by&nbsp;the&nbsp;URL.&nbsp;Calls&nbsp;sleep()<br>
+and&nbsp;awake()&nbsp;before&nbsp;and&nbsp;after&nbsp;the&nbsp;method&nbsp;call.&nbsp;Or,&nbsp;if&nbsp;the&nbsp;servlet<br>
+defines&nbsp;it,&nbsp;then&nbsp;`runMethodForTransaction`&nbsp;is&nbsp;used&nbsp;(analogous&nbsp;to&nbsp;the<br>
+use&nbsp;of&nbsp;`runTransaction`&nbsp;in&nbsp;`forward`).<br>
+&nbsp;<br>
+The&nbsp;entire&nbsp;process&nbsp;is&nbsp;similar&nbsp;to&nbsp;`forward`,&nbsp;except&nbsp;that&nbsp;instead&nbsp;of<br>
+`respond`,&nbsp;`method`&nbsp;is&nbsp;called&nbsp;(`method`&nbsp;should&nbsp;be&nbsp;a&nbsp;string,&nbsp;`*args`<br>
+and&nbsp;`**kw`&nbsp;are&nbsp;passed&nbsp;as&nbsp;arguments&nbsp;to&nbsp;that&nbsp;method).</tt></dd></dl>
+
+<dl><dt><a name="Application-configFilename"><strong>configFilename</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Application-configReplacementValues"><strong>configReplacementValues</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Application-contexts"><strong>contexts</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;context-name:&nbsp;context-path.</tt></dd></dl>
+
+<dl><dt><a name="Application-createSessionForTransaction"><strong>createSessionForTransaction</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;session&nbsp;object&nbsp;for&nbsp;the&nbsp;transaction.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;session&nbsp;already&nbsp;exists,&nbsp;returns&nbsp;that,&nbsp;otherwise&nbsp;creates<br>
+a&nbsp;new&nbsp;session.<br>
+&nbsp;<br>
+Finding&nbsp;the&nbsp;session&nbsp;ID&nbsp;is&nbsp;done&nbsp;in&nbsp;`Transaction.sessionId`.</tt></dd></dl>
+
+<dl><dt><a name="Application-createSessionWithID"><strong>createSessionWithID</strong></a>(self, trans, sessionID)</dt><dd><tt>Create&nbsp;a&nbsp;session&nbsp;object&nbsp;with&nbsp;our&nbsp;session&nbsp;ID.</tt></dd></dl>
+
+<dl><dt><a name="Application-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>The&nbsp;default&nbsp;<a href="#Application">Application</a>.config.</tt></dd></dl>
+
+<dl><dt><a name="Application-dispatchRawRequest"><strong>dispatchRawRequest</strong></a>(self, requestDict, strmOut)</dt><dd><tt>Dispatch&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Dispatch&nbsp;a&nbsp;request&nbsp;as&nbsp;passed&nbsp;from&nbsp;the&nbsp;Adapter&nbsp;through&nbsp;the&nbsp;AppServer.<br>
+This&nbsp;method&nbsp;creates&nbsp;the&nbsp;request,&nbsp;response,&nbsp;and&nbsp;transaction&nbsp;object,<br>
+then&nbsp;runs&nbsp;(via&nbsp;`runTransaction`)&nbsp;the&nbsp;transaction.&nbsp;It&nbsp;also&nbsp;catches&nbsp;any<br>
+exceptions,&nbsp;which&nbsp;are&nbsp;then&nbsp;passed&nbsp;on&nbsp;to&nbsp;`handleExceptionInTransaction`.</tt></dd></dl>
+
+<dl><dt><a name="Application-errorPage"><strong>errorPage</strong></a>(self, errorClass)</dt><dd><tt>Get&nbsp;the&nbsp;error&nbsp;page&nbsp;url&nbsp;corresponding&nbsp;to&nbsp;an&nbsp;error&nbsp;class.</tt></dd></dl>
+
+<dl><dt><a name="Application-forward"><strong>forward</strong></a>(self, trans, url)</dt><dd><tt>Forward&nbsp;the&nbsp;request&nbsp;to&nbsp;a&nbsp;different&nbsp;(internal)&nbsp;URL.<br>
+&nbsp;<br>
+The&nbsp;transaction's&nbsp;URL&nbsp;is&nbsp;changed&nbsp;to&nbsp;point&nbsp;to&nbsp;the&nbsp;new&nbsp;servlet,<br>
+and&nbsp;the&nbsp;transaction&nbsp;is&nbsp;simply&nbsp;run&nbsp;again.<br>
+&nbsp;<br>
+Output&nbsp;is&nbsp;_not_&nbsp;accumulated,&nbsp;so&nbsp;if&nbsp;the&nbsp;original&nbsp;servlet&nbsp;had&nbsp;any&nbsp;output,<br>
+the&nbsp;new&nbsp;output&nbsp;will&nbsp;_replace_&nbsp;the&nbsp;old&nbsp;output.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;change&nbsp;the&nbsp;request&nbsp;in&nbsp;place&nbsp;to&nbsp;control&nbsp;the&nbsp;servlet&nbsp;you&nbsp;are<br>
+forwarding&nbsp;to&nbsp;--&nbsp;using&nbsp;methods&nbsp;like&nbsp;`HTTPRequest.setField`.</tt></dd></dl>
+
+<dl><dt><a name="Application-handleException"><strong>handleException</strong></a>(self)</dt><dd><tt>Handle&nbsp;exceptions.<br>
+&nbsp;<br>
+This&nbsp;should&nbsp;only&nbsp;be&nbsp;used&nbsp;in&nbsp;cases&nbsp;where&nbsp;there&nbsp;is&nbsp;no&nbsp;transaction&nbsp;object,<br>
+for&nbsp;example&nbsp;if&nbsp;an&nbsp;exception&nbsp;occurs&nbsp;when&nbsp;attempting&nbsp;to&nbsp;save&nbsp;a&nbsp;session<br>
+to&nbsp;disk.</tt></dd></dl>
+
+<dl><dt><a name="Application-handleExceptionInTransaction"><strong>handleExceptionInTransaction</strong></a>(self, excInfo, trans)</dt><dd><tt>Handle&nbsp;exception&nbsp;with&nbsp;info.<br>
+&nbsp;<br>
+Handles&nbsp;exception&nbsp;`excInfo`&nbsp;(as&nbsp;returned&nbsp;by&nbsp;`sys.exc_info()`)<br>
+that&nbsp;was&nbsp;generated&nbsp;by&nbsp;`transaction`.&nbsp;It&nbsp;may&nbsp;display&nbsp;the&nbsp;exception<br>
+report,&nbsp;email&nbsp;the&nbsp;report,&nbsp;etc.,&nbsp;handled&nbsp;by<br>
+`ExceptionHandler.ExceptionHandler`.</tt></dd></dl>
+
+<dl><dt><a name="Application-handleMissingPathSession"><strong>handleMissingPathSession</strong></a>(self, trans)</dt><dd><tt>Redirect&nbsp;requests&nbsp;without&nbsp;session&nbsp;info&nbsp;in&nbsp;the&nbsp;path.<br>
+&nbsp;<br>
+If&nbsp;UseAutomaticPathSessions&nbsp;is&nbsp;enabled&nbsp;in&nbsp;<a href="#Application">Application</a>.config<br>
+we&nbsp;redirect&nbsp;the&nbsp;browser&nbsp;to&nbsp;an&nbsp;absolute&nbsp;url&nbsp;with&nbsp;SID&nbsp;in&nbsp;path<br>
+<a href="http://gandalf/a/_SID_=2001080221301877755/Examples/">http://gandalf/a/_SID_=2001080221301877755/Examples/</a><br>
+_SID_&nbsp;is&nbsp;extracted&nbsp;and&nbsp;removed&nbsp;from&nbsp;path&nbsp;in&nbsp;HTTPRequest.py<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;for&nbsp;convinient&nbsp;building&nbsp;of&nbsp;webapps&nbsp;that&nbsp;must&nbsp;not<br>
+depend&nbsp;on&nbsp;cookie&nbsp;support.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;we&nbsp;create&nbsp;an&nbsp;absolute&nbsp;URL&nbsp;with&nbsp;scheme&nbsp;and&nbsp;hostname<br>
+because&nbsp;otherwise&nbsp;IIS&nbsp;will&nbsp;only&nbsp;cause&nbsp;an&nbsp;internal&nbsp;redirect.</tt></dd></dl>
+
+<dl><dt><a name="Application-handlePathSession"><strong>handlePathSession</strong></a>(self, trans)</dt><dd><tt>Handle&nbsp;the&nbsp;session&nbsp;identifier&nbsp;that&nbsp;has&nbsp;been&nbsp;found&nbsp;in&nbsp;the&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="Application-handleUnnecessaryPathSession"><strong>handleUnnecessaryPathSession</strong></a>(self, trans)</dt><dd><tt>Redirect&nbsp;request&nbsp;with&nbsp;unnecessary&nbsp;session&nbsp;info&nbsp;in&nbsp;the&nbsp;path.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;called&nbsp;if&nbsp;it&nbsp;has&nbsp;been&nbsp;determined&nbsp;that&nbsp;the&nbsp;request&nbsp;has&nbsp;a&nbsp;path<br>
+session,&nbsp;but&nbsp;also&nbsp;cookies.&nbsp;In&nbsp;that&nbsp;case&nbsp;we&nbsp;redirect&nbsp;to&nbsp;eliminate&nbsp;the<br>
+unnecessary&nbsp;path&nbsp;session.</tt></dd></dl>
+
+<dl><dt><a name="Application-hasContext"><strong>hasContext</strong></a>(self, name)</dt><dd><tt>Checks&nbsp;whether&nbsp;context&nbsp;`name`&nbsp;exist.</tt></dd></dl>
+
+<dl><dt><a name="Application-hasSession"><strong>hasSession</strong></a>(self, sessionId)</dt><dd><tt>Check&nbsp;whether&nbsp;session&nbsp;`sessionId`&nbsp;exists.</tt></dd></dl>
+
+<dl><dt><a name="Application-includeURL"><strong>includeURL</strong></a>(self, trans, url)</dt><dd><tt>Include&nbsp;another&nbsp;servlet.<br>
+&nbsp;<br>
+Include&nbsp;the&nbsp;servlet&nbsp;given&nbsp;by&nbsp;the&nbsp;URL.&nbsp;Like&nbsp;`forward`,<br>
+except&nbsp;control&nbsp;is&nbsp;ultimately&nbsp;returned&nbsp;to&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<dl><dt><a name="Application-initErrorPage"><strong>initErrorPage</strong></a>(self)</dt><dd><tt>Initialize&nbsp;the&nbsp;error&nbsp;page&nbsp;related&nbsp;attributes.</tt></dd></dl>
+
+<dl><dt><a name="Application-initSessions"><strong>initSessions</strong></a>(self)</dt><dd><tt>Initialize&nbsp;all&nbsp;session&nbsp;related&nbsp;attributes.</tt></dd></dl>
+
+<dl><dt><a name="Application-initVersions"><strong>initVersions</strong></a>(self)</dt><dd><tt>Get&nbsp;and&nbsp;store&nbsp;versions.<br>
+&nbsp;<br>
+Initialize&nbsp;attributes&nbsp;that&nbsp;store&nbsp;the&nbsp;Webware&nbsp;and&nbsp;WebKit&nbsp;versions&nbsp;as<br>
+both&nbsp;tuples&nbsp;and&nbsp;strings.&nbsp;These&nbsp;are&nbsp;stored&nbsp;in&nbsp;the&nbsp;Properties.py&nbsp;files.</tt></dd></dl>
+
+<dl><dt><a name="Application-makeDirs"><strong>makeDirs</strong></a>(self)</dt><dd><tt>Make&nbsp;sure&nbsp;some&nbsp;standard&nbsp;directories&nbsp;are&nbsp;always&nbsp;available.</tt></dd></dl>
+
+<dl><dt><a name="Application-rootURLParser"><strong>rootURLParser</strong></a>(self)</dt><dd><tt>Accessor:&nbsp;the&nbsp;Rool&nbsp;URL&nbsp;parser.<br>
+&nbsp;<br>
+URL&nbsp;parsing&nbsp;(as&nbsp;defined&nbsp;by&nbsp;subclasses&nbsp;of&nbsp;`URLParser.URLParser`)<br>
+starts&nbsp;here.&nbsp;Other&nbsp;parsers&nbsp;are&nbsp;called&nbsp;in&nbsp;turn&nbsp;by&nbsp;this&nbsp;parser.</tt></dd></dl>
+
+<dl><dt><a name="Application-runTransaction"><strong>runTransaction</strong></a>(self, trans)</dt><dd><tt>Run&nbsp;transation.<br>
+&nbsp;<br>
+Executes&nbsp;the&nbsp;transaction,&nbsp;handling&nbsp;HTTPException&nbsp;errors.<br>
+Finds&nbsp;the&nbsp;servlet&nbsp;(using&nbsp;the&nbsp;root&nbsp;parser,&nbsp;probably<br>
+`URLParser.ContextParser`,&nbsp;to&nbsp;find&nbsp;the&nbsp;servlet&nbsp;for&nbsp;the<br>
+transaction,&nbsp;then&nbsp;calling&nbsp;`runTransactionViaServlet`.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;`dispatchRawRequest`.</tt></dd></dl>
+
+<dl><dt><a name="Application-server"><strong>server</strong></a>(self)</dt><dd><tt>Acessor:&nbsp;the&nbsp;AppServer</tt></dd></dl>
+
+<dl><dt><a name="Application-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;the&nbsp;server-side&nbsp;path.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;absolute&nbsp;server-side&nbsp;path&nbsp;of&nbsp;the&nbsp;WebKit&nbsp;application.<br>
+If&nbsp;the&nbsp;optional&nbsp;path&nbsp;is&nbsp;passed&nbsp;in,&nbsp;then&nbsp;it&nbsp;is&nbsp;joined&nbsp;with&nbsp;the<br>
+server&nbsp;side&nbsp;directory&nbsp;to&nbsp;form&nbsp;a&nbsp;path&nbsp;relative&nbsp;to&nbsp;the&nbsp;app&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="Application-session"><strong>session</strong></a>(self, sessionId, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>The&nbsp;session&nbsp;object&nbsp;for&nbsp;`sessionId`.<br>
+&nbsp;<br>
+Raises&nbsp;`KeyError`&nbsp;if&nbsp;session&nbsp;not&nbsp;found&nbsp;and&nbsp;no&nbsp;default&nbsp;is&nbsp;given.</tt></dd></dl>
+
+<dl><dt><a name="Application-sessionCookiePath"><strong>sessionCookiePath</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;cookie&nbsp;path&nbsp;for&nbsp;this&nbsp;transaction.<br>
+&nbsp;<br>
+If&nbsp;not&nbsp;path&nbsp;is&nbsp;specified&nbsp;in&nbsp;the&nbsp;configuration&nbsp;setting,<br>
+the&nbsp;servlet&nbsp;path&nbsp;is&nbsp;used&nbsp;for&nbsp;security&nbsp;reasons,&nbsp;see:<br>
+<a href="http://www.net-security.org/dl/articles/cookie_path.pdf">http://www.net-security.org/dl/articles/cookie_path.pdf</a></tt></dd></dl>
+
+<dl><dt><a name="Application-sessionName"><strong>sessionName</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;field&nbsp;holding&nbsp;the&nbsp;session&nbsp;ID.<br>
+&nbsp;<br>
+Overwrite&nbsp;to&nbsp;make&nbsp;this&nbsp;transaction&nbsp;dependent.</tt></dd></dl>
+
+<dl><dt><a name="Application-sessionPrefix"><strong>sessionPrefix</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;prefix&nbsp;string&nbsp;for&nbsp;the&nbsp;session&nbsp;ID.<br>
+&nbsp;<br>
+Overwrite&nbsp;to&nbsp;make&nbsp;this&nbsp;transaction&nbsp;dependent.</tt></dd></dl>
+
+<dl><dt><a name="Application-sessionTimeout"><strong>sessionTimeout</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;timeout&nbsp;(in&nbsp;seconds)&nbsp;for&nbsp;a&nbsp;user&nbsp;session.<br>
+&nbsp;<br>
+Overwrite&nbsp;to&nbsp;make&nbsp;this&nbsp;transaction&nbsp;dependent.</tt></dd></dl>
+
+<dl><dt><a name="Application-sessions"><strong>sessions</strong></a>(self)</dt><dd><tt>A&nbsp;dictionary&nbsp;of&nbsp;all&nbsp;the&nbsp;session&nbsp;objects.</tt></dd></dl>
+
+<dl><dt><a name="Application-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Shut&nbsp;down&nbsp;the&nbsp;application.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;AppServer&nbsp;when&nbsp;it&nbsp;is&nbsp;shuting&nbsp;down.&nbsp;&nbsp;The&nbsp;`__del__`&nbsp;function<br>
+of&nbsp;<a href="#Application">Application</a>&nbsp;probably&nbsp;won't&nbsp;be&nbsp;called&nbsp;due&nbsp;to&nbsp;circular&nbsp;references.</tt></dd></dl>
+
+<dl><dt><a name="Application-startSessionSweeper"><strong>startSessionSweeper</strong></a>(self)</dt><dd><tt>Start&nbsp;session&nbsp;sweeper.<br>
+&nbsp;<br>
+Starts&nbsp;the&nbsp;session&nbsp;sweeper,&nbsp;`WebKit.Tasks.SessionTask`,&nbsp;which&nbsp;deletes<br>
+session&nbsp;objects&nbsp;(and&nbsp;disk&nbsp;copies&nbsp;of&nbsp;those&nbsp;objects)&nbsp;that&nbsp;have&nbsp;expired.</tt></dd></dl>
+
+<dl><dt><a name="Application-taskManager"><strong>taskManager</strong></a>(self)</dt><dd><tt>Accessor:&nbsp;`TaskKit.Scheduler`&nbsp;instance.</tt></dd></dl>
+
+<dl><dt><a name="Application-webKitPath"><strong>webKitPath</strong></a>(self)</dt><dd><tt>The&nbsp;Path&nbsp;of&nbsp;the&nbsp;``Webware/WebKit/``&nbsp;directory.</tt></dd></dl>
+
+<dl><dt><a name="Application-webKitVersion"><strong>webKitVersion</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;WebKit&nbsp;version&nbsp;as&nbsp;a&nbsp;tuple.</tt></dd></dl>
+
+<dl><dt><a name="Application-webKitVersionString"><strong>webKitVersionString</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;WebKit&nbsp;version&nbsp;as&nbsp;a&nbsp;printable&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="Application-webwarePath"><strong>webwarePath</strong></a>(self)</dt><dd><tt>The&nbsp;path&nbsp;of&nbsp;the&nbsp;``Webware/``&nbsp;directory.</tt></dd></dl>
+
+<dl><dt><a name="Application-webwareVersion"><strong>webwareVersion</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Webware&nbsp;version&nbsp;as&nbsp;a&nbsp;tuple.</tt></dd></dl>
+
+<dl><dt><a name="Application-webwareVersionString"><strong>webwareVersionString</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Webware&nbsp;version&nbsp;as&nbsp;a&nbsp;printable&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="Application-writeActivityLog"><strong>writeActivityLog</strong></a>(self, trans)</dt><dd><tt>Write&nbsp;an&nbsp;entry&nbsp;to&nbsp;the&nbsp;activity&nbsp;log.<br>
+&nbsp;<br>
+Writes&nbsp;an&nbsp;entry&nbsp;to&nbsp;the&nbsp;script&nbsp;log&nbsp;file.&nbsp;Uses&nbsp;settings<br>
+``ActivityLogFilename``&nbsp;and&nbsp;``ActivityLogColumns``.</tt></dd></dl>
+
+<dl><dt><a name="Application-writeExceptionReport"><strong>writeExceptionReport</strong></a>(self, handler)</dt><dd><tt>Write&nbsp;extra&nbsp;information&nbsp;to&nbsp;the&nbsp;exception&nbsp;report.<br>
+&nbsp;<br>
+See&nbsp;`WebKit.ExceptionHandler`&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="Application-addServletFactory"><strong>addServletFactory</strong></a>(factory)</dt><dd><tt>Add&nbsp;a&nbsp;ServletFactory.<br>
+&nbsp;<br>
+Delegated&nbsp;to&nbsp;the&nbsp;`URLParser.ServletFactoryManager`&nbsp;singleton.</tt></dd></dl>
+
+<dl><dt><a name="Application-createRequestForDict"><strong>createRequestForDict</strong></a>(requestDict)</dt><dd><tt>Create&nbsp;request&nbsp;object&nbsp;for&nbsp;a&nbsp;given&nbsp;dictionary.<br>
+&nbsp;<br>
+Create&nbsp;a&nbsp;request&nbsp;object&nbsp;(subclass&nbsp;of&nbsp;`Request`)&nbsp;given&nbsp;the&nbsp;raw<br>
+dictionary&nbsp;as&nbsp;passed&nbsp;by&nbsp;the&nbsp;adapter.<br>
+&nbsp;<br>
+The&nbsp;class&nbsp;of&nbsp;the&nbsp;request&nbsp;may&nbsp;be&nbsp;based&nbsp;on&nbsp;the&nbsp;contents&nbsp;of&nbsp;the<br>
+dictionary&nbsp;(though&nbsp;only&nbsp;`HTTPRequest`&nbsp;is&nbsp;currently&nbsp;created),<br>
+and&nbsp;the&nbsp;request&nbsp;will&nbsp;later&nbsp;determine&nbsp;the&nbsp;class&nbsp;of&nbsp;the&nbsp;response.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;`dispatchRawRequest`.</tt></dd></dl>
+
+<dl><dt><a name="Application-name"><strong>name</strong></a>()</dt><dd><tt>The&nbsp;name&nbsp;by&nbsp;which&nbsp;this&nbsp;was&nbsp;started.&nbsp;Usually&nbsp;`AppServer`.</tt></dd></dl>
+
+<dl><dt><a name="Application-removePathSession"><strong>removePathSession</strong></a>(trans)</dt><dd><tt>Remove&nbsp;a&nbsp;possible&nbsp;session&nbsp;identifier&nbsp;from&nbsp;the&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="Application-resolveInternalRelativePath"><strong>resolveInternalRelativePath</strong></a>(trans, url)</dt><dd><tt>Return&nbsp;the&nbsp;absolute&nbsp;internal&nbsp;path.<br>
+&nbsp;<br>
+Given&nbsp;a&nbsp;URL,&nbsp;return&nbsp;the&nbsp;absolute&nbsp;internal&nbsp;URL.<br>
+URLs&nbsp;are&nbsp;assumed&nbsp;relative&nbsp;to&nbsp;the&nbsp;current&nbsp;URL.<br>
+Absolute&nbsp;paths&nbsp;are&nbsp;returned&nbsp;unchanged.</tt></dd></dl>
+
+<dl><dt><a name="Application-returnServlet"><strong>returnServlet</strong></a>(servlet)</dt><dd><tt>Return&nbsp;the&nbsp;servlet&nbsp;to&nbsp;its&nbsp;pool.</tt></dd></dl>
+
+<dl><dt><a name="Application-runTransactionViaServlet"><strong>runTransactionViaServlet</strong></a>(servlet, trans)</dt><dd><tt>Execute&nbsp;the&nbsp;transaction&nbsp;using&nbsp;the&nbsp;servlet.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;`awake`/`respond`/`sleep`&nbsp;sequence&nbsp;of&nbsp;calls,&nbsp;or&nbsp;if<br>
+the&nbsp;servlet&nbsp;supports&nbsp;it,&nbsp;a&nbsp;single&nbsp;`runTransaction`&nbsp;call&nbsp;(which&nbsp;is<br>
+presumed&nbsp;to&nbsp;make&nbsp;the&nbsp;awake/respond/sleep&nbsp;calls&nbsp;on&nbsp;its&nbsp;own).&nbsp;Using<br>
+`runTransaction`&nbsp;allows&nbsp;the&nbsp;servlet&nbsp;to&nbsp;override&nbsp;the&nbsp;basic&nbsp;call<br>
+sequence,&nbsp;or&nbsp;catch&nbsp;errors&nbsp;from&nbsp;that&nbsp;sequence.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;`runTransaction`.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>:<br>
+<dl><dt><a name="Application-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;setting,&nbsp;using&nbsp;the&nbsp;server&nbsp;side&nbsp;path&nbsp;when&nbsp;indicated.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;setting,&nbsp;filtered&nbsp;by&nbsp;<a href="#Application-serverSidePath">serverSidePath</a>(),<br>
+if&nbsp;the&nbsp;name&nbsp;ends&nbsp;with&nbsp;``Filename``&nbsp;or&nbsp;``Dir``.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><a name="Application-commandLineConfig"><strong>commandLineConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;settings&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;command-line.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;come&nbsp;via&nbsp;addCommandLineSetting().</tt></dd></dl>
+
+<dl><dt><a name="Application-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;configuration&nbsp;of&nbsp;the&nbsp;object&nbsp;as&nbsp;a&nbsp;dictionary.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;combination&nbsp;of&nbsp;<a href="#Application-defaultConfig">defaultConfig</a>()&nbsp;and&nbsp;<a href="#Application-userConfig">userConfig</a>().<br>
+This&nbsp;method&nbsp;caches&nbsp;the&nbsp;config.</tt></dd></dl>
+
+<dl><dt><a name="Application-configName"><strong>configName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;configuration&nbsp;file&nbsp;without&nbsp;the&nbsp;extension.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;name&nbsp;before&nbsp;the&nbsp;'.config'.<br>
+This&nbsp;is&nbsp;used&nbsp;on&nbsp;the&nbsp;command-line.</tt></dd></dl>
+
+<dl><dt><a name="Application-hasSetting"><strong>hasSetting</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;a&nbsp;configuration&nbsp;setting&nbsp;has&nbsp;been&nbsp;changed.</tt></dd></dl>
+
+<dl><dt><a name="Application-printConfig"><strong>printConfig</strong></a>(self, dest<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;the&nbsp;configuration&nbsp;to&nbsp;the&nbsp;given&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;destination&nbsp;is&nbsp;stdout.&nbsp;A&nbsp;fixed&nbsp;with&nbsp;font&nbsp;is&nbsp;assumed<br>
+for&nbsp;aligning&nbsp;the&nbsp;values&nbsp;to&nbsp;start&nbsp;at&nbsp;the&nbsp;same&nbsp;column.</tt></dd></dl>
+
+<dl><dt><a name="Application-setSetting"><strong>setSetting</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="Application-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;config&nbsp;overrides.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;config&nbsp;file.<br>
+Returns&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken&nbsp;from&nbsp;<a href="#Application-configFilename">configFilename</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EndResponse">class <strong>EndResponse</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>End&nbsp;response&nbsp;exception.<br>
+&nbsp;<br>
+Used&nbsp;to&nbsp;prematurely&nbsp;break&nbsp;out&nbsp;of&nbsp;the&nbsp;awake()/respond()/sleep()<br>
+cycle&nbsp;without&nbsp;reporting&nbsp;a&nbsp;traceback.&nbsp;During&nbsp;servlet&nbsp;processing,<br>
+if&nbsp;this&nbsp;exception&nbsp;is&nbsp;caught&nbsp;during&nbsp;awake()&nbsp;or&nbsp;respond()&nbsp;then&nbsp;sleep()<br>
+is&nbsp;called&nbsp;and&nbsp;the&nbsp;response&nbsp;is&nbsp;sent.&nbsp;If&nbsp;caught&nbsp;during&nbsp;sleep(),<br>
+processing&nbsp;ends&nbsp;and&nbsp;the&nbsp;response&nbsp;is&nbsp;sent.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.Application.html#EndResponse">EndResponse</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="EndResponse-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#EndResponse-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="EndResponse-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="EndResponse-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="EndResponse-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#EndResponse-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="EndResponse-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>debug</strong> = False<br>
+<strong>defaultConfig</strong> = {'ActivityLogColumns': ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'], 'ActivityLogFilename': 'Logs/Activity.csv', 'AlwaysSaveSessions': True, 'CacheDir': 'Cache', 'Contexts': {'Admin': 'Admin', 'Docs': 'Docs', 'Examples': 'Examples', 'Testing': 'Testing', 'default': 'Examples'}, 'Debug': {'Sessions': False}, 'DirectoryFile': ['index', 'Index', 'main', 'Main'], 'EmailErrorReportAsAttachment': False, 'EmailErrors': False, 'EnterDebuggerOnException': False, ...}</td></tr></table>
+</body></html>

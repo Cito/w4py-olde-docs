@@ -1,0 +1,207 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.CSVParser</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.CSVParser</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/CSVParser.py">/var/www/docs/Webware-1.1.1/MiscUtils/CSVParser.py</a></font></td></tr></table>
+    <p><tt><a href="#CSVParser">CSVParser</a>.py<br>
+&nbsp;<br>
+A&nbsp;parser&nbsp;for&nbsp;CSV&nbsp;files.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.CSVParser.html#CSVParser">CSVParser</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.CSVParser.html#ParseError">ParseError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="CSVParser">class <strong>CSVParser</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Parser&nbsp;for&nbsp;CSV&nbsp;files.<br>
+&nbsp;<br>
+Parses&nbsp;CSV&nbsp;files&nbsp;including&nbsp;all&nbsp;subtleties&nbsp;such&nbsp;as:<br>
+&nbsp;&nbsp;*&nbsp;commas&nbsp;in&nbsp;fields<br>
+&nbsp;&nbsp;*&nbsp;double&nbsp;quotes&nbsp;in&nbsp;fields<br>
+&nbsp;&nbsp;*&nbsp;embedded&nbsp;newlines&nbsp;in&nbsp;fields<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Examples&nbsp;of&nbsp;programs&nbsp;that&nbsp;produce&nbsp;such&nbsp;beasts&nbsp;include<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MySQL&nbsp;and&nbsp;Excel<br>
+&nbsp;<br>
+For&nbsp;a&nbsp;higher-level,&nbsp;friendlier&nbsp;CSV&nbsp;class&nbsp;with&nbsp;many&nbsp;conveniences,<br>
+see&nbsp;DataTable&nbsp;(which&nbsp;uses&nbsp;this&nbsp;class&nbsp;for&nbsp;its&nbsp;parsing).<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;records&nbsp;=&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parse&nbsp;=&nbsp;<a href="#CSVParser">CSVParser</a>().parse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;line&nbsp;in&nbsp;lines:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;results&nbsp;=&nbsp;<a href="#CSVParser-parse">parse</a>(line)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;results&nbsp;is&nbsp;not&nbsp;None:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;records.append(results)<br>
+&nbsp;<br>
+CREDIT<br>
+&nbsp;<br>
+The&nbsp;algorithm&nbsp;was&nbsp;taken&nbsp;directly&nbsp;from&nbsp;the&nbsp;open&nbsp;source&nbsp;Python<br>
+C-extension,&nbsp;csv:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.object-craft.com.au/projects/csv/">http://www.object-craft.com.au/projects/csv/</a><br>
+&nbsp;<br>
+It&nbsp;would&nbsp;be&nbsp;nice&nbsp;to&nbsp;use&nbsp;the&nbsp;csv&nbsp;module&nbsp;when&nbsp;present,&nbsp;since&nbsp;it&nbsp;is<br>
+substantially&nbsp;faster.&nbsp;Before&nbsp;that&nbsp;can&nbsp;be&nbsp;done,&nbsp;it&nbsp;needs&nbsp;to&nbsp;support<br>
+allowComments&nbsp;and&nbsp;stripWhitespace,&nbsp;and&nbsp;pass&nbsp;the&nbsp;TestCSVParser.py<br>
+test&nbsp;suite.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="CSVParser-__init__"><strong>__init__</strong></a>(self, allowComments<font color="#909090">=True</font>, stripWhitespace<font color="#909090">=True</font>, fieldSep<font color="#909090">=','</font>, autoReset<font color="#909090">=True</font>, doubleQuote<font color="#909090">=True</font>)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;CSV&nbsp;parser.<br>
+&nbsp;<br>
+allowComments:&nbsp;If&nbsp;true&nbsp;(the&nbsp;default),&nbsp;then&nbsp;comment&nbsp;lines&nbsp;using<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;Python&nbsp;comment&nbsp;marker&nbsp;are&nbsp;allowed.<br>
+stripWhitespace:&nbsp;If&nbsp;true&nbsp;(the&nbsp;default),&nbsp;then&nbsp;left&nbsp;and&nbsp;right&nbsp;whitespace<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;stripped&nbsp;off&nbsp;from&nbsp;all&nbsp;fields.<br>
+fieldSep:&nbsp;Defines&nbsp;the&nbsp;field&nbsp;separator&nbsp;string&nbsp;(a&nbsp;comma&nbsp;by&nbsp;default).<br>
+autoReset:&nbsp;If&nbsp;true&nbsp;(the&nbsp;default),&nbsp;recover&nbsp;from&nbsp;errors&nbsp;automatically.<br>
+doubleQuote:&nbsp;If&nbsp;true&nbsp;(the&nbsp;default),&nbsp;assume&nbsp;quotes&nbsp;in&nbsp;fields&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escaped&nbsp;by&nbsp;appearing&nbsp;doubled.</tt></dd></dl>
+
+<dl><dt><a name="CSVParser-endQuotedField"><strong>endQuotedField</strong></a>(self, c)</dt></dl>
+
+<dl><dt><a name="CSVParser-inField"><strong>inField</strong></a>(self, c)</dt></dl>
+
+<dl><dt><a name="CSVParser-inQuotedField"><strong>inQuotedField</strong></a>(self, c)</dt></dl>
+
+<dl><dt><a name="CSVParser-parse"><strong>parse</strong></a>(self, line)</dt><dd><tt>Parse&nbsp;a&nbsp;single&nbsp;line&nbsp;and&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;string&nbsp;fields.<br>
+&nbsp;<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;CSV&nbsp;record&nbsp;contains&nbsp;embedded&nbsp;newlines&nbsp;and<br>
+the&nbsp;record&nbsp;is&nbsp;not&nbsp;yet&nbsp;complete.</tt></dd></dl>
+
+<dl><dt><a name="CSVParser-quoteInField"><strong>quoteInField</strong></a>(self, c)</dt></dl>
+
+<dl><dt><a name="CSVParser-quoteInQuotedField"><strong>quoteInQuotedField</strong></a>(self, c)</dt></dl>
+
+<dl><dt><a name="CSVParser-reset"><strong>reset</strong></a>(self)</dt><dd><tt>Reset&nbsp;the&nbsp;parser.<br>
+&nbsp;<br>
+Resets&nbsp;the&nbsp;parser&nbsp;to&nbsp;a&nbsp;fresh&nbsp;state&nbsp;in&nbsp;order&nbsp;to&nbsp;recover&nbsp;from<br>
+exceptions.&nbsp;But&nbsp;if&nbsp;autoReset&nbsp;is&nbsp;true&nbsp;(the&nbsp;default),&nbsp;this&nbsp;is<br>
+done&nbsp;automatically.</tt></dd></dl>
+
+<dl><dt><a name="CSVParser-saveField"><strong>saveField</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CSVParser-startField"><strong>startField</strong></a>(self, c)</dt></dl>
+
+<dl><dt><a name="CSVParser-startRecord"><strong>startRecord</strong></a>(self, c)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ParseError">class <strong>ParseError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>CSV&nbsp;file&nbsp;parse&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.CSVParser.html#ParseError">ParseError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ParseError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ParseError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ParseError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ParseError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ParseError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#ParseError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="ParseError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-parse"><strong>parse</strong></a>(self, line)<font color="#909090"><font face="helvetica, arial"> method of <a href="MiscUtils.CSVParser.html#CSVParser">CSVParser</a> instance</font></font></dt><dd><tt>Parse&nbsp;a&nbsp;single&nbsp;line&nbsp;and&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;string&nbsp;fields.<br>
+&nbsp;<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;CSV&nbsp;record&nbsp;contains&nbsp;embedded&nbsp;newlines&nbsp;and<br>
+the&nbsp;record&nbsp;is&nbsp;not&nbsp;yet&nbsp;complete.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>EndQuotedField</strong> = 6<br>
+<strong>Finished</strong> = 10<br>
+<strong>InField</strong> = 2<br>
+<strong>InQuotedField</strong> = 4<br>
+<strong>QuoteInField</strong> = 3<br>
+<strong>QuoteInQuotedField</strong> = 5<br>
+<strong>StartField</strong> = 1<br>
+<strong>StartRecord</strong> = 0</td></tr></table>
+</body></html>

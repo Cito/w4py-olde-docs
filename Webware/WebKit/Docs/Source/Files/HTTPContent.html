@@ -1,0 +1,435 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/HTTPContent.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Content producing HTTP servlet."""</span>
+
+<span class="PY_KEYWORD">from</span> HTTPServlet <span class="PY_KEYWORD">import</span> HTTPServlet
+<span class="PY_KEYWORD">from</span> WebUtils <span class="PY_KEYWORD">import</span> Funcs
+<span class="PY_KEYWORD">from</span> Application <span class="PY_KEYWORD">import</span> EndResponse
+
+
+<span class="PY_KEYWORD">class</span> HTTPContentError(Exception):
+    <span class="PY_STRING">"""HTTP content error"""</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPContent(HTTPServlet):
+    <span class="PY_STRING">"""Content producing HTTP servlet.
+
+    HTTPContent is a type of HTTPServlet that is more convenient for
+    Servlets which represent content generated in response to
+    GET and POST requests.  If you are generating HTML content, you
+    you probably want your servlet to inherit from Page, which contains
+    many HTML-related convenience methods.
+
+    If you are generating non-HTML content, it is appropriate to inherit
+    from this class directly.
+
+    Subclasses typically override defaultAction().
+
+    In `awake`, the page sets self attributes: `_transaction`, `_response`
+    and `_request` which subclasses should use as appropriate.
+
+    For the purposes of output, the `write` and `writeln`
+    convenience methods are provided.
+
+    If you plan to produce HTML content, you should start by looking
+    at Page instead of this lower-level class.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Transactions ##</span>
+
+    <span class="PY_KEYWORD">def</span> awake(self, transaction):
+        <span class="PY_STRING">"""Let servlet awake.
+
+        Makes instance variables from the transaction. This is
+        where Page becomes unthreadsafe, as the page is tied to
+        the transaction. This is also what allows us to
+        implement functions like `write`, where you don't
+        need to pass in the transaction or response.
+
+        """</span>
+        HTTPServlet.awake(self, transaction)
+        self._response = transaction.response()
+        self._request = transaction.request()
+        self._session = None <span class="PY_COMMENT"># don't create unless needed</span>
+        <span class="PY_KEYWORD">assert</span> self._transaction <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+        <span class="PY_KEYWORD">assert</span> self._response <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+        <span class="PY_KEYWORD">assert</span> self._request <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+
+    <span class="PY_KEYWORD">def</span> respondToGet(self, transaction):
+        <span class="PY_STRING">"""Respond to GET.
+
+        Invoked in response to a GET request method. All methods
+        are passed to `_respond`.
+
+        """</span>
+        self._respond(transaction)
+
+    <span class="PY_KEYWORD">def</span> respondToPost(self, transaction):
+        <span class="PY_STRING">"""Respond to POST.
+
+        Invoked in response to a POST request method. All methods
+        are passed to `_respond`.
+
+        """</span>
+        self._respond(transaction)
+
+    <span class="PY_KEYWORD">def</span> _respond(self, transaction):
+        <span class="PY_STRING">"""Respond to action.
+
+        Handles actions if an ``_action_`` or ``_action_name`` field is
+        defined, otherwise invokes `writeHTML`. This implementation makes
+        sure that exactly one action per request is handled. ``_action_``
+        takes precedence over ``_action_name``; and if there are multiple
+        ``action_name`` fields, the precedence is given by the order of
+        the names in the actions() method. If no action field matches,
+        the default action is run. The value of the ``_action_`` field
+        is transformed to a method name using the methodNameForAction(),
+        whereas ``name`` in ``_action_name`` is left unchanged.
+
+        Invoked by both `respondToGet` and `respondToPost`.
+
+        """</span>
+        req = transaction.request()
+        prefix = self._actionPrefix
+        <span class="PY_KEYWORD">if</span> prefix:
+            <span class="PY_COMMENT"># First check whether there is an _action_ field:</span>
+            <span class="PY_KEYWORD">if</span> req.hasField(prefix):
+                action = self.methodNameForAction(req.field(prefix))
+                <span class="PY_KEYWORD">if</span> action <span class="PY_KEYWORD">in</span> self.actions():
+                    self.handleAction(action)
+                    <span class="PY_KEYWORD">return</span>
+            <span class="PY_COMMENT"># Next, check whether there is an _acion_name field:</span>
+            <span class="PY_KEYWORD">for</span> action <span class="PY_KEYWORD">in</span> self.actions():
+                name = prefix + action
+                <span class="PY_KEYWORD">if</span> req.hasField(name) <span class="PY_KEYWORD">or</span> (req.hasField(name + <span class="PY_STRING">'.x'</span>)
+                        <span class="PY_KEYWORD">and</span> req.hasField(name + <span class="PY_STRING">'.y'</span>)):
+                    self.handleAction(action)
+                    <span class="PY_KEYWORD">return</span>
+            <span class="PY_COMMENT"># If no action was found, run the default:</span>
+        self.defaultAction()
+
+    <span class="PY_KEYWORD">def</span> defaultAction(self):
+        <span class="PY_STRING">"""Default action.
+
+        The core method that gets called as a result of requests.
+        Subclasses should override this.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> sleep(self, transaction):
+        <span class="PY_STRING">"""Let servlet sleep again.
+
+        We unset some variables. Very boring.
+
+        """</span>
+        self._session = None
+        self._request = None
+        self._response = None
+        self._transaction = None
+        HTTPServlet.sleep(self, transaction)
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> application(self):
+        <span class="PY_STRING">"""The `Application` instance we're using."""</span>
+        <span class="PY_KEYWORD">return</span> self._transaction.application()
+
+    <span class="PY_KEYWORD">def</span> transaction(self):
+        <span class="PY_STRING">"""The `Transaction` we're currently handling."""</span>
+        <span class="PY_KEYWORD">return</span> self._transaction
+
+    <span class="PY_KEYWORD">def</span> request(self):
+        <span class="PY_STRING">"""The request (`HTTPRequest`) we're handling."""</span>
+        <span class="PY_KEYWORD">return</span> self._request
+
+    <span class="PY_KEYWORD">def</span> response(self):
+        <span class="PY_STRING">"""The response (`HTTPResponse`) we're handling."""</span>
+        <span class="PY_KEYWORD">return</span> self._response
+
+    <span class="PY_KEYWORD">def</span> session(self):
+        <span class="PY_STRING">"""The session object.
+
+        This provides a state for the current user
+        (associated with a browser instance, really).
+        If no session exists, then a session will be created.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._session:
+            self._session = self._transaction.session()
+        <span class="PY_KEYWORD">return</span> self._session
+
+
+    <span class="PY_COMMENT">## Writing ##</span>
+
+    <span class="PY_KEYWORD">def</span> write(self, *args):
+        <span class="PY_STRING">"""Write to output.
+
+        Writes the arguments, which are turned to strings (with `str`)
+        and concatenated before being written to the response.
+        Unicode strings must be encoded before they can be written.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> arg <span class="PY_KEYWORD">in</span> args:
+            self._response.write(arg)
+
+    <span class="PY_KEYWORD">def</span> writeln(self, *args):
+        <span class="PY_STRING">"""Write to output with newline.
+
+        Writes the arguments (like `write`), adding a newline after.
+        Unicode strings must be encoded before they can be written.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> arg <span class="PY_KEYWORD">in</span> args:
+            self._response.write(arg)
+        self._response.write(<span class="PY_STRING">'\n'</span>)
+
+
+    <span class="PY_COMMENT">## Threading ##</span>
+
+    <span class="PY_KEYWORD">def</span> canBeThreaded(self):
+        <span class="PY_STRING">"""Declares whether servlet can be threaded.
+
+        Returns False because of the instance variables we set up in `awake`.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> False
+
+
+    <span class="PY_COMMENT">## Actions ##</span>
+
+    _actionPrefix = <span class="PY_STRING">'_action_'</span>
+
+    <span class="PY_KEYWORD">def</span> handleAction(self, action):
+        <span class="PY_STRING">"""Handle action.
+
+        Invoked by `_respond` when a legitimate action has
+        been found in a form. Invokes `preAction`, the actual
+        action method and `postAction`.
+
+        Subclasses rarely override this method.
+
+        """</span>
+        self.preAction(action)
+        getattr(self, action)()
+        self.postAction(action)
+
+    <span class="PY_KEYWORD">def</span> actions(self):
+        <span class="PY_STRING">"""The allowed actions.
+
+        Returns a list or a set of method names that are allowable
+        actions from HTML forms. The default implementation returns [].
+        See `_respond` for more about actions.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> []
+
+    <span class="PY_KEYWORD">def</span> preAction(self, actionName):
+        <span class="PY_STRING">"""Things to do before action.
+
+        Invoked by self prior to invoking a action method.
+        The `actionName` is passed to this method,
+        although it seems a generally bad idea to rely on this.
+        However, it's still provided just in case you need that hook.
+
+        By default this does nothing.
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> postAction(self, actionName):
+        <span class="PY_STRING">"""Things to do after action.
+
+        Invoked by self after invoking a action method.
+        Subclasses may override to customize and may or may not
+        invoke super as they see fit.
+        The `actionName` is passed to this method,
+        although it seems a generally bad idea to rely on this.
+        However, it's still provided just in case you need that hook.
+
+        By default this does nothing.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> methodNameForAction(self, name):
+        <span class="PY_STRING">"""Return method name for an action name.
+
+        Invoked by _respond() to determine the method name for a given action
+        name which has been derived as the value of an ``_action_`` field.
+        Since this is usually the label of an HTML submit button in a form,
+        it is often needed to transform it in order to get a valid method name
+        (for instance, blanks could be replaced by underscores and the like).
+        This default implementation of the name transformation is the identity,
+        it simply returns the name. Subclasses should override this method
+        when action names don't match their method names; they could "mangle"
+        the action names or look the method names up in a dictionary.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> name
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> urlEncode(s):
+        <span class="PY_STRING">"""Quotes special characters using the % substitutions.
+
+        This method does the same as the `urllib.quote_plus()` function.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> Funcs.urlEncode(s) <span class="PY_COMMENT"># we could also use urllib.quote</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> urlDecode(s):
+        <span class="PY_STRING">"""Turn special % characters into actual characters.
+
+        This method does the same as the `urllib.unquote_plus()` function.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> Funcs.urlDecode(s)
+
+    <span class="PY_KEYWORD">def</span> forward(self, url):
+        <span class="PY_STRING">"""Forward request.
+
+        Forwards this request to another servlet.
+        See `Application.forward` for details.
+        The main difference is that here you don't have
+        to pass in the transaction as the first argument.
+
+        """</span>
+        self.application().forward(self.transaction(), url)
+
+    <span class="PY_KEYWORD">def</span> includeURL(self, url):
+        <span class="PY_STRING">"""Include output from other servlet.
+
+        Includes the response of another servlet
+        in the current servlet's response.
+        See `Application.includeURL` for details.
+        The main difference is that here you don't have
+        to pass in the transaction as the first argument.
+
+        """</span>
+        self.application().includeURL(self.transaction(), url)
+
+    <span class="PY_KEYWORD">def</span> callMethodOfServlet(self, url, method, *args, **kwargs):
+        <span class="PY_STRING">"""Call a method of another servlet.
+
+        See `Application.callMethodOfServlet` for details.
+        The main difference is that here you don't have
+        to pass in the transaction as the first argument.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.application().callMethodOfServlet(
+            self.transaction(), url, method, *args, **kwargs)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> endResponse():
+        <span class="PY_STRING">"""End response.
+
+        When this method is called during `awake` or `respond`,
+        servlet processing will end immediately,
+        and the accumulated response will be sent.
+
+        Note that `sleep` will still be called, providing a
+        chance to clean up or free any resources.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> EndResponse
+
+    <span class="PY_KEYWORD">def</span> sendRedirectAndEnd(self, url, status=None):
+        <span class="PY_STRING">"""Send redirect and end.
+
+        Sends a redirect back to the client and ends the response.
+        This is a very popular pattern.
+
+        """</span>
+        self.response().sendRedirect(url, status)
+        self.endResponse()
+
+    <span class="PY_KEYWORD">def</span> sendRedirectPermanentAndEnd(self, url):
+        <span class="PY_STRING">"""Send permanent redirect and end."""</span>
+        self.response().sendRedirectPermanent(url)
+        self.endResponse()
+
+    <span class="PY_KEYWORD">def</span> sendRedirectSeeOtherAndEnd(self, url):
+        <span class="PY_STRING">"""Send redirect to a URL to be retrieved with GET and end.
+
+        This is the proper method for the Post/Redirect/Get pattern.
+
+        """</span>
+        self.response().sendRedirectSeeOther(url)
+        self.endResponse()
+
+    <span class="PY_KEYWORD">def</span> sendRedirectTemporaryAndEnd(self, url):
+        <span class="PY_STRING">"""Send temporary redirect and end."""</span>
+        self.response().sendRedirectTemporary(url)
+        self.endResponse()
+
+
+    <span class="PY_COMMENT">## Utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> sessionEncode(self, url=None):
+        <span class="PY_STRING">"""Utility function to access `Session.sessionEncode`.
+
+        Takes a url and adds the session ID as a parameter.
+        This is for cases where you don't know if the client
+        will accepts cookies.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> url <span class="PY_KEYWORD">is</span> None:
+            url = self.request().uri()
+        <span class="PY_KEYWORD">return</span> self.session().sessionEncode(url)
+
+
+    <span class="PY_COMMENT">## Exception Reports ##</span>
+
+    <span class="PY_KEYWORD">def</span> writeExceptionReport(self, handler):
+        <span class="PY_STRING">"""Write extra information to the exception report.
+
+        The `handler` argument is the exception handler, and
+        information is written there (using `writeTitle`,
+        `write`, and `writeln`).  This information is added
+        to the exception report.
+
+        See `WebKit.ExceptionHandler` for more information.
+
+        """</span>
+        handler.writeln(<span class="PY_STRING">'''
+&lt;p&gt;Servlets can provide debugging information here by overriding
+&lt;tt&gt;writeExceptionReport()&lt;/tt&gt;.&lt;/p&gt;&lt;p&gt;For example:&lt;/p&gt;
+&lt;pre&gt;
+exceptionReportAttrs = 'foo bar baz'.split()
+def writeExceptionReport(self, handler):
+handler.writeTitle(self.__class__.__name__)
+handler.writeAttrs(self, self.exceptionReportAttrs)
+handler.write('any string')
+&lt;/pre&gt;
+&lt;p&gt;See WebKit/ExceptionHandler.py for more information.&lt;/p&gt;
+'''</span>)
+</pre>
+<!--footer-->
+
+</body>
+</html>

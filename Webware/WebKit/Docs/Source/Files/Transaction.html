@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Transaction.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The Transaction container."""</span>
+
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">import</span> traceback
+
+
+<span class="PY_KEYWORD">class</span> Transaction(object):
+    <span class="PY_STRING">"""The Transaction container.
+
+    A transaction serves as:
+
+      * A container for all objects involved in the transaction.
+        The objects include application, request, response, session
+        and servlet.
+
+      * A message dissemination point. The messages include awake(),
+        respond() and sleep().
+
+    When first created, a transaction has no session. However, it will
+    create or retrieve one upon being asked for session().
+
+    The life cycle of a transaction begins and ends with Application's
+    dispatchRequest().
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, application, request=None):
+        self._application = application
+        self._request = request
+        self._response = None
+        self._session = None
+        self._servlet = None
+        self._error = None
+        self._nested = 0
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        s = []
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> sorted(self.__dict__):
+            attr = getattr(self, name)
+            <span class="PY_KEYWORD">if</span> isinstance(attr, type):
+                s.append(<span class="PY_STRING">'%s=%r'</span> % (name, attr))
+        s = <span class="PY_STRING">' '</span>.join(s)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;%s %s&gt;'</span> % (self.__class__.__name__, s)
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> application(self):
+        <span class="PY_STRING">"""Get the corresponding application."""</span>
+        <span class="PY_KEYWORD">return</span> self._application
+
+    <span class="PY_KEYWORD">def</span> request(self):
+        <span class="PY_STRING">"""Get the corresponding request."""</span>
+        <span class="PY_KEYWORD">return</span> self._request
+
+    <span class="PY_KEYWORD">def</span> response(self):
+        <span class="PY_STRING">"""Get the corresponding response."""</span>
+        <span class="PY_KEYWORD">return</span> self._response
+
+    <span class="PY_KEYWORD">def</span> setResponse(self, response):
+        <span class="PY_STRING">"""Set the corresponding response."""</span>
+        self._response = response
+
+    <span class="PY_KEYWORD">def</span> hasSession(self):
+        <span class="PY_STRING">"""Return true if the transaction has a session."""</span>
+        id = self._request.sessionId()
+        <span class="PY_KEYWORD">return</span> id <span class="PY_KEYWORD">and</span> self._application.hasSession(id)
+
+    <span class="PY_KEYWORD">def</span> session(self):
+        <span class="PY_STRING">"""Return the session for the transaction.
+
+        A new transaction is created if necessary. Therefore, this method
+        never returns None. Use hasSession() if you want to find out if
+        a session already exists.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._session:
+            self._session = self._application.createSessionForTransaction(self)
+            self._session.awake(self) <span class="PY_COMMENT"># give the new servlet a chance to set up</span>
+        <span class="PY_KEYWORD">return</span> self._session
+
+    <span class="PY_KEYWORD">def</span> setSession(self, session):
+        <span class="PY_STRING">"""Set the session for the transaction."""</span>
+        self._session = session
+
+    <span class="PY_KEYWORD">def</span> servlet(self):
+        <span class="PY_STRING">"""Return the current servlet that is processing.
+
+        Remember that servlets can be nested.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._servlet
+
+    <span class="PY_KEYWORD">def</span> setServlet(self, servlet):
+        <span class="PY_STRING">"""Set the servlet for processing the transaction."""</span>
+        self._servlet = servlet
+        <span class="PY_KEYWORD">if</span> servlet <span class="PY_KEYWORD">and</span> self._request:
+            servlet._serverSidePath = self._request.serverSidePath()
+
+    <span class="PY_KEYWORD">def</span> duration(self):
+        <span class="PY_STRING">"""Return the duration, in seconds, of the transaction.
+
+        This is basically the response end time minus the request start time.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._response.endTime() - self._request.time()
+
+    <span class="PY_KEYWORD">def</span> errorOccurred(self):
+        <span class="PY_STRING">"""Check whether a server error occured."""</span>
+        <span class="PY_KEYWORD">return</span> isinstance(self._error, Exception)
+
+    <span class="PY_KEYWORD">def</span> error(self):
+        <span class="PY_STRING">"""Return Exception instance if there was any."""</span>
+        <span class="PY_KEYWORD">return</span> self._error
+
+    <span class="PY_KEYWORD">def</span> setError(self, err):
+        <span class="PY_STRING">"""Set Exception instance.
+
+        Invoked by the application if an Exception is raised to the
+        application level.
+
+        """</span>
+        self._error = err
+
+
+    <span class="PY_COMMENT">## Transaction stages ##</span>
+
+    <span class="PY_KEYWORD">def</span> awake(self):
+        <span class="PY_STRING">"""Send awake() to the session (if there is one) and the servlet.
+
+        Currently, the request and response do not partake in the
+        awake()-respond()-sleep() cycle. This could definitely be added
+        in the future if any use was demonstrated for it.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._nested <span class="PY_KEYWORD">and</span> self._session:
+            self._session.awake(self)
+        self._servlet.awake(self)
+        self._nested += 1
+
+    <span class="PY_KEYWORD">def</span> respond(self):
+        <span class="PY_STRING">"""Respond to the request."""</span>
+        <span class="PY_KEYWORD">if</span> self._session:
+            self._session.respond(self)
+        self._servlet.respond(self)
+
+    <span class="PY_KEYWORD">def</span> sleep(self):
+        <span class="PY_STRING">"""Send sleep() to the session and the servlet.
+
+        Note that sleep() is sent in reverse order as awake()
+        (which is typical for shutdown/cleanup methods).
+
+        """</span>
+        self._nested -= 1
+        self._servlet.sleep(self)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._nested <span class="PY_KEYWORD">and</span> self._session:
+            self._session.sleep(self)
+            self._application.sessions().storeSession(self._session)
+
+
+    <span class="PY_COMMENT">## Debugging ##</span>
+
+    <span class="PY_KEYWORD">def</span> dump(self, file=None):
+        <span class="PY_STRING">"""Dump debugging info to stdout."""</span>
+        <span class="PY_KEYWORD">if</span> file <span class="PY_KEYWORD">is</span> None:
+            file = sys.stdout
+        wr = file.write
+        wr(<span class="PY_STRING">'&gt;&gt; Transaction: %s\n'</span> % self)
+        <span class="PY_KEYWORD">for</span> attr <span class="PY_KEYWORD">in</span> dir(self):
+            wr(<span class="PY_STRING">'%s: %s\n'</span> % (attr, getattr(self, attr)))
+        wr(<span class="PY_STRING">'\n'</span>)
+
+
+    <span class="PY_COMMENT">## Die ##</span>
+
+    <span class="PY_KEYWORD">def</span> die(self):
+        <span class="PY_STRING">"""End transaction.
+
+        This method should be invoked when the entire transaction is
+        finished with. Currently, this is invoked by AppServer. This method
+        removes references to the different objects in the transaction,
+        breaking cyclic reference chains and speeding up garbage collection.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> self.__dict__.keys(): <span class="PY_COMMENT"># needs keys() since dict changes</span>
+            delattr(self, name)
+
+
+    <span class="PY_COMMENT">## Exception handling ##</span>
+
+    _exceptionReportAttrNames = \
+        <span class="PY_STRING">'application request response session servlet'</span>.split()
+
+    <span class="PY_KEYWORD">def</span> writeExceptionReport(self, handler):
+        <span class="PY_STRING">"""Write extra information to the exception report."""</span>
+        handler.writeTitle(self.__class__.__name__)
+        handler.writeAttrs(self, self._exceptionReportAttrNames)
+
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> self._exceptionReportAttrNames:
+            obj = getattr(self, <span class="PY_STRING">'_'</span> + name, None)
+            <span class="PY_KEYWORD">if</span> obj:
+                <span class="PY_KEYWORD">try</span>:
+                    obj.writeExceptionReport(handler)
+                <span class="PY_KEYWORD">except</span> Exception:
+                    handler.writeln(<span class="PY_STRING">'&lt;p&gt;Uncaught exception while asking'</span>
+                        <span class="PY_STRING">' &lt;b&gt;%s&lt;/b&gt; to write report:&lt;/p&gt;\n&lt;pre&gt;'</span> % name)
+                    traceback.print_exc(file=handler)
+                    handler.writeln(<span class="PY_STRING">'&lt;/pre&gt;'</span>)
+</pre>
+<!--footer-->
+
+</body>
+</html>

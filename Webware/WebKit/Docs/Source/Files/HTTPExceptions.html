@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/HTTPExceptions.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""HTTP exceptions.
+
+HTTPExceptions are for situations that are predicted by the HTTP spec.
+Where the ``200 OK`` response is typical, a ``404 Not Found``
+or ``301 Moved Temporarily`` response is not entirely unexpected.
+
+`Application` catches all `HTTPException` exceptions (and subclasses of
+HTTPException), and instead of being errors these are translated into responses.
+In various places these can also be caught and changed, for instance
+an `HTTPAuthenticationRequired` could be turned into a normal login page.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> htmlEncode
+
+
+<span class="PY_KEYWORD">class</span> HTTPException(Exception):
+    <span class="PY_STRING">"""HTTPException template class.
+
+    Subclasses must define these variables (usually as class variables):
+
+    `_code`:
+        a tuple of the integer error code, and the short
+        description that goes with it (like ``(200, "OK")``)
+    `_description`:
+        the long-winded description, to be presented
+        in the response page. Or you can override description()
+        if you want something more context-sensitive.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'%d %s'</span> % (self.code(), self.codeMessage())
+
+
+    <span class="PY_COMMENT">## Error codes ##</span>
+
+    _description = <span class="PY_STRING">'An error occurred'</span>
+
+    <span class="PY_KEYWORD">def</span> code(self):
+        <span class="PY_STRING">"""The integer code."""</span>
+        <span class="PY_KEYWORD">return</span> self._code[0]
+
+    <span class="PY_KEYWORD">def</span> codeMessage(self):
+        <span class="PY_STRING">"""The message (like ``Not Found``) that goes with the code."""</span>
+        <span class="PY_KEYWORD">return</span> self._code[1]
+
+
+    <span class="PY_COMMENT">## HTML Description ##</span>
+
+    <span class="PY_KEYWORD">def</span> html(self):
+        <span class="PY_STRING">"""The error page.
+
+        The HTML page that should be sent with the error,
+        usually a description of the problem.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'''
+&lt;html&gt;&lt;head&gt;&lt;title&gt;%(code)s %(title)s&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;%(htTitle)s&lt;/h1&gt;
+%(body)s
+&lt;/body&gt;&lt;/html&gt;'''</span> % dict(
+            htTitle=self.htTitle(), title=self.title(),
+            body=self.htBody(), code=self.code())
+
+    <span class="PY_KEYWORD">def</span> title(self):
+        <span class="PY_STRING">"""The title used in the HTML page."""</span>
+        <span class="PY_KEYWORD">return</span> self.codeMessage()
+
+    <span class="PY_KEYWORD">def</span> htTitle(self):
+        <span class="PY_STRING">"""The title, but it may include HTML markup (like italics)."""</span>
+        <span class="PY_KEYWORD">return</span> self.title()
+
+    <span class="PY_KEYWORD">def</span> htBody(self):
+        <span class="PY_STRING">"""The HTML body of the page."""</span>
+        body = self.htDescription()
+        <span class="PY_KEYWORD">if</span> self.args:
+            body += <span class="PY_STRING">''</span>.join([<span class="PY_STRING">'&lt;p&gt;%s&lt;/p&gt;\n'</span>
+                % htmlEncode(str(p)) <span class="PY_KEYWORD">for</span> p <span class="PY_KEYWORD">in</span> self.args])
+        <span class="PY_KEYWORD">return</span> body
+
+    <span class="PY_KEYWORD">def</span> description(self):
+        <span class="PY_STRING">"""Error description.
+
+        Possibly a plain text version of the error description,
+        though usually just identical to `htDescription`.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._description
+
+    <span class="PY_KEYWORD">def</span> htDescription(self):
+        <span class="PY_STRING">"""HTML error description.
+
+        The HTML description of the error, for presentation
+        to the browser user.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.description()
+
+
+    <span class="PY_COMMENT">## Misc ##</span>
+
+    <span class="PY_KEYWORD">def</span> headers(self):
+        <span class="PY_STRING">"""Get headers.
+
+        Additional headers that should be sent with the
+        response, not including the Status header. For instance,
+        the redirect exception adds a Location header.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> {}
+
+    <span class="PY_KEYWORD">def</span> setTransaction(self, trans):
+        <span class="PY_STRING">"""Set transaction.
+
+        When the exception is caught by `Application`, it tells
+        the exception what the transaction is. This way you
+        can resolve relative paths, or otherwise act in a manner
+        sensitive of the context of the error.
+
+        """</span>
+        self._transaction = trans
+
+
+<span class="PY_KEYWORD">class</span> HTTPMovedPermanently(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "moved permanently" subclass.
+
+    When a resource is permanently moved. The browser may remember this
+    relocation, and later requests may skip requesting the original
+    resource altogether.
+
+    """</span>
+    _code = 301, <span class="PY_STRING">'Moved Permanently'</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, location=None, webkitLocation=None, *args):
+        <span class="PY_STRING">"""Set destination.
+
+        HTTPMovedPermanently needs a destination that you it should be
+        directed to -- you can pass `location` *or* `webkitLocation` --
+        if you pass `webkitLocation` it will be relative to the WebKit base
+        (the portion through the adapter).
+        """</span>
+        self._location = location
+        self._webkitLocation = webkitLocation
+        HTTPException.__init__(self, 301, <span class="PY_STRING">'Moved Permanently'</span>, *args)
+
+    <span class="PY_KEYWORD">def</span> location(self):
+        <span class="PY_STRING">"""The location that we will be redirecting to."""</span>
+        <span class="PY_KEYWORD">if</span> self._webkitLocation:
+            location = self._transaction.request().servletPath()
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._webkitLocation.startswith(<span class="PY_STRING">'/'</span>):
+                location += <span class="PY_STRING">'/'</span>
+            location += self._webkitLocation
+        <span class="PY_KEYWORD">else</span>:
+            location = self._location
+        <span class="PY_KEYWORD">return</span> location
+
+    <span class="PY_KEYWORD">def</span> headers(self):
+        <span class="PY_STRING">"""We include a Location header."""</span>
+        <span class="PY_KEYWORD">return</span> {<span class="PY_STRING">'Location'</span>: self.location()}
+
+    <span class="PY_KEYWORD">def</span> description(self):
+        <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'The resource you are accessing has been moved to'</span>
+            <span class="PY_STRING">' &lt;a href="%s"&gt;%s&lt;/a&gt;'</span> % ((htmlEncode(self.location()),)*2))
+
+
+<span class="PY_KEYWORD">class</span> HTTPTemporaryRedirect(HTTPMovedPermanently):
+    <span class="PY_STRING">"""HTTPExcecption "temporary redirect" subclass.
+
+    Like HTTPMovedPermanently, except the redirect is only valid for this
+    request. Internally identical to HTTPMovedPermanently, except with a
+    different response code. Browsers will check the server for each request
+    to see where it's redirected to.
+
+    """</span>
+    _code = 307, <span class="PY_STRING">'Temporary Redirect'</span>
+
+<span class="PY_COMMENT"># This is what people mean most often:</span>
+HTTPRedirect = HTTPTemporaryRedirect
+
+
+<span class="PY_KEYWORD">class</span> HTTPBadRequest(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "bad request" subclass.
+
+    When the browser sends an invalid request.
+
+    """</span>
+    _code = 400, <span class="PY_STRING">'Bad Request'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPAuthenticationRequired(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "authentication required" subclass.
+
+    HTTPAuthenticationRequired will usually cause the browser to open up an
+    HTTP login box, and after getting login information from the user, the
+    browser will resubmit the request. However, this should also trigger
+    login pages in properly set up environments (though much code will not
+    work this way).
+
+    Browsers will usually not send authentication information unless they
+    receive this response, even when other pages on the site have given 401
+    responses before. So when using this authentication every request will
+    usually be doubled, once without authentication, once with.
+
+    """</span>
+    _code = 401, <span class="PY_STRING">'Authentication Required'</span>
+    _description = <span class="PY_STRING">"You must log in to access this resource"</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, realm=None, *args):
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> realm:
+            realm = <span class="PY_STRING">'Password required'</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_STRING">'"'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> realm, <span class="PY_STRING">'Realm must not contain quotation marks'</span>
+        self._realm = realm
+        HTTPException.__init__(self, *args)
+
+    <span class="PY_KEYWORD">def</span> headers(self):
+        <span class="PY_KEYWORD">return</span> {<span class="PY_STRING">'WWW-Authenticate'</span>: <span class="PY_STRING">'Basic realm="%s"'</span> % self._realm}
+
+<span class="PY_COMMENT"># This is for wording mistakes:</span>
+HTTPAuthorizationRequired = HTTPAuthenticationRequired
+
+
+<span class="PY_KEYWORD">class</span> HTTPSessionExpired(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "session expired" subclass.
+
+    This is the same as HTTPAuthenticationRequired, but should be used
+    in the situation when a session has expired.
+
+    """</span>
+    _code = 401, <span class="PY_STRING">'Session Expired'</span>
+    _description = <span class="PY_STRING">'Your login session has expired - please log in again'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPForbidden(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "forbidden" subclass.
+
+    When access is not allowed to this resource. If the user is anonymous,
+    and must be authenticated, then HTTPAuthenticationRequired is a preferable
+    exception. If the user should not be able to get to this resource (at
+    least through the path they did), or is authenticated and still doesn't
+    have access, or no one is allowed to view this, then HTTPForbidden would
+    be the proper response.
+
+    """</span>
+    _code = 403, <span class="PY_STRING">'Forbidden'</span>
+    _description = <span class="PY_STRING">"You are not authorized to access this resource"</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPNotFound(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "not found" subclass.
+
+    When the requested resource does not exist. To be more secretive,
+    it is okay to return a 404 if access to the resource is not permitted
+    (you are not required to use HTTPForbidden, though it makes it more
+    clear why access was disallowed).
+
+    """</span>
+    _code = 404, <span class="PY_STRING">'Not Found'</span>
+    _description = <span class="PY_STRING">'The resource you were trying to access was not found'</span>
+
+    <span class="PY_KEYWORD">def</span> html(self):
+        trans = self._transaction
+        page = trans.application()._error404
+        <span class="PY_KEYWORD">if</span> page:
+            uri = trans.request().uri()
+            <span class="PY_KEYWORD">return</span> page % htmlEncode(uri)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> HTTPException.html(self)
+
+
+<span class="PY_KEYWORD">class</span> HTTPMethodNotAllowed(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "method not allowed" subclass.
+
+    When a method (like GET, PROPFIND, POST, etc) is not allowed
+    on this resource (usually because it does not make sense, not
+    because it is not permitted). Mostly for WebDAV.
+
+    """</span>
+    _code = 405, <span class="PY_STRING">'Method Not Allowed'</span>
+    _description = <span class="PY_STRING">'The method is not supported on this resource'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPRequestTimeout(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "request timeout" subclass.
+
+    The client did not produce a request within the time that the
+    server was prepared to wait. The client may repeat the request
+    without modifications at any later time.
+
+    """</span>
+    _code = 408, <span class="PY_STRING">'Request Timeout'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPConflict(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "conflict" subclass.
+
+    When there's a locking conflict on this resource (in response to
+    something like a PUT, not for most other conflicts). Mostly for WebDAV.
+
+    """</span>
+    _code = 409, <span class="PY_STRING">'Conflict'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPUnsupportedMediaType(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "unsupported media type" subclass.
+
+    The server is refusing to service the request because the entity
+    of the request is in a format not supported by the requested resource
+    for the requested method.
+
+    """</span>
+    _code = 415, <span class="PY_STRING">'Unsupported Media Type'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPPreconditionFailed(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "Precondition Failed" subclass.
+
+    During compound, atomic operations, when a precondition for an early
+    operation fail, then later operations in will fail with this code.
+    Mostly for WebDAV.
+
+    """</span>
+    _code = 412, <span class="PY_STRING">'Precondition Failed'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPServerError(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "Server Error" subclass.
+
+    The server encountered an unexpected condition which prevented it
+    from fulfilling the request.
+
+    """</span>
+    _code = 500, <span class="PY_STRING">'Server Error'</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPNotImplemented(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "not implemented" subclass.
+
+    When methods (like GET, POST, PUT, PROPFIND, etc) are not
+    implemented for this resource.
+
+    """</span>
+    _code = 501, <span class="PY_STRING">"Not Implemented"</span>
+    _description = <span class="PY_STRING">"The method given is not yet implemented by this application"</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPServiceUnavailable(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "service unavailable" subclass.
+
+    The server is currently unable to handle the request due to a temporary
+    overloading or maintenance of the server. The implication is that this
+    is a temporary condition which will be alleviated after some delay.
+
+    """</span>
+    _code = 503, <span class="PY_STRING">"Service Unavailable"</span>
+    _description = <span class="PY_STRING">"The server is currently unable to handle the request"</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPInsufficientStorage(HTTPException):
+    <span class="PY_STRING">"""HTTPExcecption "insufficient storage" subclass.
+
+    When there is not sufficient storage, usually in response to a PUT when
+    there isn't enough disk space. Mostly for WebDAV.
+
+    """</span>
+    _code = 507, <span class="PY_STRING">'Insufficient Storage'</span>
+    _description = <span class="PY_STRING">'There was not enough storage space on the server to complete your request'</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

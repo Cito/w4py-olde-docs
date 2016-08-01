@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/ModelObject.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> sys
+
+
+<span class="PY_KEYWORD">class</span> ModelObject(object):
+
+
+    <span class="PY_COMMENT">## Debugging ##</span>
+
+    <span class="PY_KEYWORD">def</span> printAttrs(self, out=None):
+        <span class="PY_KEYWORD">if</span> out <span class="PY_KEYWORD">is</span> None:
+            out = sys.stdout
+        out.write(<span class="PY_STRING">'self = %s\n'</span> % repr(self))
+        out.write(<span class="PY_STRING">'self  attrs = %s\n'</span> % self.__dict__.keys())
+        out.write(<span class="PY_STRING">'class attrs = %s\n'</span> % self.__class__.__dict__.keys())
+</pre>
+<!--footer-->
+
+</body>
+</html>

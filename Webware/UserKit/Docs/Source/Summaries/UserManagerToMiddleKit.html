@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of UserKit.UserManagerToMiddleKit</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of UserKit.UserManagerToMiddleKit</h2>
+<p>You can also browse the <a href="../Files/UserManagerToMiddleKit.html">complete source file</a>
+or the <a href="../Docs/UserKit.UserManagerToMiddleKit.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">UserManagerToMiddleKit</span>(UserManager):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, userClass=None, store=None, useSQL=None)</span>
+
+<span class="line_category">    ## MiddleKit specifics ##</span>
+<span class="line_def">    def <span class="name_def">loadUser</span>(self, serialNum, default=NoDefault)</span>
+
+<span class="line_category">    ## UserManager customizations ##</span>
+<span class="line_def">    def <span class="name_def">setUserClass</span>(self, userClass)</span>
+
+<span class="line_category">    ## UserManager concrete methods ##</span>
+<span class="line_def">    def <span class="name_def">addUser</span>(self, user)</span>
+<span class="line_def">    def <span class="name_def">userForSerialNum</span>(self, id, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">userForExternalId</span>(self, externalId, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">userForName</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">users</span>(self)</span>
+<span class="line_def">    def <span class="name_def">activeUsers</span>(self)</span>
+<span class="line_def">    def <span class="name_def">inactiveUsers</span>(self)</span>
+
+</pre>
+</body>
+</html>

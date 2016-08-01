@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/ImportManager.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""ImportManager
+
+Manages imported modules and protects against concurrent imports.
+
+Keeps lists of all imported Python modules and templates as well as other
+config files used by Webware for Python. For modules which are not directly
+imported, ImportManager can use ImportSpy to keep track of them. This can
+be used to detect changes in source files, templates or config files in order
+to reload them automatically by the AutoReloadingAppServer. The use of
+ImportSpy can be suppressed with the``UseImportSpy`` setting.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> imp
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+
+<span class="PY_KEYWORD">class</span> ImportManager(object):
+    <span class="PY_STRING">"""The import manager.
+
+    Keeps track of the Python modules and other system files that have been
+    imported and are used by Webware.
+
+    """</span>
+
+    _imp = _spy = None
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        <span class="PY_STRING">"""Create import hook."""</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._imp, <span class="PY_STRING">"Only one instance of ImportManager is possible."</span>
+        self._imp = True
+        self._fileList = {}
+        self._moduleFiles = {}
+        self._notifyHook = None
+
+    <span class="PY_KEYWORD">def</span> load_module(self, name, file, filename, info):
+        <span class="PY_STRING">"""Replaces imp.load_module."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                imp.acquire_lock()
+                mod = imp.load_module(name, file, filename, info)
+            <span class="PY_KEYWORD">finally</span>:
+                imp.release_lock()
+                <span class="PY_KEYWORD">if</span> file:
+                    file.close()
+            self.recordModule(mod)
+        <span class="PY_KEYWORD">except</span>:
+            <span class="PY_COMMENT"># Also record filepaths which weren't successfully loaded, which</span>
+            <span class="PY_COMMENT"># may happen due to a syntax error in a servlet, because we also</span>
+            <span class="PY_COMMENT"># want to know when such a file is modified:</span>
+            self.recordFile(filename)
+            <span class="PY_KEYWORD">raise</span>
+        <span class="PY_KEYWORD">return</span> mod
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> find_module(name, path=None):
+        <span class="PY_STRING">"""Replaces imp.find_module."""</span>
+        <span class="PY_KEYWORD">return</span> imp.find_module(name, path)
+
+    <span class="PY_KEYWORD">def</span> activateImportSpy(self):
+        <span class="PY_STRING">"""Activate ImportSpy to keep track of modules loaded elsewhere."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._spy:
+            <span class="PY_KEYWORD">from</span> ImportSpy <span class="PY_KEYWORD">import</span> activate
+            activate(self)
+            self._spy = True
+
+    <span class="PY_KEYWORD">def</span> fileList(self, update=True):
+        <span class="PY_STRING">"""Return the list of tracked files."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._spy <span class="PY_KEYWORD">and</span> update:
+            <span class="PY_COMMENT"># Update list of files of imported modules</span>
+            moduleNames = []
+            <span class="PY_KEYWORD">for</span> modname <span class="PY_KEYWORD">in</span> sys.modules:
+                <span class="PY_KEYWORD">if</span> modname <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._moduleFiles:
+                    moduleNames.append(modname)
+            <span class="PY_KEYWORD">if</span> moduleNames:
+                self.recordModules(moduleNames)
+        <span class="PY_KEYWORD">return</span> self._fileList
+
+    <span class="PY_KEYWORD">def</span> notifyOfNewFiles(self, hook):
+        <span class="PY_STRING">"""Register notification hook.
+
+        Called by someone else to register that they'd like to be know
+        when a new file is imported.
+
+        """</span>
+        self._notifyHook = hook
+
+    <span class="PY_KEYWORD">def</span> watchFile(self, path, modname=None, getmtime=os.path.getmtime):
+        <span class="PY_STRING">"""Add more files to watch without importing them."""</span>
+        modtime = getmtime(path)
+        self._fileList[path] = modtime
+        <span class="PY_KEYWORD">if</span> modname:
+            self._moduleFiles[modname] = path
+        <span class="PY_COMMENT"># send notification that this file was imported</span>
+        <span class="PY_KEYWORD">if</span> self._notifyHook:
+            self._notifyHook(path, modtime)
+
+    <span class="PY_KEYWORD">def</span> recordModule(self, mod, isfile=os.path.isfile):
+        <span class="PY_STRING">"""Record a module."""</span>
+        modname = getattr(mod, <span class="PY_STRING">'__name__'</span>, None)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> modname <span class="PY_KEYWORD">or</span> modname <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> sys.modules:
+            <span class="PY_KEYWORD">return</span>
+        fileList = self._fileList
+        <span class="PY_COMMENT"># __orig_file__ is used for PSP, Kid and Cheetah templates; we want</span>
+        <span class="PY_COMMENT"># to record the source filenames, not the auto-generated modules:</span>
+        f = getattr(mod, <span class="PY_STRING">'__orig_file__'</span>, None)
+        <span class="PY_KEYWORD">if</span> f <span class="PY_KEYWORD">and</span> f <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> fileList:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> isfile(f):
+                    self.watchFile(f, modname)
+            <span class="PY_KEYWORD">except</span> OSError:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">else</span>:
+            f = getattr(mod, <span class="PY_STRING">'__file__'</span>, None)
+            <span class="PY_KEYWORD">if</span> f <span class="PY_KEYWORD">and</span> f <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> fileList:
+                <span class="PY_COMMENT"># record the .py file corresponding to each .pyc or .pyo</span>
+                <span class="PY_KEYWORD">if</span> f[-4:].lower() <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'.pyc'</span>, <span class="PY_STRING">'.pyo'</span>):
+                    f = f[:-1]
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> isfile(f):
+                        self.watchFile(f, modname)
+                    <span class="PY_KEYWORD">else</span>:
+                        self.watchFile(os.path.join(f, <span class="PY_STRING">'__init__.py'</span>))
+                <span class="PY_KEYWORD">except</span> OSError:
+                    <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> recordModules(self, moduleNames=None):
+        <span class="PY_STRING">"""Record a list of modules (or all modules)."""</span>
+        <span class="PY_KEYWORD">if</span> moduleNames <span class="PY_KEYWORD">is</span> None:
+            moduleNames = sys.modules
+        <span class="PY_KEYWORD">for</span> modname <span class="PY_KEYWORD">in</span> moduleNames:
+            mod = sys.modules[modname]
+            self.recordModule(mod)
+
+    <span class="PY_KEYWORD">def</span> recordFile(self, filename, isfile=os.path.isfile):
+        <span class="PY_STRING">"""Record a file."""</span>
+        <span class="PY_KEYWORD">if</span> isfile(filename):
+            self.watchFile(filename)
+
+    <span class="PY_KEYWORD">def</span> fileUpdated(self, filename, update=True, getmtime=os.path.getmtime):
+        <span class="PY_STRING">"""Check whether file has been updated."""</span>
+        fileList = self.fileList(update)
+        <span class="PY_KEYWORD">try</span>:
+            mtime = fileList[filename]
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">try</span>:
+            newmtime = getmtime(filename)
+        <span class="PY_KEYWORD">except</span> OSError:
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">if</span> mtime &gt;= newmtime:
+            <span class="PY_KEYWORD">return</span> False
+        fileList[filename] = newmtime
+        <span class="PY_COMMENT"># Note that the file list could be changed while running this</span>
+        <span class="PY_COMMENT"># method in a monitor thread, so we don't use iteritems() here:</span>
+        <span class="PY_KEYWORD">for</span> modname, modfile <span class="PY_KEYWORD">in</span> self._moduleFiles.items():
+            <span class="PY_KEYWORD">if</span> modfile == filename:
+                mod = sys.modules.get(modname)
+                <span class="PY_KEYWORD">return</span> <span class="PY_KEYWORD">not</span> mod <span class="PY_KEYWORD">or</span> <span class="PY_KEYWORD">not</span> getattr(mod, <span class="PY_STRING">'__donotreload__'</span>, False)
+        <span class="PY_KEYWORD">return</span> True <span class="PY_COMMENT"># it's not a module, we must reload</span>
+
+    <span class="PY_KEYWORD">def</span> updatedFile(self, update=True, getmtime=os.path.getmtime):
+        <span class="PY_STRING">"""Check whether one of the files has been updated."""</span>
+        fileList = self.fileList(update)
+        <span class="PY_KEYWORD">for</span> filename, mtime <span class="PY_KEYWORD">in</span> fileList.items():
+            <span class="PY_KEYWORD">try</span>:
+                newmtime = getmtime(filename)
+            <span class="PY_KEYWORD">except</span> OSError:
+                <span class="PY_KEYWORD">return</span> filename
+            <span class="PY_KEYWORD">if</span> mtime &gt;= newmtime:
+                <span class="PY_KEYWORD">continue</span>
+            fileList[filename] = newmtime
+            <span class="PY_KEYWORD">for</span> modname, modfile <span class="PY_KEYWORD">in</span> self._moduleFiles.items():
+                <span class="PY_KEYWORD">if</span> modfile == filename:
+                    mod = sys.modules.get(modname)
+                    <span class="PY_KEYWORD">if</span> mod <span class="PY_KEYWORD">and</span> getattr(mod, <span class="PY_STRING">'__donotreload__'</span>, False):
+                        <span class="PY_KEYWORD">break</span>
+                    <span class="PY_KEYWORD">return</span> filename <span class="PY_COMMENT"># it's a module that needs to be reloaded</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> filename <span class="PY_COMMENT"># it's not a module, we must reload</span>
+
+    <span class="PY_KEYWORD">def</span> delModules(self, includePythonModules=False, excludePrefixes=None):
+        <span class="PY_STRING">"""Delete imported modules.
+
+        Deletes all the modules that the ImportSpy has ever imported unless
+        they are part of WebKit. This in support of DebugAppServer's useful
+        (yet imperfect) support for AutoReload.
+
+        """</span>
+        moduleFiles = self._moduleFiles
+        fileList = self._fileList
+        <span class="PY_KEYWORD">for</span> modname <span class="PY_KEYWORD">in</span> moduleFiles:
+            <span class="PY_KEYWORD">if</span> modname == __name__:
+                <span class="PY_KEYWORD">continue</span>
+            filename = self._moduleFiles[modname]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> includePythonModules:
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> filename <span class="PY_KEYWORD">or</span> filename.startswith(sys.prefix):
+                    <span class="PY_KEYWORD">continue</span>
+            <span class="PY_KEYWORD">for</span> prefix <span class="PY_KEYWORD">in</span> excludePrefixes <span class="PY_KEYWORD">or</span> []:
+                <span class="PY_KEYWORD">if</span> modname.startswith(prefix):
+                    <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">del</span> sys.modules[modname]
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">del</span> moduleFiles[modname]
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_KEYWORD">pass</span>
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">del</span> fileList[filename]
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

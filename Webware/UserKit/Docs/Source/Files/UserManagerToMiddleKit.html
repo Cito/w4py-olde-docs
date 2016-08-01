@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/UserManagerToMiddleKit.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The UserManagerToMiddleKit class."""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> uniqueId
+<span class="PY_KEYWORD">from</span> MiddleKit.Run.ObjectStore <span class="PY_KEYWORD">import</span> UnknownObjectError
+
+<span class="PY_KEYWORD">from</span> UserManager <span class="PY_KEYWORD">import</span> UserManager
+
+
+<span class="PY_KEYWORD">class</span> UserManagerToMiddleKit(UserManager):
+    <span class="PY_STRING">"""UserManagerToMiddleKit stores users in a given MiddleKit object store.
+
+    However, the manager itself does not keep any information there.
+    This might change in the future.
+
+    In your MiddleKit model, your User class should have the attributes:
+    name, password and externalId; all of type string.
+    The max len for external id should be at least 14.
+    You can decide what you like for the others.
+    Only name and password have to be required.
+
+    Then you must edit User.py so that:
+      * In addition to inheriting GenUser, it also inherits UserKit.User
+      * It invokes both base class' __init__()s
+      * The __init__ takes manager, name and password, and passes them on.
+
+            from UserKit.User import User
+
+            class User(GenUser, User):
+
+                def __init__(self, manager=None, name=None, password=None):
+                    GenUser.__init__(self)
+                    User.__init__(self, manager, name, password)
+
+    If your user class is called something other than 'User', then you must
+    pass it to the store:
+
+        from MyUser import MyUser
+        userMgr = UserManagerToMiddleKit(userClass=MyUser, store=store)
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, userClass=None, store=None, useSQL=None):
+        <span class="PY_COMMENT"># If no userClass was specified, try to pull 'User'</span>
+        <span class="PY_COMMENT"># out of the object model.</span>
+        <span class="PY_KEYWORD">if</span> userClass <span class="PY_KEYWORD">is</span> None:
+            userClass = store.model().klass(<span class="PY_STRING">'User'</span>, None)
+
+        UserManager.__init__(self, userClass)
+
+        <span class="PY_KEYWORD">if</span> store <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">from</span> MiddleKit.Run.ObjectStore <span class="PY_KEYWORD">import</span> ObjectStore
+            store = ObjectStore
+        <span class="PY_KEYWORD">assert</span> store, <span class="PY_STRING">'No MiddleKit store.'</span>
+        self._store = store
+
+        <span class="PY_COMMENT"># If the user didn't say whether or not to useSQL, then</span>
+        <span class="PY_COMMENT"># we'll check if this looks like a SQLObjectStore. If so,</span>
+        <span class="PY_COMMENT"># then using SQL server side queries will speed up our</span>
+        <span class="PY_COMMENT"># operation:</span>
+        <span class="PY_KEYWORD">if</span> useSQL <span class="PY_KEYWORD">is</span> None:
+            useSQL = getattr(self._store, <span class="PY_STRING">'executeSQL'</span>) <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+        self._useSQL = useSQL
+
+        <span class="PY_COMMENT"># _saveNewUsers: if true, then we do a store.saveChanges()</span>
+        <span class="PY_COMMENT"># whenever a new user is added. This helps with the</span>
+        <span class="PY_COMMENT"># integrity of accessors like users().</span>
+        <span class="PY_COMMENT"># @@ 2001-02-18 ce: But perhaps that's a problem because</span>
+        <span class="PY_COMMENT"># manager is not a MiddleKit object...</span>
+        self._saveNewUsers = True
+
+
+    <span class="PY_COMMENT">## MiddleKit specifics ##</span>
+
+    <span class="PY_KEYWORD">def</span> loadUser(self, serialNum, default=NoDefault):
+        <span class="PY_KEYWORD">try</span>:
+            user = self._store.fetchObject(self._userClass, serialNum, default)
+        <span class="PY_KEYWORD">except</span> UnknownObjectError:
+            <span class="PY_KEYWORD">raise</span> KeyError(serialNum)
+        <span class="PY_KEYWORD">if</span> user <span class="PY_KEYWORD">is</span> default:
+            <span class="PY_KEYWORD">return</span> default
+        <span class="PY_KEYWORD">else</span>:
+            self._cachedUsers.append(user)
+            self._cachedUsersBySerialNum[serialNum] = user
+            <span class="PY_KEYWORD">return</span> user
+
+
+    <span class="PY_COMMENT">## UserManager customizations ##</span>
+
+    <span class="PY_KEYWORD">def</span> setUserClass(self, userClass):
+        <span class="PY_STRING">"""Overridden to verify that our userClass is really a MiddleObject."""</span>
+        <span class="PY_KEYWORD">from</span> MiddleKit.Run.MiddleObject <span class="PY_KEYWORD">import</span> MiddleObject
+        <span class="PY_KEYWORD">assert</span> issubclass(userClass, MiddleObject)
+        UserManager.setUserClass(self, userClass)
+
+
+    <span class="PY_COMMENT">## UserManager concrete methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> addUser(self, user):
+        <span class="PY_KEYWORD">if</span> user.externalId() <span class="PY_KEYWORD">is</span> None:
+            user.setExternalId(uniqueId(user))
+        self._store.addObject(user)
+        <span class="PY_KEYWORD">if</span> self._saveNewUsers:
+            self._store.saveChanges()
+        UserManager.addUser(self, user)
+
+    <span class="PY_KEYWORD">def</span> userForSerialNum(self, id, default=NoDefault):
+        user = self._cachedUsersBySerialNum.get(id)
+        <span class="PY_KEYWORD">if</span> user <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">return</span> self.loadUser(id, default)
+
+    <span class="PY_KEYWORD">def</span> userForExternalId(self, externalId, default=NoDefault):
+        <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self._cachedUsers:
+            <span class="PY_KEYWORD">if</span> user.externalId() == externalId:
+                <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">if</span> self._useSQL:
+            users = self._store.fetchObjectsOfClass(self._userClass,
+                clauses=<span class="PY_STRING">'where externalId=%r'</span> % externalId)
+            <span class="PY_KEYWORD">if</span> users:
+                <span class="PY_KEYWORD">assert</span> len(users) == 1
+                <span class="PY_KEYWORD">return</span> users[0]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self.users():
+                <span class="PY_KEYWORD">if</span> user.externalId() == externalId:
+                    <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">raise</span> KeyError(externalId)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> userForName(self, name, default=NoDefault):
+        <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self._cachedUsers:
+            <span class="PY_KEYWORD">if</span> user.name() == name:
+                <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">if</span> self._useSQL:
+            users = self._store.fetchObjectsOfClass(
+                self._userClass, clauses=<span class="PY_STRING">'where name=%r'</span> % name)
+            <span class="PY_KEYWORD">if</span> users:
+                <span class="PY_KEYWORD">assert</span> len(users) == 1
+                <span class="PY_KEYWORD">return</span> users[0]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self.users():
+                <span class="PY_KEYWORD">if</span> user.name() == name:
+                    <span class="PY_KEYWORD">return</span> user
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">raise</span> KeyError(name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> users(self):
+        <span class="PY_KEYWORD">return</span> self._store.fetchObjectsOfClass(self._userClass)
+
+    <span class="PY_KEYWORD">def</span> activeUsers(self):
+        <span class="PY_COMMENT"># @@ 2001-02-17 ce: this ultimately does a fetch every time,</span>
+        <span class="PY_COMMENT"># which sucks if we already have the user in memory.</span>
+        <span class="PY_COMMENT"># This is really an MK issue regarding caching of objects</span>
+        <span class="PY_COMMENT"># and perhaps a SQL database issue as well.</span>
+        <span class="PY_KEYWORD">return</span> [user <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self.users() <span class="PY_KEYWORD">if</span> user.isActive()]
+
+    <span class="PY_KEYWORD">def</span> inactiveUsers(self):
+        <span class="PY_KEYWORD">return</span> [user <span class="PY_KEYWORD">for</span> user <span class="PY_KEYWORD">in</span> self.users() <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> user.isActive()]
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiscUtils.PropertiesObject</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiscUtils.PropertiesObject</h2>
+<p>You can also browse the <a href="../Files/PropertiesObject.html">complete source file</a>
+or the <a href="../Docs/MiscUtils.PropertiesObject.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">WillNotRunError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">PropertiesObject</span>(dict):</span>
+
+<span class="line_category">    ## Init and reading ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, filename=None)</span>
+<span class="line_def">    def <span class="name_def">loadValues</span>(self, *args, **kwargs)</span>
+<span class="line_def">    def <span class="name_def">readFileNamed</span>(self, filename)</span>
+
+<span class="line_category">    ## Self utility ##</span>
+<span class="line_def">    def <span class="name_def">cleanPrivateItems</span>(self)</span>
+<span class="line_def">    def <span class="name_def">createDerivedItems</span>(self)</span>
+<span class="line_def">    def <span class="name_def">createVersionString</span>(self)</span>
+<span class="line_def">    def <span class="name_def">createRequiredPyVersionString</span>(self)</span>
+<span class="line_def">    def <span class="name_def">createWillRun</span>(self)</span>
+<span class="line_def">    def <span class="name_def">willRunKeys</span>(self)</span>
+<span class="line_def">    def <span class="name_def">checkRequiredPyVersion</span>(self)</span>
+<span class="line_def">    def <span class="name_def">checkRequiredOpSys</span>(self)</span>
+<span class="line_def">    def <span class="name_def">checkDeniedOpSys</span>(self)</span>
+<span class="line_def">    def <span class="name_def">checkRequiredSoftware</span>(self)</span>
+<span class="line_def">    def <span class="name_def">checkWillRunFunc</span>(self)</span>
+
+</pre>
+</body>
+</html>

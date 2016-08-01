@@ -1,0 +1,267 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.PickleRPCServlet</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.PickleRPCServlet</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/PickleRPCServlet.py">/var/www/docs/Webware-1.1.1/WebKit/PickleRPCServlet.py</a></font></td></tr></table>
+    <p><tt>Dict-RPC&nbsp;servlets.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="traceback.html">traceback</a><br>
+</td><td width="25%" valign=top><a href="zlib.html">zlib</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#SafeUnpickler">MiscUtils.PickleRPC.SafeUnpickler</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.PickleRPCServlet.html#PickleRPCServlet">PickleRPCServlet</a>(<a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a>, <a href="MiscUtils.PickleRPC.html#SafeUnpickler">MiscUtils.PickleRPC.SafeUnpickler</a>)
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a>(<a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.PickleRPCServlet.html#PickleRPCServlet">PickleRPCServlet</a>(<a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a>, <a href="MiscUtils.PickleRPC.html#SafeUnpickler">MiscUtils.PickleRPC.SafeUnpickler</a>)
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PickleRPCServlet">class <strong>PickleRPCServlet</strong></a>(<a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a>, <a href="MiscUtils.PickleRPC.html#SafeUnpickler">MiscUtils.PickleRPC.SafeUnpickler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#PickleRPCServlet">PickleRPCServlet</a>&nbsp;is&nbsp;a&nbsp;base&nbsp;class&nbsp;for&nbsp;Dict-RPC&nbsp;servlets.<br>
+&nbsp;<br>
+The&nbsp;"Pickle"&nbsp;refers&nbsp;to&nbsp;Python's&nbsp;pickle&nbsp;module.&nbsp;This&nbsp;class&nbsp;is<br>
+similar&nbsp;to&nbsp;XMLRPCServlet.&nbsp;By&nbsp;using&nbsp;Python&nbsp;pickles&nbsp;you&nbsp;get&nbsp;their<br>
+convenience&nbsp;(assuming&nbsp;the&nbsp;client&nbsp;is&nbsp;Pythonic),&nbsp;but&nbsp;lose<br>
+language&nbsp;independence.&nbsp;Some&nbsp;of&nbsp;us&nbsp;don't&nbsp;mind&nbsp;that&nbsp;last&nbsp;one.&nbsp;&nbsp;;-)<br>
+&nbsp;<br>
+Conveniences&nbsp;over&nbsp;XML-RPC&nbsp;include&nbsp;the&nbsp;use&nbsp;of&nbsp;all&nbsp;of&nbsp;the&nbsp;following:<br>
+&nbsp;&nbsp;*&nbsp;Any&nbsp;pickle-able&nbsp;Python&nbsp;type&nbsp;(datetime&nbsp;for&nbsp;example)<br>
+&nbsp;&nbsp;*&nbsp;Python&nbsp;instances&nbsp;(aka&nbsp;objects)<br>
+&nbsp;&nbsp;*&nbsp;None<br>
+&nbsp;&nbsp;*&nbsp;Longs&nbsp;that&nbsp;are&nbsp;outside&nbsp;the&nbsp;32-bit&nbsp;int&nbsp;boundaries<br>
+&nbsp;&nbsp;*&nbsp;Keyword&nbsp;arguments<br>
+&nbsp;<br>
+Pickles&nbsp;should&nbsp;also&nbsp;be&nbsp;faster&nbsp;than&nbsp;XML,&nbsp;especially&nbsp;now&nbsp;that<br>
+we&nbsp;support&nbsp;binary&nbsp;pickling&nbsp;and&nbsp;compression.<br>
+&nbsp;<br>
+To&nbsp;make&nbsp;your&nbsp;own&nbsp;<a href="#PickleRPCServlet">PickleRPCServlet</a>,&nbsp;create&nbsp;a&nbsp;subclass&nbsp;and&nbsp;implement&nbsp;a<br>
+method&nbsp;which&nbsp;is&nbsp;then&nbsp;named&nbsp;in&nbsp;<a href="#PickleRPCServlet-exposedMethods">exposedMethods</a>():<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;WebKit.<a href="#PickleRPCServlet">PickleRPCServlet</a>&nbsp;import&nbsp;<a href="#PickleRPCServlet">PickleRPCServlet</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;Math(<a href="#PickleRPCServlet">PickleRPCServlet</a>):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;multiply(self,&nbsp;x,&nbsp;y):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;x&nbsp;*&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#PickleRPCServlet-exposedMethods">exposedMethods</a>(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;['multiply']<br>
+&nbsp;<br>
+To&nbsp;make&nbsp;a&nbsp;PickleRPC&nbsp;call&nbsp;from&nbsp;another&nbsp;Python&nbsp;program,&nbsp;do&nbsp;this:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;MiscUtils.PickleRPC&nbsp;import&nbsp;Server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;server&nbsp;=&nbsp;Server('<a href="http://localhost/WebKit.cgi/Context/Math">http://localhost/WebKit.cgi/Context/Math</a>')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;server.multiply(3,&nbsp;4)&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;12<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;server.multiply('-',&nbsp;10)&nbsp;#&nbsp;----------<br>
+&nbsp;<br>
+If&nbsp;a&nbsp;request&nbsp;error&nbsp;is&nbsp;raised&nbsp;by&nbsp;the&nbsp;server,&nbsp;then<br>
+MiscUtils.PickleRPC.RequestError&nbsp;is&nbsp;raised.&nbsp;If&nbsp;an&nbsp;unhandled<br>
+exception&nbsp;is&nbsp;raised&nbsp;by&nbsp;the&nbsp;server,&nbsp;or&nbsp;the&nbsp;server&nbsp;response&nbsp;is<br>
+malformed,&nbsp;then&nbsp;MiscUtils.PickleRPC.ResponseError&nbsp;(or&nbsp;one&nbsp;of<br>
+its&nbsp;subclasses)&nbsp;is&nbsp;raised.<br>
+&nbsp;<br>
+Tip:&nbsp;If&nbsp;you&nbsp;want&nbsp;callers&nbsp;of&nbsp;the&nbsp;RPC&nbsp;servlets&nbsp;to&nbsp;be&nbsp;able&nbsp;to<br>
+introspect&nbsp;what&nbsp;methods&nbsp;are&nbsp;available,&nbsp;then&nbsp;include<br>
+'exposedMethods'&nbsp;in&nbsp;<a href="#PickleRPCServlet-exposedMethods">exposedMethods</a>().<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;wanted&nbsp;the&nbsp;actual&nbsp;response&nbsp;dictionary&nbsp;for&nbsp;some&nbsp;reason:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;server._request('multiply',&nbsp;3,&nbsp;4)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;{'value':&nbsp;12,&nbsp;'timeReceived':&nbsp;...}<br>
+&nbsp;<br>
+In&nbsp;which&nbsp;case,&nbsp;an&nbsp;exception&nbsp;is&nbsp;not&nbsp;purposefully&nbsp;raised&nbsp;if&nbsp;the<br>
+dictionary&nbsp;contains&nbsp;one.&nbsp;Instead,&nbsp;examine&nbsp;the&nbsp;dictionary.<br>
+&nbsp;<br>
+For&nbsp;the&nbsp;dictionary&nbsp;formats&nbsp;and&nbsp;more&nbsp;information&nbsp;see&nbsp;the&nbsp;docs<br>
+for&nbsp;MiscUtils.PickleRPC.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.PickleRPCServlet.html#PickleRPCServlet">PickleRPCServlet</a></dd>
+<dd><a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a></dd>
+<dd><a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a></dd>
+<dd><a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#SafeUnpickler">MiscUtils.PickleRPC.SafeUnpickler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PickleRPCServlet-respondToPost"><strong>respondToPost</strong></a>(self, trans)</dt></dl>
+
+<dl><dt><a name="PickleRPCServlet-sendResponse"><strong>sendResponse</strong></a>(self, trans, response)</dt><dd><tt>Timestamp&nbsp;the&nbsp;response&nbsp;dict&nbsp;and&nbsp;send&nbsp;it.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="PickleRPCServlet-useBinaryPickle"><strong>useBinaryPickle</strong></a>()</dt><dd><tt>Determine&nbsp;whether&nbsp;binary&nbsp;pickling&nbsp;format&nbsp;shall&nbsp;be&nbsp;used.<br>
+&nbsp;<br>
+When&nbsp;this&nbsp;returns&nbsp;True,&nbsp;the&nbsp;highest&nbsp;available&nbsp;binary&nbsp;pickling&nbsp;format<br>
+will&nbsp;be&nbsp;used.&nbsp;Override&nbsp;this&nbsp;to&nbsp;return&nbsp;False&nbsp;to&nbsp;use&nbsp;the&nbsp;less-efficient<br>
+text&nbsp;pickling&nbsp;format.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a>:<br>
+<dl><dt><a name="PickleRPCServlet-awake"><strong>awake</strong></a>(self, transaction)</dt><dd><tt>Begin&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-call"><strong>call</strong></a>(self, methodName, *args, **keywords)</dt><dd><tt>Call&nbsp;custom&nbsp;method.<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;this&nbsp;class&nbsp;for&nbsp;custom&nbsp;handling&nbsp;of&nbsp;methods.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-resultForException"><strong>resultForException</strong></a>(self, e, trans)</dt><dd><tt>Get&nbsp;text&nbsp;for&nbsp;exception.<br>
+&nbsp;<br>
+Given&nbsp;an&nbsp;unhandled&nbsp;exception,&nbsp;returns&nbsp;the&nbsp;string&nbsp;that&nbsp;should&nbsp;be<br>
+sent&nbsp;back&nbsp;in&nbsp;the&nbsp;RPC&nbsp;response&nbsp;as&nbsp;controlled&nbsp;by&nbsp;the<br>
+RPCExceptionReturn&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-sleep"><strong>sleep</strong></a>(self, transaction)</dt><dd><tt>End&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-transaction"><strong>transaction</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;corresponding&nbsp;transaction.<br>
+&nbsp;<br>
+Most&nbsp;uses&nbsp;of&nbsp;RPC&nbsp;will&nbsp;not&nbsp;need&nbsp;this.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.RPCServlet.html#RPCServlet">WebKit.RPCServlet.RPCServlet</a>:<br>
+<dl><dt><a name="PickleRPCServlet-exposedMethods"><strong>exposedMethods</strong></a>()</dt><dd><tt>Get&nbsp;exposed&nbsp;methods.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;methods&nbsp;that&nbsp;will&nbsp;be&nbsp;exposed<br>
+through&nbsp;XML-RPC.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-handleException"><strong>handleException</strong></a>(transaction)</dt><dd><tt>Handle&nbsp;exception.<br>
+&nbsp;<br>
+If&nbsp;ReportRPCExceptionsInWebKit&nbsp;is&nbsp;set&nbsp;to&nbsp;True,&nbsp;then&nbsp;flush&nbsp;the&nbsp;response<br>
+(because&nbsp;we&nbsp;don't&nbsp;want&nbsp;the&nbsp;standard&nbsp;HTML&nbsp;traceback&nbsp;to&nbsp;be&nbsp;appended&nbsp;to<br>
+the&nbsp;response)&nbsp;and&nbsp;then&nbsp;handle&nbsp;the&nbsp;exception&nbsp;in&nbsp;the&nbsp;standard&nbsp;WebKit&nbsp;way.<br>
+This&nbsp;means&nbsp;logging&nbsp;it&nbsp;to&nbsp;the&nbsp;console,&nbsp;storing&nbsp;it&nbsp;in&nbsp;the&nbsp;error&nbsp;log,<br>
+sending&nbsp;error&nbsp;email,&nbsp;etc.&nbsp;depending&nbsp;on&nbsp;the&nbsp;settings.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-sendOK"><strong>sendOK</strong></a>(contentType, contents, trans, contentEncoding<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;a&nbsp;200&nbsp;OK&nbsp;response&nbsp;with&nbsp;the&nbsp;given&nbsp;contents.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>:<br>
+<dl><dt><a name="PickleRPCServlet-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PickleRPCServlet-respond"><strong>respond</strong></a>(self, trans)</dt><dd><tt>Respond&nbsp;to&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Invokes&nbsp;the&nbsp;appropriate&nbsp;respondToSomething()&nbsp;method&nbsp;depending&nbsp;on&nbsp;the<br>
+type&nbsp;of&nbsp;request&nbsp;(e.g.,&nbsp;GET,&nbsp;POST,&nbsp;PUT,&nbsp;...).</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-respondToHead"><strong>respondToHead</strong></a>(self, trans)</dt><dd><tt>Respond&nbsp;to&nbsp;a&nbsp;HEAD&nbsp;request.<br>
+&nbsp;<br>
+A&nbsp;correct&nbsp;but&nbsp;inefficient&nbsp;implementation.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>:<br>
+<dl><dt><a name="PickleRPCServlet-lastModified"><strong>lastModified</strong></a>(trans)</dt><dd><tt>Get&nbsp;time&nbsp;of&nbsp;last&nbsp;modification.<br>
+&nbsp;<br>
+Return&nbsp;this&nbsp;object's&nbsp;Last-Modified&nbsp;time&nbsp;(as&nbsp;a&nbsp;float),<br>
+or&nbsp;None&nbsp;(meaning&nbsp;don't&nbsp;know&nbsp;or&nbsp;not&nbsp;applicable).</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-notImplemented"><strong>notImplemented</strong></a>(trans)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><a name="PickleRPCServlet-close"><strong>close</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PickleRPCServlet-log"><strong>log</strong></a>(self, message)</dt><dd><tt>Log&nbsp;a&nbsp;message.<br>
+&nbsp;<br>
+This&nbsp;can&nbsp;be&nbsp;invoked&nbsp;to&nbsp;print&nbsp;messages&nbsp;concerning&nbsp;the&nbsp;servlet.<br>
+This&nbsp;is&nbsp;often&nbsp;used&nbsp;by&nbsp;self&nbsp;to&nbsp;relay&nbsp;important&nbsp;information&nbsp;back<br>
+to&nbsp;developers.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-name"><strong>name</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;which&nbsp;is&nbsp;simple&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;class.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;*not*&nbsp;override&nbsp;this&nbsp;method.<br>
+It&nbsp;is&nbsp;used&nbsp;for&nbsp;logging&nbsp;and&nbsp;debugging.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-open"><strong>open</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PickleRPCServlet-runMethodForTransaction"><strong>runMethodForTransaction</strong></a>(self, trans, method, *args, **kw)</dt></dl>
+
+<dl><dt><a name="PickleRPCServlet-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;filesystem&nbsp;path&nbsp;of&nbsp;the&nbsp;page&nbsp;on&nbsp;the&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-setFactory"><strong>setFactory</strong></a>(self, factory)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><a name="PickleRPCServlet-canBeReused"><strong>canBeReused</strong></a>()</dt><dd><tt>Returns&nbsp;whether&nbsp;a&nbsp;single&nbsp;servlet&nbsp;instance&nbsp;can&nbsp;be&nbsp;reused.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;is&nbsp;True,&nbsp;but&nbsp;subclasses&nbsp;con&nbsp;override&nbsp;to&nbsp;return&nbsp;False.<br>
+Keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;performance&nbsp;may&nbsp;seriously&nbsp;be&nbsp;degraded&nbsp;if&nbsp;instances<br>
+can't&nbsp;be&nbsp;reused.&nbsp;Also,&nbsp;there's&nbsp;no&nbsp;known&nbsp;good&nbsp;reasons&nbsp;not&nbsp;to&nbsp;reuse<br>
+an&nbsp;instance.&nbsp;Remember&nbsp;the&nbsp;<a href="#PickleRPCServlet-awake">awake</a>()&nbsp;and&nbsp;<a href="#PickleRPCServlet-sleep">sleep</a>()&nbsp;methods&nbsp;are&nbsp;invoked<br>
+for&nbsp;every&nbsp;transaction.&nbsp;But&nbsp;just&nbsp;in&nbsp;case,&nbsp;your&nbsp;servlet&nbsp;can&nbsp;refuse<br>
+to&nbsp;be&nbsp;reused.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-canBeThreaded"><strong>canBeThreaded</strong></a>()</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;servlet&nbsp;can&nbsp;be&nbsp;multithreaded.<br>
+&nbsp;<br>
+This&nbsp;value&nbsp;should&nbsp;not&nbsp;change&nbsp;during&nbsp;the&nbsp;lifetime&nbsp;of&nbsp;the&nbsp;object.<br>
+The&nbsp;default&nbsp;implementation&nbsp;returns&nbsp;False.<br>
+Note:&nbsp;This&nbsp;is&nbsp;not&nbsp;currently&nbsp;used.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-runTransaction"><strong>runTransaction</strong></a>(trans)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="MiscUtils.PickleRPC.html#SafeUnpickler">MiscUtils.PickleRPC.SafeUnpickler</a>:<br>
+<dl><dt><a name="PickleRPCServlet-allowedGlobals"><strong>allowedGlobals</strong></a>(self)</dt><dd><tt>Allowed&nbsp;class&nbsp;names.<br>
+&nbsp;<br>
+Must&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;(moduleName,&nbsp;klassName)&nbsp;tuples&nbsp;for&nbsp;all<br>
+classes&nbsp;that&nbsp;you&nbsp;want&nbsp;to&nbsp;allow&nbsp;to&nbsp;be&nbsp;unpickled.<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;[('datetime',&nbsp;'date')]<br>
+allows&nbsp;datetime.date&nbsp;instances&nbsp;to&nbsp;be&nbsp;unpickled.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-findGlobal"><strong>findGlobal</strong></a>(self, module, klass)</dt><dd><tt>Find&nbsp;class&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-load"><strong>load</strong></a>(self, file)</dt><dd><tt>Unpickle&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="PickleRPCServlet-loads"><strong>loads</strong></a>(self, str)</dt><dd><tt>Unpickle&nbsp;a&nbsp;string.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-dumps"><strong>dumps</strong></a>(...)</dt><dd><tt><a href="#-dumps">dumps</a>(obj,&nbsp;protocol=0)&nbsp;--&nbsp;Return&nbsp;a&nbsp;string&nbsp;containing&nbsp;an&nbsp;object&nbsp;in&nbsp;pickle&nbsp;format.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;Pickler&nbsp;docstring&nbsp;for&nbsp;the&nbsp;meaning&nbsp;of&nbsp;optional&nbsp;argument&nbsp;proto.</tt></dd></dl>
+ <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+</td></tr></table>
+</body></html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/RoleUserManagerToMiddleKit.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The RoleUserManagerToMiddleKit class."""</span>
+
+<span class="PY_KEYWORD">from</span> RoleUserManagerMixIn <span class="PY_KEYWORD">import</span> RoleUserManagerMixIn
+<span class="PY_KEYWORD">from</span> UserManagerToMiddleKit <span class="PY_KEYWORD">import</span> UserManagerToMiddleKit
+
+
+<span class="PY_KEYWORD">class</span> RoleUserManagerToMiddleKit(UserManagerToMiddleKit, RoleUserManagerMixIn):
+    <span class="PY_STRING">"""See the base classes for more information."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, userClass=None, store=None, useSQL=None):
+        UserManagerToMiddleKit.__init__(self, userClass, store, useSQL)
+        RoleUserManagerMixIn.__init__(self)
+
+    <span class="PY_KEYWORD">def</span> initUserClass(self):
+        <span class="PY_STRING">"""Invoked by __init__ to set the default user class.
+
+        Overridden to pass on the semantics we inherit from
+        RoleUsersManagerMixIn. The user class is a MiddleKit issue for us.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

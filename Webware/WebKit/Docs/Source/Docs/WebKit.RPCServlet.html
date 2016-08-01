@@ -1,0 +1,162 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.RPCServlet</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.RPCServlet</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/RPCServlet.py">/var/www/docs/Webware-1.1.1/WebKit/RPCServlet.py</a></font></td></tr></table>
+    <p><tt>RPC&nbsp;servlets.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="traceback.html">traceback</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>(<a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.RPCServlet.html#RPCServlet">RPCServlet</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RPCServlet">class <strong>RPCServlet</strong></a>(<a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#RPCServlet">RPCServlet</a>&nbsp;is&nbsp;a&nbsp;base&nbsp;class&nbsp;for&nbsp;RPC&nbsp;servlets.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.RPCServlet.html#RPCServlet">RPCServlet</a></dd>
+<dd><a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a></dd>
+<dd><a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="RPCServlet-awake"><strong>awake</strong></a>(self, transaction)</dt><dd><tt>Begin&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-call"><strong>call</strong></a>(self, methodName, *args, **keywords)</dt><dd><tt>Call&nbsp;custom&nbsp;method.<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;this&nbsp;class&nbsp;for&nbsp;custom&nbsp;handling&nbsp;of&nbsp;methods.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-resultForException"><strong>resultForException</strong></a>(self, e, trans)</dt><dd><tt>Get&nbsp;text&nbsp;for&nbsp;exception.<br>
+&nbsp;<br>
+Given&nbsp;an&nbsp;unhandled&nbsp;exception,&nbsp;returns&nbsp;the&nbsp;string&nbsp;that&nbsp;should&nbsp;be<br>
+sent&nbsp;back&nbsp;in&nbsp;the&nbsp;RPC&nbsp;response&nbsp;as&nbsp;controlled&nbsp;by&nbsp;the<br>
+RPCExceptionReturn&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-sleep"><strong>sleep</strong></a>(self, transaction)</dt><dd><tt>End&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-transaction"><strong>transaction</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;corresponding&nbsp;transaction.<br>
+&nbsp;<br>
+Most&nbsp;uses&nbsp;of&nbsp;RPC&nbsp;will&nbsp;not&nbsp;need&nbsp;this.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="RPCServlet-exposedMethods"><strong>exposedMethods</strong></a>()</dt><dd><tt>Get&nbsp;exposed&nbsp;methods.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;methods&nbsp;that&nbsp;will&nbsp;be&nbsp;exposed<br>
+through&nbsp;XML-RPC.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-handleException"><strong>handleException</strong></a>(transaction)</dt><dd><tt>Handle&nbsp;exception.<br>
+&nbsp;<br>
+If&nbsp;ReportRPCExceptionsInWebKit&nbsp;is&nbsp;set&nbsp;to&nbsp;True,&nbsp;then&nbsp;flush&nbsp;the&nbsp;response<br>
+(because&nbsp;we&nbsp;don't&nbsp;want&nbsp;the&nbsp;standard&nbsp;HTML&nbsp;traceback&nbsp;to&nbsp;be&nbsp;appended&nbsp;to<br>
+the&nbsp;response)&nbsp;and&nbsp;then&nbsp;handle&nbsp;the&nbsp;exception&nbsp;in&nbsp;the&nbsp;standard&nbsp;WebKit&nbsp;way.<br>
+This&nbsp;means&nbsp;logging&nbsp;it&nbsp;to&nbsp;the&nbsp;console,&nbsp;storing&nbsp;it&nbsp;in&nbsp;the&nbsp;error&nbsp;log,<br>
+sending&nbsp;error&nbsp;email,&nbsp;etc.&nbsp;depending&nbsp;on&nbsp;the&nbsp;settings.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-sendOK"><strong>sendOK</strong></a>(contentType, contents, trans, contentEncoding<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;a&nbsp;200&nbsp;OK&nbsp;response&nbsp;with&nbsp;the&nbsp;given&nbsp;contents.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>:<br>
+<dl><dt><a name="RPCServlet-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RPCServlet-respond"><strong>respond</strong></a>(self, trans)</dt><dd><tt>Respond&nbsp;to&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Invokes&nbsp;the&nbsp;appropriate&nbsp;respondToSomething()&nbsp;method&nbsp;depending&nbsp;on&nbsp;the<br>
+type&nbsp;of&nbsp;request&nbsp;(e.g.,&nbsp;GET,&nbsp;POST,&nbsp;PUT,&nbsp;...).</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-respondToHead"><strong>respondToHead</strong></a>(self, trans)</dt><dd><tt>Respond&nbsp;to&nbsp;a&nbsp;HEAD&nbsp;request.<br>
+&nbsp;<br>
+A&nbsp;correct&nbsp;but&nbsp;inefficient&nbsp;implementation.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.HTTPServlet.html#HTTPServlet">WebKit.HTTPServlet.HTTPServlet</a>:<br>
+<dl><dt><a name="RPCServlet-lastModified"><strong>lastModified</strong></a>(trans)</dt><dd><tt>Get&nbsp;time&nbsp;of&nbsp;last&nbsp;modification.<br>
+&nbsp;<br>
+Return&nbsp;this&nbsp;object's&nbsp;Last-Modified&nbsp;time&nbsp;(as&nbsp;a&nbsp;float),<br>
+or&nbsp;None&nbsp;(meaning&nbsp;don't&nbsp;know&nbsp;or&nbsp;not&nbsp;applicable).</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-notImplemented"><strong>notImplemented</strong></a>(trans)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><a name="RPCServlet-close"><strong>close</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RPCServlet-log"><strong>log</strong></a>(self, message)</dt><dd><tt>Log&nbsp;a&nbsp;message.<br>
+&nbsp;<br>
+This&nbsp;can&nbsp;be&nbsp;invoked&nbsp;to&nbsp;print&nbsp;messages&nbsp;concerning&nbsp;the&nbsp;servlet.<br>
+This&nbsp;is&nbsp;often&nbsp;used&nbsp;by&nbsp;self&nbsp;to&nbsp;relay&nbsp;important&nbsp;information&nbsp;back<br>
+to&nbsp;developers.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-name"><strong>name</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;which&nbsp;is&nbsp;simple&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;class.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;*not*&nbsp;override&nbsp;this&nbsp;method.<br>
+It&nbsp;is&nbsp;used&nbsp;for&nbsp;logging&nbsp;and&nbsp;debugging.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-open"><strong>open</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RPCServlet-runMethodForTransaction"><strong>runMethodForTransaction</strong></a>(self, trans, method, *args, **kw)</dt></dl>
+
+<dl><dt><a name="RPCServlet-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;filesystem&nbsp;path&nbsp;of&nbsp;the&nbsp;page&nbsp;on&nbsp;the&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-setFactory"><strong>setFactory</strong></a>(self, factory)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><a name="RPCServlet-canBeReused"><strong>canBeReused</strong></a>()</dt><dd><tt>Returns&nbsp;whether&nbsp;a&nbsp;single&nbsp;servlet&nbsp;instance&nbsp;can&nbsp;be&nbsp;reused.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;is&nbsp;True,&nbsp;but&nbsp;subclasses&nbsp;con&nbsp;override&nbsp;to&nbsp;return&nbsp;False.<br>
+Keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;performance&nbsp;may&nbsp;seriously&nbsp;be&nbsp;degraded&nbsp;if&nbsp;instances<br>
+can't&nbsp;be&nbsp;reused.&nbsp;Also,&nbsp;there's&nbsp;no&nbsp;known&nbsp;good&nbsp;reasons&nbsp;not&nbsp;to&nbsp;reuse<br>
+an&nbsp;instance.&nbsp;Remember&nbsp;the&nbsp;<a href="#RPCServlet-awake">awake</a>()&nbsp;and&nbsp;<a href="#RPCServlet-sleep">sleep</a>()&nbsp;methods&nbsp;are&nbsp;invoked<br>
+for&nbsp;every&nbsp;transaction.&nbsp;But&nbsp;just&nbsp;in&nbsp;case,&nbsp;your&nbsp;servlet&nbsp;can&nbsp;refuse<br>
+to&nbsp;be&nbsp;reused.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-canBeThreaded"><strong>canBeThreaded</strong></a>()</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;servlet&nbsp;can&nbsp;be&nbsp;multithreaded.<br>
+&nbsp;<br>
+This&nbsp;value&nbsp;should&nbsp;not&nbsp;change&nbsp;during&nbsp;the&nbsp;lifetime&nbsp;of&nbsp;the&nbsp;object.<br>
+The&nbsp;default&nbsp;implementation&nbsp;returns&nbsp;False.<br>
+Note:&nbsp;This&nbsp;is&nbsp;not&nbsp;currently&nbsp;used.</tt></dd></dl>
+
+<dl><dt><a name="RPCServlet-runTransaction"><strong>runTransaction</strong></a>(trans)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.Servlet.html#Servlet">WebKit.Servlet.Servlet</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

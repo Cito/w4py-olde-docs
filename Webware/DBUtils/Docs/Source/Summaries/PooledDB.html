@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of DBUtils.PooledDB</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of DBUtils.PooledDB</h2>
+<p>You can also browse the <a href="../Files/PooledDB.html">complete source file</a>
+or the <a href="../Docs/DBUtils.PooledDB.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">PooledDBError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">InvalidConnection</span>(PooledDBError):</span>
+
+
+<span class="line_class">class <span class="name_class">NotSupportedError</span>(PooledDBError):</span>
+
+
+<span class="line_class">class <span class="name_class">TooManyConnections</span>(PooledDBError):</span>
+
+
+<span class="line_class">class <span class="name_class">PooledDB</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, creator,</span>
+<span class="line_def">            def <span class="name_def">wait</span>()</span>
+<span class="line_def">    def <span class="name_def">steady_connection</span>(self)</span>
+<span class="line_def">    def <span class="name_def">connection</span>(self, shareable=True)</span>
+<span class="line_def">    def <span class="name_def">dedicated_connection</span>(self)</span>
+<span class="line_def">    def <span class="name_def">unshare</span>(self, con)</span>
+<span class="line_def">    def <span class="name_def">cache</span>(self, con)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__del__</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">PooledDedicatedDBConnection</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, pool, con)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__getattr__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__del__</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">SharedDBConnection</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, con)</span>
+<span class="line_def">    def <span class="name_def">__lt__</span>(self, other)</span>
+<span class="line_def">    def <span class="name_def">__le__</span>(self, other)</span>
+<span class="line_def">    def <span class="name_def">__eq__</span>(self, other)</span>
+<span class="line_def">    def <span class="name_def">__ne__</span>(self, other)</span>
+<span class="line_def">    def <span class="name_def">__gt__</span>(self, other)</span>
+<span class="line_def">    def <span class="name_def">__ge__</span>(self, other)</span>
+<span class="line_def">    def <span class="name_def">share</span>(self)</span>
+<span class="line_def">    def <span class="name_def">unshare</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">PooledSharedDBConnection</span>:</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, pool, shared_con)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__getattr__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__del__</span>(self)</span>
+
+</pre>
+</body>
+</html>

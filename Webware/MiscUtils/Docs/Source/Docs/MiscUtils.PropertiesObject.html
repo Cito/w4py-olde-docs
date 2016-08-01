@@ -1,0 +1,269 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.PropertiesObject</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.PropertiesObject</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/PropertiesObject.py">/var/www/docs/Webware-1.1.1/MiscUtils/PropertiesObject.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#dict">__builtin__.dict</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PropertiesObject.html#PropertiesObject">PropertiesObject</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PropertiesObject.html#WillNotRunError">WillNotRunError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PropertiesObject">class <strong>PropertiesObject</strong></a>(<a href="__builtin__.html#dict">__builtin__.dict</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;Properties&nbsp;Object.<br>
+&nbsp;<br>
+A&nbsp;<a href="#PropertiesObject">PropertiesObject</a>&nbsp;represents,&nbsp;in&nbsp;a&nbsp;dictionary-like&nbsp;fashion,&nbsp;the&nbsp;values<br>
+found&nbsp;in&nbsp;a&nbsp;Properties.py&nbsp;file.&nbsp;That&nbsp;file&nbsp;is&nbsp;always&nbsp;included&nbsp;with&nbsp;a&nbsp;Webware<br>
+component&nbsp;to&nbsp;advertise&nbsp;its&nbsp;name,&nbsp;version,&nbsp;status,&nbsp;etc.&nbsp;Note&nbsp;that&nbsp;a&nbsp;Webware<br>
+component&nbsp;is&nbsp;a&nbsp;Python&nbsp;package&nbsp;that&nbsp;follows&nbsp;additional&nbsp;conventions.<br>
+Also,&nbsp;the&nbsp;top&nbsp;level&nbsp;Webware&nbsp;directory&nbsp;contains&nbsp;a&nbsp;Properties.py.<br>
+&nbsp;<br>
+Component&nbsp;properties&nbsp;are&nbsp;often&nbsp;used&nbsp;for:<br>
+&nbsp;&nbsp;*&nbsp;generation&nbsp;of&nbsp;documentation<br>
+&nbsp;&nbsp;*&nbsp;runtime&nbsp;examination&nbsp;of&nbsp;components,&nbsp;especially&nbsp;prior&nbsp;to&nbsp;loading<br>
+&nbsp;<br>
+<a href="#PropertiesObject">PropertiesObject</a>&nbsp;provides&nbsp;additional&nbsp;keys:<br>
+&nbsp;&nbsp;*&nbsp;filename&nbsp;-&nbsp;the&nbsp;filename&nbsp;from&nbsp;which&nbsp;the&nbsp;properties&nbsp;were&nbsp;read<br>
+&nbsp;&nbsp;*&nbsp;versionString&nbsp;-&nbsp;a&nbsp;nicely&nbsp;printable&nbsp;string&nbsp;of&nbsp;the&nbsp;version<br>
+&nbsp;&nbsp;*&nbsp;requiredPyVersionString&nbsp;-&nbsp;like&nbsp;versionString,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;for&nbsp;requiredPyVersion&nbsp;instead<br>
+&nbsp;&nbsp;*&nbsp;willRun&nbsp;-&nbsp;1&nbsp;if&nbsp;the&nbsp;component&nbsp;will&nbsp;run.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;So&nbsp;far&nbsp;that&nbsp;means&nbsp;having&nbsp;the&nbsp;right&nbsp;Python&nbsp;version.<br>
+&nbsp;&nbsp;*&nbsp;willNotRunReason&nbsp;-&nbsp;defined&nbsp;only&nbsp;if&nbsp;willRun&nbsp;is&nbsp;0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;contains&nbsp;a&nbsp;readable&nbsp;error&nbsp;message<br>
+&nbsp;<br>
+Using&nbsp;a&nbsp;<a href="#PropertiesObject">PropertiesObject</a>&nbsp;is&nbsp;better&nbsp;than&nbsp;investigating&nbsp;the&nbsp;Properties.py<br>
+file&nbsp;directly,&nbsp;because&nbsp;the&nbsp;rules&nbsp;for&nbsp;determining&nbsp;derived&nbsp;keys&nbsp;and&nbsp;any<br>
+future&nbsp;convenience&nbsp;methods&nbsp;will&nbsp;all&nbsp;be&nbsp;provided&nbsp;here.<br>
+&nbsp;<br>
+Usage&nbsp;example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;MiscUtils.<a href="#PropertiesObject">PropertiesObject</a>&nbsp;import&nbsp;<a href="#PropertiesObject">PropertiesObject</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;props&nbsp;=&nbsp;<a href="#PropertiesObject">PropertiesObject</a>(filename)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;item&nbsp;in&nbsp;props.<a href="#PropertiesObject-items">items</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;'%s:&nbsp;%s'&nbsp;%&nbsp;item<br>
+&nbsp;<br>
+Note:&nbsp;We&nbsp;don't&nbsp;normally&nbsp;suffix&nbsp;a&nbsp;class&nbsp;name&nbsp;with&nbsp;"Object"&nbsp;as&nbsp;we&nbsp;have<br>
+with&nbsp;this&nbsp;class,&nbsp;however,&nbsp;the&nbsp;name&nbsp;Properties.py&nbsp;is&nbsp;already&nbsp;used&nbsp;in<br>
+our&nbsp;containing&nbsp;package&nbsp;and&nbsp;all&nbsp;other&nbsp;packages.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PropertiesObject.html#PropertiesObject">PropertiesObject</a></dd>
+<dd><a href="__builtin__.html#dict">__builtin__.dict</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PropertiesObject-__init__"><strong>__init__</strong></a>(self, filename<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-checkDeniedOpSys"><strong>checkDeniedOpSys</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-checkRequiredOpSys"><strong>checkRequiredOpSys</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-checkRequiredPyVersion"><strong>checkRequiredPyVersion</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-checkRequiredSoftware"><strong>checkRequiredSoftware</strong></a>(self)</dt><dd><tt>Not&nbsp;implemented.&nbsp;No&nbsp;op&nbsp;right&nbsp;now.</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-checkWillRunFunc"><strong>checkWillRunFunc</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-cleanPrivateItems"><strong>cleanPrivateItems</strong></a>(self)</dt><dd><tt>Remove&nbsp;items&nbsp;whose&nbsp;keys&nbsp;start&nbsp;with&nbsp;a&nbsp;double&nbsp;underscore,&nbsp;such&nbsp;as&nbsp;__builtins__.</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-createDerivedItems"><strong>createDerivedItems</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-createRequiredPyVersionString"><strong>createRequiredPyVersionString</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-createVersionString"><strong>createVersionString</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-createWillRun"><strong>createWillRun</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-loadValues"><strong>loadValues</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-readFileNamed"><strong>readFileNamed</strong></a>(self, filename)</dt></dl>
+
+<dl><dt><a name="PropertiesObject-willRunKeys"><strong>willRunKeys</strong></a>(self)</dt><dd><tt>Return&nbsp;keys&nbsp;to&nbsp;be&nbsp;examined&nbsp;before&nbsp;running&nbsp;the&nbsp;component.<br>
+&nbsp;<br>
+This&nbsp;returns&nbsp;a&nbsp;set&nbsp;of&nbsp;all&nbsp;keys&nbsp;whose&nbsp;values&nbsp;should&nbsp;be&nbsp;examined&nbsp;in<br>
+order&nbsp;to&nbsp;determine&nbsp;if&nbsp;the&nbsp;component&nbsp;will&nbsp;run.&nbsp;Used&nbsp;by&nbsp;<a href="#PropertiesObject-createWillRun">createWillRun</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><a name="PropertiesObject-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-__contains__">__contains__</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__delitem__"><strong>__delitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__delitem__">__delitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__iter__">__iter__</a>()&nbsp;&lt;==&gt;&nbsp;iter(x)</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__len__"><strong>__len__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__len__">__len__</a>()&nbsp;&lt;==&gt;&nbsp;len(x)</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__setitem__"><strong>__setitem__</strong></a>(...)</dt><dd><tt>x.<a href="#PropertiesObject-__setitem__">__setitem__</a>(i,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i]=y</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-__sizeof__">__sizeof__</a>()&nbsp;-&gt;&nbsp;size&nbsp;of&nbsp;D&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-clear"><strong>clear</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-clear">clear</a>()&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;D.</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-copy"><strong>copy</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-copy">copy</a>()&nbsp;-&gt;&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-get"><strong>get</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-get">get</a>(k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;else&nbsp;d.&nbsp;&nbsp;d&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-has_key"><strong>has_key</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-has_key">has_key</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-items"><strong>items</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-items">items</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;(key,&nbsp;value)&nbsp;pairs,&nbsp;as&nbsp;2-tuples</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-iteritems"><strong>iteritems</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-iteritems">iteritems</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;(key,&nbsp;value)&nbsp;items&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-iterkeys"><strong>iterkeys</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-iterkeys">iterkeys</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;keys&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-itervalues"><strong>itervalues</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-itervalues">itervalues</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;values&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-keys"><strong>keys</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-keys">keys</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;keys</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-pop"><strong>pop</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-pop">pop</a>(k[,d])&nbsp;-&gt;&nbsp;v,&nbsp;remove&nbsp;specified&nbsp;key&nbsp;and&nbsp;return&nbsp;the&nbsp;corresponding&nbsp;value.<br>
+If&nbsp;key&nbsp;is&nbsp;not&nbsp;found,&nbsp;d&nbsp;is&nbsp;returned&nbsp;if&nbsp;given,&nbsp;otherwise&nbsp;KeyError&nbsp;is&nbsp;raised</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-popitem"><strong>popitem</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-popitem">popitem</a>()&nbsp;-&gt;&nbsp;(k,&nbsp;v),&nbsp;remove&nbsp;and&nbsp;return&nbsp;some&nbsp;(key,&nbsp;value)&nbsp;pair&nbsp;as&nbsp;a<br>
+2-tuple;&nbsp;but&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;D&nbsp;is&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-setdefault"><strong>setdefault</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-setdefault">setdefault</a>(k[,d])&nbsp;-&gt;&nbsp;D.<a href="#PropertiesObject-get">get</a>(k,d),&nbsp;also&nbsp;set&nbsp;D[k]=d&nbsp;if&nbsp;k&nbsp;not&nbsp;in&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-update"><strong>update</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-update">update</a>(E,&nbsp;**F)&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Update&nbsp;D&nbsp;from&nbsp;<a href="__builtin__.html#dict">dict</a>/iterable&nbsp;E&nbsp;and&nbsp;F.<br>
+If&nbsp;E&nbsp;has&nbsp;a&nbsp;.<a href="#PropertiesObject-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;k&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;E[k]<br>
+If&nbsp;E&nbsp;lacks&nbsp;.<a href="#PropertiesObject-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(k,&nbsp;v)&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;v<br>
+In&nbsp;either&nbsp;case,&nbsp;this&nbsp;is&nbsp;followed&nbsp;by:&nbsp;for&nbsp;k&nbsp;in&nbsp;F:&nbsp;D[k]&nbsp;=&nbsp;F[k]</tt></dd></dl>
+
+<dl><dt><a name="PropertiesObject-values"><strong>values</strong></a>(...)</dt><dd><tt>D.<a href="#PropertiesObject-values">values</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;values</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#PropertiesObject-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<dl><dt><strong>fromkeys</strong> = &lt;built-in method fromkeys of type object&gt;<dd><tt><a href="__builtin__.html#dict">dict</a>.<a href="#PropertiesObject-fromkeys">fromkeys</a>(S[,v])&nbsp;-&gt;&nbsp;New&nbsp;<a href="__builtin__.html#dict">dict</a>&nbsp;with&nbsp;keys&nbsp;from&nbsp;S&nbsp;and&nbsp;values&nbsp;equal&nbsp;to&nbsp;v.<br>
+v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WillNotRunError">class <strong>WillNotRunError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Error&nbsp;for&nbsp;Webware&nbsp;components&nbsp;that&nbsp;will&nbsp;not&nbsp;run.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PropertiesObject.html#WillNotRunError">WillNotRunError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="WillNotRunError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#WillNotRunError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="WillNotRunError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="WillNotRunError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="WillNotRunError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#WillNotRunError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="WillNotRunError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

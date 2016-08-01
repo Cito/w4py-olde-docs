@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>TaskKit/Task.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Base class for tasks."""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError
+
+
+<span class="PY_KEYWORD">class</span> Task(object):
+    <span class="PY_STRING">"""Abstract base class from which you have to derive your own tasks."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        <span class="PY_STRING">"""Subclasses should invoke super for this method."""</span>
+        <span class="PY_COMMENT"># Nothing for now, but we might do something in the future.</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> run(self):
+        <span class="PY_STRING">"""Override this method for you own tasks.
+
+        Long running tasks can periodically use the proceed() method to check
+        if a task should stop.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+
+    <span class="PY_COMMENT">## Utility method ##</span>
+
+    <span class="PY_KEYWORD">def</span> proceed(self):
+        <span class="PY_STRING">"""Check whether this task should continue running.
+
+        Should be called periodically by long tasks to check if the system
+        wants them to exit. Returns True if its OK to continue, False if
+        it's time to quit.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._handle._isRunning
+
+
+    <span class="PY_COMMENT">## Attributes ##</span>
+
+    <span class="PY_KEYWORD">def</span> handle(self):
+        <span class="PY_STRING">"""Return the task handle.
+
+        A task is scheduled by wrapping a handler around it. It knows
+        everything about the scheduling (periodicity and the like).
+        Under normal circumstances you should not need the handler,
+        but if you want to write period modifying run() methods,
+        it is useful to have access to the handler. Use it with care.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._handle
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_STRING">"""Return the unique name under which the task was scheduled."""</span>
+        <span class="PY_KEYWORD">return</span> self._name
+
+
+    <span class="PY_COMMENT">## Private method ##</span>
+
+    <span class="PY_KEYWORD">def</span> _run(self, handle):
+        <span class="PY_STRING">"""This is the actual run method for the Task thread.
+
+        It is a private method which should not be overriden.
+
+        """</span>
+        self._name = handle.name()
+        self._handle = handle
+        <span class="PY_KEYWORD">try</span>:
+            self.run()
+        <span class="PY_KEYWORD">except</span> Exception:
+            handle.notifyFailure()
+        handle.notifyCompletion()
+</pre>
+<!--footer-->
+
+</body>
+</html>

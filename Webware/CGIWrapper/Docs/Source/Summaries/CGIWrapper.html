@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of CGIWrapper.CGIWrapper</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of CGIWrapper.CGIWrapper</h2>
+<p>You can also browse the <a href="../Files/CGIWrapper.html">complete source file</a>
+or the <a href="../Docs/CGIWrapper.CGIWrapper.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">CGIWrapper</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+
+<span class="line_category">    ## Configuration ##</span>
+<span class="line_def">    def <span class="name_def">defaultConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">configFilename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">userConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">config</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setting</span>(self, name)</span>
+
+<span class="line_category">    ## Utilities ##</span>
+<span class="line_def">    def <span class="name_def">docType</span>(self)</span>
+<span class="line_def">    def <span class="name_def">makeHeaders</span>(self)</span>
+<span class="line_def">    def <span class="name_def">makeFieldStorage</span>(self)</span>
+<span class="line_def">    def <span class="name_def">enhanceThePath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">environ</span>(self)</span>
+<span class="line_def">    def <span class="name_def">requireEnvs</span>(self, names)</span>
+<span class="line_def">    def <span class="name_def">scriptPathname</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeScriptLog</span>(self)</span>
+<span class="line_def">    def <span class="name_def">version</span>(self)</span>
+
+<span class="line_category">    ## Exception handling ##</span>
+<span class="line_def">    def <span class="name_def">handleException</span>(self, excInfo)</span>
+<span class="line_def">    def <span class="name_def">logExceptionToConsole</span>(self, stderr=sys.stderr)</span>
+<span class="line_def">    def <span class="name_def">reset</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htmlErrorPage</span>(self, showDebugInfo=True)</span>
+<span class="line_def">    def <span class="name_def">htmlDebugInfo</span>(self)</span>
+<span class="line_def">    def <span class="name_def">saveHTMLErrorPage</span>(self, html)</span>
+<span class="line_def">    def <span class="name_def">htmlErrorPageFilename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">logExceptionToDisk</span>(self, errorMsgFilename=None, excInfo=None)</span>
+<span class="line_def">    def <span class="name_def">emailException</span>(self, html, excInfo=None)</span>
+
+<span class="line_category">    ## Serve ##</span>
+<span class="line_def">    def <span class="name_def">serve</span>(self, environ=os.environ)</span>
+<span class="line_def">    def <span class="name_def">deliver</span>(self)</span>
+
+
+<span class="line_category">## Misc functions ##</span>
+<span class="line_def">def <span class="name_def">docType</span>()</span>
+<span class="line_def">def <span class="name_def">htTitle</span>(name)</span>
+<span class="line_def">def <span class="name_def">htDictionary</span>(d, addSpace=None)</span>
+<span class="line_def">def <span class="name_def">htTable</span>(listOfDicts, keys=None)</span>
+<span class="line_def">def <span class="name_def">osIdTable</span>()</span>
+<span class="line_def">def <span class="name_def">main</span>()</span>
+
+</pre>
+</body>
+</html>

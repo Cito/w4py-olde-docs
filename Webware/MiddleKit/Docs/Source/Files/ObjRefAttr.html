@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/ObjRefAttr.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">from</span> Attr <span class="PY_KEYWORD">import</span> Attr
+
+
+<span class="PY_KEYWORD">def</span> objRefJoin(klassId, serialNum):
+    <span class="PY_STRING">"""Given a klass id and object serial number, return a 64-bit obj ref value (e.g., a long)."""</span>
+    <span class="PY_KEYWORD">return</span> (long(klassId) &lt;&lt; 32) | long(serialNum)
+
+<span class="PY_KEYWORD">def</span> objRefSplit(objRef):
+    <span class="PY_STRING">"""Return a tuple with (klassId, serialNum) given the 64-bit (e.g., long type) objRef."""</span>
+    <span class="PY_KEYWORD">return</span> (objRef &amp; 0xFFFFFFFF00000000L) &gt;&gt; 32, objRef &amp; 0xFFFFFFFFL
+
+
+<span class="PY_KEYWORD">class</span> ObjRefAttr(Attr):
+    <span class="PY_STRING">"""This is an attribute that refers to another user-defined object.
+
+    For a list of objects, use ListAttr.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        Attr.__init__(self, attr)
+        self._className = attr[<span class="PY_STRING">'Type'</span>]
+
+    <span class="PY_KEYWORD">def</span> targetClassName(self):
+        <span class="PY_STRING">"""Return the name of the base class that this obj ref attribute points to."""</span>
+        <span class="PY_KEYWORD">return</span> self._className
+
+    <span class="PY_KEYWORD">def</span> targetKlass(self):
+        <span class="PY_KEYWORD">assert</span> self._targetKlass, <span class="PY_STRING">'not yet fully initialized'</span>
+        <span class="PY_KEYWORD">return</span> self._targetKlass
+
+    <span class="PY_KEYWORD">def</span> awakeFromRead(self):
+        <span class="PY_STRING">"""Check that the target class actually exists."""</span>
+        self._targetKlass = self.model().klass(self.targetClassName(), None)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._targetKlass:
+            <span class="PY_KEYWORD">from</span> Model <span class="PY_KEYWORD">import</span> ModelError
+            <span class="PY_KEYWORD">raise</span> ModelError(<span class="PY_STRING">'class %s: attr %s:'</span>
+                <span class="PY_STRING">'cannot locate target class %s for this obj ref.'</span> % (
+                self.klass().name(), self.name(), self.targetClassName()))
+</pre>
+<!--footer-->
+
+</body>
+</html>

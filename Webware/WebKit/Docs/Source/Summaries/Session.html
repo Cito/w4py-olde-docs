@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.Session</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.Session</h2>
+<p>You can also browse the <a href="../Files/Session.html">complete source file</a>
+or the <a href="../Docs/WebKit.Session.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">SessionError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">Session</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, trans, identifier=None)</span>
+
+<span class="line_category">    ## Access ##</span>
+<span class="line_def">    def <span class="name_def">creationTime</span>(self)</span>
+<span class="line_def">    def <span class="name_def">lastAccessTime</span>(self)</span>
+<span class="line_def">    def <span class="name_def">identifier</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isDirty</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setDirty</span>(self, dirty=True)</span>
+<span class="line_def">    def <span class="name_def">isExpired</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isNew</span>(self)</span>
+<span class="line_def">    def <span class="name_def">timeout</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setTimeout</span>(self, timeout)</span>
+
+<span class="line_category">    ## Invalidate ##</span>
+<span class="line_def">    def <span class="name_def">invalidate</span>(self)</span>
+
+<span class="line_category">    ## Values ##</span>
+<span class="line_def">    def <span class="name_def">value</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">hasValue</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setValue</span>(self, name, value)</span>
+<span class="line_def">    def <span class="name_def">delValue</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">values</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__getitem__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__setitem__</span>(self, name, value)</span>
+<span class="line_def">    def <span class="name_def">__delitem__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__contains__</span>(self, name)</span>
+
+<span class="line_category">    ## Transactions ##</span>
+<span class="line_def">    def <span class="name_def">awake</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">respond</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">sleep</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">expiring</span>(self)</span>
+
+<span class="line_category">    ## Utility ##</span>
+<span class="line_def">    def <span class="name_def">sessionEncode</span>(self, url)</span>
+
+<span class="line_category">    ## Exception reports ##</span>
+<span class="line_def">    def <span class="name_def">writeExceptionReport</span>(self, handler)</span>
+
+</pre>
+</body>
+</html>

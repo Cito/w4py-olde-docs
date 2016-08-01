@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/NamedValueAccess.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""NamedValueAccess.py
+
+NamedValueAccess provides functions for accessing Python objects by keys and
+named attributes. A 'key' is a single identifier such as 'foo'. A 'name' could
+be a key, or a qualified key, such as 'foo.bar.boo'. Names are generally more
+convenient and powerful, while the key-oriented function is more efficient and
+provide the atomic functionality that the name-oriented function is built upon.
+
+
+CREDIT
+
+Chuck Esterbrook &lt;echuck@mindspring.com&gt;
+Tavis Rudd &lt;tavis@calrudd.com&gt;
+
+"""</span>
+
+
+<span class="PY_KEYWORD">from</span> types <span class="PY_KEYWORD">import</span> MethodType
+<span class="PY_KEYWORD">from</span> UserDict <span class="PY_KEYWORD">import</span> UserDict
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+
+<span class="PY_COMMENT">## Exceptions ##</span>
+
+<span class="PY_KEYWORD">class</span> NamedValueAccessError(LookupError):
+    <span class="PY_STRING">"""General named value access error."""</span>
+
+
+<span class="PY_KEYWORD">class</span> ValueForKeyError(NamedValueAccessError):
+    <span class="PY_STRING">"""No value for key found error."""</span>
+
+
+<span class="PY_COMMENT">## Functions ##</span>
+
+<span class="PY_KEYWORD">def</span> valueForKey(obj, key, default=NoDefault):
+    <span class="PY_STRING">"""Get the value of the object named by the given key.
+
+    This method returns the value with the following precedence:
+      1. Methods before non-methods
+      2. Attributes before keys (__getitem__)
+      3. Public things before private things
+         (private being denoted by a preceding underscore)
+
+    Suppose key is 'foo', then this method returns one of these:
+      * obj.foo()
+      * obj._foo()
+      * obj.foo
+      * obj._foo
+      * obj['foo']
+      * default # only if specified
+
+    If all of these fail, a ValueForKeyError is raised.
+
+    NOTES
+
+      * valueForKey() works on dictionaries and dictionary-like objects.
+      * See valueForName() which is a more advanced version of this
+        function that allows multiple, qualified keys.
+
+    """</span>
+
+    <span class="PY_KEYWORD">assert</span> obj <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+
+    <span class="PY_COMMENT"># We only accept strings for keys</span>
+    <span class="PY_KEYWORD">assert</span> isinstance(key, basestring)
+
+    attr = method = None
+    unknown = False
+    <span class="PY_KEYWORD">if</span> isinstance(obj, (dict, UserDict)):
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> obj[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">raise</span> ValueForKeyError(key)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> obj.get(key, default)
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">try</span>:
+            klass = obj.__class__
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_COMMENT"># happens for classes themselves</span>
+            klass = method = None
+        <span class="PY_KEYWORD">else</span>:
+            method = getattr(klass, key, None)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> method:
+            underKey = <span class="PY_STRING">'_'</span> + key
+            method = klass <span class="PY_KEYWORD">and</span> getattr(klass, underKey, None) <span class="PY_KEYWORD">or</span> None
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> method:
+                attr = getattr(obj, key, NoDefault)
+                <span class="PY_KEYWORD">if</span> attr <span class="PY_KEYWORD">is</span> NoDefault:
+                    attr = getattr(obj, underKey, NoDefault)
+                    <span class="PY_KEYWORD">if</span> attr <span class="PY_KEYWORD">is</span> NoDefault:
+                        <span class="PY_KEYWORD">if</span> klass <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+                            getitem = getattr(klass, <span class="PY_STRING">'__getitem__'</span>, None)
+                            <span class="PY_KEYWORD">if</span> getitem:
+                                <span class="PY_KEYWORD">try</span>:
+                                    getitem(obj, key)
+                                <span class="PY_KEYWORD">except</span> KeyError:
+                                    unknown = True
+
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> unknown:
+        <span class="PY_KEYWORD">if</span> method:
+            <span class="PY_KEYWORD">return</span> method(obj)
+        <span class="PY_KEYWORD">if</span> attr <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> attr
+
+    <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> NoDefault:
+        <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">raise</span> ValueForKeyError(key)
+
+
+<span class="PY_KEYWORD">def</span> valueForName(obj, name, default=NoDefault):
+    <span class="PY_STRING">"""Get the value of the object that is named.
+
+    The name can use dotted notation to traverse through a network/graph
+    of objects. Since this function relies on valueForKey() for each
+    individual component of the name, you should be familiar with the
+    semantics of that notation.
+
+    Example: valueForName(obj, 'department.manager.salary')
+
+    """</span>
+    <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> name.split(<span class="PY_STRING">'.'</span>):
+        obj = valueForKey(obj, name, default)
+        <span class="PY_KEYWORD">if</span> obj <span class="PY_KEYWORD">is</span> default:
+            <span class="PY_KEYWORD">break</span>
+    <span class="PY_KEYWORD">return</span> obj
+</pre>
+<!--footer-->
+
+</body>
+</html>

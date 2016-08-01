@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of PSP.StreamReader</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of PSP.StreamReader</h2>
+<p>You can also browse the <a href="../Files/StreamReader.html">complete source file</a>
+or the <a href="../Docs/PSP.StreamReader.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Mark</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, reader,</span>
+<span class="line_def">    def <span class="name_def">__str__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getFile</span>(self)</span>
+<span class="line_def">    def <span class="name_def">pushStream</span>(self, inFileId, inStream, inBaseDir, inEncoding)</span>
+<span class="line_def">    def <span class="name_def">popStream</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">StreamReader</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, filename, ctxt)</span>
+<span class="line_def">    def <span class="name_def">init</span>(self)</span>
+<span class="line_def">    def <span class="name_def">registerSourceFile</span>(self, filepath)</span>
+<span class="line_def">    def <span class="name_def">pushFile</span>(self, filepath, encoding=None)</span>
+<span class="line_def">    def <span class="name_def">popFile</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getFile</span>(self, i)</span>
+<span class="line_def">    def <span class="name_def">newSourceFile</span>(self, filename)</span>
+<span class="line_def">    def <span class="name_def">mark</span>(self)</span>
+<span class="line_def">    def <span class="name_def">skipUntil</span>(self, s)</span>
+<span class="line_def">    def <span class="name_def">reset</span>(self, mark)</span>
+<span class="line_def">    def <span class="name_def">matches</span>(self, s)</span>
+<span class="line_def">    def <span class="name_def">advance</span>(self, length)</span>
+<span class="line_def">    def <span class="name_def">nextChar</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isSpace</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isDelimiter</span>(self)</span>
+<span class="line_def">    def <span class="name_def">peekChar</span>(self, cnt=1)</span>
+<span class="line_def">    def <span class="name_def">skipSpaces</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getChars</span>(self, start, stop)</span>
+<span class="line_def">    def <span class="name_def">hasMoreInput</span>(self)</span>
+<span class="line_def">    def <span class="name_def">nextContent</span>(self)</span>
+<span class="line_def">    def <span class="name_def">parseTagAttributes</span>(self)</span>
+<span class="line_def">    def <span class="name_def">parseAttributeValue</span>(self, valueDict)</span>
+<span class="line_def">    def <span class="name_def">parseToken</span>(self, quoted)</span>
+
+</pre>
+</body>
+</html>

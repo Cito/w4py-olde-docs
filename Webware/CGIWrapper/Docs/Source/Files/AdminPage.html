@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>CGIWrapper/AdminPage.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+
+<span class="PY_KEYWORD">class</span> AdminPage(object):
+    <span class="PY_STRING">"""AdminPage
+
+    This is the abstract superclass of all CGI Wrapper administration CGI
+    classes. Subclasses typically override title() and writeBody(), but may
+    customize other methods. Subclasses use self._var for the various vars
+    that are passed in from CGI Wrapper and self.write() and self.writeln().
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, vars):
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> vars:
+            setattr(self, <span class="PY_STRING">'_'</span> + name, vars[name])
+        self._vars = vars
+
+
+    <span class="PY_COMMENT">## HTML ##</span>
+
+    <span class="PY_KEYWORD">def</span> html(self):
+        self._html = []
+        self.writeHeader()
+        self.writeBody()
+        self.writeFooter()
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(self._html)
+
+
+    <span class="PY_COMMENT">## Utility methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> write(self, *args):
+        <span class="PY_KEYWORD">for</span> arg <span class="PY_KEYWORD">in</span> args:
+            self._html.append(str(arg))
+
+    <span class="PY_KEYWORD">def</span> writeln(self, *args):
+        <span class="PY_KEYWORD">for</span> arg <span class="PY_KEYWORD">in</span> args:
+            self._html.append(str(arg))
+        self._html.append(<span class="PY_STRING">'\n'</span>)
+
+
+    <span class="PY_COMMENT">## Content methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> writeHeader(self):
+        self.writeln(<span class="PY_STRING">'''&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;%s&lt;/title&gt;
+&lt;/head&gt;
+&lt;body %s&gt;
+        &lt;table align="center" bgcolor="white"&gt;&lt;tr&gt;&lt;td&gt;'''</span> % (
+            self.title(), self.bodyTags()))
+        self.writeBanner()
+        self.writeToolbar()
+
+    <span class="PY_KEYWORD">def</span> writeBody(self):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError(<span class="PY_STRING">'Should be overridden in a subclass'</span>)
+
+    <span class="PY_KEYWORD">def</span> writeFooter(self):
+        self.writeln(<span class="PY_STRING">'''
+        &lt;hr&gt;
+        &lt;div align="center" style="font-size:small"&gt;Webware for Python&lt;/div&gt;
+        &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;'''</span>)
+
+    <span class="PY_KEYWORD">def</span> title(self):
+        <span class="PY_KEYWORD">raise</span> NotImplementedError(<span class="PY_STRING">'Should be overridden in a subclass'</span>)
+
+    <span class="PY_KEYWORD">def</span> bodyTags(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'text="black" bgcolor="#555555"'</span>
+
+    <span class="PY_KEYWORD">def</span> writeBanner(self):
+        self.writeln(<span class="PY_STRING">'''
+        &lt;table align="center" bgcolor="#202080" cellpadding="5" cellspacing="0" width="100%%"&gt;
+            &lt;tr&gt;&lt;td align="center" style="color:white;font-weight:bold;font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif"&gt;
+                &lt;div style="font-size:14pt"&gt;CGI Wrapper&lt;/div&gt;
+                &lt;div style="font-size:16pt"&gt;%s&lt;/div&gt;
+            &lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;'''</span> % self.title())
+
+    <span class="PY_KEYWORD">def</span> writeToolbar(self):
+        <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/DebugAppServer.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""DebugAppServer
+
+`DebugAppServer` executes all requests within the main thread, allowing
+servlets to be easily debugged using any Python debugger. The drawback is
+that only one request can be processed at a time using this approach.
+
+Also, exceptions are not caught and gracefully handled with an HTML error
+page. Instead, the exceptions rise uncaught which allows the debugger to
+trap them so you can inspect the program.
+
+To use, simply run "python Launch.py DebugAppServer" using whatever debugging
+environment you prefer.
+
+Caveats:
+
+This app server supports the AutoReload feature but not for Python's standard
+modules or WebKit or WebKit's dependencies (MiscUtils, WebUtils and TaskKit).
+Even with that limitation, auto-reload is still useful because if you modify
+any module in your site, the auto-reload will happen. Note that the app server
+*will* restart when the aformentioned modules are modified, but the modules
+won't actually be reloaded.
+
+Currently the session sweeper is still run within a separate thread, and
+a "close thread" is started up by the AppServer base class, but neither
+of these two extra threads should pose any problems debugging servlets.
+
+Tested on:
+    - WingIDE on Windows, http://wingware.com/
+    - PythonWin
+    - JEdit with the JPyDbg plugin, on Windows
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">import</span> ThreadedAppServer, Profiler
+
+<span class="PY_COMMENT"># We are going to replace ThreadedAppServer with our own class,</span>
+<span class="PY_COMMENT"># so we need to save a reference to the original class.</span>
+OriginalThreadedAppServer = ThreadedAppServer.ThreadedAppServer
+
+<span class="PY_COMMENT"># We want the Python debugger to trap the exceptions, not WebKit</span>
+ThreadedAppServer.doesRunHandleExceptions = False
+
+
+<span class="PY_KEYWORD">class</span> DebugAppServer(OriginalThreadedAppServer):
+    <span class="PY_STRING">"""Single-threaded AppServer for debugging purposes.
+
+    We are piggybacking on 99% of the code in ThreadedAppServer. Our
+    trick is to replace the request queue with a dummy object that
+    executes requests immediately instead of pushing them onto a queue
+    to be handled by other threads.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    _excludePrefixes = <span class="PY_STRING">'WebKit MiscUtils WebUtils TaskKit'</span>.split()
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path=None):
+        <span class="PY_STRING">"""Initialize DebugAppServer."""</span>
+        <span class="PY_COMMENT"># Initialize the base class</span>
+        OriginalThreadedAppServer.__init__(self, path)
+        <span class="PY_COMMENT"># Replace the request queue with a dummy object that merely</span>
+        <span class="PY_COMMENT"># runs request handlers as soon as they are "pushed"</span>
+        self._requestQueue = DummyRequestQueue()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'You are running the debugging app server.'</span>
+
+    <span class="PY_KEYWORD">def</span> config(self):
+        <span class="PY_STRING">"""Return default configuration."""</span>
+        <span class="PY_COMMENT"># Force ThreadedAppServer to create an empty thread pool by hacking</span>
+        <span class="PY_COMMENT"># the settings to zero. This is not strictly necessary to do.</span>
+        <span class="PY_KEYWORD">if</span> self._config <span class="PY_KEYWORD">is</span> None:
+            OriginalThreadedAppServer.config(self)
+            self.setSetting(<span class="PY_STRING">'StartServerThreads'</span>, 0)
+            self.setSetting(<span class="PY_STRING">'MaxServerThreads'</span>, 0)
+            self.setSetting(<span class="PY_STRING">'MinServerThreads'</span>, 0)
+        <span class="PY_KEYWORD">return</span> self._config
+
+
+    <span class="PY_COMMENT">## Overridden methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> mainloop(self):
+        <span class="PY_STRING">"""Main loop for Windows.
+
+        This is needed for COM support on Windows, because special thread
+        initialization is required on any thread that runs servlets, in
+        this case the main thread itself.
+
+        """</span>
+        self.initThread()
+        <span class="PY_KEYWORD">try</span>:
+            OriginalThreadedAppServer.mainloop(self)
+        <span class="PY_KEYWORD">finally</span>:
+            self.delThread()
+
+    <span class="PY_KEYWORD">def</span> createApplication(self):
+        <span class="PY_STRING">"""Create and return an application object. Invoked by __init__."""</span>
+        <span class="PY_KEYWORD">return</span> DebugApplication(server=self)
+
+    <span class="PY_KEYWORD">def</span> restart(self):
+        <span class="PY_COMMENT"># The normal restart technique is to exit the application</span>
+        <span class="PY_COMMENT"># with a special exit code and let an exta-process script</span>
+        <span class="PY_COMMENT"># start the app server up again. That works poorly for a</span>
+        <span class="PY_COMMENT"># debugging environment which is attached to a particular process.</span>
+        Profiler.reset()
+        self.initiateShutdown()
+        self._closeThread.join()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        self._imp.delModules(includePythonModules=False,
+            excludePrefixes=self._excludePrefixes)
+        <span class="PY_KEYWORD">raise</span> ThreadedAppServer.RestartAppServerError
+
+
+<span class="PY_KEYWORD">from</span> Application <span class="PY_KEYWORD">import</span> Application
+
+
+<span class="PY_KEYWORD">class</span> DebugApplication(Application):
+    <span class="PY_STRING">"""This is a modified Application class for debugging."""</span>
+
+
+    <span class="PY_COMMENT">## Overridden methods ##</span>
+
+    <span class="PY_COMMENT"># Don't handle exceptions gracefully because we want</span>
+    <span class="PY_COMMENT"># them to rise uncaught so the debugger will kick in.</span>
+
+    <span class="PY_COMMENT"># @@ 2005-07-15 CE: This works well for exceptions within responding to</span>
+    <span class="PY_COMMENT"># a request, but for problems during importing a servlet, the exception</span>
+    <span class="PY_COMMENT"># gets printed to console and the debugger does not kick in.</span>
+
+    <span class="PY_KEYWORD">def</span> handleException(self):
+        <span class="PY_STRING">"""Handle exception.
+
+        This should only be used in cases where there is no transaction object,
+        for example if an exception occurs when attempting to save a session
+        to disk.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span>
+
+    <span class="PY_KEYWORD">def</span> handleExceptionInTransaction(self, excInfo, transaction):
+        <span class="PY_STRING">"""Handle exception with info.
+
+        Raises exception `excInfo` (as returned by ``sys.exc_info()``)
+        that was generated by `transaction`.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span>
+
+
+<span class="PY_KEYWORD">class</span> DummyRequestQueue(object):
+    <span class="PY_STRING">"""This is a dummy replacement for the request queue.
+
+    It merely executes handlers as soon as they are "pushed".
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Overridden methods ##</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> put(handler):
+        handler.handleRequest()
+        handler.close()
+
+
+<span class="PY_COMMENT">## Globals ##</span>
+
+<span class="PY_COMMENT"># Replace ThreadedAppServer class in the ThreadedAppServer module with our</span>
+<span class="PY_COMMENT"># DebugAppServer.  This seems like an awful hack, but it works and</span>
+<span class="PY_COMMENT"># requires less code duplication than other approaches I could think of, and</span>
+<span class="PY_COMMENT"># required a very minimal amount of modification to ThreadedAppServer.py.</span>
+ThreadedAppServer.ThreadedAppServer = DebugAppServer
+
+<span class="PY_COMMENT"># Grab the main function from ThreadedAppServer -- it has been "tricked"</span>
+<span class="PY_COMMENT"># into using DebugAppServer instead.</span>
+main = ThreadedAppServer.main
+
+<span class="PY_COMMENT"># Tweak ThreadedAppServer so that it never runs the main loop in a thread:</span>
+<span class="PY_KEYWORD">def</span> runMainLoopInThread():
+    <span class="PY_KEYWORD">return</span> 0
+ThreadedAppServer.runMainLoopInThread = runMainLoopInThread
+</pre>
+<!--footer-->
+
+</body>
+</html>

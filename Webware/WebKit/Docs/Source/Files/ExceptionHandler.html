@@ -1,0 +1,768 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/ExceptionHandler.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Exception handling."""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">import</span> poplib
+<span class="PY_KEYWORD">import</span> smtplib
+<span class="PY_KEYWORD">import</span> traceback
+<span class="PY_KEYWORD">from</span> random <span class="PY_KEYWORD">import</span> randint
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time, localtime
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> email.message <span class="PY_KEYWORD">import</span> Message
+    <span class="PY_KEYWORD">from</span> email.Utils <span class="PY_KEYWORD">import</span> formatdate
+<span class="PY_KEYWORD">except</span> ImportError: <span class="PY_COMMENT"># Python &lt; 2.5</span>
+    <span class="PY_KEYWORD">from</span> email.Message <span class="PY_KEYWORD">import</span> Message
+    <span class="PY_KEYWORD">from</span> email.Utils <span class="PY_KEYWORD">import</span> formatdate
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> StringIO
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> asclocaltime
+<span class="PY_KEYWORD">from</span> WebUtils.HTMLForException <span class="PY_KEYWORD">import</span> HTMLForException
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> htmlForDict, htmlEncode
+
+
+<span class="PY_KEYWORD">class</span> Singleton(object):
+    <span class="PY_STRING">"""A singleton object."""</span>
+
+
+<span class="PY_KEYWORD">class</span> ExceptionHandler(object):
+    <span class="PY_STRING">"""Exception handling.
+
+    ExceptionHandler is a utility class for Application that is created
+    to handle a particular exception. The object is a one-shot deal.
+    After handling an exception, it should be removed.
+
+    At some point, the exception handler sends
+    `writeExceptionReport` to the transaction (if present), which
+    in turn sends it to the other transactional objects
+    (application, request, response, etc.)  The handler is the
+    single argument for this message.
+
+    Classes may find it useful to do things like this::
+
+        exceptionReportAttrs = 'foo bar baz'.split()
+        def writeExceptionReport(self, handler):
+            handler.writeTitle(self.__class__.__name__)
+            handler.writeAttrs(self, self.exceptionReportAttrs)
+
+    The handler write methods that may be useful are:
+
+      * write
+      * writeTitle
+      * writeDict
+      * writeAttrs
+
+    Derived classes must not assume that the error occured in a
+    transaction.  self._tra may be None for exceptions outside
+    of transactions.
+
+    **HOW TO CREATE A CUSTOM EXCEPTION HANDLER**
+
+    In the ``__init__.py`` of your context::
+
+        from WebKit.ExceptionHandler import ExceptionHandler as _ExceptionHandler
+
+        class ExceptionHandler(_ExceptionHandler):
+
+            _hideValuesForFields = _ExceptionHandler._hideValuesForFields + ['foo', 'bar']
+
+            def work(self):
+                _ExceptionHandler.work(self)
+                # do whatever
+                # override other methods if you like
+
+        def contextInitialize(app, ctxPath):
+            app._exceptionHandlerClass = ExceptionHandler
+
+    You can also control the errors with settings in
+    ``Application.config``
+
+    """</span>
+    <span class="PY_COMMENT"># keep these lower case to support case insensitivity:</span>
+    _hideValuesForFields = [<span class="PY_STRING">'password'</span>, <span class="PY_STRING">'passwd'</span>, <span class="PY_STRING">'pwd'</span>,
+        <span class="PY_STRING">'creditcard'</span>, <span class="PY_STRING">'credit card'</span>, <span class="PY_STRING">'cc'</span>, <span class="PY_STRING">'pin'</span>, <span class="PY_STRING">'tan'</span>]
+    <span class="PY_KEYWORD">if</span> False: <span class="PY_COMMENT"># for testing</span>
+        _hideValuesForFields.extend([<span class="PY_STRING">'application'</span>, <span class="PY_STRING">'uri'</span>,
+            <span class="PY_STRING">'http_accept'</span>, <span class="PY_STRING">'userid'</span>])
+    _hiddenString = <span class="PY_STRING">'*** hidden ***'</span>
+    _addSpace = {<span class="PY_STRING">'PATH'</span>: os.pathsep, <span class="PY_STRING">'CLASSPATH'</span>: os.pathsep,
+        <span class="PY_STRING">'HTTP_ACCEPT'</span>: <span class="PY_STRING">','</span>, <span class="PY_STRING">'HTTP_ACCEPT_CHARSET'</span>: <span class="PY_STRING">','</span>,
+        <span class="PY_STRING">'HTTP_ACCEPT_ENCODING'</span>: <span class="PY_STRING">','</span>, <span class="PY_STRING">'HTTP_ACCEPT_LANGUAGE'</span>: <span class="PY_STRING">','</span>}
+    _docType = (<span class="PY_STRING">'&lt;!DOCTYPE HTML PUBLIC'</span>
+        <span class="PY_STRING">' "-//W3C//DTD HTML 4.01 Transitional//EN"'</span>
+        <span class="PY_STRING">' "http://www.w3.org/TR/html4/loose.dtd"&gt;'</span>)
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, application, transaction, excInfo,
+            formatOptions=None):
+        <span class="PY_STRING">"""Create an exception handler instance.
+
+        ExceptionHandler instances are created anew for each exception.
+        Instantiating ExceptionHandler completes the process --
+        the caller need not do anything else.
+
+        """</span>
+        <span class="PY_COMMENT"># Keep references to the objects</span>
+        self._app = application
+        self._tra = transaction
+        self._exc = excInfo
+        <span class="PY_KEYWORD">if</span> self._tra:
+            self._req = self._tra.request()
+            self._res = self._tra.response()
+        <span class="PY_KEYWORD">else</span>:
+            self._req = self._res = None
+
+        self._formatOptions = formatOptions
+
+        <span class="PY_COMMENT"># Make some repairs, if needed. We use the transaction</span>
+        <span class="PY_COMMENT"># &amp; response to get the error page back out</span>
+
+        <span class="PY_COMMENT"># @@ 2000-05-09 ce: Maybe a fresh transaction and</span>
+        <span class="PY_COMMENT"># response should always be made for that purpose</span>
+
+        <span class="PY_COMMENT"># @@ 2003-01-10 sd: This requires a transaction which</span>
+        <span class="PY_COMMENT"># we do not have.</span>
+
+        <span class="PY_COMMENT"># Making remaining code safe for no transaction.</span>
+        <span class="PY_COMMENT">#</span>
+        <span class="PY_COMMENT"># if self._res is None:</span>
+        <span class="PY_COMMENT">#      self._res = HTTPResponse()</span>
+        <span class="PY_COMMENT">#      self._tra.setResponse(self._res)</span>
+
+        <span class="PY_COMMENT"># Cache MaxValueLengthInExceptionReport for speed</span>
+        self._maxValueLength = self.setting(<span class="PY_STRING">'MaxValueLengthInExceptionReport'</span>)
+
+        <span class="PY_COMMENT"># exception occurance time (overridden by response.endTime())</span>
+        self._time = time()
+
+        <span class="PY_COMMENT"># Get to work</span>
+        self.work()
+
+
+    <span class="PY_COMMENT">## Accessors ##</span>
+
+    <span class="PY_KEYWORD">def</span> setting(self, name):
+        <span class="PY_STRING">"""Settings are inherited from Application."""</span>
+        <span class="PY_KEYWORD">return</span> self._app.setting(name)
+
+    <span class="PY_KEYWORD">def</span> servletPathname(self):
+        <span class="PY_STRING">"""The full filesystem path for the servlet."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._tra.request().serverSidePath()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">return</span> None
+
+    <span class="PY_KEYWORD">def</span> basicServletName(self):
+        <span class="PY_STRING">"""The base name for the servlet (sans directory)."""</span>
+        name = self.servletPathname()
+        <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'unknown'</span>
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> os.path.basename(name)
+
+
+    <span class="PY_COMMENT">## Exception Handling ##</span>
+
+    <span class="PY_KEYWORD">def</span> work(self):
+        <span class="PY_STRING">"""Main error handling method.
+
+        Invoked by `__init__` to do the main work. This calls
+        `logExceptionToConsole`, then checks settings to see if it should
+        call `saveErrorPage` (to save the error to disk) and `emailException`.
+
+        It also sends gives a page from `privateErrorPage` or
+        `publicErrorPage` (which one based on ``ShowDebugInfoOnErrors``).
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._res:
+            self._res.recordEndTime()
+            self._time = self._res.endTime()
+
+        self.logExceptionToConsole()
+
+        <span class="PY_COMMENT"># Write the error page out to the response if available:</span>
+        <span class="PY_KEYWORD">if</span> self._res <span class="PY_KEYWORD">and</span> (<span class="PY_KEYWORD">not</span> self._res.isCommitted()
+                <span class="PY_KEYWORD">or</span> self._res.header(<span class="PY_STRING">'Content-Type'</span>, None) == <span class="PY_STRING">'text/html'</span>):
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._res.isCommitted():
+                self._res.reset()
+                self._res.setStatus(500, <span class="PY_STRING">"Servlet Error"</span>)
+            <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'ShowDebugInfoOnErrors'</span>) == 1:
+                publicErrorPage = self.privateErrorPage()
+            <span class="PY_KEYWORD">else</span>:
+                publicErrorPage = self.publicErrorPage()
+            self._res.write(publicErrorPage)
+
+            <span class="PY_COMMENT"># Add a large block comment; this prevents IE from overriding the</span>
+            <span class="PY_COMMENT"># page with its own generic error 500 page</span>
+            self._res.write(<span class="PY_STRING">'&lt;!-- - - - - - - - - - - - - - - - - - --&gt;\n'</span> * 100)
+
+        privateErrorPage = None
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'SaveErrorMessages'</span>):
+            privateErrorPage = self.privateErrorPage()
+            filename = self.saveErrorPage(privateErrorPage)
+        <span class="PY_KEYWORD">else</span>:
+            filename = None
+
+        self.logExceptionToDisk(errorMsgFilename=filename)
+
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EmailErrors'</span>):
+            <span class="PY_KEYWORD">if</span> privateErrorPage <span class="PY_KEYWORD">is</span> None:
+                privateErrorPage = self.privateErrorPage()
+            <span class="PY_KEYWORD">try</span>:
+                self.emailException(privateErrorPage)
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Could not send error email:"</span>, e
+
+    <span class="PY_KEYWORD">def</span> logExceptionToConsole(self, stderr=None):
+        <span class="PY_STRING">"""Log an exception.
+
+        Logs the time, servlet name and traceback to the console
+        (typically stderr). This usually results in the information
+        appearing in console/terminal from which AppServer was launched.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> stderr <span class="PY_KEYWORD">is</span> None:
+            stderr = sys.stderr
+        stderr.write(<span class="PY_STRING">'[%s] [error] WebKit: Error while executing script %s\n'</span>
+            % (asclocaltime(self._time), self.servletPathname()))
+        traceback.print_exc(file=stderr)
+
+    <span class="PY_KEYWORD">def</span> publicErrorPage(self):
+        <span class="PY_STRING">"""Return a public error page.
+
+        Returns a brief error page telling the user that an error has occurred.
+        Body of the message comes from ``UserErrorMessage`` setting.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'\n'</span>.join((docType(), <span class="PY_STRING">'&lt;html&gt;'</span>, <span class="PY_STRING">'&lt;head&gt;'</span>, <span class="PY_STRING">'&lt;title&gt;Error&lt;/title&gt;'</span>,
+            htStyle(), <span class="PY_STRING">'&lt;/head&gt;'</span>, <span class="PY_STRING">'&lt;body text="black" bgcolor="white"&gt;'</span>,
+            htTitle(<span class="PY_STRING">'Error'</span>), <span class="PY_STRING">'&lt;p&gt;%s&lt;/p&gt;'</span> % self.setting(<span class="PY_STRING">'UserErrorMessage'</span>),
+            <span class="PY_STRING">'&lt;/body&gt;'</span>, <span class="PY_STRING">'&lt;/html&gt;\n'</span>))
+
+    <span class="PY_KEYWORD">def</span> privateErrorPage(self):
+        <span class="PY_STRING">"""Return a private error page.
+
+        Returns an HTML page intended for the developer with
+        useful information such as the traceback.
+
+        Most of the contents are generated in `htmlDebugInfo`.
+
+        """</span>
+        html = [docType(), <span class="PY_STRING">'&lt;html&gt;'</span>, <span class="PY_STRING">'&lt;head&gt;'</span>, <span class="PY_STRING">'&lt;title&gt;Error&lt;/title&gt;'</span>,
+            htStyle(), <span class="PY_STRING">'&lt;/head&gt;'</span>, <span class="PY_STRING">'&lt;body text="black" bgcolor="white"&gt;'</span>,
+            htTitle(<span class="PY_STRING">'Error'</span>), <span class="PY_STRING">'&lt;p&gt;%s&lt;/p&gt;'</span> % self.setting(<span class="PY_STRING">'UserErrorMessage'</span>)]
+        html.append(self.htmlDebugInfo())
+        html.extend([<span class="PY_STRING">'&lt;/body&gt;'</span>, <span class="PY_STRING">'&lt;/html&gt;\n'</span>])
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'\n'</span>.join(html)
+
+    <span class="PY_KEYWORD">def</span> htmlDebugInfo(self):
+        <span class="PY_STRING">"""Return the debug info.
+
+        Return HTML-formatted debugging information about the current exception.
+        Calls `writeHTML`, which uses ``self.write(...)`` to add content.
+
+        """</span>
+        self._html = []
+        self.writeHTML()
+        html = <span class="PY_STRING">''</span>.join(self._html)
+        self._html = None
+        <span class="PY_KEYWORD">return</span> html
+
+    <span class="PY_KEYWORD">def</span> writeHTML(self):
+        <span class="PY_STRING">"""Write the traceback.
+
+        Writes all the parts of the traceback, invoking:
+          * `writeTraceback`
+          * `writeMiscInfo`
+          * `writeTransaction`
+          * `writeEnvironment`
+          * `writeIds`
+          * `writeFancyTraceback`
+
+        """</span>
+        self.writeTraceback()
+        self.writeMiscInfo()
+        self.writeTransaction()
+        self.writeEnvironment()
+        self.writeIds()
+        self.writeFancyTraceback()
+
+
+    <span class="PY_COMMENT">## Write Methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> write(self, s):
+        <span class="PY_STRING">"""Output `s` to the body."""</span>
+        self._html.append(str(s))
+
+    <span class="PY_KEYWORD">def</span> writeln(self, s):
+        <span class="PY_STRING">"""Output `s` plus a newline."""</span>
+        self._html.append(str(s))
+        self._html.append(<span class="PY_STRING">'\n'</span>)
+
+    <span class="PY_KEYWORD">def</span> writeTitle(self, s):
+        <span class="PY_STRING">"""Output the sub-heading to define a section."""</span>
+        self.writeln(htTitle(s))
+
+    <span class="PY_KEYWORD">def</span> writeDict(self, d, heading=None, encoded=None):
+        <span class="PY_STRING">"""Output a table-formated dictionary."""</span>
+        self.writeln(htmlForDict(d, addSpace=self._addSpace,
+            filterValueCallBack=self.filterDictValue,
+            maxValueLength=self._maxValueLength,
+            topHeading=heading, isEncoded=encoded))
+
+    <span class="PY_KEYWORD">def</span> writeAttrs(self, obj, attrNames):
+        <span class="PY_STRING">"""Output object attributes.
+
+        Writes the attributes of the object as given by attrNames.
+        Tries ``obj._name` first, followed by ``obj.name()``.
+        Is resilient regarding exceptions so as not to spoil the
+        exception report.
+
+        """</span>
+        attrs = {}
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> attrNames:
+            value = getattr(obj, <span class="PY_STRING">'_'</span> + name, Singleton) <span class="PY_COMMENT"># go for data attribute</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> value <span class="PY_KEYWORD">is</span> Singleton:
+                    value = getattr(obj, name, Singleton) <span class="PY_COMMENT"># go for method</span>
+                    <span class="PY_KEYWORD">if</span> value <span class="PY_KEYWORD">is</span> Singleton:
+                        value = <span class="PY_STRING">'(could not find attribute or method)'</span>
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">try</span>:
+                            <span class="PY_KEYWORD">if</span> callable(value):
+                                value = value()
+                            value = self.repr(value)
+                        <span class="PY_KEYWORD">except</span> Exception, e:
+                            value = (<span class="PY_STRING">'(exception during method call:'</span>
+                                <span class="PY_STRING">' %s: %s)'</span> % (e.__class__.__name__, e))
+                <span class="PY_KEYWORD">else</span>:
+                    value = self.repr(value)
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                value = (<span class="PY_STRING">'(exception during value processing:'</span>
+                    <span class="PY_STRING">' %s: %s)'</span> % (e.__class__.__name__, e))
+            attrs[name] = value
+        self.writeDict(attrs, (<span class="PY_STRING">'Attribute'</span>, <span class="PY_STRING">'Value'</span>), True)
+
+
+    <span class="PY_COMMENT">## Traceback sections ##</span>
+
+    <span class="PY_KEYWORD">def</span> writeTraceback(self):
+        <span class="PY_STRING">"""Output the traceback.
+
+        Writes the traceback, with most of the work done
+        by `WebUtils.HTMLForException.HTMLForException`.
+
+        """</span>
+        self.writeTitle(<span class="PY_STRING">'Traceback'</span>)
+        self.write(<span class="PY_STRING">'&lt;p&gt;&lt;i&gt;%s&lt;/i&gt;&lt;/p&gt;'</span> % self.servletPathname())
+        self.write(HTMLForException(self._exc, self._formatOptions))
+
+    <span class="PY_KEYWORD">def</span> writeMiscInfo(self):
+        <span class="PY_STRING">"""Output misc info.
+
+        Write a couple little pieces of information about the environment.
+
+        """</span>
+        self.writeTitle(<span class="PY_STRING">'MiscInfo'</span>)
+        info = {
+            <span class="PY_STRING">'time'</span>:        asclocaltime(self._time),
+            <span class="PY_STRING">'filename'</span>:    self.servletPathname(),
+            <span class="PY_STRING">'os.getcwd()'</span>: os.getcwd(),
+            <span class="PY_STRING">'sys.path'</span>:    sys.path,
+            <span class="PY_STRING">'sys.version'</span>: sys.version,
+        }
+        self.writeDict(info)
+
+    <span class="PY_KEYWORD">def</span> writeTransaction(self):
+        <span class="PY_STRING">"""Output transaction.
+
+        Lets the transaction talk about itself, using
+        `Transaction.writeExceptionReport`.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._tra:
+            self._tra.writeExceptionReport(self)
+        <span class="PY_KEYWORD">else</span>:
+            self.writeTitle(<span class="PY_STRING">"No current Transaction."</span>)
+
+    <span class="PY_KEYWORD">def</span> writeEnvironment(self):
+        <span class="PY_STRING">"""Output environment.
+
+        Writes the environment this is being run in. This is *not* the
+        environment that was passed in with the request (holding the CGI
+        information) -- it's just the information from the environment
+        that the AppServer is being executed in.
+
+        """</span>
+        self.writeTitle(<span class="PY_STRING">'Environment'</span>)
+        self.writeDict(os.environ)
+
+    <span class="PY_KEYWORD">def</span> writeIds(self):
+        <span class="PY_STRING">"""Output OS identification.
+
+        Prints some values from the OS (like processor ID).
+
+        """</span>
+        self.writeTitle(<span class="PY_STRING">'OS Ids'</span>)
+        self.writeDict(osIdDict(), (<span class="PY_STRING">'Name'</span>, <span class="PY_STRING">'Value'</span>))
+
+    <span class="PY_KEYWORD">def</span> writeFancyTraceback(self):
+        <span class="PY_STRING">"""Output a fancy traceback, using CGITraceback."""</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'IncludeFancyTraceback'</span>):
+            self.writeTitle(<span class="PY_STRING">'Fancy Traceback'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">from</span> WebUtils.ExpansiveHTMLForException <span class="PY_KEYWORD">import</span> (
+                    ExpansiveHTMLForException)
+                self.write(ExpansiveHTMLForException(
+                    context=self.setting(<span class="PY_STRING">'FancyTracebackContext'</span>)))
+            <span class="PY_KEYWORD">except</span> Exception:
+                self.write(<span class="PY_STRING">'&lt;p&gt;Unable to generate a fancy traceback'</span>
+                    <span class="PY_STRING">' (uncaught exception)!&lt;/p&gt;'</span>)
+                <span class="PY_KEYWORD">try</span>:
+                    self.write(HTMLForException(sys.exc_info()))
+                <span class="PY_KEYWORD">except</span> Exception:
+                    self.write(<span class="PY_STRING">'&lt;p&gt;Unable to even generate a normal traceback'</span>
+                        <span class="PY_STRING">' of the exception in fancy traceback!&lt;/p&gt;'</span>)
+
+    <span class="PY_KEYWORD">def</span> saveErrorPage(self, html):
+        <span class="PY_STRING">"""Save the error page.
+
+        Saves the given HTML error page for later viewing by
+        the developer, and returns the filename used.
+
+        """</span>
+        filename = os.path.join(self._app._errorMessagesDir,
+            self.errorPageFilename())
+        <span class="PY_KEYWORD">try</span>:
+            f = open(filename, <span class="PY_STRING">'w'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                f.write(html)
+            <span class="PY_KEYWORD">finally</span>:
+                f.close()
+        <span class="PY_KEYWORD">except</span> IOError:
+            sys.stderr.write(<span class="PY_STRING">'[%s] [error] WebKit: Cannot save error page (%s)\n'</span>
+                % (asclocaltime(self._time), filename))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> filename
+
+    <span class="PY_KEYWORD">def</span> errorPageFilename(self):
+        <span class="PY_STRING">"""Create filename for error page.
+
+        Construct a filename for an HTML error page, not including the
+        ``ErrorMessagesDir`` setting (which `saveError` adds on).
+
+        """</span>
+        <span class="PY_COMMENT"># Note: Using the timestamp and a random number is a poor technique</span>
+        <span class="PY_COMMENT"># for filename uniqueness, but it is fast and good enough in practice.</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'Error-%s-%s-%06d.html'</span> % (self.basicServletName(),
+            <span class="PY_STRING">'-'</span>.join(map(<span class="PY_KEYWORD">lambda</span> x: <span class="PY_STRING">'%02d'</span> % x, localtime(self._time)[:6])),
+            randint(0, 999999))
+
+    <span class="PY_KEYWORD">def</span> logExceptionToDisk(self, errorMsgFilename=None):
+        <span class="PY_STRING">"""Log the exception to disk.
+
+        Writes a tuple containing (date-time, filename,
+        pathname, exception-name, exception-data,error report
+        filename) to the errors file (typically 'Errors.csv')
+        in CSV format. Invoked by `handleException`.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self.setting(<span class="PY_STRING">'LogErrors'</span>):
+            <span class="PY_KEYWORD">return</span>
+        err, msg = self._exc[:2]
+        <span class="PY_KEYWORD">if</span> isinstance(err, basestring): <span class="PY_COMMENT"># string exception</span>
+            err, msg = <span class="PY_STRING">''</span>, str(msg <span class="PY_KEYWORD">or</span> err)
+        <span class="PY_KEYWORD">else</span>:
+            err, msg = err.__name__, str(msg)
+        logline = (asclocaltime(self._time),
+            self.basicServletName(), self.servletPathname(),
+            err, msg, errorMsgFilename <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>)
+        <span class="PY_KEYWORD">def</span> fixElement(element):
+            element = str(element)
+            <span class="PY_KEYWORD">if</span> <span class="PY_STRING">','</span> <span class="PY_KEYWORD">in</span> element <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'"'</span> <span class="PY_KEYWORD">in</span> element:
+                element = element.replace(<span class="PY_STRING">'"'</span>, <span class="PY_STRING">'""'</span>)
+                element = <span class="PY_STRING">'"%s"'</span> % element
+            <span class="PY_KEYWORD">return</span> element
+        logline = map(fixElement, logline)
+        filename = self._app.serverSidePath(self.setting(<span class="PY_STRING">'ErrorLogFilename'</span>))
+        <span class="PY_KEYWORD">if</span> os.path.exists(filename):
+            f = open(filename, <span class="PY_STRING">'a'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            f = open(filename, <span class="PY_STRING">'w'</span>)
+            f.write(<span class="PY_STRING">'time,filename,pathname,exception name,'</span>
+                <span class="PY_STRING">'exception data,error report filename\n'</span>)
+        f.write(<span class="PY_STRING">','</span>.join(logline) + <span class="PY_STRING">'\n'</span>)
+        f.close()
+
+    <span class="PY_KEYWORD">def</span> emailException(self, htmlErrMsg):
+        <span class="PY_STRING">"""Email the exception.
+
+        Send the exception via mail, either as an attachment,
+        or as the body of the mail.
+
+        """</span>
+        message = Message()
+
+        <span class="PY_COMMENT"># Construct the message headers</span>
+        headers = self.setting(<span class="PY_STRING">'ErrorEmailHeaders'</span>).copy()
+        headers[<span class="PY_STRING">'Date'</span>] = formatdate()
+        headers[<span class="PY_STRING">'Mime-Version'</span>] = <span class="PY_STRING">'1.0'</span>
+        headers[<span class="PY_STRING">'Subject'</span>] = headers.get(<span class="PY_STRING">'Subject'</span>,
+            <span class="PY_STRING">'[WebKit Error]'</span>) + <span class="PY_STRING">' %s: %s'</span> % sys.exc_info()[:2]
+        <span class="PY_KEYWORD">for</span> h, v <span class="PY_KEYWORD">in</span> headers.items():
+            <span class="PY_KEYWORD">if</span> isinstance(v, (list, tuple)):
+                v = <span class="PY_STRING">','</span>.join(v)
+            message.add_header(h, v)
+
+        <span class="PY_COMMENT"># Construct the message body</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EmailErrorReportAsAttachment'</span>):
+            <span class="PY_COMMENT"># start off with a text/plain part</span>
+            text = (<span class="PY_STRING">'WebKit caught an exception while processing'</span>
+                <span class="PY_STRING">' a request for "%s" at %s (timestamp: %s).'</span>
+                <span class="PY_STRING">' The plain text traceback from Python is printed below and'</span>
+                <span class="PY_STRING">' the full HTML error report from WebKit is attached.\n\n'</span>
+                    % (self.servletPathname(),
+                        asclocaltime(self._time), self._time))
+            message.set_type(<span class="PY_STRING">'multipart/mixed'</span>)
+            part = Message()
+            part.set_type(<span class="PY_STRING">'text/plain'</span>)
+            body = StringIO()
+            body.write(text)
+            traceback.print_exc(file=body)
+            part.set_payload(body.getvalue())
+            body.close()
+            message.attach(part)
+            part = Message()
+            <span class="PY_COMMENT"># now add htmlErrMsg</span>
+            part.add_header(<span class="PY_STRING">'Content-Transfer-Encoding'</span>, <span class="PY_STRING">'7bit'</span>)
+            part.add_header(<span class="PY_STRING">'Content-Description'</span>,
+                <span class="PY_STRING">'HTML version of WebKit error message'</span>)
+            part.add_header(<span class="PY_STRING">'Content-Disposition'</span>,
+                <span class="PY_STRING">'attachment'</span>, filename=<span class="PY_STRING">'WebKitErrorMsg.html'</span>)
+            part.set_type(<span class="PY_STRING">'text/html'</span>)
+            part.set_payload(htmlErrMsg)
+            message.attach(part)
+        <span class="PY_KEYWORD">else</span>:
+            message.set_type(<span class="PY_STRING">'text/html'</span>)
+            message.set_payload(htmlErrMsg, <span class="PY_STRING">'us-ascii'</span>)
+
+        <span class="PY_COMMENT"># Send the message</span>
+        server = self.setting(<span class="PY_STRING">'ErrorEmailServer'</span>)
+        <span class="PY_COMMENT"># This setting can be: server, server:port, server:port:user:password</span>
+        <span class="PY_COMMENT"># or server:port:user:password:popserver:popport for "smtp after pop".</span>
+        parts = server.split(<span class="PY_STRING">':'</span>, 5)
+        server = port = user = passwd = None
+        popserver = popssl = popport = None
+        <span class="PY_KEYWORD">try</span>:
+            server = parts[0]
+            <span class="PY_KEYWORD">try</span>:
+                port = int(parts[1])
+            <span class="PY_KEYWORD">except</span> ValueError:
+                <span class="PY_KEYWORD">pass</span>
+            user = parts[2]
+            passwd = parts[3]
+            popserver = parts[4]
+            <span class="PY_KEYWORD">try</span>:
+                popport = int(parts[5])
+            <span class="PY_KEYWORD">except</span> ValueError:
+                popport = None
+            <span class="PY_KEYWORD">if</span> parts[6].lower() == <span class="PY_STRING">'ssl'</span>:
+                popssl = True
+        <span class="PY_KEYWORD">except</span> IndexError:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">if</span> user <span class="PY_KEYWORD">and</span> passwd <span class="PY_KEYWORD">and</span> popserver:
+            <span class="PY_COMMENT"># SMTP after POP</span>
+            <span class="PY_KEYWORD">if</span> popssl <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">and</span> popport == 995:
+                popssl = True
+            popssl = popssl <span class="PY_KEYWORD">and</span> poplib.POP3_SSL <span class="PY_KEYWORD">or</span> poplib.POP3
+            <span class="PY_KEYWORD">if</span> popport:
+                popserver = popssl(popserver, popport)
+            <span class="PY_KEYWORD">else</span>:
+                popserver = popssl(popserver)
+            popserver.set_debuglevel(0)
+            popserver.user(user)
+            popserver.pass_(passwd)
+            <span class="PY_KEYWORD">try</span>:
+                popserver.quit()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">if</span> port:
+            server = smtplib.SMTP(server, port)
+        <span class="PY_KEYWORD">else</span>:
+            server = smtplib.SMTP(server)
+        <span class="PY_KEYWORD">try</span>:
+            server.set_debuglevel(0)
+            <span class="PY_KEYWORD">if</span> user <span class="PY_KEYWORD">and</span> passwd <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> popserver:
+                <span class="PY_COMMENT"># SMTP-AUTH</span>
+                server.ehlo()
+                <span class="PY_KEYWORD">if</span> server.has_extn(<span class="PY_STRING">'starttls'</span>):
+                    server.starttls()
+                    server.ehlo()
+                server.login(user, passwd)
+            body = message.as_string()
+            server.sendmail(headers[<span class="PY_STRING">'From'</span>], headers[<span class="PY_STRING">'To'</span>], body)
+        <span class="PY_KEYWORD">finally</span>:
+            <span class="PY_KEYWORD">try</span>:
+                server.quit()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Filtering ##</span>
+
+    <span class="PY_KEYWORD">def</span> filterDictValue(self, value, key, dict):
+        <span class="PY_STRING">"""Filter dictionary values.
+
+        Filters keys from a dict.  Currently ignores the
+        dictionary, and just filters based on the key.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.filterValue(value, key)
+
+    <span class="PY_KEYWORD">def</span> filterValue(self, value, key):
+        <span class="PY_STRING">"""Filter values.
+
+        This is the core filter method that is used in all filtering.
+        By default, it simply returns self._hiddenString if the key is
+        in self._hideValuesForField (case insensitive). Subclasses
+        could override for more elaborate filtering techniques.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            key = key.lower()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">in</span> self._hideValuesForFields:
+            <span class="PY_KEYWORD">return</span> self._hiddenString
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> value
+
+
+    <span class="PY_COMMENT">## Utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> repr(self, value):
+        <span class="PY_STRING">"""Get HTML encoded representation.
+
+        Returns the repr() of value already HTML encoded. As a special case,
+        dictionaries are nicely formatted in table.
+
+        This is a utility method for `writeAttrs`.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> isinstance(value, dict):
+            <span class="PY_KEYWORD">return</span> htmlForDict(value, addSpace=self._addSpace,
+                filterValueCallBack=self.filterDictValue,
+                maxValueLength=self._maxValueLength)
+        <span class="PY_KEYWORD">else</span>:
+            rep = repr(value)
+            <span class="PY_KEYWORD">if</span> self._maxValueLength <span class="PY_KEYWORD">and</span> len(rep) &gt; self._maxValueLength:
+                rep = rep[:self._maxValueLength] + <span class="PY_STRING">'...'</span>
+            <span class="PY_KEYWORD">return</span> htmlEncode(rep)
+
+
+<span class="PY_COMMENT">## Misc functions ##</span>
+
+<span class="PY_KEYWORD">def</span> docType():
+    <span class="PY_STRING">"""Return the document type for the page."""</span>
+    <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'&lt;!DOCTYPE HTML PUBLIC'</span>
+        <span class="PY_STRING">' "-//W3C//DTD HTML 4.01 Transitional//EN"'</span>
+        <span class="PY_STRING">' "http://www.w3.org/TR/html4/loose.dtd"&gt;'</span>)
+
+<span class="PY_KEYWORD">def</span> htStyle():
+    <span class="PY_STRING">"""Return the page style."""</span>
+    <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'''&lt;style type="text/css"&gt;
+&lt;!--
+body {
+    background-color: white;
+    color: #080810;
+    font-size: 11pt;
+    font-family: Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin: 0pt;
+    padding: 8pt;
+}
+h2.section {
+    font-size: 14pt;
+    background-color:#933;
+    color:white;
+    text-align:center;
+}
+table.NiceTable {
+    font-size: 10pt;
+}
+table.NiceTable td {
+    background-color: #EEE;
+    color: #111;
+}
+table.NiceTable th {
+    background-color: #BBB;
+    color: black;
+}
+table.NiceTable tr.TopHeading th {
+    background-color: #555;
+    color: white;
+}
+table.NiceTable table.NiceTable td {
+    background-color: #DDD;
+    color: #222;
+}
+table.NiceTable table.NiceTable th {
+    background-color: #CCC;
+    color: black;
+    font-weight: normal;
+}
+--&gt;
+&lt;/style&gt;'''</span>)
+
+<span class="PY_KEYWORD">def</span> htTitle(name):
+    <span class="PY_STRING">"""Format a `name` as a section title."""</span>
+    <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'&lt;h2 class="section"&gt;%s&lt;/h2&gt;'</span> % name)
+
+<span class="PY_KEYWORD">def</span> osIdDict():
+    <span class="PY_STRING">"""Get all OS id information.
+
+    Returns a dictionary containing id information such as
+    uid, gid, etc., all obtained from the os module.
+
+    """</span>
+    ids = [<span class="PY_STRING">'egid'</span>, <span class="PY_STRING">'euid'</span>, <span class="PY_STRING">'gid'</span>, <span class="PY_STRING">'groups'</span>, <span class="PY_STRING">'pgrp'</span>,
+        <span class="PY_STRING">'pid'</span>, <span class="PY_STRING">'ppid'</span>, <span class="PY_STRING">'uid'</span>]
+    attrs = {}
+    <span class="PY_KEYWORD">for</span> id <span class="PY_KEYWORD">in</span> ids:
+        getter = <span class="PY_STRING">'get'</span> + id
+        <span class="PY_KEYWORD">try</span>:
+            value = getattr(os, getter)()
+            attrs[id] = value
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">pass</span>
+    <span class="PY_KEYWORD">return</span> attrs
+</pre>
+<!--footer-->
+
+</body>
+</html>

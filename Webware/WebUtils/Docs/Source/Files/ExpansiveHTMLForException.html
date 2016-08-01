@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/ExpansiveHTMLForException.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""ExpansiveHTMLForException.py
+
+Create expansive HTML for exceptions using the CGITraceback module.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> WebUtils <span class="PY_KEYWORD">import</span> CGITraceback
+
+
+HTMLForExceptionOptions = {
+    <span class="PY_STRING">'table'</span>: <span class="PY_STRING">'background-color:#F0F0F0;font-size:10pt'</span>,
+    <span class="PY_STRING">'default'</span>: <span class="PY_STRING">'color:#000000'</span>,
+    <span class="PY_STRING">'row.location'</span>: <span class="PY_STRING">'color:#000099'</span>,
+    <span class="PY_STRING">'row.code'</span>: <span class="PY_STRING">'color:#990000'</span>,
+    <span class="PY_STRING">'editlink'</span>: None,
+}
+
+
+<span class="PY_KEYWORD">def</span> ExpansiveHTMLForException(context=5, options=None):
+    <span class="PY_STRING">"""Create expansive HTML for exceptions."""</span>
+    <span class="PY_KEYWORD">if</span> options:
+        opt = HTMLForExceptionOptions.copy()
+        opt.update(options)
+    <span class="PY_KEYWORD">else</span>:
+        opt = HTMLForExceptionOptions
+    <span class="PY_KEYWORD">return</span> CGITraceback.html(context=context, options=opt)
+</pre>
+<!--footer-->
+
+</body>
+</html>

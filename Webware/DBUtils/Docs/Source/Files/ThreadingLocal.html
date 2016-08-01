@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>DBUtils/ThreadingLocal.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Thread-local objects.
+
+This module provides a Python version of the threading.local class.
+It is avaliable as _threading_local in the standard library since Python 2.4.
+
+Depending on the version of Python you're using, there may be a faster
+threading.local class available in the standard library.
+
+However, the C implementation turned out to be unusable with mod_wsgi,
+since it does not keep the thread-local data between requests.
+To have a reliable solution that works the same with all Python versions,
+we fall back to this Python implemention in DBUtils.
+
+"""</span>
+
+__all__ = [<span class="PY_STRING">"local"</span>]
+
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> current_thread
+<span class="PY_KEYWORD">except</span> ImportError: <span class="PY_COMMENT"># Python &gt;2.5</span>
+    <span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> currentThread <span class="PY_KEYWORD">as</span> current_thread
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> RLock, enumerate
+
+
+<span class="PY_KEYWORD">class</span> _localbase(object):
+    __slots__ = <span class="PY_STRING">'_local__key'</span>, <span class="PY_STRING">'_local__args'</span>, <span class="PY_STRING">'_local__lock'</span>
+
+    <span class="PY_KEYWORD">def</span> __new__(cls, *args, **kw):
+        self = object.__new__(cls)
+        key = <span class="PY_STRING">'_local__key'</span>, <span class="PY_STRING">'thread.local.'</span> + str(id(self))
+        object.__setattr__(self, <span class="PY_STRING">'_local__key'</span>, key)
+        object.__setattr__(self, <span class="PY_STRING">'_local__args'</span>, (args, kw))
+        object.__setattr__(self, <span class="PY_STRING">'_local__lock'</span>, RLock())
+        <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">or</span> kw <span class="PY_KEYWORD">and</span> (cls.__init__ <span class="PY_KEYWORD">is</span> object.__init__):
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">"Initialization arguments are not supported"</span>)
+        dict = object.__getattribute__(self, <span class="PY_STRING">'__dict__'</span>)
+        current_thread().__dict__[key] = dict
+        <span class="PY_KEYWORD">return</span> self
+
+
+<span class="PY_KEYWORD">def</span> _patch(self):
+    key = object.__getattribute__(self, <span class="PY_STRING">'_local__key'</span>)
+    d = current_thread().__dict__.get(key)
+    <span class="PY_KEYWORD">if</span> d <span class="PY_KEYWORD">is</span> None:
+        d = {}
+        current_thread().__dict__[key] = d
+        object.__setattr__(self, <span class="PY_STRING">'__dict__'</span>, d)
+        cls = type(self)
+        <span class="PY_KEYWORD">if</span> cls.__init__ <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> object.__init__:
+            args, kw = object.__getattribute__(self, <span class="PY_STRING">'_local__args'</span>)
+            cls.__init__(self, *args, **kw)
+    <span class="PY_KEYWORD">else</span>:
+        object.__setattr__(self, <span class="PY_STRING">'__dict__'</span>, d)
+
+
+<span class="PY_KEYWORD">class</span> local(_localbase):
+    <span class="PY_STRING">"""A class that represents thread-local data."""</span>
+
+    <span class="PY_KEYWORD">def</span> __getattribute__(self, name):
+        lock = object.__getattribute__(self, <span class="PY_STRING">'_local__lock'</span>)
+        lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            _patch(self)
+            <span class="PY_KEYWORD">return</span> object.__getattribute__(self, name)
+        <span class="PY_KEYWORD">finally</span>:
+            lock.release()
+
+    <span class="PY_KEYWORD">def</span> __setattr__(self, name, value):
+        lock = object.__getattribute__(self, <span class="PY_STRING">'_local__lock'</span>)
+        lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            _patch(self)
+            <span class="PY_KEYWORD">return</span> object.__setattr__(self, name, value)
+        <span class="PY_KEYWORD">finally</span>:
+            lock.release()
+
+    <span class="PY_KEYWORD">def</span> __delattr__(self, name):
+        lock = object.__getattribute__(self, <span class="PY_STRING">'_local__lock'</span>)
+        lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            _patch(self)
+            <span class="PY_KEYWORD">return</span> object.__delattr__(self, name)
+        <span class="PY_KEYWORD">finally</span>:
+            lock.release()
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_KEYWORD">try</span>:
+            key = object.__getattribute__(self, <span class="PY_STRING">'_local__key'</span>)
+            threads = list(enumerate())
+        <span class="PY_KEYWORD">except</span>:
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">for</span> thread <span class="PY_KEYWORD">in</span> threads:
+            <span class="PY_KEYWORD">try</span>:
+                __dict__ = thread.__dict__
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                <span class="PY_KEYWORD">continue</span>
+            <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">in</span> __dict__:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">del</span> __dict__[key]
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

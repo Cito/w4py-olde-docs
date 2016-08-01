@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.ImportManager</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.ImportManager</h2>
+<p>You can also browse the <a href="../Files/ImportManager.html">complete source file</a>
+or the <a href="../Docs/WebKit.ImportManager.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">ImportManager</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">load_module</span>(self, name, file, filename, info)</span>
+<span class="line_def">    def <span class="name_def">find_module</span>(name, path=None)</span>
+<span class="line_def">    def <span class="name_def">activateImportSpy</span>(self)</span>
+<span class="line_def">    def <span class="name_def">fileList</span>(self, update=True)</span>
+<span class="line_def">    def <span class="name_def">notifyOfNewFiles</span>(self, hook)</span>
+<span class="line_def">    def <span class="name_def">watchFile</span>(self, path, modname=None, getmtime=os.path.getmtime)</span>
+<span class="line_def">    def <span class="name_def">recordModule</span>(self, mod, isfile=os.path.isfile)</span>
+<span class="line_def">    def <span class="name_def">recordModules</span>(self, moduleNames=None)</span>
+<span class="line_def">    def <span class="name_def">recordFile</span>(self, filename, isfile=os.path.isfile)</span>
+<span class="line_def">    def <span class="name_def">fileUpdated</span>(self, filename, update=True, getmtime=os.path.getmtime)</span>
+<span class="line_def">    def <span class="name_def">updatedFile</span>(self, update=True, getmtime=os.path.getmtime)</span>
+<span class="line_def">    def <span class="name_def">delModules</span>(self, includePythonModules=False, excludePrefixes=None)</span>
+
+</pre>
+</body>
+</html>

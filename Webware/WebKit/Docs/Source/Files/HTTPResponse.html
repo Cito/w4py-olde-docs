@@ -1,0 +1,511 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/HTTPResponse.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""HTTP responses"""</span>
+
+<span class="PY_KEYWORD">from</span> datetime <span class="PY_KEYWORD">import</span> datetime, timedelta
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time, gmtime, strftime, struct_time
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.DateInterval <span class="PY_KEYWORD">import</span> timeDecode
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> localTimeDelta
+
+<span class="PY_KEYWORD">from</span> Response <span class="PY_KEYWORD">import</span> Response
+<span class="PY_KEYWORD">from</span> Cookie <span class="PY_KEYWORD">import</span> Cookie
+<span class="PY_KEYWORD">from</span> HTTPExceptions <span class="PY_KEYWORD">import</span> HTTPException, HTTPServerError
+
+debug = False
+
+
+<span class="PY_KEYWORD">class</span> HTTPResponse(Response):
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, transaction, strmOut, headers=None):
+        <span class="PY_STRING">"""Initialize the request."""</span>
+
+        Response.__init__(self, transaction, strmOut)
+
+        self._committed = False
+
+        <span class="PY_KEYWORD">if</span> headers <span class="PY_KEYWORD">is</span> None:
+            self._headers = {}
+            self.setHeader(<span class="PY_STRING">'Content-Type'</span>, <span class="PY_STRING">'text/html'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self._headers = headers
+
+        self._cookies = {}
+
+
+    <span class="PY_COMMENT">## Protocol ##</span>
+
+    <span class="PY_KEYWORD">def</span> protocol(self):
+        <span class="PY_STRING">"""Return the name and version of the protocol."""</span>
+        <span class="PY_KEYWORD">return</span> self._transaction.request().protocol()
+
+
+    <span class="PY_COMMENT">## Headers ##</span>
+
+    <span class="PY_KEYWORD">def</span> header(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the value of the specified header."""</span>
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._headers[name.capitalize()]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._headers.get(name.capitalize(), default)
+
+    <span class="PY_KEYWORD">def</span> hasHeader(self, name):
+        <span class="PY_KEYWORD">return</span> name.capitalize() <span class="PY_KEYWORD">in</span> self._headers
+
+    <span class="PY_KEYWORD">def</span> setHeader(self, name, value):
+        <span class="PY_STRING">"""Set a specific header by name.
+
+        Parameters:
+            name: the header name
+            value: the header value
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Headers have already been sent."</span>
+        self._headers[name.capitalize()] = value
+
+    <span class="PY_KEYWORD">def</span> headers(self, name=None):
+        <span class="PY_STRING">"""Return all the headers.
+
+        Returns a dictionary-style object of all header objects contained by
+        this request.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._headers
+
+    <span class="PY_KEYWORD">def</span> clearHeaders(self):
+        <span class="PY_STRING">"""Clear all the headers.
+
+        You might consider a setHeader('Content-Type', 'text/html')
+        or something similar after this.
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Headers have already been sent."</span>
+        self._headers = {}
+
+
+    <span class="PY_COMMENT">## Cookies ##</span>
+
+    <span class="PY_KEYWORD">def</span> cookie(self, name):
+        <span class="PY_STRING">"""Return the value of the specified cookie."""</span>
+        <span class="PY_KEYWORD">return</span> self._cookies[name]
+
+    <span class="PY_KEYWORD">def</span> hasCookie(self, name):
+        <span class="PY_STRING">"""Return True if the specified cookie is present."""</span>
+        <span class="PY_KEYWORD">return</span> name <span class="PY_KEYWORD">in</span> self._cookies
+
+    <span class="PY_KEYWORD">def</span> setCookie(self, name, value, path=<span class="PY_STRING">'/'</span>, expires=<span class="PY_STRING">'ONCLOSE'</span>,
+            secure=False):
+        <span class="PY_STRING">"""Set a cookie.
+
+        You can also set the path (which defaults to /).
+        You can also set when it expires. It can expire:
+          'NOW': this is the same as trying to delete it, but it
+            doesn't really seem to work in IE
+          'ONCLOSE': the default behavior for cookies (expires when
+            the browser closes)
+          'NEVER': some time in the far, far future.
+          integer: a timestamp value
+          tuple or struct_time: a tuple, as created by the time module
+          datetime: a datetime.datetime object for the time (if without
+            time zone, assumed to be *local*, not GMT time)
+          timedelta: a duration counted from the present, e.g.,
+            datetime.timedelta(days=14) (2 weeks in the future)
+          '+...': a time in the future, '...' should be something like
+            1w (1 week), 3h46m (3:45), etc.  You can use y (year),
+            b (month), w (week), d (day), h (hour), m (minute),
+            s (second). This is done by the MiscUtils.DateInterval.
+
+        """</span>
+        cookie = Cookie(name, value)
+        t = expires
+        <span class="PY_KEYWORD">if</span> isinstance(t, basestring):
+            <span class="PY_KEYWORD">if</span> t == <span class="PY_STRING">'ONCLOSE'</span>:
+                t = None
+            <span class="PY_KEYWORD">elif</span> t == <span class="PY_STRING">'NOW'</span>:
+                cookie.delete()
+                <span class="PY_KEYWORD">return</span>
+            <span class="PY_KEYWORD">elif</span> t == <span class="PY_STRING">'NEVER'</span>:
+                t = gmtime()
+                t = (t[0] + 10,) + t[1:]
+            <span class="PY_KEYWORD">elif</span> t.startswith(<span class="PY_STRING">'+'</span>):
+                t = time() + timeDecode(t[1:])
+        <span class="PY_KEYWORD">if</span> t:
+            <span class="PY_KEYWORD">if</span> isinstance(t, (int, long, float)):
+                t = gmtime(t)
+            <span class="PY_KEYWORD">if</span> isinstance(t, (tuple, struct_time)):
+                t = strftime(<span class="PY_STRING">"%a, %d-%b-%Y %H:%M:%S GMT"</span>, t)
+            <span class="PY_KEYWORD">if</span> isinstance(t, timedelta):
+                t = datetime.now() + t
+            <span class="PY_KEYWORD">if</span> isinstance(t, datetime):
+                d = t.utcoffset()
+                <span class="PY_KEYWORD">if</span> d <span class="PY_KEYWORD">is</span> None:
+                    d = localTimeDelta()
+                t -= d
+                t = t.strftime(<span class="PY_STRING">"%a, %d-%b-%Y %H:%M:%S GMT"</span>)
+            cookie.setExpires(t)
+        <span class="PY_KEYWORD">if</span> path:
+            cookie.setPath(path)
+        <span class="PY_KEYWORD">if</span> secure:
+            cookie.setSecure(secure)
+        self.addCookie(cookie)
+
+    <span class="PY_KEYWORD">def</span> addCookie(self, cookie):
+        <span class="PY_STRING">"""Add a cookie that will be sent with this response.
+
+        cookie is a Cookie object instance. See WebKit.Cookie.
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Headers have already been sent."</span>
+        <span class="PY_KEYWORD">assert</span> isinstance(cookie, Cookie)
+        self._cookies[cookie.name()] = cookie
+
+    <span class="PY_KEYWORD">def</span> delCookie(self, name, path=<span class="PY_STRING">'/'</span>, secure=False):
+        <span class="PY_STRING">"""Delete a cookie at the browser.
+
+        To do so, one has to create and send to the browser a cookie with
+        parameters that will cause the browser to delete it.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> self._cookies:
+            self._cookies[name].delete()
+        <span class="PY_KEYWORD">else</span>:
+            cookie = Cookie(name, None)
+            <span class="PY_KEYWORD">if</span> path:
+                cookie.setPath(path)
+            <span class="PY_KEYWORD">if</span> secure:
+                cookie.setSecure(secure)
+            cookie.delete()
+            self.addCookie(cookie)
+
+    <span class="PY_KEYWORD">def</span> cookies(self):
+        <span class="PY_STRING">"""Get all the cookies.
+
+        Returns a dictionary-style object of all Cookie objects that will
+        be sent with this response.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._cookies
+
+    <span class="PY_KEYWORD">def</span> clearCookies(self):
+        <span class="PY_STRING">"""Clear all the cookies."""</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Headers have already been sent."</span>
+        self._cookies = {}
+
+
+    <span class="PY_COMMENT">## Status ##</span>
+
+    <span class="PY_KEYWORD">def</span> setStatus(self, code, msg=<span class="PY_STRING">''</span>):
+        <span class="PY_STRING">"""Set the status code of the response, such as 200, 'OK'."""</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Headers have already been sent."</span>
+        self.setHeader(<span class="PY_STRING">'Status'</span>, str(code) + <span class="PY_STRING">' '</span> + msg)
+
+
+    <span class="PY_COMMENT">## Special responses ##</span>
+
+    <span class="PY_KEYWORD">def</span> sendError(self, code, msg=<span class="PY_STRING">''</span>):
+        <span class="PY_STRING">"""Set the status code to the specified code and message."""</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Response already partially sent."</span>
+        self.setStatus(code, msg)
+
+    <span class="PY_KEYWORD">def</span> sendRedirect(self, url, status=None):
+        <span class="PY_STRING">"""Redirect to another url.
+
+        This method sets the headers and content for the redirect, but does
+        NOT change the cookies. Use clearCookies() as appropriate.
+
+        See http://www.ietf.org/rfc/rfc2616 (section 10.3.3),
+        http://www.ietf.org/rfc/rfc3875 (section 6.2.3) and
+        http://support.microsoft.com/kb/176113
+        (removing cookies by IIS is considered a bug).
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Headers have already been sent."</span>
+        self.setHeader(<span class="PY_STRING">'Status'</span>, status <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'302 Found'</span>)
+        self.setHeader(<span class="PY_STRING">'Location'</span>, url)
+        self.setHeader(<span class="PY_STRING">'Content-Type'</span>, <span class="PY_STRING">'text/html'</span>)
+        self.write(<span class="PY_STRING">'&lt;html&gt;&lt;body&gt;This page has been redirected'</span>
+            <span class="PY_STRING">' to &lt;a href="%s"&gt;%s&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;'</span> % (url, url))
+
+    <span class="PY_KEYWORD">def</span> sendRedirectPermanent(self, url):
+        <span class="PY_STRING">"""Redirect permanently to another URL."""</span>
+        self.sendRedirect(url, status=<span class="PY_STRING">'301 Moved Permanently'</span>)
+
+    <span class="PY_KEYWORD">def</span> sendRedirectSeeOther(self, url):
+        <span class="PY_STRING">"""Redirect to a URL that shall be retrieved with GET.
+
+        This method exists primarily to allow for the PRG pattern.
+        See http://en.wikipedia.org/wiki/Post/Redirect/Get
+
+        """</span>
+        self.sendRedirect(url, status=<span class="PY_STRING">'303 See Other'</span>)
+
+    <span class="PY_KEYWORD">def</span> sendRedirectTemporary(self, url):
+        <span class="PY_STRING">"""Redirect temporarily to another URL."""</span>
+        self.sendRedirect(url, status=<span class="PY_STRING">'307 Temporary Redirect'</span>)
+
+
+    <span class="PY_COMMENT">## Output ##</span>
+
+    <span class="PY_KEYWORD">def</span> write(self, charstr=None):
+        <span class="PY_STRING">"""Write charstr to the response stream.
+
+        charstr must be convertible into an ordinary string.
+        Unicode strings with special characters must therefore
+        be encoded before they can be written.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> charstr:
+            self._strmOut.write(str(charstr))
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._committed <span class="PY_KEYWORD">and</span> self._strmOut._needCommit:
+            self.commit()
+
+    <span class="PY_KEYWORD">def</span> flush(self, autoFlush=True):
+        <span class="PY_STRING">"""Send all accumulated response data now.
+
+        Commits the response headers and tells the underlying stream to flush.
+        if autoFlush is true, the responseStream will flush itself automatically
+        from now on.
+
+        Caveat: Some webservers, especially on Win, will still buffer the output
+        from your servlet until it terminates before transmitting the results
+        to the browser. Also, server modules for Apache like mod_deflate or
+        mod_gzip may do buffering of their own that will cause flush() to not
+        result in data being sent immediately to the client. You can prevent
+        this by setting a no-gzip note in the Apache configuration, e.g.
+
+           SetEnvIf Request_URI ^/wk/MyServlet no-gzip=1
+
+        Even the browser may buffer its input before displaying it. For example,
+        Netscape buffered text until it received an end-of-line or the beginning
+        of a tag, and it didn't render tables until the end tag of the outermost
+        table was seen. Some Firefox add-ons also buffer response data before it
+        gets rendered. Some versions of MSIE will only start to display the page
+        after they have received 256 bytes of output, so you may need to send
+        extra whitespace before flushing to get MSIE to display the page.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._committed:
+            self.commit()
+        self._strmOut.flush()
+        self._strmOut.setAutoCommit(autoFlush)
+
+    <span class="PY_KEYWORD">def</span> isCommitted(self):
+        <span class="PY_STRING">"""Check whether response is already commited.
+
+        Checks whether the reponse has already been partially or completely sent.
+        If this returns true, no new headers/cookies can be added
+        to the response.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._committed
+
+    <span class="PY_KEYWORD">def</span> deliver(self):
+        <span class="PY_STRING">"""Deliver response.
+
+        The final step in the processing cycle.
+        Not used for much with responseStreams added.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"HTTPResponse deliver called"</span>
+        self.recordEndTime()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._committed:
+            self.commit()
+
+    <span class="PY_KEYWORD">def</span> commit(self):
+        <span class="PY_STRING">"""Commit response.
+
+        Write out all headers to the reponse stream, and tell the underlying
+        response stream it can start sending data.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"HTTPResponse commit"</span>
+        self.recordSession()
+        <span class="PY_KEYWORD">if</span> self._transaction.errorOccurred():
+            err = self._transaction.error()
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(err, HTTPException):
+                err = HTTPServerError()
+                self._transaction.setError(err)
+            self.setErrorHeaders(err)
+        self.writeHeaders()
+        self._committed = True
+        self._strmOut.commit()
+
+    <span class="PY_KEYWORD">def</span> writeHeaders(self):
+        <span class="PY_STRING">"""Write headers to the response stream. Used internally."""</span>
+        <span class="PY_KEYWORD">if</span> self._committed:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"response.writeHeaders called when already committed"</span>
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_COMMENT"># make sure the status header comes first</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'Status'</span> <span class="PY_KEYWORD">in</span> self._headers:
+            <span class="PY_COMMENT"># store and temporarily delete status</span>
+            status = self._headers[<span class="PY_STRING">'Status'</span>]
+            <span class="PY_KEYWORD">del</span> self._headers[<span class="PY_STRING">'Status'</span>]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># invent meaningful status</span>
+            status = <span class="PY_STRING">'Location'</span> <span class="PY_KEYWORD">in</span> self._headers <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'302 Found'</span> <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'200 OK'</span>
+        head = [<span class="PY_STRING">'Status: %s'</span> % status]
+        head.extend(map(<span class="PY_KEYWORD">lambda</span> h: <span class="PY_STRING">'%s: %s'</span> % h, self._headers.items()))
+        self._headers[<span class="PY_STRING">'Status'</span>] = status <span class="PY_COMMENT"># restore status</span>
+        head.extend(map(<span class="PY_KEYWORD">lambda</span> c: <span class="PY_STRING">'Set-Cookie: %s'</span> % c.headerValue(),
+            self._cookies.values()))
+        head.extend([<span class="PY_STRING">''</span>]*2) <span class="PY_COMMENT"># this adds one empy line</span>
+        head = <span class="PY_STRING">'\r\n'</span>.join(head)
+        self._strmOut.prepend(head)
+
+    <span class="PY_KEYWORD">def</span> recordSession(self):
+        <span class="PY_STRING">"""Record session ID.
+
+        Invoked by commit() to record the session ID in the response
+        (if a session exists). This implementation sets a cookie for
+        that purpose. For people who don't like sweets, a future version
+        could check a setting and instead of using cookies, could parse
+        the HTML and update all the relevant URLs to include the session ID
+        (which implies a big performance hit). Or we could require site
+        developers to always pass their URLs through a function which adds
+        the session ID (which implies pain). Personally, I'd rather just
+        use cookies. You can experiment with different techniques by
+        subclassing Session and overriding this method. Just make sure
+        Application knows which "session" class to use.
+
+        It should be also considered to automatically add the server port
+        to the cookie name in order to distinguish application instances
+        running on different ports on the same server, or to use the port
+        cookie-attribute introduced with RFC 2965 for that purpose.
+
+        """</span>
+        trans = self._transaction
+        app = trans.application()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> app.setting(<span class="PY_STRING">'UseCookieSessions'</span>):
+            <span class="PY_KEYWORD">return</span>
+        session = trans._session
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> session:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; recordSession: Did not set SID.'</span>
+            <span class="PY_KEYWORD">return</span>
+        request = trans.request()
+        sessionName = app.sessionName(trans)
+        identifier = session.identifier()
+        <span class="PY_KEYWORD">if</span> session.isExpired() <span class="PY_KEYWORD">or</span> session.timeout() == 0:
+            self.delCookie(sessionName, app.sessionCookiePath(trans),
+                request.isSecure() <span class="PY_KEYWORD">and</span> app.setting(<span class="PY_STRING">'SecureSessionCookie'</span>))
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; recordSession: Removing SID'</span>, identifier
+            <span class="PY_KEYWORD">return</span>
+        <span class="PY_KEYWORD">if</span> request.hasCookie(sessionName):
+            <span class="PY_KEYWORD">if</span> request.cookie(sessionName) == identifier:
+                <span class="PY_KEYWORD">if</span> debug:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; recordSession: Using SID'</span>, identifier
+                <span class="PY_KEYWORD">return</span>
+        cookie = Cookie(app.sessionName(trans), identifier)
+        cookie.setPath(app.sessionCookiePath(trans))
+        <span class="PY_KEYWORD">if</span> trans.request().isSecure():
+            cookie.setSecure(app.setting(<span class="PY_STRING">'SecureSessionCookie'</span>))
+        self.addCookie(cookie)
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; recordSession: Setting SID'</span>, identifier
+
+    <span class="PY_KEYWORD">def</span> reset(self):
+        <span class="PY_STRING">"""Reset the response (such as headers, cookies and contents)."""</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, \
+            <span class="PY_STRING">"Cannot reset the response; it has already been sent."</span>
+        self._headers = {}
+        self.setHeader(<span class="PY_STRING">'Content-Type'</span>, <span class="PY_STRING">'text/html'</span>)
+        self._cookies = {}
+        self._strmOut.clear()
+
+    <span class="PY_KEYWORD">def</span> rawResponse(self):
+        <span class="PY_STRING">"""Return the final contents of the response.
+
+        Don't invoke this method until after deliver().
+
+        Returns a dictionary representing the response containing only
+        strings, numbers, lists, tuples, etc. with no backreferences.
+        That means you don't need any special imports to examine the contents
+        and you can marshal it. Currently there are two keys. 'headers' is
+        list of tuples each of which contains two strings: the header and
+        it's value. 'contents' is a string (that may be binary, for example,
+        if an image were being returned).
+
+        """</span>
+        headers = []
+        <span class="PY_KEYWORD">for</span> key, value <span class="PY_KEYWORD">in</span> self._headers.items():
+            headers.append((key, value))
+        <span class="PY_KEYWORD">for</span> cookie <span class="PY_KEYWORD">in</span> self._cookies.values():
+            headers.append((<span class="PY_STRING">'Set-Cookie'</span>, cookie.headerValue()))
+        <span class="PY_KEYWORD">return</span> dict(headers=headers, contents=self._strmOut.buffer())
+
+    <span class="PY_KEYWORD">def</span> size(self):
+        <span class="PY_STRING">"""Return the size of the final contents of the response.
+
+        Don't invoke this method until after deliver().
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._strmOut.size()
+
+    <span class="PY_KEYWORD">def</span> mergeTextHeaders(self, headerstr):
+        <span class="PY_STRING">"""Merge text into our headers.
+
+        Given a string of headers (separated by newlines),
+        merge them into our headers.
+
+        """</span>
+        lines = headerstr.splitlines()
+        <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+            header = line.split(<span class="PY_STRING">':'</span>, 1)
+            <span class="PY_KEYWORD">if</span> len(header) &gt; 1:
+                self.setHeader(header[0], header[1].rstrip())
+
+
+    <span class="PY_COMMENT">## Exception reporting ##</span>
+
+    _exceptionReportAttrNames = Response._exceptionReportAttrNames + [
+        <span class="PY_STRING">'committed'</span>, <span class="PY_STRING">'headers'</span>, <span class="PY_STRING">'cookies'</span>]
+
+    <span class="PY_KEYWORD">def</span> setErrorHeaders(self, err):
+        <span class="PY_STRING">"""Set error headers for an HTTPException."""</span>
+        <span class="PY_KEYWORD">for</span> header, value <span class="PY_KEYWORD">in</span> err.headers().items():
+            self.setHeader(header, value)
+        self.setStatus(err.code(), err.codeMessage())
+        self.setHeader(<span class="PY_STRING">'Content-Type'</span>, <span class="PY_STRING">'text/html'</span>)
+
+    <span class="PY_KEYWORD">def</span> displayError(self, err):
+        <span class="PY_STRING">"""Display HTTPException errors, with status codes."""</span>
+        <span class="PY_KEYWORD">assert</span> <span class="PY_KEYWORD">not</span> self._committed, <span class="PY_STRING">"Already committed"</span>
+        self._strmOut.clear()
+        self._strmOut.write(err.html())
+        uri = self._transaction.request().uri()
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'HTTPResponse: %s: %s'</span> % (uri, err.codeMessage())
+        self.commit()
+</pre>
+<!--footer-->
+
+</body>
+</html>

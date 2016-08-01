@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/HTTPServer.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""HTTP servlets"""</span>
+
+<span class="PY_KEYWORD">import</span> os, socket, errno
+<span class="PY_KEYWORD">import</span> BaseHTTPServer
+
+<span class="PY_KEYWORD">from</span> ThreadedAppServer <span class="PY_KEYWORD">import</span> Handler
+<span class="PY_KEYWORD">from</span> ASStreamOut <span class="PY_KEYWORD">import</span> ASStreamOut
+
+
+<span class="PY_KEYWORD">class</span> HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    <span class="PY_STRING">"""Handles incoming requests.
+
+    Recreated with every request. Abstract base class.
+
+    """</span>
+
+    <span class="PY_COMMENT"># This sends the common CGI variables, except the following:</span>
+    <span class="PY_COMMENT"># HTTP_CONNECTION, HTTP_KEEP_ALIVE</span>
+    <span class="PY_COMMENT"># DOCUMENT_ROOT, PATH_TRANSLATED, SCRIPT_FILENAME</span>
+    <span class="PY_COMMENT"># SERVER_NAME, SERVER_ADMIN, SERVER_SIGNATURE</span>
+
+    <span class="PY_KEYWORD">def</span> handleRequest(self):
+        <span class="PY_STRING">"""Handle a request.
+
+        Actually performs the request, creating the environment and calling
+        self.doTransaction(env, input) to perform the response.
+
+        """</span>
+        self.server_version = <span class="PY_STRING">'Webware/'</span> + self._server.version()
+        env = {}
+        <span class="PY_KEYWORD">for</span> header <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'Content-Type'</span>, <span class="PY_STRING">'Content-Length'</span>, <span class="PY_STRING">'If-Modified-Since'</span>):
+            <span class="PY_COMMENT"># unfortunately, self.headers has no pop() method</span>
+            <span class="PY_KEYWORD">if</span> header <span class="PY_KEYWORD">in</span> self.headers:
+                env[header.upper().replace(<span class="PY_STRING">'-'</span>, <span class="PY_STRING">'_'</span>)] = self.headers[header]
+                <span class="PY_KEYWORD">del</span> self.headers[header]
+        self.headersToEnviron(self.headers, env)
+        env[<span class="PY_STRING">'REMOTE_ADDR'</span>], env[<span class="PY_STRING">'REMOTE_PORT'</span>] = map(str, self.client_address)
+        env[<span class="PY_STRING">'REQUEST_METHOD'</span>] = self.command
+        path = self.path
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'?'</span> <span class="PY_KEYWORD">in</span> path:
+            env[<span class="PY_STRING">'REQUEST_URI'</span>], env[<span class="PY_STRING">'QUERY_STRING'</span>] = path.split(<span class="PY_STRING">'?'</span>, 1)
+        <span class="PY_KEYWORD">else</span>:
+            env[<span class="PY_STRING">'REQUEST_URI'</span>] = path
+            env[<span class="PY_STRING">'QUERY_STRING'</span>] = <span class="PY_STRING">''</span>
+            env[<span class="PY_STRING">'SCRIPT_NAME'</span>] = <span class="PY_STRING">''</span>
+        env[<span class="PY_STRING">'PATH'</span>] = os.getenv(<span class="PY_STRING">'PATH'</span>, <span class="PY_STRING">''</span>)
+        env[<span class="PY_STRING">'PATH_INFO'</span>] = env[<span class="PY_STRING">'REQUEST_URI'</span>]
+        env[<span class="PY_STRING">'SERVER_ADDR'</span>], env[<span class="PY_STRING">'SERVER_PORT'</span>] = map(str, self._serverAddress)
+        env[<span class="PY_STRING">'SERVER_SOFTWARE'</span>] = self.server_version
+        env[<span class="PY_STRING">'SERVER_PROTOCOL'</span>] = self.protocol_version
+        env[<span class="PY_STRING">'GATEWAY_INTERFACE'</span>] = <span class="PY_STRING">'CGI/1.1'</span>
+        self.doTransaction(env, self.rfile)
+
+    do_GET = do_POST = do_HEAD = handleRequest
+    <span class="PY_COMMENT"># These methods are used in WebDAV requests:</span>
+    do_OPTIONS = do_PUT = do_DELETE = handleRequest
+    do_MKCOL = do_COPY = do_MOVE = handleRequest
+    do_PROPFIND = handleRequest
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> headersToEnviron(headers, env):
+        <span class="PY_STRING">"""Convert headers to environment variables.
+
+        Use a simple heuristic to convert all the headers to
+        environmental variables.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> header, value <span class="PY_KEYWORD">in</span> headers.items():
+            env[<span class="PY_STRING">'HTTP_%s'</span> % header.upper().replace(<span class="PY_STRING">'-'</span>, <span class="PY_STRING">'_'</span>)] = value
+        <span class="PY_KEYWORD">return</span> env
+
+    <span class="PY_KEYWORD">def</span> processResponse(self, data):
+        <span class="PY_STRING">"""Process response.
+
+        Takes a string (like what a CGI script would print) and
+        sends the actual HTTP response (response code, headers, body).
+
+        """</span>
+        status, data = data.split(<span class="PY_STRING">'\r\n'</span>, 1)
+        status, code, message = status.split(None, 2)
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">assert</span> status == <span class="PY_STRING">'Status:'</span>
+            code = int(code)
+            <span class="PY_KEYWORD">assert</span> 2 &lt;= code/100 &lt; 6
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%5d  HTTPServer error: Missing status header'</span> % (
+                self._requestID,)
+        <span class="PY_KEYWORD">else</span>:
+            self.send_response(code, message)
+            self.wfile.write(data)
+
+    <span class="PY_KEYWORD">def</span> log_request(self, code=<span class="PY_STRING">'-'</span>, size=<span class="PY_STRING">'-'</span>):
+        <span class="PY_STRING">"""Log an accepted request.
+
+        Do nothing (use the LogActivity setting instead).
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">class</span> HTTPAppServerHandler(Handler, HTTPHandler):
+    <span class="PY_STRING">"""AppServer interface.
+
+    Adapters HTTPHandler to fit with ThreadedAppServer's model of an adapter.
+
+    """</span>
+    protocolName = <span class="PY_STRING">'http'</span>
+    settingPrefix = <span class="PY_STRING">'HTTP'</span>
+
+    <span class="PY_KEYWORD">def</span> handleRequest(self):
+        <span class="PY_STRING">"""Handle a request."""</span>
+        HTTPHandler.__init__(self, self._sock, self._sock.getpeername(), None)
+
+    <span class="PY_KEYWORD">def</span> doTransaction(self, env, input):
+        <span class="PY_STRING">"""Process transaction."""</span>
+        requestDict = dict(format=<span class="PY_STRING">'CGI'</span>, environ=env, input=input)
+        self.startRequest(requestDict)
+        streamOut = ASStreamOut()
+        self.dispatchRawRequest(requestDict, streamOut)
+        <span class="PY_KEYWORD">try</span>:
+            self.processResponse(streamOut._buffer)
+            self._sock.shutdown(2)
+        <span class="PY_KEYWORD">except</span> socket.error, e:
+            <span class="PY_KEYWORD">if</span> e[0] == errno.EPIPE: <span class="PY_COMMENT"># broken pipe</span>
+                <span class="PY_KEYWORD">return</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%5d  HTTPServer output error: %s'</span> % (
+                self._requestID, e)
+        self.endRequest()
+
+    <span class="PY_KEYWORD">def</span> dispatchRawRequest(self, requestDict, streamOut):
+        <span class="PY_STRING">"""Dispatch the request."""</span>
+        transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
+        streamOut.close()
+        transaction._application = None
+        transaction.die()
+        <span class="PY_KEYWORD">del</span> transaction
+</pre>
+<!--footer-->
+
+</body>
+</html>

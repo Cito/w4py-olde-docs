@@ -1,0 +1,1556 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.ThreadedAppServer</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.ThreadedAppServer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/ThreadedAppServer.py">/var/www/docs/Webware-1.1.1/WebKit/ThreadedAppServer.py</a></font></td></tr></table>
+    <p><tt>Threaded&nbsp;Application&nbsp;Server<br>
+&nbsp;<br>
+The&nbsp;AppServer&nbsp;is&nbsp;the&nbsp;main&nbsp;process&nbsp;of&nbsp;WebKit.&nbsp;It&nbsp;handles&nbsp;requests&nbsp;for<br>
+servlets&nbsp;from&nbsp;webservers.<br>
+&nbsp;<br>
+<a href="#ThreadedAppServer">ThreadedAppServer</a>&nbsp;uses&nbsp;a&nbsp;threaded&nbsp;model&nbsp;for&nbsp;handling&nbsp;multiple&nbsp;requests.<br>
+&nbsp;<br>
+At&nbsp;one&nbsp;time&nbsp;there&nbsp;were&nbsp;other&nbsp;experimental&nbsp;execution&nbsp;models&nbsp;for&nbsp;AppServer,<br>
+but&nbsp;none&nbsp;of&nbsp;these&nbsp;were&nbsp;successful&nbsp;and&nbsp;have&nbsp;been&nbsp;removed.<br>
+The&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>/AppServer&nbsp;distinction&nbsp;is&nbsp;thus&nbsp;largely&nbsp;historical.<br>
+&nbsp;<br>
+<a href="#ThreadedAppServer">ThreadedAppServer</a>&nbsp;takes&nbsp;the&nbsp;following&nbsp;command&nbsp;line&nbsp;arguments:<br>
+&nbsp;<br>
+start:&nbsp;start&nbsp;the&nbsp;AppServer&nbsp;(default&nbsp;argument)<br>
+stop:&nbsp;stop&nbsp;the&nbsp;currently&nbsp;running&nbsp;Apperver<br>
+daemon:&nbsp;run&nbsp;as&nbsp;a&nbsp;daemon<br>
+ClassName.SettingName=value:&nbsp;change&nbsp;configuration&nbsp;settings<br>
+&nbsp;<br>
+When&nbsp;started,&nbsp;the&nbsp;app&nbsp;server&nbsp;records&nbsp;its&nbsp;pid&nbsp;in&nbsp;appserver.pid.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="WebKit.AppServer.html">WebKit.AppServer</a><br>
+<a href="MiscUtils.Configurable.html">MiscUtils.Configurable</a><br>
+<a href="Queue.html">Queue</a><br>
+<a href="errno.html">errno</a><br>
+</td><td width="25%" valign=top><a href="fcntl.html">fcntl</a><br>
+<a href="os.html">os</a><br>
+<a href="re.html">re</a><br>
+<a href="select.html">select</a><br>
+</td><td width="25%" valign=top><a href="signal.html">signal</a><br>
+<a href="socket.html">socket</a><br>
+<a href="sys.html">sys</a><br>
+<a href="threading.html">threading</a><br>
+</td><td width="25%" valign=top><a href="traceback.html">traceback</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ASStreamOut.html#ASStreamOut">WebKit.ASStreamOut.ASStreamOut</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#TASStreamOut">TASStreamOut</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a>(<a href="WebKit.AppServer.html#AppServer">WebKit.AppServer.AppServer</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#ThreadedAppServer">ThreadedAppServer</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">WebKit.HTTPExceptions.HTTPServiceUnavailable</a>(<a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#RequestAbortedError">RequestAbortedError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#RequestTooLongError">RequestTooLongError</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#ServerShutDownError">ServerShutDownError</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#AdapterHandler">AdapterHandler</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#SCGIHandler">SCGIHandler</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#MonitorHandler">MonitorHandler</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#NotEnoughDataError">NotEnoughDataError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#ProtocolError">ProtocolError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#RestartAppServerError">RestartAppServerError</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="threading.html#Thread">threading.Thread</a>(<a href="threading.html#_Verbose">threading._Verbose</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#WorkerThread">WorkerThread</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="AdapterHandler">class <strong>AdapterHandler</strong></a>(<a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Adapter&nbsp;handler.<br>
+&nbsp;<br>
+Handles&nbsp;the&nbsp;Adapter&nbsp;protocol&nbsp;(as&nbsp;used&nbsp;in&nbsp;mod_webkit,&nbsp;wkcgi,<br>
+WebKit.cgi,&nbsp;HTTPAdapter,&nbsp;etc).&nbsp;This&nbsp;protocol&nbsp;passes&nbsp;a&nbsp;marshalled<br>
+dictionary&nbsp;which&nbsp;contains&nbsp;the&nbsp;keys&nbsp;``format``&nbsp;and&nbsp;``environ``.<br>
+``format``&nbsp;is&nbsp;currently&nbsp;always&nbsp;the&nbsp;string&nbsp;``CGI``,&nbsp;and&nbsp;``environ``<br>
+is&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;string:&nbsp;string,&nbsp;with&nbsp;values&nbsp;like&nbsp;those&nbsp;passed<br>
+in&nbsp;the&nbsp;environment&nbsp;to&nbsp;a&nbsp;CGI&nbsp;request&nbsp;(QUERY_STRING,&nbsp;HTTP_HOST,&nbsp;etc).<br>
+&nbsp;<br>
+The&nbsp;handler&nbsp;adds&nbsp;one&nbsp;more&nbsp;key,&nbsp;``input``,&nbsp;which&nbsp;contains&nbsp;a&nbsp;file<br>
+<a href="__builtin__.html#object">object</a>&nbsp;based&nbsp;off&nbsp;the&nbsp;socket,&nbsp;which&nbsp;contains&nbsp;the&nbsp;body&nbsp;of&nbsp;the<br>
+request&nbsp;(the&nbsp;POST&nbsp;data,&nbsp;for&nbsp;instance).&nbsp;It's&nbsp;left&nbsp;to&nbsp;Application<br>
+to&nbsp;handle&nbsp;that&nbsp;data.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#AdapterHandler">AdapterHandler</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#Handler">Handler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="AdapterHandler-handleRequest"><strong>handleRequest</strong></a>(self)</dt><dd><tt>Handle&nbsp;request.<br>
+&nbsp;<br>
+Creates&nbsp;the&nbsp;request&nbsp;dictionary,&nbsp;and&nbsp;creates&nbsp;a&nbsp;`<a href="#TASStreamOut">TASStreamOut</a>`&nbsp;<a href="__builtin__.html#object">object</a><br>
+for&nbsp;the&nbsp;response,&nbsp;then&nbsp;calls&nbsp;`Application.dispatchRawRequest`,&nbsp;which<br>
+does&nbsp;the&nbsp;rest&nbsp;of&nbsp;the&nbsp;work&nbsp;(here&nbsp;we&nbsp;just&nbsp;clean&nbsp;up&nbsp;after).</tt></dd></dl>
+
+<dl><dt><a name="AdapterHandler-makeInput"><strong>makeInput</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;file-like&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;the&nbsp;socket.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>protocolName</strong> = 'adapter'</dl>
+
+<dl><dt><strong>settingPrefix</strong> = 'Adapter'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>:<br>
+<dl><dt><a name="AdapterHandler-__init__"><strong>__init__</strong></a>(self, server, serverAddress)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Each&nbsp;handler&nbsp;is&nbsp;attached&nbsp;to&nbsp;a&nbsp;specific&nbsp;host&nbsp;and&nbsp;port,<br>
+and&nbsp;of&nbsp;course&nbsp;to&nbsp;the&nbsp;AppServer.</tt></dd></dl>
+
+<dl><dt><a name="AdapterHandler-activate"><strong>activate</strong></a>(self, sock, requestID)</dt><dd><tt>Activate&nbsp;the&nbsp;handler&nbsp;for&nbsp;processing&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+`sock`&nbsp;is&nbsp;the&nbsp;incoming&nbsp;socket&nbsp;that&nbsp;this&nbsp;handler&nbsp;will&nbsp;work&nbsp;with,<br>
+and&nbsp;`requestID`&nbsp;is&nbsp;a&nbsp;serial&nbsp;number&nbsp;unique&nbsp;for&nbsp;each&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;isn't&nbsp;where&nbsp;work&nbsp;gets&nbsp;done&nbsp;--&nbsp;the&nbsp;handler&nbsp;is&nbsp;queued&nbsp;after&nbsp;this,<br>
+and&nbsp;work&nbsp;is&nbsp;done&nbsp;when&nbsp;`handleRequest`&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="AdapterHandler-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Called&nbsp;when&nbsp;the&nbsp;handler&nbsp;is&nbsp;finished.&nbsp;Closes&nbsp;the&nbsp;socket&nbsp;and<br>
+returns&nbsp;the&nbsp;handler&nbsp;to&nbsp;the&nbsp;pool&nbsp;of&nbsp;inactive&nbsp;handlers.</tt></dd></dl>
+
+<dl><dt><a name="AdapterHandler-endRequest"><strong>endRequest</strong></a>(self, error<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;end&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="AdapterHandler-receiveDict"><strong>receiveDict</strong></a>(self)</dt><dd><tt>Receive&nbsp;a&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Utility&nbsp;function&nbsp;to&nbsp;receive&nbsp;a&nbsp;marshalled&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;request&nbsp;was&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="AdapterHandler-startRequest"><strong>startRequest</strong></a>(self, requestDict<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;start&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Handler">class <strong>Handler</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;very&nbsp;general&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+<a href="#Handler">Handler</a>&nbsp;is&nbsp;an&nbsp;abstract&nbsp;superclass&nbsp;--&nbsp;specific&nbsp;protocol&nbsp;implementations<br>
+will&nbsp;subclass&nbsp;this.&nbsp;A&nbsp;<a href="#Handler">Handler</a>&nbsp;takes&nbsp;a&nbsp;socket&nbsp;to&nbsp;interact&nbsp;with,&nbsp;and<br>
+creates&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Handlers&nbsp;will&nbsp;be&nbsp;reused.&nbsp;When&nbsp;a&nbsp;socket&nbsp;is&nbsp;received&nbsp;`activate`&nbsp;will&nbsp;be<br>
+called&nbsp;--&nbsp;but&nbsp;the&nbsp;handler&nbsp;should&nbsp;not&nbsp;do&nbsp;anything,&nbsp;as&nbsp;it&nbsp;is&nbsp;still&nbsp;running<br>
+in&nbsp;the&nbsp;main&nbsp;thread.&nbsp;The&nbsp;handler&nbsp;is&nbsp;put&nbsp;into&nbsp;a&nbsp;queue,&nbsp;and&nbsp;a&nbsp;worker&nbsp;thread<br>
+picks&nbsp;it&nbsp;up&nbsp;and&nbsp;runs&nbsp;`handleRequest`,&nbsp;which&nbsp;subclasses&nbsp;should&nbsp;override.<br>
+&nbsp;<br>
+Several&nbsp;methods&nbsp;are&nbsp;provided&nbsp;which&nbsp;are&nbsp;typically&nbsp;used&nbsp;by&nbsp;subclasses.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Handler-__init__"><strong>__init__</strong></a>(self, server, serverAddress)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Each&nbsp;handler&nbsp;is&nbsp;attached&nbsp;to&nbsp;a&nbsp;specific&nbsp;host&nbsp;and&nbsp;port,<br>
+and&nbsp;of&nbsp;course&nbsp;to&nbsp;the&nbsp;AppServer.</tt></dd></dl>
+
+<dl><dt><a name="Handler-activate"><strong>activate</strong></a>(self, sock, requestID)</dt><dd><tt>Activate&nbsp;the&nbsp;handler&nbsp;for&nbsp;processing&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+`sock`&nbsp;is&nbsp;the&nbsp;incoming&nbsp;socket&nbsp;that&nbsp;this&nbsp;handler&nbsp;will&nbsp;work&nbsp;with,<br>
+and&nbsp;`requestID`&nbsp;is&nbsp;a&nbsp;serial&nbsp;number&nbsp;unique&nbsp;for&nbsp;each&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;isn't&nbsp;where&nbsp;work&nbsp;gets&nbsp;done&nbsp;--&nbsp;the&nbsp;handler&nbsp;is&nbsp;queued&nbsp;after&nbsp;this,<br>
+and&nbsp;work&nbsp;is&nbsp;done&nbsp;when&nbsp;`handleRequest`&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="Handler-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Called&nbsp;when&nbsp;the&nbsp;handler&nbsp;is&nbsp;finished.&nbsp;Closes&nbsp;the&nbsp;socket&nbsp;and<br>
+returns&nbsp;the&nbsp;handler&nbsp;to&nbsp;the&nbsp;pool&nbsp;of&nbsp;inactive&nbsp;handlers.</tt></dd></dl>
+
+<dl><dt><a name="Handler-endRequest"><strong>endRequest</strong></a>(self, error<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;end&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="Handler-handleRequest"><strong>handleRequest</strong></a>(self)</dt><dd><tt>Handle&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;where&nbsp;the&nbsp;work&nbsp;gets&nbsp;done.&nbsp;Subclasses&nbsp;should&nbsp;override.</tt></dd></dl>
+
+<dl><dt><a name="Handler-receiveDict"><strong>receiveDict</strong></a>(self)</dt><dd><tt>Receive&nbsp;a&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Utility&nbsp;function&nbsp;to&nbsp;receive&nbsp;a&nbsp;marshalled&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;request&nbsp;was&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="Handler-startRequest"><strong>startRequest</strong></a>(self, requestDict<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;start&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MonitorHandler">class <strong>MonitorHandler</strong></a>(<a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Monitor&nbsp;server&nbsp;status.<br>
+&nbsp;<br>
+Monitor&nbsp;is&nbsp;a&nbsp;minimal&nbsp;service&nbsp;that&nbsp;accepts&nbsp;a&nbsp;simple&nbsp;protocol,<br>
+and&nbsp;returns&nbsp;a&nbsp;value&nbsp;indicating&nbsp;the&nbsp;status&nbsp;of&nbsp;the&nbsp;server.<br>
+&nbsp;<br>
+The&nbsp;protocol&nbsp;passes&nbsp;a&nbsp;marshalled&nbsp;dict,&nbsp;much&nbsp;like&nbsp;the&nbsp;Adapter<br>
+interface,&nbsp;which&nbsp;looks&nbsp;like&nbsp;``{'format':&nbsp;'CMD'}``,&nbsp;where&nbsp;CMD<br>
+is&nbsp;a&nbsp;command&nbsp;(``STATUS``&nbsp;or&nbsp;``QUIT``).&nbsp;Responds&nbsp;with&nbsp;a&nbsp;simple<br>
+string,&nbsp;either&nbsp;the&nbsp;number&nbsp;of&nbsp;requests&nbsp;we've&nbsp;received&nbsp;(for<br>
+``STATUS``)&nbsp;or&nbsp;``OK``&nbsp;for&nbsp;``QUIT``&nbsp;(which&nbsp;also&nbsp;stops&nbsp;the&nbsp;server).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#MonitorHandler">MonitorHandler</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#Handler">Handler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MonitorHandler-handleRequest"><strong>handleRequest</strong></a>(self)</dt></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>protocolName</strong> = 'monitor'</dl>
+
+<dl><dt><strong>settingPrefix</strong> = 'Monitor'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>:<br>
+<dl><dt><a name="MonitorHandler-__init__"><strong>__init__</strong></a>(self, server, serverAddress)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Each&nbsp;handler&nbsp;is&nbsp;attached&nbsp;to&nbsp;a&nbsp;specific&nbsp;host&nbsp;and&nbsp;port,<br>
+and&nbsp;of&nbsp;course&nbsp;to&nbsp;the&nbsp;AppServer.</tt></dd></dl>
+
+<dl><dt><a name="MonitorHandler-activate"><strong>activate</strong></a>(self, sock, requestID)</dt><dd><tt>Activate&nbsp;the&nbsp;handler&nbsp;for&nbsp;processing&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+`sock`&nbsp;is&nbsp;the&nbsp;incoming&nbsp;socket&nbsp;that&nbsp;this&nbsp;handler&nbsp;will&nbsp;work&nbsp;with,<br>
+and&nbsp;`requestID`&nbsp;is&nbsp;a&nbsp;serial&nbsp;number&nbsp;unique&nbsp;for&nbsp;each&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;isn't&nbsp;where&nbsp;work&nbsp;gets&nbsp;done&nbsp;--&nbsp;the&nbsp;handler&nbsp;is&nbsp;queued&nbsp;after&nbsp;this,<br>
+and&nbsp;work&nbsp;is&nbsp;done&nbsp;when&nbsp;`handleRequest`&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="MonitorHandler-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Called&nbsp;when&nbsp;the&nbsp;handler&nbsp;is&nbsp;finished.&nbsp;Closes&nbsp;the&nbsp;socket&nbsp;and<br>
+returns&nbsp;the&nbsp;handler&nbsp;to&nbsp;the&nbsp;pool&nbsp;of&nbsp;inactive&nbsp;handlers.</tt></dd></dl>
+
+<dl><dt><a name="MonitorHandler-endRequest"><strong>endRequest</strong></a>(self, error<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;end&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="MonitorHandler-receiveDict"><strong>receiveDict</strong></a>(self)</dt><dd><tt>Receive&nbsp;a&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Utility&nbsp;function&nbsp;to&nbsp;receive&nbsp;a&nbsp;marshalled&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;request&nbsp;was&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="MonitorHandler-startRequest"><strong>startRequest</strong></a>(self, requestDict<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;start&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NotEnoughDataError">class <strong>NotEnoughDataError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Not&nbsp;enough&nbsp;data&nbsp;received&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#NotEnoughDataError">NotEnoughDataError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="NotEnoughDataError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#NotEnoughDataError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="NotEnoughDataError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="NotEnoughDataError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="NotEnoughDataError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#NotEnoughDataError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="NotEnoughDataError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ProtocolError">class <strong>ProtocolError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Network&nbsp;protocol&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#ProtocolError">ProtocolError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ProtocolError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ProtocolError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ProtocolError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ProtocolError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ProtocolError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RequestAbortedError">class <strong>RequestAbortedError</strong></a>(<a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Request&nbsp;aborted&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#RequestAbortedError">RequestAbortedError</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">WebKit.HTTPExceptions.HTTPServiceUnavailable</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><a name="RequestAbortedError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RequestAbortedError-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="RequestAbortedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#RequestAbortedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="RequestAbortedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RequestAbortedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestAbortedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="RequestAbortedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RequestAbortedError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RequestTooLongError">class <strong>RequestTooLongError</strong></a>(<a href="WebKit.ThreadedAppServer.html#RequestAbortedError">RequestAbortedError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Request&nbsp;lasts&nbsp;too&nbsp;long&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#RequestTooLongError">RequestTooLongError</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#RequestAbortedError">RequestAbortedError</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">WebKit.HTTPExceptions.HTTPServiceUnavailable</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><a name="RequestTooLongError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RequestTooLongError-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="RequestTooLongError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#RequestTooLongError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="RequestTooLongError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RequestTooLongError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestTooLongError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="RequestTooLongError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RequestTooLongError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RestartAppServerError">class <strong>RestartAppServerError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Raised&nbsp;by&nbsp;DebugAppServer&nbsp;when&nbsp;needed.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#RestartAppServerError">RestartAppServerError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="RestartAppServerError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#RestartAppServerError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="RestartAppServerError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RestartAppServerError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RestartAppServerError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#RestartAppServerError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="RestartAppServerError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SCGIHandler">class <strong>SCGIHandler</strong></a>(<a href="WebKit.ThreadedAppServer.html#AdapterHandler">AdapterHandler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>SCGI&nbsp;handler.<br>
+&nbsp;<br>
+Modified&nbsp;Adapter&nbsp;handler&nbsp;speaking&nbsp;the&nbsp;SCGI&nbsp;protocol.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#SCGIHandler">SCGIHandler</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#AdapterHandler">AdapterHandler</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#Handler">Handler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SCGIHandler-receiveDict"><strong>receiveDict</strong></a>(self)</dt><dd><tt>Receive&nbsp;a&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Utility&nbsp;function&nbsp;to&nbsp;receive&nbsp;the&nbsp;SCGI&nbsp;headers&nbsp;from&nbsp;the&nbsp;socket.<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;request&nbsp;was&nbsp;empty.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>protocolName</strong> = 'scgi'</dl>
+
+<dl><dt><strong>settingPrefix</strong> = 'SCGI'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ThreadedAppServer.html#AdapterHandler">AdapterHandler</a>:<br>
+<dl><dt><a name="SCGIHandler-handleRequest"><strong>handleRequest</strong></a>(self)</dt><dd><tt>Handle&nbsp;request.<br>
+&nbsp;<br>
+Creates&nbsp;the&nbsp;request&nbsp;dictionary,&nbsp;and&nbsp;creates&nbsp;a&nbsp;`<a href="#TASStreamOut">TASStreamOut</a>`&nbsp;<a href="__builtin__.html#object">object</a><br>
+for&nbsp;the&nbsp;response,&nbsp;then&nbsp;calls&nbsp;`Application.dispatchRawRequest`,&nbsp;which<br>
+does&nbsp;the&nbsp;rest&nbsp;of&nbsp;the&nbsp;work&nbsp;(here&nbsp;we&nbsp;just&nbsp;clean&nbsp;up&nbsp;after).</tt></dd></dl>
+
+<dl><dt><a name="SCGIHandler-makeInput"><strong>makeInput</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;file-like&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;the&nbsp;socket.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>:<br>
+<dl><dt><a name="SCGIHandler-__init__"><strong>__init__</strong></a>(self, server, serverAddress)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Each&nbsp;handler&nbsp;is&nbsp;attached&nbsp;to&nbsp;a&nbsp;specific&nbsp;host&nbsp;and&nbsp;port,<br>
+and&nbsp;of&nbsp;course&nbsp;to&nbsp;the&nbsp;AppServer.</tt></dd></dl>
+
+<dl><dt><a name="SCGIHandler-activate"><strong>activate</strong></a>(self, sock, requestID)</dt><dd><tt>Activate&nbsp;the&nbsp;handler&nbsp;for&nbsp;processing&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+`sock`&nbsp;is&nbsp;the&nbsp;incoming&nbsp;socket&nbsp;that&nbsp;this&nbsp;handler&nbsp;will&nbsp;work&nbsp;with,<br>
+and&nbsp;`requestID`&nbsp;is&nbsp;a&nbsp;serial&nbsp;number&nbsp;unique&nbsp;for&nbsp;each&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;isn't&nbsp;where&nbsp;work&nbsp;gets&nbsp;done&nbsp;--&nbsp;the&nbsp;handler&nbsp;is&nbsp;queued&nbsp;after&nbsp;this,<br>
+and&nbsp;work&nbsp;is&nbsp;done&nbsp;when&nbsp;`handleRequest`&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="SCGIHandler-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Called&nbsp;when&nbsp;the&nbsp;handler&nbsp;is&nbsp;finished.&nbsp;Closes&nbsp;the&nbsp;socket&nbsp;and<br>
+returns&nbsp;the&nbsp;handler&nbsp;to&nbsp;the&nbsp;pool&nbsp;of&nbsp;inactive&nbsp;handlers.</tt></dd></dl>
+
+<dl><dt><a name="SCGIHandler-endRequest"><strong>endRequest</strong></a>(self, error<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;end&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="SCGIHandler-startRequest"><strong>startRequest</strong></a>(self, requestDict<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;start&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.ThreadedAppServer.html#Handler">Handler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ServerShutDownError">class <strong>ServerShutDownError</strong></a>(<a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Server&nbsp;has&nbsp;been&nbsp;shut&nbsp;down&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#ServerShutDownError">ServerShutDownError</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">WebKit.HTTPExceptions.HTTPServiceUnavailable</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><a name="ServerShutDownError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ServerShutDownError-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ServerShutDownError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ServerShutDownError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ServerShutDownError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ServerShutDownError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ServerShutDownError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ServerShutDownError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ServerShutDownError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TASStreamOut">class <strong>TASStreamOut</strong></a>(<a href="WebKit.ASStreamOut.html#ASStreamOut">WebKit.ASStreamOut.ASStreamOut</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Response&nbsp;stream&nbsp;for&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>.<br>
+&nbsp;<br>
+The&nbsp;`<a href="#TASStreamOut">TASStreamOut</a>`&nbsp;class&nbsp;streams&nbsp;to&nbsp;a&nbsp;given&nbsp;socket,&nbsp;so&nbsp;that&nbsp;when&nbsp;`flush`<br>
+is&nbsp;called&nbsp;and&nbsp;the&nbsp;buffer&nbsp;is&nbsp;ready&nbsp;to&nbsp;be&nbsp;written,&nbsp;it&nbsp;sends&nbsp;the&nbsp;data&nbsp;from&nbsp;the<br>
+buffer&nbsp;out&nbsp;on&nbsp;the&nbsp;socket.&nbsp;This&nbsp;is&nbsp;the&nbsp;response&nbsp;stream&nbsp;used&nbsp;for&nbsp;requests<br>
+generated&nbsp;by&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#TASStreamOut">TASStreamOut</a></dd>
+<dd><a href="WebKit.ASStreamOut.html#ASStreamOut">WebKit.ASStreamOut.ASStreamOut</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="TASStreamOut-__init__"><strong>__init__</strong></a>(self, sock, autoCommit<font color="#909090">=False</font>, bufferSize<font color="#909090">=8192</font>)</dt><dd><tt>Create&nbsp;stream.<br>
+&nbsp;<br>
+We&nbsp;get&nbsp;an&nbsp;extra&nbsp;`sock`&nbsp;argument,&nbsp;which&nbsp;is&nbsp;the&nbsp;socket&nbsp;which&nbsp;we'll<br>
+stream&nbsp;output&nbsp;to&nbsp;(if&nbsp;we're&nbsp;streaming).</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-flush"><strong>flush</strong></a>(self)</dt><dd><tt>Flush&nbsp;stream.<br>
+&nbsp;<br>
+Calls&nbsp;`<a href="WebKit.ASStreamOut.html#ASStreamOut">ASStreamOut</a>.<a href="WebKit.ASStreamOut.html#ASStreamOut">ASStreamOut</a>.flush`,&nbsp;and&nbsp;if&nbsp;that&nbsp;returns&nbsp;True<br>
+(indicating&nbsp;the&nbsp;buffer&nbsp;is&nbsp;full&nbsp;enough)&nbsp;then&nbsp;we&nbsp;send&nbsp;data&nbsp;from<br>
+the&nbsp;buffer&nbsp;out&nbsp;on&nbsp;the&nbsp;socket.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>e</strong> = 'ECONNRESET'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ASStreamOut.html#ASStreamOut">WebKit.ASStreamOut.ASStreamOut</a>:<br>
+<dl><dt><a name="TASStreamOut-autoCommit"><strong>autoCommit</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;auto&nbsp;commit&nbsp;mode.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-buffer"><strong>buffer</strong></a>(self)</dt><dd><tt>Return&nbsp;accumulated&nbsp;data&nbsp;which&nbsp;has&nbsp;not&nbsp;yet&nbsp;been&nbsp;flushed.<br>
+&nbsp;<br>
+We&nbsp;want&nbsp;to&nbsp;be&nbsp;able&nbsp;to&nbsp;get&nbsp;at&nbsp;this&nbsp;data&nbsp;without&nbsp;having&nbsp;to&nbsp;call&nbsp;flush<br>
+first,&nbsp;so&nbsp;that&nbsp;we&nbsp;can&nbsp;(for&nbsp;example)&nbsp;integrate&nbsp;automatic&nbsp;HTML&nbsp;validation.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-bufferSize"><strong>bufferSize</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;buffer&nbsp;size.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Try&nbsp;to&nbsp;clear&nbsp;any&nbsp;accumulated&nbsp;response&nbsp;data.<br>
+&nbsp;<br>
+Will&nbsp;fail&nbsp;if&nbsp;the&nbsp;response&nbsp;is&nbsp;already&nbsp;sommitted.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;this&nbsp;buffer.&nbsp;No&nbsp;more&nbsp;data&nbsp;may&nbsp;be&nbsp;sent.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-closed"><strong>closed</strong></a>(self)</dt><dd><tt>Check&nbsp;whether&nbsp;we&nbsp;are&nbsp;closed&nbsp;to&nbsp;new&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-commit"><strong>commit</strong></a>(self, autoCommit<font color="#909090">=True</font>)</dt><dd><tt>Called&nbsp;by&nbsp;the&nbsp;Response&nbsp;to&nbsp;tell&nbsp;us&nbsp;to&nbsp;go.<br>
+&nbsp;<br>
+If&nbsp;`_autoCommit`&nbsp;is&nbsp;True,&nbsp;then&nbsp;we&nbsp;will&nbsp;be&nbsp;placed&nbsp;into&nbsp;autoCommit&nbsp;mode.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-committed"><strong>committed</strong></a>(self)</dt><dd><tt>Are&nbsp;we&nbsp;committed?</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-needCommit"><strong>needCommit</strong></a>(self)</dt><dd><tt>Request&nbsp;for&nbsp;commitment.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;the&nbsp;`HTTPResponse`&nbsp;instance&nbsp;that&nbsp;is&nbsp;using&nbsp;this&nbsp;instance<br>
+to&nbsp;ask&nbsp;if&nbsp;the&nbsp;response&nbsp;needs&nbsp;to&nbsp;be&nbsp;prepared&nbsp;to&nbsp;be&nbsp;delivered.<br>
+The&nbsp;response&nbsp;should&nbsp;then&nbsp;commit&nbsp;its&nbsp;headers,&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-pop"><strong>pop</strong></a>(self, count)</dt><dd><tt>Remove&nbsp;count&nbsp;bytes&nbsp;from&nbsp;the&nbsp;front&nbsp;of&nbsp;the&nbsp;buffer.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-prepend"><strong>prepend</strong></a>(self, charstr)</dt><dd><tt>Add&nbsp;the&nbsp;attached&nbsp;string&nbsp;to&nbsp;front&nbsp;of&nbsp;the&nbsp;response&nbsp;buffer.<br>
+&nbsp;<br>
+Invalid&nbsp;if&nbsp;we&nbsp;are&nbsp;already&nbsp;committed.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-setAutoCommit"><strong>setAutoCommit</strong></a>(self, autoCommit<font color="#909090">=True</font>)</dt><dd><tt>Set&nbsp;the&nbsp;auto&nbsp;commit&nbsp;mode.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-setBufferSize"><strong>setBufferSize</strong></a>(self, bufferSize<font color="#909090">=8192</font>)</dt><dd><tt>Set&nbsp;the&nbsp;buffer&nbsp;size.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-size"><strong>size</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;size&nbsp;of&nbsp;the&nbsp;data&nbsp;held&nbsp;here.</tt></dd></dl>
+
+<dl><dt><a name="TASStreamOut-write"><strong>write</strong></a>(self, charstr)</dt><dd><tt>Write&nbsp;a&nbsp;string&nbsp;to&nbsp;the&nbsp;buffer.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.ASStreamOut.html#ASStreamOut">WebKit.ASStreamOut.ASStreamOut</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ThreadAbortedError">class <strong>ThreadAbortedError</strong></a>(<a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">WebKit.HTTPExceptions.HTTPServiceUnavailable</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="threading.html#Thread">Thread</a>&nbsp;aborted&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#ThreadAbortedError">ThreadAbortedError</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPServiceUnavailable">WebKit.HTTPExceptions.HTTPServiceUnavailable</a></dd>
+<dd><a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><a name="ThreadAbortedError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ThreadAbortedError-code"><strong>code</strong></a>(self)</dt><dd><tt>The&nbsp;integer&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-codeMessage"><strong>codeMessage</strong></a>(self)</dt><dd><tt>The&nbsp;message&nbsp;(like&nbsp;``Not&nbsp;Found``)&nbsp;that&nbsp;goes&nbsp;with&nbsp;the&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-description"><strong>description</strong></a>(self)</dt><dd><tt>Error&nbsp;description.<br>
+&nbsp;<br>
+Possibly&nbsp;a&nbsp;plain&nbsp;text&nbsp;version&nbsp;of&nbsp;the&nbsp;error&nbsp;description,<br>
+though&nbsp;usually&nbsp;just&nbsp;identical&nbsp;to&nbsp;`htDescription`.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-headers"><strong>headers</strong></a>(self)</dt><dd><tt>Get&nbsp;headers.<br>
+&nbsp;<br>
+Additional&nbsp;headers&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+response,&nbsp;not&nbsp;including&nbsp;the&nbsp;Status&nbsp;header.&nbsp;For&nbsp;instance,<br>
+the&nbsp;redirect&nbsp;exception&nbsp;adds&nbsp;a&nbsp;Location&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-htBody"><strong>htBody</strong></a>(self)</dt><dd><tt>The&nbsp;HTML&nbsp;body&nbsp;of&nbsp;the&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-htDescription"><strong>htDescription</strong></a>(self)</dt><dd><tt>HTML&nbsp;error&nbsp;description.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;description&nbsp;of&nbsp;the&nbsp;error,&nbsp;for&nbsp;presentation<br>
+to&nbsp;the&nbsp;browser&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-htTitle"><strong>htTitle</strong></a>(self)</dt><dd><tt>The&nbsp;title,&nbsp;but&nbsp;it&nbsp;may&nbsp;include&nbsp;HTML&nbsp;markup&nbsp;(like&nbsp;italics).</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-html"><strong>html</strong></a>(self)</dt><dd><tt>The&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;HTML&nbsp;page&nbsp;that&nbsp;should&nbsp;be&nbsp;sent&nbsp;with&nbsp;the&nbsp;error,<br>
+usually&nbsp;a&nbsp;description&nbsp;of&nbsp;the&nbsp;problem.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-setTransaction"><strong>setTransaction</strong></a>(self, trans)</dt><dd><tt>Set&nbsp;transaction.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;exception&nbsp;is&nbsp;caught&nbsp;by&nbsp;`Application`,&nbsp;it&nbsp;tells<br>
+the&nbsp;exception&nbsp;what&nbsp;the&nbsp;transaction&nbsp;is.&nbsp;This&nbsp;way&nbsp;you<br>
+can&nbsp;resolve&nbsp;relative&nbsp;paths,&nbsp;or&nbsp;otherwise&nbsp;act&nbsp;in&nbsp;a&nbsp;manner<br>
+sensitive&nbsp;of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;error.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-title"><strong>title</strong></a>(self)</dt><dd><tt>The&nbsp;title&nbsp;used&nbsp;in&nbsp;the&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.HTTPExceptions.html#HTTPException">WebKit.HTTPExceptions.HTTPException</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ThreadAbortedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ThreadAbortedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ThreadAbortedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ThreadAbortedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ThreadAbortedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ThreadAbortedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ThreadAbortedError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ThreadedAppServer">class <strong>ThreadedAppServer</strong></a>(<a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Threaded&nbsp;Application&nbsp;Server.<br>
+&nbsp;<br>
+`<a href="#ThreadedAppServer">ThreadedAppServer</a>`&nbsp;accepts&nbsp;incoming&nbsp;socket&nbsp;requests,&nbsp;spawns&nbsp;a<br>
+new&nbsp;thread&nbsp;or&nbsp;reuses&nbsp;an&nbsp;existing&nbsp;one,&nbsp;then&nbsp;dispatches&nbsp;the&nbsp;request<br>
+to&nbsp;the&nbsp;appropriate&nbsp;handler&nbsp;(e.g.,&nbsp;an&nbsp;Adapter&nbsp;handler,&nbsp;HTTP&nbsp;handler,<br>
+etc.,&nbsp;one&nbsp;for&nbsp;each&nbsp;protocol).<br>
+&nbsp;<br>
+The&nbsp;transaction&nbsp;is&nbsp;connected&nbsp;directly&nbsp;to&nbsp;the&nbsp;socket,&nbsp;so&nbsp;that&nbsp;the<br>
+response&nbsp;is&nbsp;sent&nbsp;directly&nbsp;(if&nbsp;streaming&nbsp;is&nbsp;used,&nbsp;like&nbsp;if&nbsp;you&nbsp;call<br>
+`response.flush()`).&nbsp;Thus&nbsp;the&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>&nbsp;packages&nbsp;the<br>
+socket/response,&nbsp;rather&nbsp;than&nbsp;value&nbsp;being&nbsp;returned&nbsp;up&nbsp;the&nbsp;call&nbsp;chain.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#ThreadedAppServer">ThreadedAppServer</a></dd>
+<dd><a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a></dd>
+<dd><a href="WebKit.AppServer.html#AppServer">WebKit.AppServer.AppServer</a></dd>
+<dd><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a></dd>
+<dd><a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ThreadedAppServer-__init__"><strong>__init__</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Setup&nbsp;the&nbsp;AppServer.<br>
+&nbsp;<br>
+Create&nbsp;an&nbsp;initial&nbsp;thread&nbsp;pool&nbsp;(threads&nbsp;created&nbsp;with&nbsp;`spawnThread`),<br>
+and&nbsp;the&nbsp;request&nbsp;queue,&nbsp;record&nbsp;the&nbsp;PID&nbsp;in&nbsp;a&nbsp;file,&nbsp;and&nbsp;add&nbsp;any&nbsp;enabled<br>
+handlers&nbsp;(Adapter,&nbsp;HTTP,&nbsp;Monitor).</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-abortLongRequests"><strong>abortLongRequests</strong></a>(self)</dt><dd><tt>Check&nbsp;for&nbsp;long-running&nbsp;requests&nbsp;and&nbsp;cancel&nbsp;these.<br>
+&nbsp;<br>
+The&nbsp;longest&nbsp;allowed&nbsp;execution&nbsp;time&nbsp;for&nbsp;requests&nbsp;is&nbsp;controlled<br>
+by&nbsp;the&nbsp;MaxRequestTime&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-abortRequest"><strong>abortRequest</strong></a>(self, requestID, exception<font color="#909090">=&lt;class 'WebKit.ThreadedAppServer.RequestAbortedError'&gt;</font>)</dt><dd><tt>Abort&nbsp;a&nbsp;request&nbsp;by&nbsp;raising&nbsp;an&nbsp;exception&nbsp;in&nbsp;its&nbsp;worker&nbsp;thread.<br>
+&nbsp;<br>
+A&nbsp;return&nbsp;value&nbsp;of&nbsp;one&nbsp;means&nbsp;the&nbsp;thread&nbsp;was&nbsp;successfully&nbsp;aborted,<br>
+a&nbsp;value&nbsp;of&nbsp;zero&nbsp;means&nbsp;the&nbsp;thread&nbsp;could&nbsp;not&nbsp;be&nbsp;found,<br>
+any&nbsp;other&nbsp;value&nbsp;indicates&nbsp;that&nbsp;an&nbsp;error&nbsp;has&nbsp;occurred.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-absorbThread"><strong>absorbThread</strong></a>(self, count<font color="#909090">=1</font>)</dt><dd><tt>Absorb&nbsp;a&nbsp;thread.<br>
+&nbsp;<br>
+We&nbsp;do&nbsp;this&nbsp;by&nbsp;putting&nbsp;a&nbsp;None&nbsp;on&nbsp;the&nbsp;Queue.<br>
+When&nbsp;a&nbsp;thread&nbsp;gets&nbsp;it,&nbsp;that&nbsp;tells&nbsp;it&nbsp;to&nbsp;exit.<br>
+&nbsp;<br>
+We&nbsp;also&nbsp;keep&nbsp;track&nbsp;of&nbsp;the&nbsp;threads,&nbsp;so&nbsp;after&nbsp;killing<br>
+threads&nbsp;we&nbsp;go&nbsp;through&nbsp;all&nbsp;the&nbsp;threads&nbsp;and&nbsp;find&nbsp;the<br>
+thread(s)&nbsp;that&nbsp;have&nbsp;exited,&nbsp;so&nbsp;that&nbsp;we&nbsp;can&nbsp;take&nbsp;them<br>
+out&nbsp;of&nbsp;the&nbsp;thread&nbsp;pool.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-activeThreadCount"><strong>activeThreadCount</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;the&nbsp;number&nbsp;of&nbsp;threads&nbsp;currently&nbsp;in&nbsp;use.<br>
+&nbsp;<br>
+Called&nbsp;from&nbsp;`updateThreadUsage`.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-addSocketHandler"><strong>addSocketHandler</strong></a>(self, handlerClass, serverAddress<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Adds&nbsp;a&nbsp;socket&nbsp;handler&nbsp;for&nbsp;`serverAddress`&nbsp;--&nbsp;`serverAddress`<br>
+is&nbsp;a&nbsp;tuple&nbsp;``(host,&nbsp;port)``,&nbsp;where&nbsp;``host``&nbsp;is&nbsp;the&nbsp;interface<br>
+to&nbsp;connect&nbsp;to&nbsp;(for&nbsp;instance,&nbsp;the&nbsp;IP&nbsp;address&nbsp;on&nbsp;a&nbsp;machine&nbsp;with<br>
+multiple&nbsp;IP&nbsp;numbers),&nbsp;and&nbsp;``port``&nbsp;is&nbsp;the&nbsp;port&nbsp;(e.g.&nbsp;HTTP&nbsp;is&nbsp;on<br>
+80&nbsp;by&nbsp;default,&nbsp;and&nbsp;Webware&nbsp;adapters&nbsp;use&nbsp;8086&nbsp;by&nbsp;default).<br>
+&nbsp;<br>
+The&nbsp;`handlerClass`&nbsp;is&nbsp;a&nbsp;subclass&nbsp;of&nbsp;`<a href="#Handler">Handler</a>`,&nbsp;and&nbsp;is&nbsp;used&nbsp;to<br>
+handle&nbsp;the&nbsp;actual&nbsp;request&nbsp;--&nbsp;usually&nbsp;returning&nbsp;control&nbsp;back<br>
+to&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>&nbsp;in&nbsp;some&nbsp;fashion.&nbsp;See&nbsp;`<a href="#Handler">Handler</a>`&nbsp;for&nbsp;more.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-address"><strong>address</strong></a>(self, settingPrefix)</dt><dd><tt>Get&nbsp;host&nbsp;address.<br>
+&nbsp;<br>
+The&nbsp;address&nbsp;for&nbsp;the&nbsp;Adapter&nbsp;(Host/interface,&nbsp;and&nbsp;port),<br>
+as&nbsp;taken&nbsp;from&nbsp;``Configs/AppServer.config``,<br>
+settings&nbsp;``Host``&nbsp;and&nbsp;``AdapterPort``.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-addressFileName"><strong>addressFileName</strong></a>(self, handlerClass)</dt><dd><tt>Get&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;text&nbsp;file&nbsp;with&nbsp;the&nbsp;server&nbsp;address.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-awakeSelect"><strong>awakeSelect</strong></a>(self)</dt><dd><tt>Awake&nbsp;the&nbsp;select()&nbsp;call.<br>
+&nbsp;<br>
+The&nbsp;`select()`&nbsp;in&nbsp;`<a href="#ThreadedAppServer-mainloop">mainloop</a>()`&nbsp;is&nbsp;blocking,&nbsp;so&nbsp;when<br>
+we&nbsp;shut&nbsp;down&nbsp;we&nbsp;have&nbsp;to&nbsp;make&nbsp;a&nbsp;connect&nbsp;to&nbsp;unblock&nbsp;it.<br>
+Here's&nbsp;where&nbsp;we&nbsp;do&nbsp;that.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>The&nbsp;default&nbsp;AppServer.config.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-delThread"><strong>delThread</strong></a>(self)</dt><dd><tt>Delete&nbsp;thread.<br>
+&nbsp;<br>
+Invoked&nbsp;immediately&nbsp;by&nbsp;<a href="#ThreadedAppServer-threadloop">threadloop</a>()&nbsp;as&nbsp;a&nbsp;hook&nbsp;for&nbsp;subclasses.<br>
+This&nbsp;implementation&nbsp;does&nbsp;nothing&nbsp;and&nbsp;subclasses&nbsp;need&nbsp;not&nbsp;invoke&nbsp;super.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-initThread"><strong>initThread</strong></a>(self)</dt><dd><tt>Initialize&nbsp;thread.<br>
+&nbsp;<br>
+Invoked&nbsp;immediately&nbsp;by&nbsp;<a href="#ThreadedAppServer-threadloop">threadloop</a>()&nbsp;as&nbsp;a&nbsp;hook&nbsp;for&nbsp;subclasses.<br>
+This&nbsp;implementation&nbsp;does&nbsp;nothing&nbsp;and&nbsp;subclasses&nbsp;need&nbsp;not&nbsp;invoke&nbsp;super.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-isPersistent"><strong>isPersistent</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ThreadedAppServer-mainloop"><strong>mainloop</strong></a>(self, timeout<font color="#909090">=1</font>)</dt><dd><tt>Main&nbsp;thread&nbsp;loop.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;main&nbsp;thread&nbsp;loop&nbsp;that&nbsp;accepts&nbsp;and&nbsp;dispatches<br>
+socket&nbsp;requests.<br>
+&nbsp;<br>
+It&nbsp;goes&nbsp;through&nbsp;a&nbsp;loop&nbsp;as&nbsp;long&nbsp;as&nbsp;``self.<strong>_running</strong>&nbsp;&gt;&nbsp;2``.<br>
+Setting&nbsp;``self.<strong>_running</strong>&nbsp;=&nbsp;2``&nbsp;asks&nbsp;the&nbsp;the&nbsp;main&nbsp;loop&nbsp;to&nbsp;end.<br>
+When&nbsp;the&nbsp;main&nbsp;loop&nbsp;is&nbsp;finished,&nbsp;it&nbsp;sets&nbsp;``self.<strong>_running</strong>&nbsp;=&nbsp;1``.<br>
+When&nbsp;the&nbsp;AppServer&nbsp;is&nbsp;completely&nbsp;down,&nbsp;it&nbsp;sets&nbsp;``self.<strong>_running</strong>&nbsp;=&nbsp;0``.<br>
+&nbsp;<br>
+The&nbsp;loop&nbsp;waits&nbsp;for&nbsp;connections,&nbsp;then&nbsp;based&nbsp;on&nbsp;the&nbsp;connecting<br>
+port&nbsp;it&nbsp;initiates&nbsp;the&nbsp;proper&nbsp;<a href="#Handler">Handler</a>&nbsp;(e.g.,<br>
+<a href="#AdapterHandler">AdapterHandler</a>,&nbsp;HTTPHandler).&nbsp;Handlers&nbsp;are&nbsp;reused&nbsp;when&nbsp;possible.<br>
+&nbsp;<br>
+The&nbsp;initiated&nbsp;handlers&nbsp;are&nbsp;put&nbsp;into&nbsp;a&nbsp;queue,&nbsp;and<br>
+worker&nbsp;threads&nbsp;poll&nbsp;that&nbsp;queue&nbsp;to&nbsp;look&nbsp;for&nbsp;requests&nbsp;that<br>
+need&nbsp;to&nbsp;be&nbsp;handled&nbsp;(worker&nbsp;threads&nbsp;use&nbsp;`threadloop`).<br>
+&nbsp;<br>
+Every&nbsp;so&nbsp;often&nbsp;(every&nbsp;5&nbsp;loops)&nbsp;it&nbsp;updates&nbsp;thread&nbsp;usage<br>
+information&nbsp;(`updateThreadUsage`),&nbsp;and&nbsp;every<br>
+``MaxServerThreads&nbsp;*&nbsp;2``&nbsp;loops&nbsp;it&nbsp;it&nbsp;will&nbsp;manage<br>
+threads&nbsp;(killing&nbsp;or&nbsp;spawning&nbsp;new&nbsp;ones,&nbsp;in&nbsp;`manageThreadCount`).</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-manageThreadCount"><strong>manageThreadCount</strong></a>(self)</dt><dd><tt>Adjust&nbsp;the&nbsp;number&nbsp;of&nbsp;threads&nbsp;in&nbsp;use.<br>
+&nbsp;<br>
+From&nbsp;information&nbsp;gleened&nbsp;from&nbsp;`updateThreadUsage`,&nbsp;we&nbsp;see&nbsp;about&nbsp;how<br>
+many&nbsp;threads&nbsp;are&nbsp;being&nbsp;used,&nbsp;to&nbsp;see&nbsp;if&nbsp;we&nbsp;have&nbsp;too&nbsp;many&nbsp;threads&nbsp;or<br>
+too&nbsp;few.&nbsp;Based&nbsp;on&nbsp;this&nbsp;we&nbsp;create&nbsp;or&nbsp;absorb&nbsp;threads.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Called&nbsp;on&nbsp;shutdown.<br>
+&nbsp;<br>
+Also&nbsp;calls&nbsp;`AppServer.shutDown`,&nbsp;but&nbsp;first&nbsp;closes&nbsp;all&nbsp;sockets<br>
+and&nbsp;tells&nbsp;all&nbsp;the&nbsp;threads&nbsp;to&nbsp;die.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-spawnThread"><strong>spawnThread</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;worker&nbsp;thread.<br>
+&nbsp;<br>
+Worker&nbsp;threads&nbsp;poll&nbsp;with&nbsp;the&nbsp;`threadloop`&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-threadloop"><strong>threadloop</strong></a>(self)</dt><dd><tt>The&nbsp;main&nbsp;loop&nbsp;for&nbsp;worker&nbsp;threads.<br>
+&nbsp;<br>
+Worker&nbsp;threads&nbsp;poll&nbsp;the&nbsp;`_requestQueue`&nbsp;to&nbsp;find&nbsp;a&nbsp;request&nbsp;handler<br>
+waiting&nbsp;to&nbsp;run.&nbsp;If&nbsp;they&nbsp;find&nbsp;a&nbsp;None&nbsp;in&nbsp;the&nbsp;queue,&nbsp;this&nbsp;thread&nbsp;has<br>
+been&nbsp;selected&nbsp;to&nbsp;die,&nbsp;which&nbsp;is&nbsp;the&nbsp;way&nbsp;the&nbsp;loop&nbsp;ends.<br>
+&nbsp;<br>
+The&nbsp;handler&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;does&nbsp;all&nbsp;the&nbsp;work&nbsp;when&nbsp;its&nbsp;`handleRequest`&nbsp;method<br>
+is&nbsp;called.<br>
+&nbsp;<br>
+`initThread`&nbsp;and&nbsp;`delThread`&nbsp;methods&nbsp;are&nbsp;called&nbsp;at&nbsp;the&nbsp;beginning&nbsp;and<br>
+end&nbsp;of&nbsp;the&nbsp;thread&nbsp;loop,&nbsp;but&nbsp;they&nbsp;aren't&nbsp;being&nbsp;used&nbsp;for&nbsp;anything<br>
+(future&nbsp;use&nbsp;as&nbsp;a&nbsp;hook).</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-updateThreadUsage"><strong>updateThreadUsage</strong></a>(self)</dt><dd><tt>Update&nbsp;the&nbsp;threadUseCounter&nbsp;list.<br>
+&nbsp;<br>
+Called&nbsp;periodically&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;`mainloop`.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>e</strong> = 'EPROTO'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a>:<br>
+<dl><dt><a name="ThreadedAppServer-activateAutoReload"><strong>activateAutoReload</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;monitor&nbsp;thread.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-deactivateAutoReload"><strong>deactivateAutoReload</strong></a>(self)</dt><dd><tt>Stop&nbsp;the&nbsp;monitor&nbsp;thread.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-fileMonitorThreadLoop"><strong>fileMonitorThreadLoop</strong></a>(self)</dt><dd><tt>This&nbsp;the&nbsp;the&nbsp;main&nbsp;loop&nbsp;for&nbsp;the&nbsp;monitoring&nbsp;thread.<br>
+&nbsp;<br>
+Runs&nbsp;in&nbsp;its&nbsp;own&nbsp;thread,&nbsp;polling&nbsp;the&nbsp;files&nbsp;for&nbsp;changes&nbsp;directly<br>
+(i.e.,&nbsp;going&nbsp;through&nbsp;every&nbsp;file&nbsp;that's&nbsp;being&nbsp;used&nbsp;and&nbsp;checking<br>
+its&nbsp;last-modified&nbsp;time,&nbsp;seeing&nbsp;if&nbsp;it's&nbsp;been&nbsp;changed&nbsp;since&nbsp;it<br>
+was&nbsp;initially&nbsp;loaded).</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-fileMonitorThreadLoopFAM"><strong>fileMonitorThreadLoopFAM</strong></a>(self)</dt><dd><tt>Monitoring&nbsp;thread&nbsp;loop,&nbsp;but&nbsp;using&nbsp;the&nbsp;FAM&nbsp;library.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-monitorNewModule"><strong>monitorNewModule</strong></a>(self, filepath, mtime<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;file&nbsp;to&nbsp;be&nbsp;monitored.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;callback&nbsp;which&nbsp;ImportSpy&nbsp;invokes&nbsp;to&nbsp;notify&nbsp;us&nbsp;of&nbsp;new&nbsp;files<br>
+to&nbsp;monitor.&nbsp;This&nbsp;is&nbsp;only&nbsp;used&nbsp;when&nbsp;we&nbsp;are&nbsp;using&nbsp;FAM.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-restartIfNecessary"><strong>restartIfNecessary</strong></a>(self)</dt><dd><tt>Check&nbsp;if&nbsp;the&nbsp;app&nbsp;server&nbsp;should&nbsp;be&nbsp;restarted.<br>
+&nbsp;<br>
+This&nbsp;should&nbsp;be&nbsp;called&nbsp;regularly&nbsp;to&nbsp;see&nbsp;if&nbsp;a&nbsp;restart&nbsp;is&nbsp;required.<br>
+The&nbsp;server&nbsp;can&nbsp;only&nbsp;restart&nbsp;from&nbsp;the&nbsp;main&nbsp;thread,&nbsp;other&nbsp;threads<br>
+can't&nbsp;do&nbsp;the&nbsp;restart.&nbsp;So&nbsp;this&nbsp;polls&nbsp;to&nbsp;see&nbsp;if&nbsp;`shouldRestart`<br>
+has&nbsp;been&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-shouldRestart"><strong>shouldRestart</strong></a>(self)</dt><dd><tt>Tell&nbsp;the&nbsp;main&nbsp;thread&nbsp;to&nbsp;restart&nbsp;the&nbsp;server.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a>:<br>
+<dl><dt><a name="ThreadedAppServer-restart"><strong>restart</strong></a>()</dt><dd><tt>Do&nbsp;the&nbsp;actual&nbsp;restart.<br>
+&nbsp;<br>
+Call&nbsp;`shouldRestart`&nbsp;from&nbsp;outside&nbsp;the&nbsp;class.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.AppServer.html#AppServer">WebKit.AppServer.AppServer</a>:<br>
+<dl><dt><a name="ThreadedAppServer-application"><strong>application</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Application&nbsp;singleton.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-checkForInstall"><strong>checkForInstall</strong></a>(self)</dt><dd><tt>Check&nbsp;whether&nbsp;Webware&nbsp;was&nbsp;installed.<br>
+&nbsp;<br>
+Exits&nbsp;with&nbsp;an&nbsp;error&nbsp;message&nbsp;if&nbsp;Webware&nbsp;was&nbsp;not&nbsp;installed.<br>
+Called&nbsp;from&nbsp;`__init__`.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-closeThread"><strong>closeThread</strong></a>(self)</dt><dd><tt>This&nbsp;method&nbsp;is&nbsp;called&nbsp;when&nbsp;the&nbsp;shutdown&nbsp;sequence&nbsp;is&nbsp;initiated.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-configFilename"><strong>configFilename</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;AppServer&nbsp;configuration&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-configReplacementValues"><strong>configReplacementValues</strong></a>(self)</dt><dd><tt>Get&nbsp;config&nbsp;values&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;escaped.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-createApplication"><strong>createApplication</strong></a>(self)</dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;an&nbsp;application&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;Invoked&nbsp;by&nbsp;__init__.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-initiateShutdown"><strong>initiateShutdown</strong></a>(self)</dt><dd><tt>Ask&nbsp;the&nbsp;master&nbsp;thread&nbsp;to&nbsp;begin&nbsp;the&nbsp;shutdown.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-loadPlugIn"><strong>loadPlugIn</strong></a>(self, path)</dt><dd><tt>Load&nbsp;and&nbsp;return&nbsp;the&nbsp;given&nbsp;plug-in.<br>
+&nbsp;<br>
+May&nbsp;return&nbsp;None&nbsp;if&nbsp;loading&nbsp;was&nbsp;unsuccessful&nbsp;(in&nbsp;which&nbsp;case&nbsp;this&nbsp;method<br>
+prints&nbsp;a&nbsp;message&nbsp;saying&nbsp;so).&nbsp;Used&nbsp;by&nbsp;`loadPlugIns`&nbsp;(note&nbsp;the&nbsp;**s**).</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-loadPlugIns"><strong>loadPlugIns</strong></a>(self)</dt><dd><tt>Load&nbsp;all&nbsp;plug-ins.<br>
+&nbsp;<br>
+A&nbsp;plug-in&nbsp;allows&nbsp;you&nbsp;to&nbsp;extend&nbsp;the&nbsp;functionality&nbsp;of&nbsp;WebKit&nbsp;without<br>
+necessarily&nbsp;having&nbsp;to&nbsp;modify&nbsp;its&nbsp;source.&nbsp;Plug-ins&nbsp;are&nbsp;loaded&nbsp;by<br>
+AppServer&nbsp;at&nbsp;startup&nbsp;time,&nbsp;just&nbsp;before&nbsp;listening&nbsp;for&nbsp;requests.<br>
+See&nbsp;the&nbsp;docs&nbsp;in&nbsp;`WebKit.PlugIn`&nbsp;for&nbsp;more&nbsp;info.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-numRequests"><strong>numRequests</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;requests.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;requests&nbsp;received&nbsp;by&nbsp;this&nbsp;app&nbsp;server<br>
+since&nbsp;it&nbsp;was&nbsp;launched.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-plugIn"><strong>plugIn</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;plug-in&nbsp;with&nbsp;the&nbsp;given&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-plugIns"><strong>plugIns</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;plug-ins&nbsp;loaded&nbsp;by&nbsp;the&nbsp;app&nbsp;server.<br>
+&nbsp;<br>
+Each&nbsp;plug-in&nbsp;is&nbsp;a&nbsp;Python&nbsp;package.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-printStartUpMessage"><strong>printStartUpMessage</strong></a>(self)</dt><dd><tt>Invoked&nbsp;by&nbsp;__init__,&nbsp;prints&nbsp;a&nbsp;little&nbsp;intro.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-readyForRequests"><strong>readyForRequests</strong></a>(self)</dt><dd><tt>Declare&nbsp;ready&nbsp;for&nbsp;getting&nbsp;requests.<br>
+&nbsp;<br>
+Should&nbsp;be&nbsp;invoked&nbsp;by&nbsp;subclasses&nbsp;when&nbsp;they&nbsp;are&nbsp;finally&nbsp;ready&nbsp;to<br>
+accept&nbsp;requests.&nbsp;Records&nbsp;some&nbsp;stats&nbsp;and&nbsp;prints&nbsp;a&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-recordPID"><strong>recordPID</strong></a>(self)</dt><dd><tt>Save&nbsp;the&nbsp;pid&nbsp;of&nbsp;the&nbsp;AppServer&nbsp;to&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;absolute&nbsp;server-side&nbsp;path&nbsp;of&nbsp;the&nbsp;WebKit&nbsp;app&nbsp;server.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;optional&nbsp;path&nbsp;is&nbsp;passed&nbsp;in,&nbsp;then&nbsp;it&nbsp;is&nbsp;joined&nbsp;with&nbsp;the<br>
+server&nbsp;side&nbsp;directory&nbsp;to&nbsp;form&nbsp;a&nbsp;path&nbsp;relative&nbsp;to&nbsp;the&nbsp;app&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-startTime"><strong>startTime</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;time&nbsp;the&nbsp;app&nbsp;server&nbsp;was&nbsp;started.<br>
+&nbsp;<br>
+The&nbsp;time&nbsp;is&nbsp;given&nbsp;as&nbsp;seconds,&nbsp;like&nbsp;<a href="#-time">time</a>().</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-version"><strong>version</strong></a>(self)</dt><dd><tt>Return&nbsp;WebKit&nbsp;version.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-webKitPath"><strong>webKitPath</strong></a>(self)</dt><dd><tt>Return&nbsp;teh&nbsp;WebKit&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-webwarePath"><strong>webwarePath</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Webware&nbsp;path.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>:<br>
+<dl><dt><a name="ThreadedAppServer-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;setting,&nbsp;using&nbsp;the&nbsp;server&nbsp;side&nbsp;path&nbsp;when&nbsp;indicated.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;setting,&nbsp;filtered&nbsp;by&nbsp;<a href="#ThreadedAppServer-serverSidePath">serverSidePath</a>(),<br>
+if&nbsp;the&nbsp;name&nbsp;ends&nbsp;with&nbsp;``Filename``&nbsp;or&nbsp;``Dir``.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><a name="ThreadedAppServer-commandLineConfig"><strong>commandLineConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;settings&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;command-line.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;come&nbsp;via&nbsp;addCommandLineSetting().</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;configuration&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;as&nbsp;a&nbsp;dictionary.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;combination&nbsp;of&nbsp;<a href="#ThreadedAppServer-defaultConfig">defaultConfig</a>()&nbsp;and&nbsp;<a href="#ThreadedAppServer-userConfig">userConfig</a>().<br>
+This&nbsp;method&nbsp;caches&nbsp;the&nbsp;config.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-configName"><strong>configName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;configuration&nbsp;file&nbsp;without&nbsp;the&nbsp;extension.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;name&nbsp;before&nbsp;the&nbsp;'.config'.<br>
+This&nbsp;is&nbsp;used&nbsp;on&nbsp;the&nbsp;command-line.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-hasSetting"><strong>hasSetting</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;a&nbsp;configuration&nbsp;setting&nbsp;has&nbsp;been&nbsp;changed.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-printConfig"><strong>printConfig</strong></a>(self, dest<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;the&nbsp;configuration&nbsp;to&nbsp;the&nbsp;given&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;destination&nbsp;is&nbsp;stdout.&nbsp;A&nbsp;fixed&nbsp;with&nbsp;font&nbsp;is&nbsp;assumed<br>
+for&nbsp;aligning&nbsp;the&nbsp;values&nbsp;to&nbsp;start&nbsp;at&nbsp;the&nbsp;same&nbsp;column.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-setSetting"><strong>setSetting</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="ThreadedAppServer-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;config&nbsp;overrides.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;config&nbsp;file.<br>
+Returns&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken&nbsp;from&nbsp;<a href="#ThreadedAppServer-configFilename">configFilename</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WorkerThread">class <strong>WorkerThread</strong></a>(<a href="threading.html#Thread">threading.Thread</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Base&nbsp;class&nbsp;for&nbsp;Webware&nbsp;worker&nbsp;threads&nbsp;that&nbsp;can&nbsp;be&nbsp;aborted.<br>
+&nbsp;<br>
+(Idea&nbsp;taken&nbsp;from:&nbsp;<a href="http://sebulba.wikispaces.com/recipe+thread2">http://sebulba.wikispaces.com/recipe+thread2</a>)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ThreadedAppServer.html#WorkerThread">WorkerThread</a></dd>
+<dd><a href="threading.html#Thread">threading.Thread</a></dd>
+<dd><a href="threading.html#_Verbose">threading._Verbose</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="WorkerThread-abort"><strong>abort</strong></a>(self, exception<font color="#909090">=&lt;class 'WebKit.ThreadedAppServer.ThreadAbortedError'&gt;</font>)</dt><dd><tt>Abort&nbsp;the&nbsp;current&nbsp;thread&nbsp;by&nbsp;raising&nbsp;an&nbsp;exception&nbsp;in&nbsp;its&nbsp;context.<br>
+&nbsp;<br>
+A&nbsp;return&nbsp;value&nbsp;of&nbsp;one&nbsp;means&nbsp;the&nbsp;thread&nbsp;was&nbsp;successfully&nbsp;aborted,<br>
+a&nbsp;value&nbsp;of&nbsp;zero&nbsp;means&nbsp;the&nbsp;thread&nbsp;could&nbsp;not&nbsp;be&nbsp;found,<br>
+any&nbsp;other&nbsp;value&nbsp;indicates&nbsp;that&nbsp;an&nbsp;error&nbsp;has&nbsp;occurred.</tt></dd></dl>
+
+<dl><dt><a name="WorkerThread-threadID"><strong>threadID</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;thread's&nbsp;internal&nbsp;id.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="threading.html#Thread">threading.Thread</a>:<br>
+<dl><dt><a name="WorkerThread-__init__"><strong>__init__</strong></a>(self, group<font color="#909090">=None</font>, target<font color="#909090">=None</font>, name<font color="#909090">=None</font>, args<font color="#909090">=()</font>, kwargs<font color="#909090">=None</font>, verbose<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="WorkerThread-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WorkerThread-getName"><strong>getName</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WorkerThread-isAlive"><strong>isAlive</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WorkerThread-isDaemon"><strong>isDaemon</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WorkerThread-is_alive"><strong>is_alive</strong></a> = isAlive(self)</dt></dl>
+
+<dl><dt><a name="WorkerThread-join"><strong>join</strong></a>(self, timeout<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="WorkerThread-run"><strong>run</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WorkerThread-setDaemon"><strong>setDaemon</strong></a>(self, daemonic)</dt></dl>
+
+<dl><dt><a name="WorkerThread-setName"><strong>setName</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="WorkerThread-start"><strong>start</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="threading.html#Thread">threading.Thread</a>:<br>
+<dl><dt><strong>daemon</strong></dt>
+</dl>
+<dl><dt><strong>ident</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<hr>
+Data descriptors inherited from <a href="threading.html#_Verbose">threading._Verbose</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-chdir"><strong>chdir</strong></a>(path, force<font color="#909090">=False</font>)</dt><dd><tt>Execute&nbsp;os.<a href="#-chdir">chdir</a>()&nbsp;with&nbsp;safety&nbsp;provision.</tt></dd></dl>
+ <dl><dt><a name="-currentFrames"><strong>currentFrames</strong></a> = _current_frames(...)</dt><dd><tt>_current_frames()&nbsp;-&gt;&nbsp;dictionary<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;dictionary&nbsp;mapping&nbsp;each&nbsp;current&nbsp;thread&nbsp;T's&nbsp;thread&nbsp;id&nbsp;to&nbsp;T's<br>
+current&nbsp;stack&nbsp;frame.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;should&nbsp;be&nbsp;used&nbsp;for&nbsp;specialized&nbsp;purposes&nbsp;only.</tt></dd></dl>
+ <dl><dt><a name="-dumps"><strong>dumps</strong></a>(...)</dt><dd><tt><a href="#-dumps">dumps</a>(value[,&nbsp;version])<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;string&nbsp;that&nbsp;would&nbsp;be&nbsp;written&nbsp;to&nbsp;a&nbsp;file&nbsp;by&nbsp;dump(value,&nbsp;file).<br>
+The&nbsp;value&nbsp;must&nbsp;be&nbsp;a&nbsp;supported&nbsp;type.&nbsp;Raise&nbsp;a&nbsp;ValueError&nbsp;exception&nbsp;if<br>
+value&nbsp;has&nbsp;(or&nbsp;contains&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;has)&nbsp;an&nbsp;unsupported&nbsp;type.<br>
+&nbsp;<br>
+New&nbsp;in&nbsp;version&nbsp;2.4:&nbsp;The&nbsp;version&nbsp;argument&nbsp;indicates&nbsp;the&nbsp;data&nbsp;format&nbsp;that<br>
+dumps&nbsp;should&nbsp;use.</tt></dd></dl>
+ <dl><dt><a name="-loads"><strong>loads</strong></a>(...)</dt><dd><tt><a href="#-loads">loads</a>(string)<br>
+&nbsp;<br>
+Convert&nbsp;the&nbsp;string&nbsp;to&nbsp;a&nbsp;value.&nbsp;If&nbsp;no&nbsp;valid&nbsp;value&nbsp;is&nbsp;found,&nbsp;raise<br>
+EOFError,&nbsp;ValueError&nbsp;or&nbsp;TypeError.&nbsp;Extra&nbsp;characters&nbsp;in&nbsp;the&nbsp;string&nbsp;are<br>
+ignored.</tt></dd></dl>
+ <dl><dt><a name="-localtime"><strong>localtime</strong></a>(...)</dt><dd><tt><a href="#-localtime">localtime</a>([seconds])&nbsp;-&gt;&nbsp;(tm_year,tm_mon,tm_mday,tm_hour,tm_min,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tm_sec,tm_wday,tm_yday,tm_isdst)<br>
+&nbsp;<br>
+Convert&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch&nbsp;to&nbsp;a&nbsp;time&nbsp;tuple&nbsp;expressing&nbsp;local&nbsp;time.<br>
+When&nbsp;'seconds'&nbsp;is&nbsp;not&nbsp;passed&nbsp;in,&nbsp;convert&nbsp;the&nbsp;current&nbsp;time&nbsp;instead.</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>(args)</dt><dd><tt>Command&nbsp;line&nbsp;interface.<br>
+&nbsp;<br>
+Run&nbsp;by&nbsp;`Launch`,&nbsp;this&nbsp;is&nbsp;the&nbsp;main&nbsp;entrance&nbsp;and&nbsp;command-line&nbsp;interface<br>
+for&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>.</tt></dd></dl>
+ <dl><dt><a name="-run"><strong>run</strong></a>(workDir<font color="#909090">=None</font>)</dt><dd><tt>Start&nbsp;the&nbsp;server&nbsp;(`<a href="#ThreadedAppServer">ThreadedAppServer</a>`).<br>
+&nbsp;<br>
+`workDir`&nbsp;is&nbsp;the&nbsp;server-side&nbsp;path&nbsp;for&nbsp;the&nbsp;server,&nbsp;which&nbsp;may&nbsp;not&nbsp;be<br>
+the&nbsp;``Webware/WebKit``&nbsp;directory&nbsp;(though&nbsp;by&nbsp;default&nbsp;it&nbsp;is).<br>
+&nbsp;<br>
+After&nbsp;setting&nbsp;up&nbsp;the&nbsp;<a href="#ThreadedAppServer">ThreadedAppServer</a>&nbsp;we&nbsp;call&nbsp;`<a href="#ThreadedAppServer">ThreadedAppServer</a>.mainloop`<br>
+to&nbsp;start&nbsp;the&nbsp;server&nbsp;main&nbsp;loop.&nbsp;It&nbsp;also&nbsp;catches&nbsp;exceptions&nbsp;as&nbsp;a&nbsp;last&nbsp;resort.</tt></dd></dl>
+ <dl><dt><a name="-runMainLoopInThread"><strong>runMainLoopInThread</strong></a>()</dt><dd><tt>#&nbsp;Determines&nbsp;whether&nbsp;the&nbsp;main&nbsp;look&nbsp;should&nbsp;run&nbsp;in&nbsp;another&nbsp;thread.<br>
+#&nbsp;On&nbsp;Win&nbsp;NT/2K/XP,&nbsp;we&nbsp;run&nbsp;the&nbsp;mainloop&nbsp;in&nbsp;a&nbsp;different&nbsp;thread&nbsp;because<br>
+#&nbsp;it's&nbsp;not&nbsp;safe&nbsp;for&nbsp;Ctrl-C&nbsp;to&nbsp;be&nbsp;caught&nbsp;while&nbsp;manipulating&nbsp;the&nbsp;queues.<br>
+#&nbsp;It's&nbsp;not&nbsp;safe&nbsp;on&nbsp;Linux&nbsp;either,&nbsp;but&nbsp;there,&nbsp;it&nbsp;appears&nbsp;that&nbsp;Ctrl-C&nbsp;will<br>
+#&nbsp;trigger&nbsp;an&nbsp;exception&nbsp;in&nbsp;ANY&nbsp;thread,&nbsp;so&nbsp;this&nbsp;fix&nbsp;doesn't&nbsp;help.</tt></dd></dl>
+ <dl><dt><a name="-setCloseOnExecFlag"><strong>setCloseOnExecFlag</strong></a>(fd)</dt><dd><tt>Set&nbsp;flag&nbsp;for&nbsp;file&nbsp;descriptor&nbsp;not&nbsp;to&nbsp;be&nbsp;inherited&nbsp;by&nbsp;child&nbsp;processes.</tt></dd></dl>
+ <dl><dt><a name="-shutDown"><strong>shutDown</strong></a>(signum, frame)</dt><dd><tt>Signal&nbsp;handler&nbsp;for&nbsp;shutting&nbsp;down&nbsp;the&nbsp;server.</tt></dd></dl>
+ <dl><dt><a name="-sleep"><strong>sleep</strong></a>(...)</dt><dd><tt><a href="#-sleep">sleep</a>(seconds)<br>
+&nbsp;<br>
+Delay&nbsp;execution&nbsp;for&nbsp;a&nbsp;given&nbsp;number&nbsp;of&nbsp;seconds.&nbsp;&nbsp;The&nbsp;argument&nbsp;may&nbsp;be<br>
+a&nbsp;floating&nbsp;point&nbsp;number&nbsp;for&nbsp;subsecond&nbsp;precision.</tt></dd></dl>
+ <dl><dt><a name="-threadDump"><strong>threadDump</strong></a>(signum, frame)</dt><dd><tt>Signal&nbsp;handler&nbsp;for&nbsp;dumping&nbsp;thread&nbsp;stack&nbsp;frames&nbsp;to&nbsp;stdout.</tt></dd></dl>
+ <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>FD_CLOEXEC</strong> = 1<br>
+<strong>F_GETFD</strong> = 2<br>
+<strong>F_SETFD</strong> = 2<br>
+<strong>PyThreadState_SetAsyncExc</strong> = &lt;_FuncPtr object&gt;<br>
+<strong>SIGBREAK</strong> = None<br>
+<strong>SIGHUP</strong> = 1<br>
+<strong>SIGINT</strong> = 2<br>
+<strong>SIGQUIT</strong> = 3<br>
+<strong>SIGTERM</strong> = 15<br>
+<strong>debug</strong> = False<br>
+<strong>defaultConfig</strong> = {'AdapterPort': 8086, 'AddressFiles': '%s.address', 'EnableAdapter': True, 'EnableHTTP': True, 'EnableMonitor': False, 'EnableSCGI': False, 'HTTPPort': 8080, 'Host': 'localhost', 'MaxRequestTime': 300, 'MaxServerThreads': 20, ...}<br>
+<strong>doesRunHandleExceptions</strong> = True<br>
+<strong>exitStatus</strong> = 0<br>
+<strong>intLength</strong> = 5<br>
+<strong>pythonapi</strong> = &lt;PyDLL 'None', handle 2028f8 at 8e4960c&gt;<br>
+<strong>server</strong> = None<br>
+<strong>settingRE</strong> = &lt;_sre.SRE_Pattern object&gt;<br>
+<strong>usage</strong> = '<font color="#c040c0">\n</font>ThreadedAppServer takes the following command l...ettingName=value: change configuration settings<font color="#c040c0">\n\n</font>'</td></tr></table>
+</body></html>

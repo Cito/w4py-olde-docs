@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/SessionDynamicStore.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Session store using memory and files."""</span>
+
+<span class="PY_KEYWORD">import</span> time
+<span class="PY_KEYWORD">import</span> threading
+<span class="PY_KEYWORD">from</span> operator <span class="PY_KEYWORD">import</span> itemgetter
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+<span class="PY_KEYWORD">from</span> SessionStore <span class="PY_KEYWORD">import</span> SessionStore
+<span class="PY_KEYWORD">import</span> SessionMemoryStore, SessionFileStore
+
+debug = False
+
+
+<span class="PY_KEYWORD">class</span> SessionDynamicStore(SessionStore):
+    <span class="PY_STRING">"""Stores the session in memory and in files.
+
+    This can be used either in a persistent app server or a cgi framework.
+
+    To use this Session Store, set SessionStore in Application.config
+    to 'Dynamic'. Other variables which can be set in Application.config are:
+
+    'MaxDynamicMemorySessions', which sets the maximum number of sessions
+    that can be in memory at one time. Default is 10,000.
+
+    'DynamicSessionTimeout', which sets the default time for a session to stay
+    in memory with no activity. Default is 15 minutes. When specifying this in
+    Application.config, use minutes.
+
+    One-shot sessions (usually created by crawler bots) aren't moved to
+    FileStore on periodical clean-up. They are still saved on SessionStore
+    shutdown. This reduces the number of files in the Sessions directory.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, app):
+        <span class="PY_STRING">"""Create both a file and a memory store."""</span>
+        SessionStore.__init__(self, app)
+        self._fileStore = SessionFileStore.SessionFileStore(app)
+        self._memoryStore = SessionMemoryStore.SessionMemoryStore(app,
+            restoreFiles=False) <span class="PY_COMMENT"># session files are read on demand</span>
+
+        <span class="PY_COMMENT"># moveToFileInterval specifies after what period of time</span>
+        <span class="PY_COMMENT"># in seconds a session is automatically moved to a file</span>
+        self._moveToFileInterval = app.setting(
+            <span class="PY_STRING">'DynamicSessionTimeout'</span>, 15) * 60
+
+        <span class="PY_COMMENT"># maxDynamicMemorySessions is what the user actually sets</span>
+        <span class="PY_COMMENT"># in Application.config, the maximum number of in memory sessions</span>
+        self._maxDynamicMemorySessions = app.setting(
+            <span class="PY_STRING">'MaxDynamicMemorySessions'</span>, 10000)
+
+        <span class="PY_COMMENT"># Used to keep track of sweeping the file store</span>
+        self._fileSweepCount = 0
+
+        <span class="PY_COMMENT"># Create a re-entrant lock for thread synchronization. The lock is used</span>
+        <span class="PY_COMMENT"># to protect all code that modifies the contents of the file store and</span>
+        <span class="PY_COMMENT"># all code that moves sessions between the file and memory stores, and</span>
+        <span class="PY_COMMENT"># is also used to protect code that searches in the file store for a</span>
+        <span class="PY_COMMENT"># session. Using the lock in this way avoids a bug that used to be in</span>
+        <span class="PY_COMMENT">#this code, where a session was temporarily neither in the file store</span>
+        <span class="PY_COMMENT"># nor in the memory store while it was being moved from file to memory.</span>
+        self._lock = threading.RLock()
+
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"SessionDynamicStore Initialized"</span>
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_STRING">"""Return the number of sessions in the store."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> len(self._memoryStore) + len(self._fileStore)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, key):
+        <span class="PY_STRING">"""Get a session item from the store."""</span>
+        <span class="PY_COMMENT"># First try to grab the session from the memory store without locking,</span>
+        <span class="PY_COMMENT"># for efficiency. Only if that fails do we acquire the lock and look</span>
+        <span class="PY_COMMENT"># in the file store.</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._memoryStore[key]
+        <span class="PY_KEYWORD">except</span> KeyError:
+            self._lock.acquire()
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">in</span> self._fileStore:
+                    self.moveToMemory(key)
+                <span class="PY_COMMENT"># let it raise a KeyError otherwise</span>
+                <span class="PY_KEYWORD">return</span> self._memoryStore[key]
+            <span class="PY_KEYWORD">finally</span>:
+                self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, key, value):
+        <span class="PY_STRING">"""Set a sessing item, saving it to the memory store for now."""</span>
+        value.setDirty(False)
+        self._memoryStore[key] = value
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, key):
+        <span class="PY_STRING">"""Delete a session item from the memory and the file store."""</span>
+        <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self:
+            <span class="PY_KEYWORD">raise</span> KeyError(key)
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">del</span> self._memoryStore[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">del</span> self._fileStore[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, key):
+        <span class="PY_STRING">"""Check whether the session store has a given key."""</span>
+        <span class="PY_COMMENT"># First try to find the session in the memory store without locking,</span>
+        <span class="PY_COMMENT"># for efficiency.  Only if that fails do we acquire the lock and</span>
+        <span class="PY_COMMENT"># look in the file store.</span>
+        <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">in</span> self._memoryStore:
+            <span class="PY_KEYWORD">return</span> True
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> key <span class="PY_KEYWORD">in</span> self._memoryStore <span class="PY_KEYWORD">or</span> key <span class="PY_KEYWORD">in</span> self._fileStore
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> __iter__(self):
+        <span class="PY_STRING">"""Return an iterator over the stored session keys."""</span>
+        <span class="PY_COMMENT"># since we must be consistent, we cannot chain the iterators</span>
+        <span class="PY_KEYWORD">return</span> iter(self.keys())
+
+    <span class="PY_KEYWORD">def</span> keys(self):
+        <span class="PY_STRING">"""Return a list with all keys of all the stored sessions."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._memoryStore.keys() + self._fileStore.keys()
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> clear(self):
+        <span class="PY_STRING">"""Clear the session store in memory and remove all session files."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            self._memoryStore.clear()
+            self._fileStore.clear()
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> setdefault(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else default (also setting it)."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> self[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                self[key] = default
+                <span class="PY_KEYWORD">return</span> default
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> pop(self, key, default=NoDefault):
+        <span class="PY_STRING">"""Return value if key available, else default (also remove key)."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">return</span> self._memoryStore.pop(key)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+                    <span class="PY_KEYWORD">return</span> self._fileStore.pop(key)
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">return</span> self._fileStore.pop(key, default)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> moveToMemory(self, key):
+        <span class="PY_STRING">"""Move the value for a session from file to memory."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt; Moving %s to Memory"</span> % key
+            self._memoryStore[key] = self._fileStore.pop(key)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> moveToFile(self, key):
+        <span class="PY_STRING">"""Move the value for a session from memory to file."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt; Moving %s to File"</span> % key
+            self._fileStore[key] = self._memoryStore.pop(key)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> setEncoderDecoder(self, encoder, decoder):
+        <span class="PY_STRING">"""Set the serializer and deserializer for the store."""</span>
+        SessionStore.setEncoderDecoder(self, encoder, decoder)
+        self._fileStore.setEncoderDecoder(encoder, decoder)
+
+
+    <span class="PY_COMMENT">## Application support ##</span>
+
+    <span class="PY_KEYWORD">def</span> storeSession(self, session):
+        <span class="PY_STRING">"""Save potentially changed session in the store."""</span>
+        <span class="PY_KEYWORD">if</span> self._alwaysSave <span class="PY_KEYWORD">or</span> session.isDirty():
+            key = session.identifier()
+            self._lock.acquire()
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">in</span> self:
+                    <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">in</span> self._memoryStore:
+                        <span class="PY_KEYWORD">if</span> self._memoryStore[key] <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> session:
+                            self._memoryStore[key] = session
+                    <span class="PY_KEYWORD">else</span>:
+                        self._fileStore[key] = session
+                <span class="PY_KEYWORD">else</span>:
+                    self[key] = session
+            <span class="PY_KEYWORD">finally</span>:
+                self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> storeAllSessions(self):
+        <span class="PY_STRING">"""Permanently save all sessions in the store."""</span>
+        self._lock.acquire()
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self._memoryStore.keys():
+                self.moveToFile(key)
+        <span class="PY_KEYWORD">finally</span>:
+            self._lock.release()
+
+    <span class="PY_KEYWORD">def</span> cleanStaleSessions(self, task=None):
+        <span class="PY_STRING">"""Clean stale sessions.
+
+        Called by the Application to tell this store to clean out all sessions
+        that have exceeded their lifetime.
+        We want to have their native class functions handle it, though.
+
+        Ideally, intervalSweep would be run more often than the
+        cleanStaleSessions functions for the actual stores.
+        This may need to wait until we get the TaskKit in place, though.
+
+        The problem is the FileStore.cleanStaleSessions can take a while to run.
+        So here, we only run the file sweep every fourth time.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Session Sweep started"</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> self._fileSweepCount == 0:
+                self._fileStore.cleanStaleSessions(task)
+            self._memoryStore.cleanStaleSessions(task)
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">if</span> self._fileSweepCount &lt; 4:
+            self._fileSweepCount += 1
+        <span class="PY_KEYWORD">else</span>:
+            self._fileSweepCount = 0
+        <span class="PY_COMMENT"># Now move sessions from memory to file as necessary:</span>
+        self.intervalSweep()
+        <span class="PY_COMMENT"># It's OK for a session to be moved from memory to file or vice versa</span>
+        <span class="PY_COMMENT"># in between the time we get the keys and the time we actually ask</span>
+        <span class="PY_COMMENT"># for the session's access time. It may take a while for the fileStore</span>
+        <span class="PY_COMMENT"># sweep to get completed.</span>
+
+    <span class="PY_KEYWORD">def</span> intervalSweep(self):
+        <span class="PY_STRING">"""The session sweeper interval function.
+
+        The interval function moves sessions from memory to file
+        and can be run more often than the full cleanStaleSessions function.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Starting interval Sweep at %s"</span> % time.ctime(time.time())
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Memory Sessions: %s   FileSessions: %s"</span> % (
+                len(self._memoryStore), len(self._fileStore))
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"maxDynamicMemorySessions = %s"</span> % self._maxDynamicMemorySessions
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"moveToFileInterval = %s"</span> % self._moveToFileInterval
+
+        now = time.time()
+
+        moveToFileTime = now - self._moveToFileInterval
+        keys = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self._memoryStore.keys():
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> self._memoryStore[key].lastAccessTime() &lt; moveToFileTime:
+                    <span class="PY_KEYWORD">if</span> self._memoryStore[key].isNew():
+                        <span class="PY_KEYWORD">if</span> debug:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"trashing one-shot session"</span>, key
+                    <span class="PY_KEYWORD">else</span>:
+                        keys.append(key)
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> keys:
+            <span class="PY_KEYWORD">try</span>:
+                self.moveToFile(key)
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+
+        <span class="PY_KEYWORD">if</span> len(self._memoryStore) &gt; self._maxDynamicMemorySessions:
+            keys = self.memoryKeysInAccessTimeOrder()
+            excess = len(self._memoryStore) - self._maxDynamicMemorySessions
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> excess, <span class="PY_STRING">"sessions beyond the limit"</span>
+            keys = keys[:excess]
+            <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> keys:
+                <span class="PY_KEYWORD">try</span>:
+                    self.moveToFile(key)
+                <span class="PY_KEYWORD">except</span> KeyError:
+                    <span class="PY_KEYWORD">pass</span>
+
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Finished interval Sweep at %s"</span> % time.ctime(time.time())
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Memory Sessions: %s   FileSessions: %s"</span> % (
+                len(self._memoryStore), len(self._fileStore))
+
+    <span class="PY_KEYWORD">def</span> memoryKeysInAccessTimeOrder(self):
+        <span class="PY_STRING">"""Return memory store's keys in ascending order of last access time."""</span>
+        accessTimeAndKeys = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self._memoryStore:
+            <span class="PY_KEYWORD">try</span>:
+                accessTimeAndKeys.append(
+                    (self._memoryStore[key].lastAccessTime(), key))
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">return</span> map(itemgetter(1), sorted(accessTimeAndKeys))
+</pre>
+<!--footer-->
+
+</body>
+</html>

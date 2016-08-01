@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiddleKit/Core.Klass</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiddleKit/Core.Klass</h2>
+<p>You can also browse the <a href="../Files/Klass.html">complete source file</a>
+or the <a href="../Docs/MiddleKit/Core.Klass.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Klass</span>(MiddleDict, ModelObject):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, klassContainer, rawDict=None)</span>
+
+<span class="line_category">    ## Reading ##</span>
+<span class="line_def">    def <span class="name_def">readDict</span>(self, rawDict)</span>
+<span class="line_def">    def <span class="name_def">awakeFromRead</span>(self, klasses)</span>
+
+<span class="line_category">    ## Names ##</span>
+<span class="line_def">    def <span class="name_def">name</span>(self)</span>
+<span class="line_def">    def <span class="name_def">supername</span>(self)</span>
+
+<span class="line_category">    ## Id ##</span>
+<span class="line_def">    def <span class="name_def">id</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setId</span>(self, id)</span>
+
+<span class="line_category">    ## Superklass ##</span>
+<span class="line_def">    def <span class="name_def">superklass</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setSuperklass</span>(self, klass)</span>
+
+<span class="line_category">    ## Ancestors ##</span>
+<span class="line_def">    def <span class="name_def">lookupAncestorKlass</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">isKindOfKlassNamed</span>(self, name)</span>
+
+<span class="line_category">    ## Subklasses ##</span>
+<span class="line_def">    def <span class="name_def">subklasses</span>(self)</span>
+<span class="line_def">    def <span class="name_def">addSubklass</span>(self, klass)</span>
+<span class="line_def">    def <span class="name_def">descendants</span>(self, init=1, memo=None)</span>
+
+<span class="line_category">    ## Accessing attributes ##</span>
+<span class="line_def">    def <span class="name_def">addAttr</span>(self, attr)</span>
+<span class="line_def">    def <span class="name_def">attrs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">hasAttr</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">attr</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">lookupAttr</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">allAttrs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">allDataAttrs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">allDataRefAttrs</span>(self)</span>
+
+<span class="line_category">    ## Klasses access ##</span>
+<span class="line_def">    def <span class="name_def">klasses</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setKlasses</span>(self, klasses)</span>
+<span class="line_def">    def <span class="name_def">model</span>(self)</span>
+
+<span class="line_category">    ## Other access ##</span>
+<span class="line_def">    def <span class="name_def">isAbstract</span>(self)</span>
+<span class="line_def">    def <span class="name_def">pyClass</span>(self)</span>
+<span class="line_def">    def <span class="name_def">backObjRefAttrs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setting</span>(self, name, default=NoDefault)</span>
+
+<span class="line_category">    ## As string ##</span>
+<span class="line_def">    def <span class="name_def">asShortString</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__str__</span>(self)</span>
+
+<span class="line_category">    ## As a dictionary key (for "set" purposes) ##</span>
+<span class="line_def">    def <span class="name_def">__hash__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__cmp__</span>(self, other)</span>
+
+<span class="line_category">    ## Warnings ##</span>
+<span class="line_def">    def <span class="name_def">printWarnings</span>(self, out)</span>
+
+<span class="line_category">    ## Model support ##</span>
+<span class="line_def">    def <span class="name_def">willBuildDependencies</span>(self)</span>
+<span class="line_def">    def <span class="name_def">buildDependencies</span>(self)</span>
+<span class="line_def">    def <span class="name_def">recordDependencyOrder</span>(self, order, visited, indent=0)</span>
+
+</pre>
+</body>
+</html>

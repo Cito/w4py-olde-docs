@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/Funcs.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""MiscUtils.Funcs
+
+This module holds functions that don't fit in anywhere else.
+
+You can safely import * from MiscUtils.Funcs if you like.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> random
+<span class="PY_KEYWORD">import</span> datetime
+<span class="PY_KEYWORD">import</span> time
+<span class="PY_KEYWORD">import</span> textwrap
+
+<span class="PY_KEYWORD">from</span> struct <span class="PY_KEYWORD">import</span> calcsize
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> hashlib <span class="PY_KEYWORD">import</span> md5, sha1
+<span class="PY_KEYWORD">except</span> ImportError: <span class="PY_COMMENT"># Python &lt; 2.5</span>
+    <span class="PY_KEYWORD">from</span> md5 <span class="PY_KEYWORD">import</span> new <span class="PY_KEYWORD">as</span> md5
+    <span class="PY_KEYWORD">from</span> sha <span class="PY_KEYWORD">import</span> new <span class="PY_KEYWORD">as</span> sha1
+
+__all__ = [
+    <span class="PY_STRING">'commas'</span>, <span class="PY_STRING">'charWrap'</span>, <span class="PY_STRING">'wordWrap'</span>, <span class="PY_STRING">'excstr'</span>, <span class="PY_STRING">'hostName'</span>, <span class="PY_STRING">'localIP'</span>,
+    <span class="PY_STRING">'positiveId'</span>, <span class="PY_STRING">'safeDescription'</span>, <span class="PY_STRING">'asclocaltime'</span>, <span class="PY_STRING">'timestamp'</span>,
+    <span class="PY_STRING">'localTimeDelta'</span>, <span class="PY_STRING">'uniqueId'</span>, <span class="PY_STRING">'valueForString'</span>]
+
+
+<span class="PY_KEYWORD">def</span> commas(number):
+    <span class="PY_STRING">"""Insert commas in a number.
+
+    Return the given number as a string with commas to separate
+    the thousands positions.
+
+    The number can be a float, int, long or string. Returns None for None.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> number <span class="PY_KEYWORD">is</span> None:
+        <span class="PY_KEYWORD">return</span> None
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> number:
+        <span class="PY_KEYWORD">return</span> str(number)
+    number = list(str(number))
+    <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'.'</span> <span class="PY_KEYWORD">in</span> number:
+        i = number.index(<span class="PY_STRING">'.'</span>)
+    <span class="PY_KEYWORD">else</span>:
+        i = len(number)
+    <span class="PY_KEYWORD">while</span> 1:
+        i -= 3
+        <span class="PY_KEYWORD">if</span> i &lt;= 0 <span class="PY_KEYWORD">or</span> number[i - 1] == <span class="PY_STRING">'-'</span>:
+            <span class="PY_KEYWORD">break</span>
+        number.insert(i, <span class="PY_STRING">','</span>)
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(number)
+
+
+<span class="PY_KEYWORD">def</span> charWrap(s, width, hanging=0):
+    <span class="PY_STRING">"""Word wrap a string.
+
+    Return a new version of the string word wrapped with the given width
+    and hanging indent. The font is assumed to be monospaced.
+
+    This can be useful for including text between &lt;pre&gt; &lt;/pre&gt; tags,
+    since &lt;pre&gt; will not word wrap, and for lengthly lines,
+    will increase the width of a web page.
+
+    It can also be used to help delineate the entries in log-style
+    output by passing hanging=4.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> s:
+        <span class="PY_KEYWORD">return</span> s
+    <span class="PY_KEYWORD">if</span> hanging &lt; 0 <span class="PY_KEYWORD">or</span> width &lt; 1 <span class="PY_KEYWORD">or</span> hanging &gt;= width:
+        <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">"Invalid width or indentation"</span>)
+    hanging = <span class="PY_STRING">' '</span> * hanging
+    lines = s.splitlines()
+    i = 0
+    <span class="PY_KEYWORD">while</span> i &lt; len(lines):
+        s = lines[i]
+        <span class="PY_KEYWORD">while</span> len(s) &gt; width:
+            lines[i], s = s[:width].rstrip(), hanging + s[width:].lstrip()
+            i += 1
+            lines.insert(i, s)
+        i += 1
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'\n'</span>.join(lines)
+
+
+<span class="PY_KEYWORD">def</span> wordWrap(s, width=78):
+    <span class="PY_STRING">"""Return a version of the string word wrapped to the given width."""</span>
+    <span class="PY_KEYWORD">return</span> textwrap.fill(s, width)
+
+
+<span class="PY_KEYWORD">def</span> excstr(e):
+    <span class="PY_STRING">"""Return a string for the exception.
+
+    The string will be in the format that Python normally outputs
+    in interactive shells and such:
+        &lt;ExceptionName&gt;: &lt;message&gt;
+        AttributeError: 'object' object has no attribute 'bar'
+    Neither str(e) nor repr(e) do that.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> e <span class="PY_KEYWORD">is</span> None:
+        <span class="PY_KEYWORD">return</span> None
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'%s: %s'</span> % (e.__class__.__name__, e)
+
+
+<span class="PY_KEYWORD">def</span> hostName():
+    <span class="PY_STRING">"""Return the host name.
+
+    The name is taken first from the os environment and failing that,
+    from the 'hostname' executable. May return None if neither attempt
+    succeeded. The environment keys checked are HOST and HOSTNAME,
+    both upper and lower case.
+
+    """</span>
+    <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> [<span class="PY_STRING">'HOST'</span>, <span class="PY_STRING">'HOSTNAME'</span>, <span class="PY_STRING">'host'</span>, <span class="PY_STRING">'hostname'</span>]:
+        hostName = os.environ.get(name)
+        <span class="PY_KEYWORD">if</span> hostName:
+            <span class="PY_KEYWORD">break</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> hostName:
+        hostName = os.popen(<span class="PY_STRING">'hostname'</span>).read().strip()
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> hostName:
+        hostName = None
+    <span class="PY_KEYWORD">else</span>:
+        hostName = hostName.lower()
+    <span class="PY_KEYWORD">return</span> hostName
+
+
+_localIP = None
+
+<span class="PY_KEYWORD">def</span> localIP(remote=(<span class="PY_STRING">'www.yahoo.com'</span>, 80), useCache=True):
+    <span class="PY_STRING">"""Get the "public" address of the local machine.
+
+    This is the address which is connected to the general Internet.
+
+    This function connects to a remote HTTP server the first time it is
+    invoked (or every time it is invoked with useCache=0). If that is
+    not acceptable, pass remote=None, but be warned that the result is
+    less likely to be externally visible.
+
+    Getting your local ip is actually quite complex. If this function
+    is not serving your needs then you probably need to think deeply
+    about what you really want and how your network is really set up.
+    Search comp.lang.python for "local ip" for more information.
+    http://groups.google.com/groups?q=%22local+ip%22+group:comp.lang.python.*
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> _localIP
+    <span class="PY_KEYWORD">if</span> useCache <span class="PY_KEYWORD">and</span> _localIP:
+        <span class="PY_KEYWORD">return</span> _localIP
+    <span class="PY_KEYWORD">import</span> socket
+    <span class="PY_KEYWORD">if</span> remote:
+        <span class="PY_COMMENT"># code from Donn Cave on comp.lang.python</span>
+        <span class="PY_COMMENT">#</span>
+        <span class="PY_COMMENT"># My notes:</span>
+        <span class="PY_COMMENT"># Q: Why not use this? socket.gethostbyname(socket.gethostname())</span>
+        <span class="PY_COMMENT"># A: On some machines, it returns '127.0.0.1' - not what we had in mind.</span>
+        <span class="PY_COMMENT">#</span>
+        <span class="PY_COMMENT"># Q: Why not use this? socket.gethostbyname_ex(socket.gethostname())[2]</span>
+        <span class="PY_COMMENT"># A: Because some machines have more than one IP (think "VPN", etc.) and</span>
+        <span class="PY_COMMENT">#    there is no easy way to tell which one is the externally visible IP.</span>
+        <span class="PY_KEYWORD">try</span>:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(remote)
+            address, port = s.getsockname()
+            s.close()
+            <span class="PY_KEYWORD">if</span> address <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> address.startswith(<span class="PY_STRING">'127.'</span>):
+                <span class="PY_KEYWORD">if</span> useCache:
+                    _localIP = address
+                <span class="PY_KEYWORD">return</span> address
+        <span class="PY_KEYWORD">except</span> socket.error:
+            <span class="PY_COMMENT"># oh, well. we'll use the local method</span>
+            <span class="PY_KEYWORD">pass</span>
+    addresses = socket.gethostbyname_ex(socket.gethostname())[2]
+    <span class="PY_KEYWORD">for</span> address <span class="PY_KEYWORD">in</span> addresses:
+        <span class="PY_KEYWORD">if</span> address <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> address.startswith(<span class="PY_STRING">'127.'</span>):
+            <span class="PY_KEYWORD">if</span> useCache:
+                _localIP = address
+            <span class="PY_KEYWORD">return</span> address
+    <span class="PY_KEYWORD">if</span> useCache:
+        _localIP = addresses[0]
+    <span class="PY_KEYWORD">return</span> _localIP
+
+
+<span class="PY_COMMENT"># Addresses can "look negative" on some boxes, some of the time.</span>
+<span class="PY_COMMENT"># If you feed a "negative address" to an %x format, modern Python</span>
+<span class="PY_COMMENT"># versions will display it as signed. So when you want to produce</span>
+<span class="PY_COMMENT"># an address, use positiveId() to obtain it.</span>
+<span class="PY_COMMENT"># _address_mask is 2**(number_of_bits_in_a_native_pointer).</span>
+<span class="PY_COMMENT"># Adding this to a negative address gives a positive int with the same</span>
+<span class="PY_COMMENT"># hex representation as the significant bits in the original.</span>
+<span class="PY_COMMENT"># This idea and code were taken from ZODB (http://svn.zope.org).</span>
+
+_address_mask = 256L ** calcsize(<span class="PY_STRING">'P'</span>)
+
+<span class="PY_KEYWORD">def</span> positiveId(obj):
+    <span class="PY_STRING">"""Return id(obj) as a non-negative integer."""</span>
+    result = id(obj)
+    <span class="PY_KEYWORD">if</span> result &lt; 0:
+        result += _address_mask
+        <span class="PY_KEYWORD">assert</span> result &gt; 0
+    <span class="PY_KEYWORD">return</span> result
+
+
+<span class="PY_KEYWORD">def</span> _descExc(reprOfWhat, err):
+    <span class="PY_STRING">"""Return a description of an exception.
+
+    This is a private function for use by safeDescription().
+
+    """</span>
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'(exception from repr(%s): %s: %s)'</span> % (
+            reprOfWhat, err.__class__.__name__, err)
+    <span class="PY_KEYWORD">except</span> Exception:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'(exception from repr(%s))'</span> % reprOfWhat
+
+
+<span class="PY_KEYWORD">def</span> safeDescription(obj, what=<span class="PY_STRING">'what'</span>):
+    <span class="PY_STRING">"""Return the repr() of obj and its class (or type) for help in debugging.
+
+    A major benefit here is that exceptions from repr() are consumed.
+    This is important in places like "assert" where you don't want
+    to lose the assertion exception in your attempt to get more information.
+
+    Example use:
+    assert isinstance(foo, Foo), safeDescription(foo)
+    print "foo:", safeDescription(foo) # won't raise exceptions
+
+    # better output format:
+    assert isinstance(foo, Foo), safeDescription(foo, 'foo')
+    print safeDescription(foo, 'foo')
+
+    """</span>
+    <span class="PY_KEYWORD">try</span>:
+        xRepr = repr(obj)
+    <span class="PY_KEYWORD">except</span> Exception, e:
+        xRepr = _descExc(<span class="PY_STRING">'obj'</span>, e)
+    <span class="PY_KEYWORD">if</span> hasattr(obj, <span class="PY_STRING">'__class__'</span>):
+        <span class="PY_KEYWORD">try</span>:
+            cRepr = repr(obj.__class__)
+        <span class="PY_KEYWORD">except</span> Exception, e:
+            cRepr = _descExc(<span class="PY_STRING">'obj.__class__'</span>, e)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'%s=%s class=%s'</span> % (what, xRepr, cRepr)
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">try</span>:
+            cRepr = repr(type(obj))
+        <span class="PY_KEYWORD">except</span> Exception, e:
+            cRepr = _descExc(<span class="PY_STRING">'type(obj)'</span>, e)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'%s=%s type=%s'</span> % (what, xRepr, cRepr)
+
+
+<span class="PY_KEYWORD">def</span> asclocaltime(t=None):
+    <span class="PY_STRING">"""Return a readable string of the current, local time.
+
+    Useful for time stamps in log files.
+
+    """</span>
+    <span class="PY_KEYWORD">return</span> time.asctime(time.localtime(t))
+
+
+<span class="PY_KEYWORD">def</span> timestamp(t=None):
+    <span class="PY_STRING">"""Return a dictionary whose keys give different versions of the timestamp.
+
+    The dictionary will contain the following timestamp versions:
+        'tuple': (year, month, day, hour, min, sec)
+        'pretty': 'YYYY-MM-DD HH:MM:SS'
+        'condensed': 'YYYYMMDDHHMMSS'
+        'dashed': 'YYYY-MM-DD-HH-MM-SS'
+
+    The focus is on the year, month, day, hour and second, with no additional
+    information such as timezone or day of year. This form of timestamp is
+    often ideal for print statements, logs and filenames. If the current number
+    of seconds is not passed, then the current time is taken. The 'pretty'
+    format is ideal for print statements, while the 'condensed' and 'dashed'
+    formats are generally more appropriate for filenames.
+
+    """</span>
+    t = time.localtime(t)[:6]
+    <span class="PY_KEYWORD">return</span> dict(tuple=t,
+        pretty=<span class="PY_STRING">'%4i-%02i-%02i %02i:%02i:%02i'</span> % t,
+        condensed=<span class="PY_STRING">'%4i%02i%02i%02i%02i%02i'</span> % t,
+        dashed=<span class="PY_STRING">'%4i-%02i-%02i-%02i-%02i-%02i'</span> % t)
+
+
+<span class="PY_KEYWORD">def</span> localTimeDelta(t=None):
+    <span class="PY_STRING">"""Return timedelta of local zone from GMT."""</span>
+    <span class="PY_KEYWORD">if</span> t <span class="PY_KEYWORD">is</span> None:
+        t = time.time()
+    dt = datetime.datetime
+    <span class="PY_KEYWORD">return</span> dt.fromtimestamp(t) - dt.utcfromtimestamp(t)
+
+
+<span class="PY_KEYWORD">def</span> uniqueId(forObject=None, sha=False):
+    <span class="PY_STRING">"""Generate an opaque, identifier string.
+
+    The string is practically guaranteed to be unique
+    If an object is passed, then its id() is incorporated into the generation.
+    Returns a 32 character long string relying on md5 or,
+    if sha is True, a 40 character long string relying on sha-1.
+
+    """</span>
+    <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># prefer os.urandom(), if available</span>
+        r = [os.urandom(8)]
+    <span class="PY_KEYWORD">except</span> (AttributeError, NotImplementedError):
+        r = [time.time(), random.random(), os.times()]
+    <span class="PY_KEYWORD">if</span> forObject <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+        r.append(id(forObject))
+    <span class="PY_KEYWORD">return</span> (sha <span class="PY_KEYWORD">and</span> sha1 <span class="PY_KEYWORD">or</span> md5)(str(r)).hexdigest()
+
+
+<span class="PY_KEYWORD">def</span> valueForString(s):
+    <span class="PY_STRING">"""Return value for a string.
+
+    For a given string, returns the most appropriate Pythonic value
+    such as None, a long, an int, a list, etc. If none of those
+    make sense, then returns the string as-is.
+
+    "None", "True" and "False" are case-insensitive because there is
+    already too much case sensitivity in computing, damn it!
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> s:
+        <span class="PY_KEYWORD">return</span> s
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">return</span> int(s)
+    <span class="PY_KEYWORD">except</span> ValueError:
+        <span class="PY_KEYWORD">pass</span>
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">return</span> long(s)
+    <span class="PY_KEYWORD">except</span> ValueError:
+        <span class="PY_KEYWORD">pass</span>
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">return</span> float(s)
+    <span class="PY_KEYWORD">except</span> ValueError:
+        <span class="PY_KEYWORD">pass</span>
+    t = s.lower()
+    <span class="PY_KEYWORD">if</span> t == <span class="PY_STRING">'none'</span>:
+        <span class="PY_KEYWORD">return</span> None
+    <span class="PY_KEYWORD">if</span> t.lower() == <span class="PY_STRING">'true'</span>:
+        <span class="PY_KEYWORD">return</span> True
+    <span class="PY_KEYWORD">if</span> t.lower() == <span class="PY_STRING">'false'</span>:
+        <span class="PY_KEYWORD">return</span> False
+    <span class="PY_KEYWORD">if</span> s[0] <span class="PY_KEYWORD">in</span> <span class="PY_STRING">'[({"\'</span>':
+        <span class="PY_KEYWORD">return</span> eval(s)
+    <span class="PY_KEYWORD">return</span> s
+</pre>
+<!--footer-->
+
+</body>
+</html>

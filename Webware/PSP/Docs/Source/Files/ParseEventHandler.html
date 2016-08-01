@@ -1,0 +1,495 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/ParseEventHandler.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""Event handler for parsing PSP tokens.
+
+This module is called when the Parser encounters psp tokens.
+It creates a generator to handle the PSP token. When the PSP
+source file is fully parsed, this module calls all of the
+generators in turn to output their source code.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> time
+
+<span class="PY_KEYWORD">from</span> Generators <span class="PY_KEYWORD">import</span> * <span class="PY_COMMENT"># ResponseObject, plus all the *Generator functions.</span>
+
+
+<span class="PY_KEYWORD">class</span> ParseEventHandler(object):
+    <span class="PY_STRING">"""This is a key class.
+
+    It implements the handling of all the parsing elements.
+    Note: This files JSP cousin is called ParseEventListener,
+    I don't know why, but Handler seemed more appropriate to me.
+
+    """</span>
+
+    aspace = <span class="PY_STRING">' '</span>
+    defaults = dict(
+        BASE_CLASS = <span class="PY_STRING">'WebKit.Page'</span>,
+        BASE_METHOD = <span class="PY_STRING">'writeHTML'</span>,
+        imports = dict(filename=<span class="PY_STRING">'classes'</span>),
+        threadSafe = <span class="PY_STRING">'no'</span>,
+        instanceSafe = <span class="PY_STRING">'yes'</span>,
+        indent = 4,
+        gobbleWhitespace = True,
+        formatter = <span class="PY_STRING">'str'</span>
+    )
+
+    <span class="PY_KEYWORD">def</span> __init__(self, ctxt, parser):
+        self._ctxt = ctxt
+        self._gens = []
+        self._reader = ctxt.getReader()
+        self._writer = ctxt.getServletWriter()
+        self._parser = parser
+        self._imports = []
+        self._importedSymbols = []
+        self._baseMethod = self.defaults[<span class="PY_STRING">'BASE_METHOD'</span>]
+        self._baseClasses = [self.defaults[<span class="PY_STRING">'BASE_CLASS'</span>]]
+        self._threadSafe = self.defaults[<span class="PY_STRING">'threadSafe'</span>]
+        self._instanceSafe = self.defaults[<span class="PY_STRING">'instanceSafe'</span>]
+        self._indent = self.defaults[<span class="PY_STRING">'indent'</span>]
+        self._gobbleWhitespace = self.defaults[<span class="PY_STRING">'gobbleWhitespace'</span>]
+        self._formatter = self.defaults[<span class="PY_STRING">'formatter'</span>]
+
+    <span class="PY_KEYWORD">def</span> addGenerator(self, gen):
+        self._gens.append(gen)
+
+    <span class="PY_KEYWORD">def</span> handleExpression(self, start, stop, attrs):
+        <span class="PY_STRING">"""Flush any template data into a CharGen and then create a new ExpressionGen."""</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        exp = ExpressionGenerator(self._reader.getChars(start, stop))
+        self.addGenerator(exp)
+
+    <span class="PY_KEYWORD">def</span> handleCharData(self, start, stop, chars):
+        <span class="PY_STRING">"""Flush character data into a CharGen."""</span>
+        <span class="PY_KEYWORD">if</span> chars:
+            gen = CharDataGenerator(chars)
+            self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleComment(self, start, stop):
+        <span class="PY_STRING">"""Comments get swallowed into nothing."""</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        <span class="PY_KEYWORD">return</span> <span class="PY_COMMENT"># just eats the comment</span>
+
+    <span class="PY_KEYWORD">def</span> handleInclude(self, attrs, param):
+        <span class="PY_STRING">"""This is for includes of the form &lt;psp:include ...&gt;
+
+        This function essentially forwards the request to the specified
+        URL and includes that output.
+
+        """</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = IncludeGenerator(attrs, param, self._ctxt)
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleInsert(self, attrs, param):
+        <span class="PY_STRING">"""This is for includes of the form &lt;psp:insert ...&gt;
+
+        This type of include is not parsed, it is just inserted in the output stream.
+
+        """</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = InsertGenerator(attrs, param, self._ctxt)
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> importHandler(self, imports, start, stop):
+        importlist = imports.split(<span class="PY_STRING">','</span>)
+        <span class="PY_KEYWORD">for</span> imp <span class="PY_KEYWORD">in</span> importlist:
+            <span class="PY_KEYWORD">if</span> <span class="PY_STRING">':'</span> <span class="PY_KEYWORD">in</span> imp:
+                module, symbol = imp.split(<span class="PY_STRING">':'</span>, 1)
+                self._importedSymbols.append(symbol.strip())
+                implist = <span class="PY_STRING">"from "</span> + module + <span class="PY_STRING">" import "</span> + symbol
+                self._imports.append(implist)
+            <span class="PY_KEYWORD">else</span>:
+                self._imports.append(<span class="PY_STRING">'import '</span> + imp.strip())
+
+    <span class="PY_KEYWORD">def</span> extendsHandler(self, bc, start, stop):
+        <span class="PY_STRING">"""Extends is a page directive.
+
+        It sets the base class (or multiple base classes) for the class
+        that this class will generate. The choice of base class affects
+        the choice of a method to override with the BaseMethod page directive.
+        The default base class is PSPPage. PSPPage inherits from Page.py.
+
+        """</span>
+        self._baseClasses = [s.strip() <span class="PY_KEYWORD">for</span> s <span class="PY_KEYWORD">in</span> bc.split(<span class="PY_STRING">','</span>)]
+
+    <span class="PY_KEYWORD">def</span> mainMethodHandler(self, method, start, stop):
+        <span class="PY_STRING">"""BaseMethod is a page directive.
+
+        It sets the class method that the main body of this PSP page
+        over-rides. The default is WriteHTML. This value should be set
+        to either WriteHTML or writeBody. See the PSPPage.py and Page.py
+        servlet classes for more information.
+
+        """</span>
+        self._baseMethod = method
+
+    <span class="PY_KEYWORD">def</span> threadSafeHandler(self, value, start, stop):
+        <span class="PY_STRING">"""Handle isThreadSage.
+
+        isThreadSafe is a page directive.
+        The value can be "yes" or "no".
+        Default is no because the default base class,
+        Page.py, isn't thread safe.
+
+        """</span>
+        self._threadSafe = value
+
+    <span class="PY_KEYWORD">def</span> instanceSafeHandler(self, value, start, stop):
+        <span class="PY_STRING">"""Handle isInstanceSafe.
+
+        isInstanceSafe tells the Servlet engine whether it is safe
+        to use object instances of this page multiple times.
+        The default is "yes".
+
+        Saying "no" here hurts performance.
+
+        """</span>
+        self._instanceSafe = value
+
+    <span class="PY_KEYWORD">def</span> indentTypeHandler(self, type, start, stop):
+        <span class="PY_STRING">"""Declare whether tabs are used to indent source code."""</span>
+        type = type.lower()
+        <span class="PY_KEYWORD">if</span> type <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'tabs'</span>, <span class="PY_STRING">'spaces'</span>, <span class="PY_STRING">'braces'</span>):
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">'Invalid Indentation Type'</span>)
+        self._writer.setIndentType(type)
+
+    <span class="PY_KEYWORD">def</span> indentSpacesHandler(self, amount, start, stop):
+        <span class="PY_STRING">"""Set number of spaces used to indent in generated source."""</span>
+        self._indentSpaces = int(amount) <span class="PY_COMMENT"># don't really need this</span>
+        self._writer.setIndentSpaces(int(amount))
+
+    <span class="PY_KEYWORD">def</span> gobbleWhitespaceHandler(self, value, start, stop):
+        <span class="PY_STRING">"""Declare whether whitespace between script tags are gobble up."""</span>
+        <span class="PY_KEYWORD">if</span> value.lower() <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'no'</span>, <span class="PY_STRING">'false'</span>, <span class="PY_STRING">'0'</span>):
+            self._gobbleWhitespace = False
+
+    <span class="PY_KEYWORD">def</span> formatterHandler(self, value, start, stop):
+        <span class="PY_STRING">"""Set an alternate formatter function to use instead of str()."""</span>
+        self._formatter = value
+
+    directiveHandlers = {
+        <span class="PY_STRING">'imports'</span>: importHandler,
+        <span class="PY_STRING">'import'</span>: importHandler,
+        <span class="PY_STRING">'extends'</span>: extendsHandler,
+        <span class="PY_STRING">'method'</span>: mainMethodHandler,
+        <span class="PY_STRING">'isThreadSafe'</span>: threadSafeHandler,
+        <span class="PY_STRING">'isInstanceSafe'</span>: instanceSafeHandler,
+        <span class="PY_STRING">'BaseClass'</span>: extendsHandler,
+        <span class="PY_STRING">'indentSpaces'</span>: indentSpacesHandler,
+        <span class="PY_STRING">'indentType'</span>: indentTypeHandler,
+        <span class="PY_STRING">'gobbleWhitespace'</span>: gobbleWhitespaceHandler,
+        <span class="PY_STRING">'formatter'</span>: formatterHandler}
+
+    <span class="PY_KEYWORD">def</span> handleDirective(self, directive, start, stop, attrs):
+        <span class="PY_STRING">"""Flush any template data into a CharGen and then create a new DirectiveGen."""</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        <span class="PY_COMMENT"># big switch</span>
+        <span class="PY_KEYWORD">if</span> directive == <span class="PY_STRING">'page'</span>:
+            <span class="PY_KEYWORD">for</span> h <span class="PY_KEYWORD">in</span> attrs:
+                <span class="PY_KEYWORD">if</span> h <span class="PY_KEYWORD">in</span> self.directiveHandlers:
+                    self.directiveHandlers[h](self, attrs[h], start, stop)
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'No page directive handler: %s'</span> % h)
+        <span class="PY_KEYWORD">elif</span> directive == <span class="PY_STRING">'include'</span>:
+            filename = attrs[<span class="PY_STRING">'file'</span>]
+            encoding = attrs.get(<span class="PY_STRING">'encoding'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                self._reader.pushFile(filename, encoding)
+            <span class="PY_KEYWORD">except</span> IOError:
+                <span class="PY_KEYWORD">raise</span> IOError(<span class="PY_STRING">'PSP include file not found: %s'</span> % filename)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Invalid directive: %s'</span> % directive)
+
+    <span class="PY_KEYWORD">def</span> handleScript(self, start, stop, attrs):
+        <span class="PY_STRING">"""Handle scripting elements"""</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = ScriptGenerator(self._reader.getChars(start, stop), attrs)
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleScriptFile(self, start, stop, attrs):
+        <span class="PY_STRING">"""Python script that goes at the file/module level"""</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = ScriptFileGenerator(self._reader.getChars(start, stop), attrs)
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleScriptClass(self, start, stop, attrs):
+        <span class="PY_STRING">"""Python script that goes at the class level"""</span>
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = ScriptClassGenerator(self._reader.getChars(start, stop), attrs)
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleEndBlock(self):
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = EndBlockGenerator()
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleMethod(self, start, stop, attrs):
+        self._parser.flushCharData(self.tmplStart, self.tmplStop)
+        gen = MethodGenerator(self._reader.getChars(start, stop), attrs)
+        self.addGenerator(gen)
+
+    <span class="PY_KEYWORD">def</span> handleMethodEnd(self, start, stop, attrs):
+        <span class="PY_COMMENT"># self._parser.flushCharData(self.tmplStart, self.tmplStop)</span>
+        gen = MethodEndGenerator(self._reader.getChars(start, stop), attrs)
+        self.addGenerator(gen)
+
+    <span class="PY_COMMENT"># --------------------------------------</span>
+    <span class="PY_COMMENT"># The generation of the page begins here</span>
+    <span class="PY_COMMENT"># --------------------------------------</span>
+
+    <span class="PY_KEYWORD">def</span> beginProcessing(self):
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> endProcessing(self):
+        encoding = self._ctxt.getPythonFileEncoding()
+        <span class="PY_KEYWORD">if</span> encoding:
+            <span class="PY_COMMENT"># add encoding as a hint for both Python (PEP263) and editors</span>
+            self._writer.println(<span class="PY_STRING">'# -*- coding: %s -*-'</span> % encoding)
+        self._writer.println(<span class="PY_STRING">'# Generated automatically by PSP compiler on %s'</span>
+            % time.asctime(time.localtime(time.time())))
+        self._writer.println()
+        self.generateHeader()
+        self.generateAll(<span class="PY_STRING">'psp:file'</span>)
+        self.generateDeclarations() <span class="PY_COMMENT"># overwrite this when we can handle extends</span>
+        self.generateInitPSP()
+        self.generateAll(<span class="PY_STRING">'psp:class'</span>)
+        self.generateAll(<span class="PY_STRING">'Declarations'</span>)
+        self._writer.println(<span class="PY_STRING">'\n'</span>)
+        self.generateMainMethod()
+        self.optimizeCharData()
+        <span class="PY_KEYWORD">if</span> self._gobbleWhitespace:
+            self.gobbleWhitespace()
+        self.generateAll(<span class="PY_STRING">'Service'</span>)
+        self._writer.println()
+        self.generateFooter()
+
+    <span class="PY_KEYWORD">def</span> setTemplateInfo(self, start, stop):
+        <span class="PY_STRING">"""Mark non code data."""</span>
+        self.tmplStart = start
+        self.tmplStop = stop
+
+    <span class="PY_KEYWORD">def</span> generateHeader(self):
+        <span class="PY_KEYWORD">for</span> imp <span class="PY_KEYWORD">in</span> self._imports:
+            self._writer.println(imp)
+        self._writer.println(<span class="PY_STRING">'import WebKit'</span>)
+        self._writer.println(<span class="PY_STRING">'from WebKit import Page'</span>)
+        <span class="PY_KEYWORD">for</span> baseClass <span class="PY_KEYWORD">in</span> self._baseClasses:
+            <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'.'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> baseClass <span class="PY_KEYWORD">and</span> baseClass <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._importedSymbols:
+                self._writer.println(<span class="PY_STRING">'import '</span> + baseClass)
+        self._writer.println(<span class="PY_STRING">"__orig_file__ = %r"</span>
+            % self._ctxt.getFullPspFileName())
+
+    <span class="PY_KEYWORD">def</span> generateDeclarations(self):
+        <span class="PY_COMMENT"># The PSP "extends" directive allows you to use a shortcut</span>
+        <span class="PY_COMMENT"># -- if the module name is the same as the class name,</span>
+        <span class="PY_COMMENT"># you can say "Classname" instead of "ClassName.ClassName".</span>
+        <span class="PY_COMMENT"># But we can't tell right now which names are actually class names,</span>
+        <span class="PY_COMMENT"># and which names are really module names that contain a class of</span>
+        <span class="PY_COMMENT"># the same name. So we have to generate code that checks at runtime.</span>
+        self._writer.println()
+        self._writer.println(<span class="PY_STRING">'import types'</span>)
+        self._writer.println(<span class="PY_STRING">'_baseClasses = []'</span>)
+        <span class="PY_KEYWORD">for</span> baseClass <span class="PY_KEYWORD">in</span> self._baseClasses:
+            className = baseClass.rsplit(<span class="PY_STRING">'.'</span>, 1)[-1]
+            self._writer.println(
+                <span class="PY_STRING">'if isinstance(%s, types.ModuleType):'</span> % baseClass)
+            self._writer.pushIndent()
+            self._writer.println(
+                <span class="PY_STRING">'_baseClasses.append(%s.%s)'</span> % (baseClass, className))
+            self._writer.popIndent()
+            self._writer.println(<span class="PY_STRING">'else:'</span>)
+            self._writer.pushIndent()
+            self._writer.println(<span class="PY_STRING">'_baseClasses.append(%s)'</span> % baseClass)
+            self._writer.popIndent()
+        self._writer.println()
+        <span class="PY_COMMENT"># Now write the class line:</span>
+        self._writer.printChars(<span class="PY_STRING">'class '</span>)
+        self._writer.printChars(self._ctxt.getServletClassName())
+        self._writer.printChars(<span class="PY_STRING">'('</span>)
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(len(self._baseClasses)):
+            <span class="PY_KEYWORD">if</span> i &gt; 0:
+                self._writer.printChars(<span class="PY_STRING">','</span>)
+            self._writer.printChars(<span class="PY_STRING">'_baseClasses[%d]'</span> % i)
+        self._writer.printChars(<span class="PY_STRING">'):'</span>)
+        self._writer.printChars(<span class="PY_STRING">'\n'</span>)
+        self._writer.pushIndent()
+        self._writer.println(<span class="PY_STRING">'def canBeThreaded(self):'</span>) <span class="PY_COMMENT"># sadly, still needed</span>
+        self._writer.pushIndent()
+        <span class="PY_KEYWORD">if</span> self._threadSafe.lower() <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'no'</span>, <span class="PY_STRING">'false'</span>, <span class="PY_STRING">'0'</span>):
+            self._writer.println(<span class="PY_STRING">'return False'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self._writer.println(<span class="PY_STRING">'return True'</span>)
+        self._writer.popIndent()
+        self._writer.println()
+        self._writer.println(<span class="PY_STRING">'def canBeReused(self):'</span>) <span class="PY_COMMENT"># sadly, still needed</span>
+        self._writer.pushIndent()
+        <span class="PY_KEYWORD">if</span> self._instanceSafe.lower() <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'no'</span>, <span class="PY_STRING">'false'</span>, <span class="PY_STRING">'0'</span>):
+            self._writer.println(<span class="PY_STRING">'return False'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self._writer.println(<span class="PY_STRING">'return True'</span>)
+        self._writer.popIndent()
+        self._writer.println()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._writer._awakeCreated:
+            self._writer.println(<span class="PY_STRING">'def awake(self, trans):'</span>)
+            self._writer.pushIndent()
+            self._writer.println(<span class="PY_STRING">'for baseclass in self.__class__.__bases__:'</span>)
+            self._writer.pushIndent()
+            self._writer.println(<span class="PY_STRING">'if hasattr(baseclass, "awake"):'</span>)
+            self._writer.pushIndent()
+            self._writer.println(<span class="PY_STRING">'baseclass.awake(self, trans)'</span>)
+            self._writer.println(<span class="PY_STRING">'break\n'</span>)
+            self._writer.popIndent() <span class="PY_COMMENT"># end if statement</span>
+            self._writer.popIndent() <span class="PY_COMMENT"># end for statement</span>
+            self._writer.println(<span class="PY_STRING">'self.initPSP()\n'</span>)
+            self._writer.println()
+            self._writer.popIndent()
+            self._writer.println()
+        self._writer.println(<span class="PY_STRING">'def __includeFile(self, filename):'</span>)
+        self._writer.pushIndent()
+        self._writer.println(<span class="PY_STRING">'self.write(open(filename).read())'</span>)
+        self._writer.popIndent()
+        self._writer.println()
+        <span class="PY_KEYWORD">return</span>
+
+    <span class="PY_KEYWORD">def</span> generateInitPSP(self):
+        self._writer.println(<span class="PY_STRING">'def initPSP(self):\n'</span>)
+        self._writer.pushIndent()
+        self._writer.println(<span class="PY_STRING">'pass\n'</span>) <span class="PY_COMMENT"># nothing for now</span>
+        self._writer.popIndent()
+        self._writer.println()
+
+    <span class="PY_KEYWORD">def</span> generateMainMethod(self):
+        <span class="PY_COMMENT"># Write the output method requested with &lt;%@ page method=... %&gt;</span>
+        self._writer.printIndent()
+        self._writer.printChars(
+            <span class="PY_STRING">'def %s(self, transaction=None):\n'</span> % self._baseMethod)
+        self._writer.pushIndent()
+        self._writer.println(<span class="PY_STRING">'"""I take a WebKit.Transaction object."""'</span>)
+        self._writer.println(<span class="PY_STRING">'trans = self._transaction'</span>)
+        self._writer.println(ResponseObject + <span class="PY_STRING">' = trans.response()'</span>)
+        self._writer.println(<span class="PY_STRING">'req = trans.request()'</span>)
+        self._writer.println(<span class="PY_STRING">'self._%s(%s, req, trans)\n'</span>
+            % (self._baseMethod, ResponseObject))
+        <span class="PY_COMMENT"># Put the real output code in a function that doesn't need</span>
+        <span class="PY_COMMENT"># a 'transaction' for unit tests.</span>
+        self._writer.popIndent()
+        self._writer.println(<span class="PY_STRING">'def _%s(self, %s, req=None, trans=None):'</span>
+            % (self._baseMethod, ResponseObject))
+        self._writer.pushIndent()
+        self._writer.println(
+            <span class="PY_STRING">'"""I take a file-like object. I am useful for unit testing."""'</span>)
+        self._writer.println(<span class="PY_STRING">'_formatter = %s'</span> % self._formatter)
+
+    <span class="PY_KEYWORD">def</span> generateFooter(self):
+        self._writer.popIndent()
+        self._writer.println(<span class="PY_STRING">'##footer'</span>)
+
+    <span class="PY_KEYWORD">def</span> generateAll(self, phase):
+        <span class="PY_KEYWORD">for</span> gen <span class="PY_KEYWORD">in</span> self._gens:
+            <span class="PY_KEYWORD">if</span> gen.phase == phase:
+                gen.generate(self._writer)
+
+    <span class="PY_KEYWORD">def</span> optimizeCharData(self):
+        <span class="PY_STRING">"""Optimize the CharData.
+
+        Too many char data generators make the servlet slow.
+        If the current Generator and the next are both CharData type,
+        merge their data.
+
+        """</span>
+        gens = self._gens
+        count = 0
+        gencount = len(gens)
+        <span class="PY_KEYWORD">while</span> count &lt; gencount-1:
+            <span class="PY_KEYWORD">if</span> (isinstance(gens[count], CharDataGenerator)
+                    <span class="PY_KEYWORD">and</span> isinstance(gens[count+1], CharDataGenerator)):
+                gens[count].mergeData(gens[count+1])
+                gens.remove(gens[count+1])
+                gencount -= 1
+            <span class="PY_KEYWORD">else</span>:
+                count += 1
+
+    <span class="PY_KEYWORD">def</span> gobbleWhitespace(self):
+        <span class="PY_STRING">"""Gobble up whitespace.
+
+        This method looks for a character block between two PSP blocks
+        that contains only whitespace. If it finds one, it deletes it.
+
+        This is necessary so that a write() line can't sneek in between
+        a if/else, try/except etc.
+
+        """</span>
+        debug = False
+        gens = self._gens
+        sideClasses = (ScriptGenerator, EndBlockGenerator)
+        count = 1
+        gencount = len(gens)
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">for</span> gen <span class="PY_KEYWORD">in</span> gens:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Generator type = %s"</span> % gen.__class__
+        <span class="PY_KEYWORD">while</span> count &lt; gencount - 1:
+            <span class="PY_KEYWORD">if</span> (isinstance(gens[count], CharDataGenerator)
+                    <span class="PY_KEYWORD">and</span> gens[count+1].__class__ <span class="PY_KEYWORD">in</span> sideClasses
+                    <span class="PY_KEYWORD">and</span> gens[count-1].__class__ <span class="PY_KEYWORD">in</span> sideClasses):
+                <span class="PY_KEYWORD">if</span> checkForTextHavingOnlyGivenChars(gens[count].chars):
+                    gens.remove(gens[count])
+                    gencount -= 1
+            count += 1
+
+
+<span class="PY_KEYWORD">def</span> checkForTextHavingOnlyGivenChars(text, ws=None):
+    <span class="PY_STRING">"""Checks whether text contains only whitespace (or other chars).
+
+    Does the given text contain anything other than the ws characters?
+    Return true if text is only ws characters.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> ws <span class="PY_KEYWORD">is</span> None:
+        <span class="PY_KEYWORD">return</span> text.isspace()
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">for</span> char <span class="PY_KEYWORD">in</span> text:
+            <span class="PY_KEYWORD">if</span> char <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> ws:
+                <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> True
+</pre>
+<!--footer-->
+
+</body>
+</html>

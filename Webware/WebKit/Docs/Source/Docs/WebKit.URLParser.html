@@ -1,0 +1,302 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.URLParser</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.URLParser</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/URLParser.py">/var/www/docs/Webware-1.1.1/WebKit/URLParser.py</a></font></td></tr></table>
+    <p><tt><a href="#URLParser">URLParser</a><br>
+&nbsp;<br>
+URL&nbsp;parsing&nbsp;is&nbsp;done&nbsp;through&nbsp;objects&nbsp;which&nbsp;are&nbsp;subclasses&nbsp;of&nbsp;the&nbsp;`<a href="#URLParser">URLParser</a>`<br>
+class.&nbsp;`Application`&nbsp;delegates&nbsp;most&nbsp;of&nbsp;the&nbsp;URL&nbsp;parsing&nbsp;to&nbsp;these&nbsp;objects.<br>
+&nbsp;<br>
+Application&nbsp;has&nbsp;a&nbsp;single&nbsp;"root"&nbsp;URL&nbsp;parser,&nbsp;which&nbsp;is&nbsp;used&nbsp;to&nbsp;parse&nbsp;all&nbsp;URLs.<br>
+This&nbsp;parser&nbsp;then&nbsp;can&nbsp;pass&nbsp;the&nbsp;request&nbsp;on&nbsp;to&nbsp;other&nbsp;parsers,&nbsp;usually&nbsp;taking&nbsp;off<br>
+parts&nbsp;of&nbsp;the&nbsp;URL&nbsp;with&nbsp;each&nbsp;step.<br>
+&nbsp;<br>
+This&nbsp;root&nbsp;parser&nbsp;is&nbsp;generally&nbsp;`<a href="#ContextParser">ContextParser</a>`,&nbsp;which&nbsp;is&nbsp;instantiated&nbsp;and&nbsp;set<br>
+up&nbsp;by&nbsp;`Application`&nbsp;(accessible&nbsp;through&nbsp;`Application.rootURLParser`).</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.URLParser.html#ServletFactoryManagerClass">ServletFactoryManagerClass</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.URLParser.html#URLParser">URLParser</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.URLParser.html#ContextParser">ContextParser</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.URLParser.html#URLParameterParser">URLParameterParser</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ContextParser">class <strong>ContextParser</strong></a>(<a href="WebKit.URLParser.html#URLParser">URLParser</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Find&nbsp;the&nbsp;context&nbsp;of&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+<a href="#ContextParser">ContextParser</a>&nbsp;uses&nbsp;the&nbsp;``Application.config``&nbsp;context&nbsp;settings&nbsp;to&nbsp;find<br>
+the&nbsp;context&nbsp;of&nbsp;the&nbsp;request.&nbsp;&nbsp;It&nbsp;then&nbsp;passes&nbsp;the&nbsp;request&nbsp;to&nbsp;a&nbsp;FileParser<br>
+rooted&nbsp;in&nbsp;the&nbsp;context&nbsp;path.<br>
+&nbsp;<br>
+The&nbsp;context&nbsp;is&nbsp;the&nbsp;first&nbsp;element&nbsp;of&nbsp;the&nbsp;URL,&nbsp;or&nbsp;if&nbsp;no&nbsp;context&nbsp;matches<br>
+that&nbsp;then&nbsp;it&nbsp;is&nbsp;the&nbsp;``default``&nbsp;context&nbsp;(and&nbsp;the&nbsp;entire&nbsp;URL&nbsp;is&nbsp;passed<br>
+to&nbsp;the&nbsp;default&nbsp;context's&nbsp;FileParser).<br>
+&nbsp;<br>
+There&nbsp;is&nbsp;generally&nbsp;only&nbsp;one&nbsp;<a href="#ContextParser">ContextParser</a>,&nbsp;which&nbsp;can&nbsp;be&nbsp;found&nbsp;as<br>
+``application.rootURLParser()``.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.URLParser.html#ContextParser">ContextParser</a></dd>
+<dd><a href="WebKit.URLParser.html#URLParser">URLParser</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ContextParser-__init__"><strong>__init__</strong></a>(self, app)</dt><dd><tt>Create&nbsp;<a href="#ContextParser">ContextParser</a>.<br>
+&nbsp;<br>
+<a href="#ContextParser">ContextParser</a>&nbsp;is&nbsp;usually&nbsp;created&nbsp;by&nbsp;Application,&nbsp;which<br>
+passes&nbsp;all&nbsp;requests&nbsp;to&nbsp;it.<br>
+&nbsp;<br>
+In&nbsp;__init__&nbsp;we&nbsp;take&nbsp;the&nbsp;``Contexts``&nbsp;setting&nbsp;from<br>
+Application.config&nbsp;and&nbsp;parse&nbsp;it&nbsp;slightly.</tt></dd></dl>
+
+<dl><dt><a name="ContextParser-absContextPath"><strong>absContextPath</strong></a>(self, path)</dt><dd><tt>Get&nbsp;absolute&nbsp;context&nbsp;path.<br>
+&nbsp;<br>
+Resolves&nbsp;relative&nbsp;paths,&nbsp;which&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;relative&nbsp;to&nbsp;the<br>
+Application's&nbsp;serverSidePath&nbsp;(the&nbsp;working&nbsp;directory).</tt></dd></dl>
+
+<dl><dt><a name="ContextParser-addContext"><strong>addContext</strong></a>(self, name, dir)</dt><dd><tt>Add&nbsp;a&nbsp;context&nbsp;to&nbsp;the&nbsp;system.<br>
+&nbsp;<br>
+The&nbsp;context&nbsp;will&nbsp;be&nbsp;imported&nbsp;as&nbsp;a&nbsp;package,&nbsp;going&nbsp;by&nbsp;`name`,<br>
+from&nbsp;the&nbsp;given&nbsp;directory.&nbsp;The&nbsp;directory&nbsp;doesn't&nbsp;have&nbsp;to&nbsp;match<br>
+the&nbsp;context&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="ContextParser-parse"><strong>parse</strong></a>(self, trans, requestPath)</dt><dd><tt>Parse&nbsp;request.<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;context&nbsp;name,&nbsp;and&nbsp;dispatch&nbsp;to&nbsp;a&nbsp;FileParser&nbsp;rooted<br>
+in&nbsp;the&nbsp;context's&nbsp;path.<br>
+&nbsp;<br>
+The&nbsp;context&nbsp;name&nbsp;and&nbsp;file&nbsp;path&nbsp;are&nbsp;stored&nbsp;in&nbsp;the&nbsp;request&nbsp;(accessible<br>
+through&nbsp;`Request.serverSidePath`&nbsp;and&nbsp;`Request.contextName`).</tt></dd></dl>
+
+<dl><dt><a name="ContextParser-resolveDefaultContext"><strong>resolveDefaultContext</strong></a>(self, name, dest)</dt><dd><tt>Find&nbsp;default&nbsp;context.<br>
+&nbsp;<br>
+Figure&nbsp;out&nbsp;if&nbsp;the&nbsp;default&nbsp;context&nbsp;refers&nbsp;to&nbsp;an&nbsp;existing&nbsp;context,<br>
+the&nbsp;same&nbsp;directory&nbsp;as&nbsp;an&nbsp;existing&nbsp;context,&nbsp;or&nbsp;a&nbsp;unique&nbsp;directory.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;context&nbsp;that&nbsp;the&nbsp;default&nbsp;context&nbsp;refers&nbsp;to,<br>
+or&nbsp;'default'&nbsp;if&nbsp;the&nbsp;default&nbsp;context&nbsp;is&nbsp;unique.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.URLParser.html#URLParser">URLParser</a>:<br>
+<dl><dt><a name="ContextParser-findServletForTransaction"><strong>findServletForTransaction</strong></a>(self, trans)</dt><dd><tt>Returns&nbsp;a&nbsp;servlet&nbsp;for&nbsp;the&nbsp;transaction.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;top-level&nbsp;entry&nbsp;point,&nbsp;below&nbsp;it&nbsp;`parse`&nbsp;is&nbsp;used.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.URLParser.html#URLParser">URLParser</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ServletFactoryManagerClass">class <strong>ServletFactoryManagerClass</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Manage&nbsp;servlet&nbsp;factories.<br>
+&nbsp;<br>
+This&nbsp;singleton&nbsp;(called&nbsp;`ServletFactoryManager`)&nbsp;collects&nbsp;and&nbsp;manages<br>
+all&nbsp;the&nbsp;servlet&nbsp;factories&nbsp;that&nbsp;are&nbsp;installed.<br>
+&nbsp;<br>
+See&nbsp;`addServletFactory`&nbsp;for&nbsp;adding&nbsp;new&nbsp;factories,&nbsp;and&nbsp;`servletForFile`<br>
+for&nbsp;getting&nbsp;the&nbsp;factories&nbsp;back.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ServletFactoryManagerClass-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ServletFactoryManagerClass-addServletFactory"><strong>addServletFactory</strong></a>(self, factory)</dt><dd><tt>Add&nbsp;a&nbsp;new&nbsp;servlet&nbsp;factory.<br>
+&nbsp;<br>
+Servlet&nbsp;factories&nbsp;can&nbsp;add&nbsp;themselves&nbsp;with::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ServletFactoryManager.<a href="#ServletFactoryManagerClass-addServletFactory">addServletFactory</a>(factory)<br>
+&nbsp;<br>
+The&nbsp;factory&nbsp;must&nbsp;have&nbsp;an&nbsp;`extensions`&nbsp;method,&nbsp;which&nbsp;should<br>
+return&nbsp;a&nbsp;list&nbsp;of&nbsp;extensions&nbsp;that&nbsp;the&nbsp;factory&nbsp;handles&nbsp;(like<br>
+``['.ht']``).&nbsp;&nbsp;The&nbsp;special&nbsp;extension&nbsp;``.*``&nbsp;will&nbsp;match&nbsp;any<br>
+file&nbsp;if&nbsp;no&nbsp;other&nbsp;factory&nbsp;is&nbsp;found.&nbsp;&nbsp;See&nbsp;`ServletFactory`<br>
+for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<dl><dt><a name="ServletFactoryManagerClass-factoryForFile"><strong>factoryForFile</strong></a>(self, path)</dt><dd><tt>Get&nbsp;a&nbsp;factory&nbsp;for&nbsp;a&nbsp;filename.</tt></dd></dl>
+
+<dl><dt><a name="ServletFactoryManagerClass-reset"><strong>reset</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ServletFactoryManagerClass-servletForFile"><strong>servletForFile</strong></a>(self, trans, path)</dt><dd><tt>Get&nbsp;a&nbsp;servlet&nbsp;for&nbsp;a&nbsp;filename&nbsp;and&nbsp;transaction.<br>
+&nbsp;<br>
+Uses&nbsp;`factoryForFile`&nbsp;to&nbsp;find&nbsp;the&nbsp;factory,&nbsp;which<br>
+creates&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="URLParameterParser">class <strong>URLParameterParser</strong></a>(<a href="WebKit.URLParser.html#URLParser">URLParser</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Strips&nbsp;named&nbsp;parameters&nbsp;out&nbsp;of&nbsp;the&nbsp;URL.<br>
+&nbsp;<br>
+E.g.&nbsp;in&nbsp;``/path/SID=123/etc``&nbsp;the&nbsp;``SID=123``&nbsp;will&nbsp;be&nbsp;removed&nbsp;from&nbsp;the&nbsp;URL,<br>
+and&nbsp;a&nbsp;field&nbsp;will&nbsp;be&nbsp;set&nbsp;in&nbsp;the&nbsp;request&nbsp;(so&nbsp;long&nbsp;as&nbsp;no&nbsp;field&nbsp;by&nbsp;that&nbsp;name<br>
+already&nbsp;exists&nbsp;--&nbsp;if&nbsp;a&nbsp;field&nbsp;does&nbsp;exist&nbsp;the&nbsp;variable&nbsp;is&nbsp;thrown&nbsp;away).<br>
+These&nbsp;are&nbsp;put&nbsp;in&nbsp;the&nbsp;place&nbsp;of&nbsp;GET&nbsp;or&nbsp;POST&nbsp;variables.<br>
+&nbsp;<br>
+It&nbsp;should&nbsp;be&nbsp;put&nbsp;in&nbsp;an&nbsp;__init__,&nbsp;like::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;WebKit.<a href="#URLParser">URLParser</a>&nbsp;import&nbsp;<a href="#URLParameterParser">URLParameterParser</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;urlParserHook&nbsp;=&nbsp;<a href="#URLParameterParser">URLParameterParser</a>()<br>
+&nbsp;<br>
+Or&nbsp;(slightly&nbsp;less&nbsp;efficient):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;WebKit.<a href="#URLParser">URLParser</a>&nbsp;import&nbsp;<a href="#URLParameterParser">URLParameterParser</a>&nbsp;as&nbsp;SubParser<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.URLParser.html#URLParameterParser">URLParameterParser</a></dd>
+<dd><a href="WebKit.URLParser.html#URLParser">URLParser</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="URLParameterParser-__init__"><strong>__init__</strong></a>(self, fileParser<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="URLParameterParser-parse"><strong>parse</strong></a>(self, trans, requestPath)</dt><dd><tt>Delegates&nbsp;to&nbsp;`parseHook`.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="URLParameterParser-parseHook"><strong>parseHook</strong></a>(trans, requestPath, hook)</dt><dd><tt>Munges&nbsp;the&nbsp;path.<br>
+&nbsp;<br>
+The&nbsp;`hook`&nbsp;is&nbsp;the&nbsp;FileParser&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;originally&nbsp;called&nbsp;this&nbsp;--<br>
+we&nbsp;just&nbsp;want&nbsp;to&nbsp;strip&nbsp;stuff&nbsp;out&nbsp;of&nbsp;the&nbsp;URL&nbsp;and&nbsp;then&nbsp;give&nbsp;it&nbsp;back&nbsp;to<br>
+the&nbsp;FileParser&nbsp;instance,&nbsp;which&nbsp;can&nbsp;actually&nbsp;find&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.URLParser.html#URLParser">URLParser</a>:<br>
+<dl><dt><a name="URLParameterParser-findServletForTransaction"><strong>findServletForTransaction</strong></a>(self, trans)</dt><dd><tt>Returns&nbsp;a&nbsp;servlet&nbsp;for&nbsp;the&nbsp;transaction.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;top-level&nbsp;entry&nbsp;point,&nbsp;below&nbsp;it&nbsp;`parse`&nbsp;is&nbsp;used.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.URLParser.html#URLParser">URLParser</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="URLParser">class <strong>URLParser</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#URLParser">URLParser</a>&nbsp;is&nbsp;the&nbsp;base&nbsp;class&nbsp;for&nbsp;all&nbsp;URL&nbsp;parsers.<br>
+&nbsp;<br>
+Though&nbsp;its&nbsp;functionality&nbsp;is&nbsp;sparse,&nbsp;it&nbsp;may&nbsp;be&nbsp;expanded&nbsp;in&nbsp;the&nbsp;future.<br>
+Subclasses&nbsp;should&nbsp;implement&nbsp;a&nbsp;`parse`&nbsp;method,&nbsp;and&nbsp;may&nbsp;also&nbsp;want&nbsp;to<br>
+implement&nbsp;an&nbsp;`__init__`&nbsp;method&nbsp;with&nbsp;arguments&nbsp;that&nbsp;control&nbsp;how&nbsp;the<br>
+parser&nbsp;works&nbsp;(for&nbsp;instance,&nbsp;passing&nbsp;a&nbsp;starting&nbsp;path&nbsp;for&nbsp;the&nbsp;parser)<br>
+&nbsp;<br>
+The&nbsp;`parse`&nbsp;method&nbsp;is&nbsp;where&nbsp;most&nbsp;of&nbsp;the&nbsp;work&nbsp;is&nbsp;done.&nbsp;It&nbsp;takes&nbsp;two<br>
+arguments&nbsp;--&nbsp;the&nbsp;transaction&nbsp;and&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;URL&nbsp;that&nbsp;is&nbsp;still&nbsp;to<br>
+be&nbsp;parsed.&nbsp;The&nbsp;transaction&nbsp;may&nbsp;(and&nbsp;usually&nbsp;is)&nbsp;modified&nbsp;along&nbsp;the&nbsp;way.<br>
+The&nbsp;URL&nbsp;is&nbsp;passed&nbsp;through&nbsp;so&nbsp;that&nbsp;you&nbsp;can&nbsp;take&nbsp;pieces&nbsp;off&nbsp;the&nbsp;front,<br>
+and&nbsp;then&nbsp;pass&nbsp;the&nbsp;reduced&nbsp;URL&nbsp;to&nbsp;another&nbsp;parser.&nbsp;The&nbsp;method&nbsp;should&nbsp;return<br>
+a&nbsp;servlet&nbsp;(never&nbsp;None).<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;cannot&nbsp;find&nbsp;a&nbsp;servlet,&nbsp;or&nbsp;some&nbsp;other&nbsp;(somewhat)&nbsp;expected&nbsp;error<br>
+occurs,&nbsp;you&nbsp;should&nbsp;raise&nbsp;an&nbsp;exception.&nbsp;HTTPNotFound&nbsp;probably&nbsp;being&nbsp;the<br>
+most&nbsp;interesting.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="URLParser-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="URLParser-findServletForTransaction"><strong>findServletForTransaction</strong></a>(self, trans)</dt><dd><tt>Returns&nbsp;a&nbsp;servlet&nbsp;for&nbsp;the&nbsp;transaction.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;top-level&nbsp;entry&nbsp;point,&nbsp;below&nbsp;it&nbsp;`parse`&nbsp;is&nbsp;used.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-application"><strong>application</strong></a>()</dt><dd><tt>Returns&nbsp;the&nbsp;global&nbsp;Application.</tt></dd></dl>
+ <dl><dt><a name="-initApp"><strong>initApp</strong></a>(app)</dt><dd><tt>Initialize&nbsp;the&nbsp;application.<br>
+&nbsp;<br>
+Installs&nbsp;the&nbsp;proper&nbsp;servlet&nbsp;factories,&nbsp;and&nbsp;gets&nbsp;some&nbsp;settings&nbsp;from<br>
+Application.config.&nbsp;Also&nbsp;saves&nbsp;the&nbsp;application&nbsp;in&nbsp;_globalApplication<br>
+for&nbsp;future&nbsp;calls&nbsp;to&nbsp;the&nbsp;<a href="#-application">application</a>()&nbsp;function.<br>
+&nbsp;<br>
+This&nbsp;needs&nbsp;to&nbsp;be&nbsp;called&nbsp;before&nbsp;any&nbsp;of&nbsp;the&nbsp;<a href="#URLParser">URLParser</a>-derived&nbsp;classes<br>
+are&nbsp;instantiated.</tt></dd></dl>
+ <dl><dt><a name="-initParser"><strong>initParser</strong></a>(app)</dt><dd><tt>Initialize&nbsp;the&nbsp;FileParser&nbsp;Class.</tt></dd></dl>
+ <dl><dt><a name="-warn"><strong>warn</strong></a>(...)</dt><dd><tt>Issue&nbsp;a&nbsp;warning,&nbsp;or&nbsp;maybe&nbsp;ignore&nbsp;it&nbsp;or&nbsp;raise&nbsp;an&nbsp;exception.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>FileParser</strong> = &lt;MiscUtils.ParamFactory.ParamFactory object&gt;<br>
+<strong>ServletFactoryManager</strong> = &lt;WebKit.URLParser.ServletFactoryManagerClass object&gt;<br>
+<strong>debug</strong> = False</td></tr></table>
+</body></html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>KidKit/Properties.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>name = <span class="PY_STRING">'KidKit'</span>
+
+version = (1, 1, 1)
+
+docs = [{<span class="PY_STRING">'name'</span>: <span class="PY_STRING">"User's Guide"</span>, <span class="PY_STRING">'file'</span>: <span class="PY_STRING">'UsersGuide.html'</span>}]
+
+status = <span class="PY_STRING">'beta'</span>
+
+requiredPyVersion = (2, 4, 0)
+
+requiredSoftware = [{<span class="PY_STRING">'name'</span>: <span class="PY_STRING">'kid'</span>, <span class="PY_STRING">'version'</span>: (0, 6, 0)}]
+
+synopsis = <span class="PY_STRING">"""KidKit is a Webware plug-in that allows Kid templates
+to be automatically compiled and run as servlets by the WebKit application server.
+Kid is a simple templating language for XML based vocabularies written in Python.
+You need to install the Kid package before you can use the KidKit plug-in."""</span>
+
+WebKitConfig = {
+    <span class="PY_STRING">'examplePages'</span>: [
+        <span class="PY_STRING">'Welcome'</span>, <span class="PY_STRING">'Time1'</span>, <span class="PY_STRING">'Time2'</span>, <span class="PY_STRING">'Files'</span>,
+        <span class="PY_STRING">'ServletInfo'</span>, <span class="PY_STRING">'SimpleForm'</span>, <span class="PY_STRING">'MandelbrotSet'</span>,
+    ]
+}
+
+<span class="PY_KEYWORD">def</span> willRunFunc():
+    <span class="PY_COMMENT"># WebKit doesn't check requiredSoftware yet. So we do so:</span>
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">for</span> soft <span class="PY_KEYWORD">in</span> requiredSoftware:
+            __import__(soft[<span class="PY_STRING">'name'</span>])
+    <span class="PY_KEYWORD">except</span> ImportError:
+        success = False
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_COMMENT"># The required version will be checked in __init__.py.</span>
+        success = True
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> success:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'The kid package is required to use KidKit.'</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

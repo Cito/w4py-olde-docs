@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>CGIWrapper/_dumpCSV.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""CGIWrapper dump CSV admin script."""</span>
+
+<span class="PY_KEYWORD">import</span> os
+
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> htmlEncode
+<span class="PY_KEYWORD">from</span> AdminPage <span class="PY_KEYWORD">import</span> AdminPage
+
+
+<span class="PY_KEYWORD">def</span> LoadCSV(filename):
+    <span class="PY_STRING">"""Load CSV file.
+
+    Loads a CSV (comma-separated value) file from disk and returns it as a
+    list of rows where each row is a list of values (which are always strings).
+
+    """</span>
+    <span class="PY_KEYWORD">try</span>:
+        f = open(filename)
+        <span class="PY_KEYWORD">try</span>:
+            rows = []
+            <span class="PY_KEYWORD">while</span> 1:
+                line = f.readline()
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> line:
+                    <span class="PY_KEYWORD">break</span>
+                rows.append(line.split(<span class="PY_STRING">','</span>))
+        <span class="PY_KEYWORD">finally</span>:
+            f.close()
+    <span class="PY_KEYWORD">except</span> IOError:
+        rows = []
+    <span class="PY_KEYWORD">return</span> rows
+
+
+<span class="PY_KEYWORD">class</span> _dumpCSV(AdminPage):
+    <span class="PY_STRING">"""CGIWrapper class that dumps a CSV file."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, dict):
+        AdminPage.__init__(self, dict)
+        self._filename = self._fields[<span class="PY_STRING">'filename'</span>].value
+
+    <span class="PY_KEYWORD">def</span> shortFilename(self):
+        <span class="PY_KEYWORD">return</span> os.path.splitext(os.path.split(self._filename)[1])[0]
+
+    <span class="PY_KEYWORD">def</span> title(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'View '</span> + self.shortFilename()
+
+    <span class="PY_KEYWORD">def</span> writeBody(self):
+        rows = LoadCSV(self._filename)
+
+        self.writeln(<span class="PY_STRING">'&lt;table align="center"'</span>
+            <span class="PY_STRING">' border="0" cellpadding="2" cellspacing="2"&gt;'</span>)
+
+        <span class="PY_COMMENT"># Head row gets special formatting</span>
+        self._headings = map(<span class="PY_KEYWORD">lambda</span> name: name.strip(), rows[0])
+        self.writeln(<span class="PY_STRING">'&lt;tr&gt;'</span>)
+        <span class="PY_KEYWORD">for</span> value <span class="PY_KEYWORD">in</span> self._headings:
+            self.writeln(<span class="PY_STRING">'&lt;th style="color:white;'</span>
+                <span class="PY_STRING">'font-family:Arial,Helvetica,sans-serif" bgcolor="#101040"&gt;'</span>,
+            value, <span class="PY_STRING">'&lt;/th&gt;'</span>)
+        self.writeln(<span class="PY_STRING">'&lt;/tr&gt;'</span>)
+
+        <span class="PY_COMMENT"># Data rows</span>
+        rowIndex = 1
+        <span class="PY_KEYWORD">for</span> row <span class="PY_KEYWORD">in</span> rows[1:]:
+            self.writeln(<span class="PY_STRING">'&lt;tr&gt;'</span>)
+            colIndex = 0
+            <span class="PY_KEYWORD">for</span> value <span class="PY_KEYWORD">in</span> row:
+                self.writeln(<span class="PY_STRING">'&lt;td style="color:#111111" bgcolor="#EEEEEE"&gt;'</span>,
+                    self.cellContents(rowIndex, colIndex, value), <span class="PY_STRING">'&lt;/td&gt;'</span>)
+                colIndex += 1
+            self.writeln(<span class="PY_STRING">'&lt;/tr&gt;'</span>)
+            rowIndex += 1
+
+        self.writeln(<span class="PY_STRING">'&lt;/table&gt;'</span>)
+
+    <span class="PY_KEYWORD">def</span> cellContents(self, rowIndex, colIndex, value):
+        <span class="PY_STRING">"""Return cell contents of CSV file.
+
+        This is a hook for subclasses to customize the contents of a cell
+        based on any criteria (including location).
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> htmlEncode(value)
+</pre>
+<!--footer-->
+
+</body>
+</html>

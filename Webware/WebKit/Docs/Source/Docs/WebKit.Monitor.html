@@ -1,0 +1,109 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.Monitor</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.Monitor</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/Monitor.py">/var/www/docs/Webware-1.1.1/WebKit/Monitor.py</a></font></td></tr></table>
+    <p><tt>Fault&nbsp;tolerance&nbsp;system&nbsp;for&nbsp;WebKit.<br>
+&nbsp;<br>
+Contributed&nbsp;to&nbsp;Webware&nbsp;for&nbsp;Python&nbsp;by&nbsp;Jay&nbsp;Love.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;is&nbsp;intended&nbsp;to&nbsp;provide&nbsp;additional&nbsp;assurance&nbsp;that&nbsp;the<br>
+AppServer&nbsp;continues&nbsp;running&nbsp;at&nbsp;all&nbsp;times.&nbsp;This&nbsp;module&nbsp;will&nbsp;be<br>
+responsible&nbsp;for&nbsp;starting&nbsp;the&nbsp;AppServer,&nbsp;and&nbsp;monitoring&nbsp;its&nbsp;health.<br>
+It&nbsp;does&nbsp;that&nbsp;by&nbsp;periodically&nbsp;sending&nbsp;a&nbsp;status&nbsp;check&nbsp;message&nbsp;to&nbsp;the<br>
+AppServer&nbsp;to&nbsp;ensure&nbsp;that&nbsp;it&nbsp;is&nbsp;responding.&nbsp;If&nbsp;it&nbsp;finds&nbsp;that&nbsp;the<br>
+AppServer&nbsp;does&nbsp;not&nbsp;respond&nbsp;within&nbsp;a&nbsp;specified&nbsp;time,&nbsp;it&nbsp;will&nbsp;start&nbsp;a<br>
+new&nbsp;copy&nbsp;of&nbsp;the&nbsp;AppServer,&nbsp;after&nbsp;killing&nbsp;the&nbsp;previous&nbsp;process.<br>
+&nbsp;<br>
+Use::<br>
+&nbsp;<br>
+&nbsp;&nbsp;$&nbsp;python&nbsp;Monitor.py&nbsp;start<br>
+&nbsp;&nbsp;$&nbsp;python&nbsp;Monitor.py&nbsp;stop<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;AppServer&nbsp;specified&nbsp;below&nbsp;will&nbsp;be&nbsp;used,&nbsp;or&nbsp;you&nbsp;can&nbsp;list<br>
+the&nbsp;AppServer&nbsp;you&nbsp;would&nbsp;like&nbsp;after&nbsp;``start``.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;have&nbsp;the&nbsp;whole&nbsp;process&nbsp;run&nbsp;as&nbsp;a&nbsp;daemon&nbsp;by&nbsp;specifying&nbsp;``daemon``<br>
+after&nbsp;``start``&nbsp;on&nbsp;the&nbsp;command&nbsp;line.<br>
+&nbsp;<br>
+To&nbsp;stop&nbsp;the&nbsp;processes,&nbsp;run&nbsp;``Monitor.py&nbsp;stop``.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="signal.html">signal</a><br>
+</td><td width="25%" valign=top><a href="socket.html">socket</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-checkServer"><strong>checkServer</strong></a>(restart<font color="#909090">=True</font>)</dt><dd><tt>Send&nbsp;a&nbsp;check&nbsp;request&nbsp;to&nbsp;the&nbsp;AppServer.<br>
+&nbsp;<br>
+If&nbsp;restart&nbsp;is&nbsp;1,&nbsp;then&nbsp;attempt&nbsp;to&nbsp;restart&nbsp;the&nbsp;server<br>
+if&nbsp;we&nbsp;can't&nbsp;connect&nbsp;to&nbsp;it.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;could&nbsp;also&nbsp;be&nbsp;used&nbsp;to&nbsp;see&nbsp;how&nbsp;busy&nbsp;an&nbsp;AppServer<br>
+is&nbsp;by&nbsp;measuring&nbsp;the&nbsp;delay&nbsp;in&nbsp;getting&nbsp;a&nbsp;response&nbsp;when&nbsp;using&nbsp;the<br>
+standard&nbsp;port.</tt></dd></dl>
+ <dl><dt><a name="-createServer"><strong>createServer</strong></a>(setupPath<font color="#909090">=0</font>)</dt><dd><tt>Unix&nbsp;only,&nbsp;executed&nbsp;after&nbsp;forking&nbsp;for&nbsp;daemonization.</tt></dd></dl>
+ <dl><dt><a name="-dumps"><strong>dumps</strong></a>(...)</dt><dd><tt><a href="#-dumps">dumps</a>(value[,&nbsp;version])<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;string&nbsp;that&nbsp;would&nbsp;be&nbsp;written&nbsp;to&nbsp;a&nbsp;file&nbsp;by&nbsp;dump(value,&nbsp;file).<br>
+The&nbsp;value&nbsp;must&nbsp;be&nbsp;a&nbsp;supported&nbsp;type.&nbsp;Raise&nbsp;a&nbsp;ValueError&nbsp;exception&nbsp;if<br>
+value&nbsp;has&nbsp;(or&nbsp;contains&nbsp;an&nbsp;object&nbsp;that&nbsp;has)&nbsp;an&nbsp;unsupported&nbsp;type.<br>
+&nbsp;<br>
+New&nbsp;in&nbsp;version&nbsp;2.4:&nbsp;The&nbsp;version&nbsp;argument&nbsp;indicates&nbsp;the&nbsp;data&nbsp;format&nbsp;that<br>
+dumps&nbsp;should&nbsp;use.</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>(args)</dt><dd><tt>The&nbsp;main&nbsp;loop.<br>
+&nbsp;<br>
+Starts&nbsp;the&nbsp;server&nbsp;with&nbsp;`<a href="#-startServer">startServer</a>(False)`,<br>
+checks&nbsp;it's&nbsp;started&nbsp;up&nbsp;(`startupCheck`),&nbsp;and&nbsp;does&nbsp;a<br>
+loop&nbsp;checking&nbsp;the&nbsp;server&nbsp;(`checkServer`).</tt></dd></dl>
+ <dl><dt><a name="-shutDown"><strong>shutDown</strong></a>(signum, frame)</dt><dd><tt>Shutdown&nbsp;handler.<br>
+&nbsp;<br>
+For&nbsp;when&nbsp;Ctrl-C&nbsp;has&nbsp;been&nbsp;hit,&nbsp;or&nbsp;this&nbsp;process&nbsp;is&nbsp;being&nbsp;cleanly&nbsp;killed.</tt></dd></dl>
+ <dl><dt><a name="-startServer"><strong>startServer</strong></a>(killcurrent<font color="#909090">=True</font>)</dt><dd><tt>Start&nbsp;the&nbsp;AppServer.<br>
+&nbsp;<br>
+If&nbsp;`killcurrent`&nbsp;is&nbsp;true&nbsp;or&nbsp;not&nbsp;provided,&nbsp;kill&nbsp;the&nbsp;current&nbsp;AppServer.</tt></dd></dl>
+ <dl><dt><a name="-startupCheck"><strong>startupCheck</strong></a>()</dt><dd><tt>Make&nbsp;sure&nbsp;the&nbsp;AppServer&nbsp;starts&nbsp;up&nbsp;correctly.</tt></dd></dl>
+ <dl><dt><a name="-stop"><strong>stop</strong></a>()</dt><dd><tt>Stop&nbsp;the&nbsp;monitor.<br>
+&nbsp;<br>
+This&nbsp;kills&nbsp;the&nbsp;other&nbsp;monitor&nbsp;process&nbsp;that&nbsp;has&nbsp;been&nbsp;opened<br>
+(from&nbsp;the&nbsp;PID&nbsp;file&nbsp;``monitor.pid``).</tt></dd></dl>
+ <dl><dt><a name="-usage"><strong>usage</strong></a>()</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>addr</strong> = None<br>
+<strong>arguments</strong> = ['start', 'stop']<br>
+<strong>debug</strong> = True<br>
+<strong>defaultServer</strong> = 'ThreadedAppServer'<br>
+<strong>maxStartTime</strong> = 120<br>
+<strong>monitorInterval</strong> = 10<br>
+<strong>optionalargs</strong> = ['daemon']<br>
+<strong>quitstr</strong> = 'i<font color="#c040c0">\x16\x00\x00\x00</font>{t<font color="#c040c0">\x06\x00\x00\x00</font>formatt<font color="#c040c0">\x04\x00\x00\x00</font>QUIT0'<br>
+<strong>running</strong> = False<br>
+<strong>serverName</strong> = 'ThreadedAppServer'<br>
+<strong>servernames</strong> = ['ThreadedAppServer']<br>
+<strong>srvpid</strong> = 0<br>
+<strong>statstr</strong> = 'i<font color="#c040c0">\x18\x00\x00\x00</font>{t<font color="#c040c0">\x06\x00\x00\x00</font>formatt<font color="#c040c0">\x06\x00\x00\x00</font>STATUS0'</td></tr></table>
+</body></html>

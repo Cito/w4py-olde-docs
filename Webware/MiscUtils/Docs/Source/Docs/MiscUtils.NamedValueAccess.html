@@ -1,0 +1,209 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.NamedValueAccess</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.NamedValueAccess</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/NamedValueAccess.py">/var/www/docs/Webware-1.1.1/MiscUtils/NamedValueAccess.py</a></font></td></tr></table>
+    <p><tt>NamedValueAccess.py<br>
+&nbsp;<br>
+NamedValueAccess&nbsp;provides&nbsp;functions&nbsp;for&nbsp;accessing&nbsp;Python&nbsp;objects&nbsp;by&nbsp;keys&nbsp;and<br>
+named&nbsp;attributes.&nbsp;A&nbsp;'key'&nbsp;is&nbsp;a&nbsp;single&nbsp;identifier&nbsp;such&nbsp;as&nbsp;'foo'.&nbsp;A&nbsp;'name'&nbsp;could<br>
+be&nbsp;a&nbsp;key,&nbsp;or&nbsp;a&nbsp;qualified&nbsp;key,&nbsp;such&nbsp;as&nbsp;'foo.bar.boo'.&nbsp;Names&nbsp;are&nbsp;generally&nbsp;more<br>
+convenient&nbsp;and&nbsp;powerful,&nbsp;while&nbsp;the&nbsp;key-oriented&nbsp;function&nbsp;is&nbsp;more&nbsp;efficient&nbsp;and<br>
+provide&nbsp;the&nbsp;atomic&nbsp;functionality&nbsp;that&nbsp;the&nbsp;name-oriented&nbsp;function&nbsp;is&nbsp;built&nbsp;upon.<br>
+&nbsp;<br>
+&nbsp;<br>
+CREDIT<br>
+&nbsp;<br>
+Chuck&nbsp;Esterbrook&nbsp;&lt;echuck@mindspring.com&gt;<br>
+Tavis&nbsp;Rudd&nbsp;&lt;tavis@calrudd.com&gt;</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="exceptions.html#LookupError">exceptions.LookupError</a>(<a href="exceptions.html#StandardError">exceptions.StandardError</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.NamedValueAccess.html#NamedValueAccessError">NamedValueAccessError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.NamedValueAccess.html#ValueForKeyError">ValueForKeyError</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NamedValueAccessError">class <strong>NamedValueAccessError</strong></a>(<a href="exceptions.html#LookupError">exceptions.LookupError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>General&nbsp;named&nbsp;value&nbsp;access&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.NamedValueAccess.html#NamedValueAccessError">NamedValueAccessError</a></dd>
+<dd><a href="exceptions.html#LookupError">exceptions.LookupError</a></dd>
+<dd><a href="exceptions.html#StandardError">exceptions.StandardError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#LookupError">exceptions.LookupError</a>:<br>
+<dl><dt><a name="NamedValueAccessError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#LookupError">exceptions.LookupError</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#NamedValueAccessError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="NamedValueAccessError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="NamedValueAccessError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="NamedValueAccessError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#NamedValueAccessError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="NamedValueAccessError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ValueForKeyError">class <strong>ValueForKeyError</strong></a>(<a href="MiscUtils.NamedValueAccess.html#NamedValueAccessError">NamedValueAccessError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>No&nbsp;value&nbsp;for&nbsp;key&nbsp;found&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.NamedValueAccess.html#ValueForKeyError">ValueForKeyError</a></dd>
+<dd><a href="MiscUtils.NamedValueAccess.html#NamedValueAccessError">NamedValueAccessError</a></dd>
+<dd><a href="exceptions.html#LookupError">exceptions.LookupError</a></dd>
+<dd><a href="exceptions.html#StandardError">exceptions.StandardError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="MiscUtils.NamedValueAccess.html#NamedValueAccessError">NamedValueAccessError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#LookupError">exceptions.LookupError</a>:<br>
+<dl><dt><a name="ValueForKeyError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#LookupError">exceptions.LookupError</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ValueForKeyError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ValueForKeyError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ValueForKeyError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ValueForKeyError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#ValueForKeyError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="ValueForKeyError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-valueForKey"><strong>valueForKey</strong></a>(obj, key, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Get&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;object&nbsp;named&nbsp;by&nbsp;the&nbsp;given&nbsp;key.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;returns&nbsp;the&nbsp;value&nbsp;with&nbsp;the&nbsp;following&nbsp;precedence:<br>
+&nbsp;&nbsp;1.&nbsp;Methods&nbsp;before&nbsp;non-methods<br>
+&nbsp;&nbsp;2.&nbsp;Attributes&nbsp;before&nbsp;keys&nbsp;(__getitem__)<br>
+&nbsp;&nbsp;3.&nbsp;Public&nbsp;things&nbsp;before&nbsp;private&nbsp;things<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(private&nbsp;being&nbsp;denoted&nbsp;by&nbsp;a&nbsp;preceding&nbsp;underscore)<br>
+&nbsp;<br>
+Suppose&nbsp;key&nbsp;is&nbsp;'foo',&nbsp;then&nbsp;this&nbsp;method&nbsp;returns&nbsp;one&nbsp;of&nbsp;these:<br>
+&nbsp;&nbsp;*&nbsp;obj.foo()<br>
+&nbsp;&nbsp;*&nbsp;obj._foo()<br>
+&nbsp;&nbsp;*&nbsp;obj.foo<br>
+&nbsp;&nbsp;*&nbsp;obj._foo<br>
+&nbsp;&nbsp;*&nbsp;obj['foo']<br>
+&nbsp;&nbsp;*&nbsp;default&nbsp;#&nbsp;only&nbsp;if&nbsp;specified<br>
+&nbsp;<br>
+If&nbsp;all&nbsp;of&nbsp;these&nbsp;fail,&nbsp;a&nbsp;<a href="#ValueForKeyError">ValueForKeyError</a>&nbsp;is&nbsp;raised.<br>
+&nbsp;<br>
+NOTES<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;<a href="#-valueForKey">valueForKey</a>()&nbsp;works&nbsp;on&nbsp;dictionaries&nbsp;and&nbsp;dictionary-like&nbsp;objects.<br>
+&nbsp;&nbsp;*&nbsp;See&nbsp;<a href="#-valueForName">valueForName</a>()&nbsp;which&nbsp;is&nbsp;a&nbsp;more&nbsp;advanced&nbsp;version&nbsp;of&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;that&nbsp;allows&nbsp;multiple,&nbsp;qualified&nbsp;keys.</tt></dd></dl>
+ <dl><dt><a name="-valueForName"><strong>valueForName</strong></a>(obj, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Get&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;object&nbsp;that&nbsp;is&nbsp;named.<br>
+&nbsp;<br>
+The&nbsp;name&nbsp;can&nbsp;use&nbsp;dotted&nbsp;notation&nbsp;to&nbsp;traverse&nbsp;through&nbsp;a&nbsp;network/graph<br>
+of&nbsp;objects.&nbsp;Since&nbsp;this&nbsp;function&nbsp;relies&nbsp;on&nbsp;<a href="#-valueForKey">valueForKey</a>()&nbsp;for&nbsp;each<br>
+individual&nbsp;component&nbsp;of&nbsp;the&nbsp;name,&nbsp;you&nbsp;should&nbsp;be&nbsp;familiar&nbsp;with&nbsp;the<br>
+semantics&nbsp;of&nbsp;that&nbsp;notation.<br>
+&nbsp;<br>
+Example:&nbsp;<a href="#-valueForName">valueForName</a>(obj,&nbsp;'department.manager.salary')</tt></dd></dl>
+</td></tr></table>
+</body></html>

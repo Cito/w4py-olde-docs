@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/M2PickleRPC.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""M2Crypto-enhanced transport for PickleRPC
+
+This lets you use M2Crypto for SSL encryption.
+
+Based on m2xmlrpclib.py which is
+Copyright (c) 1999-2002 Ng Pheng Siong. All rights reserved.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> StringIO
+<span class="PY_KEYWORD">from</span> PickleRPC <span class="PY_KEYWORD">import</span> Transport
+<span class="PY_KEYWORD">from</span> M2Crypto <span class="PY_KEYWORD">import</span> SSL, httpslib, m2urllib
+
+__version__ = 1 <span class="PY_COMMENT"># version of M2PickleRPC</span>
+
+
+<span class="PY_KEYWORD">class</span> M2Transport(Transport):
+
+    user_agent = <span class="PY_STRING">"M2PickleRPC.py/%s - %s"</span> % (__version__, Transport.user_agent)
+
+    <span class="PY_KEYWORD">def</span> __init__(self, ssl_context=None):
+        <span class="PY_KEYWORD">if</span> ssl_context <span class="PY_KEYWORD">is</span> None:
+            self.ssl_ctx = SSL.Context(<span class="PY_STRING">'sslv23'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self.ssl_ctx = ssl_context
+
+    <span class="PY_KEYWORD">def</span> make_connection(self, host):
+        _host, _port = m2urllib.splitport(host)
+        <span class="PY_KEYWORD">return</span> httpslib.HTTPS(_host, int(_port), ssl_context=self.ssl_ctx)
+
+    <span class="PY_COMMENT"># @@ workarounds below are necessary because M2Crypto seems to</span>
+    <span class="PY_COMMENT"># return from fileobject.read() early!  So we have to call it</span>
+    <span class="PY_COMMENT"># over and over to get the full data.</span>
+
+    <span class="PY_KEYWORD">def</span> parse_response(self, f):
+        <span class="PY_STRING">"""Workaround M2Crypto issue mentioned above."""</span>
+        sio = StringIO()
+        <span class="PY_KEYWORD">while</span> 1:
+            chunk = f.read()
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> chunk:
+                <span class="PY_KEYWORD">break</span>
+            sio.write(chunk)
+        sio.seek(0)
+        <span class="PY_KEYWORD">return</span> Transport.parse_response(self, sio)
+
+    <span class="PY_KEYWORD">def</span> parse_response_gzip(self, f):
+        <span class="PY_STRING">"""Workaround M2Crypto issue mentioned above."""</span>
+        sio = StringIO()
+        <span class="PY_KEYWORD">while</span> 1:
+            chunk = f.read()
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> chunk:
+                <span class="PY_KEYWORD">break</span>
+            sio.write(chunk)
+        sio.seek(0)
+        <span class="PY_KEYWORD">return</span> Transport.parse_response_gzip(self, sio)
+</pre>
+<!--footer-->
+
+</body>
+</html>

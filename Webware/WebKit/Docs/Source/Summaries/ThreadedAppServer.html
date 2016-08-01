@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.ThreadedAppServer</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.ThreadedAppServer</h2>
+<p>You can also browse the <a href="../Files/ThreadedAppServer.html">complete source file</a>
+or the <a href="../Docs/WebKit.ThreadedAppServer.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">NotEnoughDataError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">ProtocolError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">ThreadAbortedError</span>(HTTPServiceUnavailable):</span>
+
+
+<span class="line_class">class <span class="name_class">RequestAbortedError</span>(ThreadAbortedError):</span>
+
+
+<span class="line_class">class <span class="name_class">RequestTooLongError</span>(RequestAbortedError):</span>
+
+
+<span class="line_class">class <span class="name_class">ServerShutDownError</span>(ThreadAbortedError):</span>
+
+
+<span class="line_class">class <span class="name_class">WorkerThread</span>(Thread):</span>
+<span class="line_def">    def <span class="name_def">threadID</span>(self)</span>
+<span class="line_def">    def <span class="name_def">abort</span>(self, exception=ThreadAbortedError)</span>
+<span class="line_def">def <span class="name_def">setCloseOnExecFlag</span>(fd)</span>
+
+
+<span class="line_class">class <span class="name_class">ThreadedAppServer</span>(AppServer):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">addSocketHandler</span>(self, handlerClass, serverAddress=None)</span>
+<span class="line_def">    def <span class="name_def">isPersistent</span>(self)</span>
+<span class="line_def">    def <span class="name_def">defaultConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">mainloop</span>(self, timeout=1)</span>
+
+<span class="line_category">    ## Thread Management ##</span>
+<span class="line_def">    def <span class="name_def">updateThreadUsage</span>(self)</span>
+<span class="line_def">    def <span class="name_def">activeThreadCount</span>(self)</span>
+<span class="line_def">    def <span class="name_def">manageThreadCount</span>(self)</span>
+<span class="line_def">    def <span class="name_def">spawnThread</span>(self)</span>
+<span class="line_def">    def <span class="name_def">absorbThread</span>(self, count=1)</span>
+<span class="line_def">    def <span class="name_def">abortRequest</span>(self, requestID, exception=RequestAbortedError)</span>
+<span class="line_def">    def <span class="name_def">abortLongRequests</span>(self)</span>
+
+<span class="line_category">    ## Worker Threads ##</span>
+<span class="line_def">    def <span class="name_def">threadloop</span>(self)</span>
+<span class="line_def">    def <span class="name_def">initThread</span>(self)</span>
+<span class="line_def">    def <span class="name_def">delThread</span>(self)</span>
+
+<span class="line_category">    ## Shutting Down ##</span>
+<span class="line_def">    def <span class="name_def">shutDown</span>(self)</span>
+<span class="line_def">    def <span class="name_def">awakeSelect</span>(self)</span>
+
+<span class="line_category">    ## Misc ##</span>
+<span class="line_def">    def <span class="name_def">address</span>(self, settingPrefix)</span>
+<span class="line_def">    def <span class="name_def">addressFileName</span>(self, handlerClass)</span>
+
+
+<span class="line_class">class <span class="name_class">Handler</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, server, serverAddress)</span>
+<span class="line_def">    def <span class="name_def">activate</span>(self, sock, requestID)</span>
+<span class="line_def">    def <span class="name_def">close</span>(self)</span>
+<span class="line_def">    def <span class="name_def">receiveDict</span>(self)</span>
+<span class="line_def">    def <span class="name_def">handleRequest</span>(self)</span>
+<span class="line_def">    def <span class="name_def">startRequest</span>(self, requestDict=None)</span>
+<span class="line_def">    def <span class="name_def">endRequest</span>(self, error=None)</span>
+
+
+<span class="line_class">class <span class="name_class">MonitorHandler</span>(Handler):</span>
+<span class="line_def">    def <span class="name_def">handleRequest</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">TASStreamOut</span>(ASStreamOut):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, sock, autoCommit=False, bufferSize=8192)</span>
+<span class="line_def">    def <span class="name_def">flush</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">AdapterHandler</span>(Handler):</span>
+<span class="line_def">    def <span class="name_def">handleRequest</span>(self)</span>
+<span class="line_def">    def <span class="name_def">makeInput</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">SCGIHandler</span>(AdapterHandler):</span>
+<span class="line_def">    def <span class="name_def">receiveDict</span>(self)</span>
+<span class="line_def">def <span class="name_def">runMainLoopInThread</span>()</span>
+
+
+<span class="line_class">class <span class="name_class">RestartAppServerError</span>(Exception):</span>
+<span class="line_def">def <span class="name_def">chdir</span>(path, force=False)</span>
+
+
+<span class="line_category">## Script usage ##</span>
+<span class="line_def">def <span class="name_def">run</span>(workDir=None)</span>
+<span class="line_def">def <span class="name_def">shutDown</span>(signum, frame)</span>
+<span class="line_def">def <span class="name_def">threadDump</span>(signum, frame)</span>
+<span class="line_def">def <span class="name_def">main</span>(args)</span>
+
+</pre>
+</body>
+</html>

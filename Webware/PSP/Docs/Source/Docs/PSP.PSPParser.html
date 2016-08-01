@@ -1,0 +1,148 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.PSPParser</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.PSPParser</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/PSPParser.py">/var/www/docs/Webware-1.1.1/PSP/PSPParser.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;PSP&nbsp;parser.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;handles&nbsp;the&nbsp;actual&nbsp;reading&nbsp;of&nbsp;the&nbsp;characters&nbsp;in&nbsp;the&nbsp;source<br>
+PSP&nbsp;file&nbsp;and&nbsp;checking&nbsp;it&nbsp;for&nbsp;valid&nbsp;psp&nbsp;tokens.&nbsp;When&nbsp;it&nbsp;finds&nbsp;one,<br>
+it&nbsp;calls&nbsp;ParseEventHandler&nbsp;with&nbsp;the&nbsp;characters&nbsp;it&nbsp;found.<br>
+&nbsp;<br>
+(c)&nbsp;Copyright&nbsp;by&nbsp;Jay&nbsp;Love,&nbsp;2000&nbsp;(mailto:jsliv@jslove.org)<br>
+&nbsp;<br>
+Permission&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;and&nbsp;distribute&nbsp;this&nbsp;software&nbsp;and&nbsp;its<br>
+documentation&nbsp;for&nbsp;any&nbsp;purpose&nbsp;and&nbsp;without&nbsp;fee&nbsp;or&nbsp;royalty&nbsp;is&nbsp;hereby&nbsp;granted,<br>
+provided&nbsp;that&nbsp;the&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;appear&nbsp;in&nbsp;all&nbsp;copies&nbsp;and&nbsp;that<br>
+both&nbsp;that&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;appear&nbsp;in<br>
+supporting&nbsp;documentation&nbsp;or&nbsp;portions&nbsp;thereof,&nbsp;including&nbsp;modifications,<br>
+that&nbsp;you&nbsp;make.<br>
+&nbsp;<br>
+This&nbsp;software&nbsp;is&nbsp;based&nbsp;in&nbsp;part&nbsp;on&nbsp;work&nbsp;done&nbsp;by&nbsp;the&nbsp;Jakarta&nbsp;group.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.PSPParser.html#PSPParser">PSPParser</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PSPParser">class <strong>PSPParser</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;main&nbsp;PSP&nbsp;parser&nbsp;class.<br>
+&nbsp;<br>
+The&nbsp;<a href="#PSPParser">PSPParser</a>&nbsp;class&nbsp;does&nbsp;the&nbsp;actual&nbsp;sniffing&nbsp;through&nbsp;the&nbsp;input&nbsp;file<br>
+looking&nbsp;for&nbsp;anything&nbsp;we're&nbsp;interested&nbsp;in.&nbsp;Basically,&nbsp;it&nbsp;starts&nbsp;by<br>
+looking&nbsp;at&nbsp;the&nbsp;code&nbsp;looking&nbsp;for&nbsp;a&nbsp;'&lt;'&nbsp;symbol.&nbsp;It&nbsp;looks&nbsp;at&nbsp;the&nbsp;code&nbsp;by<br>
+working&nbsp;with&nbsp;a&nbsp;PSPReader&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;which&nbsp;handles&nbsp;the&nbsp;current&nbsp;location&nbsp;in<br>
+the&nbsp;code.&nbsp;When&nbsp;it&nbsp;finds&nbsp;one,&nbsp;it&nbsp;calls&nbsp;a&nbsp;list&nbsp;of&nbsp;checker&nbsp;methods,<br>
+asking&nbsp;each&nbsp;if&nbsp;it&nbsp;recognizes&nbsp;the&nbsp;characters&nbsp;as&nbsp;its&nbsp;kind&nbsp;of&nbsp;input.<br>
+When&nbsp;the&nbsp;checker&nbsp;methods&nbsp;look&nbsp;at&nbsp;the&nbsp;characters,&nbsp;if&nbsp;they&nbsp;want&nbsp;it,<br>
+they&nbsp;go&nbsp;ahead&nbsp;and&nbsp;gobble&nbsp;it&nbsp;up&nbsp;and&nbsp;set&nbsp;up&nbsp;to&nbsp;create&nbsp;it&nbsp;in&nbsp;the&nbsp;servlet<br>
+when&nbsp;the&nbsp;time&nbsp;comes.&nbsp;When&nbsp;they&nbsp;return,&nbsp;they&nbsp;return&nbsp;true&nbsp;if&nbsp;they&nbsp;accept<br>
+the&nbsp;character,&nbsp;and&nbsp;the&nbsp;PSPReader&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;cursor&nbsp;is&nbsp;positioned&nbsp;past&nbsp;the<br>
+end&nbsp;of&nbsp;the&nbsp;block&nbsp;that&nbsp;the&nbsp;checker&nbsp;method&nbsp;accepted.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PSPParser-__init__"><strong>__init__</strong></a>(self, ctxt)</dt></dl>
+
+<dl><dt><a name="PSPParser-checkDirective"><strong>checkDirective</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;directives;&nbsp;for&nbsp;now&nbsp;we&nbsp;support&nbsp;only&nbsp;page&nbsp;and&nbsp;include.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkEndBlock"><strong>checkEndBlock</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;the&nbsp;end&nbsp;of&nbsp;a&nbsp;block.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkExpression"><strong>checkExpression</strong></a>(self, handler, reader)</dt><dd><tt>Look&nbsp;for&nbsp;"expressions"&nbsp;and&nbsp;handle&nbsp;them.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkInclude"><strong>checkInclude</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;inserting&nbsp;another&nbsp;pages&nbsp;output&nbsp;in&nbsp;this&nbsp;spot.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkInsert"><strong>checkInsert</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;straight&nbsp;character&nbsp;dumps.<br>
+&nbsp;<br>
+No&nbsp;big&nbsp;hurry&nbsp;for&nbsp;this.&nbsp;It's&nbsp;almost&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;page&nbsp;include<br>
+directive.&nbsp;&nbsp;This&nbsp;is&nbsp;only&nbsp;a&nbsp;partial&nbsp;implementation&nbsp;of&nbsp;what&nbsp;JSP&nbsp;does.<br>
+JSP&nbsp;can&nbsp;pull&nbsp;it&nbsp;from&nbsp;another&nbsp;server,&nbsp;servlet,&nbsp;JSP&nbsp;page,&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkMethod"><strong>checkMethod</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;class&nbsp;methods&nbsp;defined&nbsp;in&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+We&nbsp;only&nbsp;support&nbsp;one&nbsp;format&nbsp;for&nbsp;these,<br>
+&lt;psp:method&nbsp;name="xxx"&nbsp;params="xxx,xxx"&gt;<br>
+Then&nbsp;the&nbsp;function&nbsp;body,&nbsp;then&nbsp;&lt;/psp:method&gt;.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkScript"><strong>checkScript</strong></a>(self, handler, reader)</dt><dd><tt>The&nbsp;main&nbsp;thing&nbsp;we're&nbsp;after.&nbsp;Check&nbsp;for&nbsp;embedded&nbsp;scripts.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkScriptClass"><strong>checkScriptClass</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;class&nbsp;level&nbsp;code.<br>
+&nbsp;<br>
+Check&nbsp;for&nbsp;Python&nbsp;code&nbsp;that&nbsp;should&nbsp;go&nbsp;in&nbsp;the&nbsp;class&nbsp;definition.<br>
+&nbsp;<br>
+&lt;psp:class&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;foo(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;dosomething()<br>
+&lt;/psp:class&gt;</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-checkScriptFile"><strong>checkScriptFile</strong></a>(self, handler, reader)</dt><dd><tt>Check&nbsp;for&nbsp;file&nbsp;level&nbsp;code.<br>
+&nbsp;<br>
+Check&nbsp;for&nbsp;Python&nbsp;code&nbsp;that&nbsp;should&nbsp;go&nbsp;to&nbsp;the&nbsp;top&nbsp;of&nbsp;the&nbsp;generated&nbsp;module.<br>
+&nbsp;<br>
+&lt;psp:file&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;xyz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;'hi&nbsp;Mome!'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;foo():&nbsp;return&nbsp;'foo'<br>
+&lt;/psp:file&gt;</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-commentCheck"><strong>commentCheck</strong></a>(self, handler, reader)</dt><dd><tt>Comments&nbsp;just&nbsp;get&nbsp;eaten.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-flushCharData"><strong>flushCharData</strong></a>(self, start, stop)</dt><dd><tt>Dump&nbsp;everything&nbsp;to&nbsp;the&nbsp;char&nbsp;data&nbsp;handler.<br>
+&nbsp;<br>
+Dump&nbsp;all&nbsp;the&nbsp;HTML&nbsp;that&nbsp;we've&nbsp;accumulated&nbsp;over&nbsp;to&nbsp;the&nbsp;character&nbsp;data<br>
+handler&nbsp;in&nbsp;the&nbsp;event&nbsp;handler&nbsp;<a href="__builtin__.html#object">object</a>.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-parse"><strong>parse</strong></a>(self, until<font color="#909090">=None</font>)</dt><dd><tt>Parse&nbsp;the&nbsp;PSP&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="PSPParser-setEventHandler"><strong>setEventHandler</strong></a>(self, handler)</dt><dd><tt>Set&nbsp;the&nbsp;handler&nbsp;this&nbsp;parser&nbsp;will&nbsp;use&nbsp;when&nbsp;it&nbsp;finds&nbsp;PSP&nbsp;code.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>checklist</strong> = [&lt;function commentCheck&gt;, &lt;function checkExpression&gt;, &lt;function checkDirective&gt;, &lt;function checkEndBlock&gt;, &lt;function checkScript&gt;, &lt;function checkScriptFile&gt;, &lt;function checkScriptClass&gt;, &lt;function checkMethod&gt;, &lt;function checkInclude&gt;, &lt;function checkInsert&gt;]</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-StringIO"><strong>StringIO</strong></a>(...)</dt><dd><tt><a href="#-StringIO">StringIO</a>([s])&nbsp;--&nbsp;Return&nbsp;a&nbsp;StringIO-like&nbsp;stream&nbsp;for&nbsp;reading&nbsp;or&nbsp;writing</tt></dd></dl>
+ <dl><dt><a name="-checker"><strong>checker</strong></a>(method)</dt><dd><tt>Decorator&nbsp;for&nbsp;adding&nbsp;a&nbsp;method&nbsp;to&nbsp;the&nbsp;checklist.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>checklist</strong> = [&lt;function commentCheck&gt;, &lt;function checkExpression&gt;, &lt;function checkDirective&gt;, &lt;function checkEndBlock&gt;, &lt;function checkScript&gt;, &lt;function checkScriptFile&gt;, &lt;function checkScriptClass&gt;, &lt;function checkMethod&gt;, &lt;function checkInclude&gt;, &lt;function checkInsert&gt;]</td></tr></table>
+</body></html>

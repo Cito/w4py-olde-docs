@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiscUtils.DataTable</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiscUtils.DataTable</h2>
+<p>You can also browse the <a href="../Files/DataTable.html">complete source file</a>
+or the <a href="../Docs/MiscUtils.DataTable.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_category">## Types and blank Values ##</span>
+
+
+<span class="line_category">## Functions ##</span>
+<span class="line_def">def <span class="name_def">canReadExcel</span>()</span>
+
+
+<span class="line_category">## Classes ##</span>
+
+
+<span class="line_class">class <span class="name_class">DataTableError</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">TableColumn</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, spec)</span>
+<span class="line_def">    def <span class="name_def">name</span>(self)</span>
+<span class="line_def">    def <span class="name_def">type</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setType</span>(self, type)</span>
+<span class="line_def">    def <span class="name_def">__repr__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__str__</span>(self)</span>
+
+<span class="line_category">    ## Utilities ##</span>
+<span class="line_def">    def <span class="name_def">valueForRawValue</span>(self, value)</span>
+
+
+<span class="line_class">class <span class="name_class">DataTable</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, filenameOrHeadings=None, delimiter=',',</span>
+
+<span class="line_category">    ## File I/O ##</span>
+<span class="line_def">    def <span class="name_def">readFileNamed</span>(self, filename, delimiter=',',</span>
+<span class="line_def">    def <span class="name_def">readFile</span>(self, file, delimiter=',',</span>
+<span class="line_def">    def <span class="name_def">readString</span>(self, string, delimiter=',',</span>
+<span class="line_def">    def <span class="name_def">readLines</span>(self, lines, delimiter=',',</span>
+<span class="line_def">    def <span class="name_def">canReadExcel</span>()</span>
+<span class="line_def">    def <span class="name_def">readExcel</span>(self, worksheet=1, row=1, column=1)</span>
+<span class="line_def">            def <span class="name_def">strip</span>(x)</span>
+<span class="line_def">    def <span class="name_def">save</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeFileNamed</span>(self, filename)</span>
+<span class="line_def">    def <span class="name_def">writeFile</span>(self, file)</span>
+<span class="line_def">        def <span class="name_def">valueWritingMapper</span>(item)</span>
+<span class="line_def">    def <span class="name_def">commit</span>(self)</span>
+
+<span class="line_category">    ## Headings ##</span>
+<span class="line_def">    def <span class="name_def">heading</span>(self, index)</span>
+<span class="line_def">    def <span class="name_def">hasHeading</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">numHeadings</span>(self)</span>
+<span class="line_def">    def <span class="name_def">headings</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setHeadings</span>(self, headings)</span>
+
+<span class="line_category">    ## Row access (list like) ##</span>
+<span class="line_def">    def <span class="name_def">__len__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__getitem__</span>(self, index)</span>
+<span class="line_def">    def <span class="name_def">append</span>(self, obj)</span>
+
+<span class="line_category">    ## Queries ##</span>
+<span class="line_def">    def <span class="name_def">recordsEqualTo</span>(self, record)</span>
+
+<span class="line_category">    ## As a string ##</span>
+<span class="line_def">    def <span class="name_def">__repr__</span>(self)</span>
+
+<span class="line_category">    ## As a dictionary ##</span>
+<span class="line_def">    def <span class="name_def">dictKeyedBy</span>(self, key)</span>
+
+<span class="line_category">    ## Misc access ##</span>
+<span class="line_def">    def <span class="name_def">filename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">nameToIndexMap</span>(self)</span>
+
+<span class="line_category">    ## Self utilities ##</span>
+<span class="line_def">    def <span class="name_def">createNameToIndexMap</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">TableRecord</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, table, values=None, headings=None)</span>
+<span class="line_def">    def <span class="name_def">initFromSequence</span>(self, values)</span>
+<span class="line_def">    def <span class="name_def">initFromDict</span>(self, values)</span>
+<span class="line_def">    def <span class="name_def">initFromObject</span>(self, obj)</span>
+
+<span class="line_category">    ## Accessing like a sequence or dictionary ##</span>
+<span class="line_def">    def <span class="name_def">__len__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__getitem__</span>(self, key)</span>
+<span class="line_def">    def <span class="name_def">__setitem__</span>(self, key, value)</span>
+<span class="line_def">    def <span class="name_def">__delitem__</span>(self, key)</span>
+<span class="line_def">    def <span class="name_def">__contains__</span>(self, key)</span>
+<span class="line_def">    def <span class="name_def">__repr__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__iter__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">get</span>(self, key, default=None)</span>
+<span class="line_def">    def <span class="name_def">has_key</span>(self, key)</span>
+<span class="line_def">    def <span class="name_def">keys</span>(self)</span>
+<span class="line_def">    def <span class="name_def">values</span>(self)</span>
+<span class="line_def">    def <span class="name_def">items</span>(self)</span>
+<span class="line_def">    def <span class="name_def">iterkeys</span>(self)</span>
+<span class="line_def">    def <span class="name_def">itervalues</span>(self)</span>
+<span class="line_def">    def <span class="name_def">iteritems</span>(self)</span>
+
+<span class="line_category">    ## Additional access ##</span>
+<span class="line_def">    def <span class="name_def">asList</span>(self)</span>
+<span class="line_def">    def <span class="name_def">asDict</span>(self)</span>
+
+<span class="line_category">    ## valueForFoo() family ##</span>
+<span class="line_def">    def <span class="name_def">valueForKey</span>(self, key, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">valueForAttr</span>(self, attr, default=NoDefault)</span>
+<span class="line_def">def <span class="name_def">main</span>(args=None)</span>
+
+</pre>
+</body>
+</html>

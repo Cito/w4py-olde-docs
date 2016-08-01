@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Profiler.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Profiler.py
+
+Stores some values related to performance.
+These are usually set by Launch.py or AppServer.py.
+
+To get profiling going, locate the "runProfile = False" line towards the top
+of WebKit/Launch.py and change the "False" to "True", or start the Launch.py
+script with the --run-profile option. When the app server shuts down it
+will write a profiling report "profile.pstats" in the directory containing
+the Launch.py script which can be quickly examined from the command line:
+
+    $ cd Webware
+    $ bin/printprof.py WebKit/profile.pstats
+
+Using the RunSnakeRun (http://www.vrplumber.com/programming/runsnakerun/)
+GUI utility you can even visualize the data in the profile.pstats file.
+
+You might also wish to dump the profiling stats on demand (as in, by
+clicking or reloading a URL for that purpose). Read further for details.
+
+The variables in this module are:
+
+profiler
+    An instance of Python's profile.Profiler, but only if Launch.py is
+    started with profiling enabled. Otherwise, this is None.
+    You could access this from a servlet in order to dump stats:
+
+        from WebKit.Profiler import dumpStats
+        dumpStats()
+
+    With some work, you could dump them directly to the page in a
+    readable format.
+
+startTime
+    The earliest recordable time() when the app server program was
+    launched.
+
+readyTime
+readyDuration
+    The time() and duration from startTime for when the app server
+    was ready to start accepting requests. A smaller readyDuration
+    makes application reloading faster which is useful when
+    developing with AutoReload on.
+
+"""</span>
+
+profiler = startTime = readyTime = readyDuration = None
+
+
+<span class="PY_COMMENT">## Convenience ##</span>
+
+statsFilename = <span class="PY_STRING">'profile.pstats'</span>
+
+
+<span class="PY_KEYWORD">def</span> runCall(func, *args, **kwargs):
+    <span class="PY_KEYWORD">return</span> profiler.runcall(func, *args, **kwargs)
+
+
+<span class="PY_KEYWORD">def</span> dumpStats(file=statsFilename):
+    profiler.dump_stats(file)
+
+
+<span class="PY_KEYWORD">def</span> reset():
+    <span class="PY_STRING">"""Invoked by DebugAppServer in support of AutoReload."""</span>
+    <span class="PY_KEYWORD">global</span> startTime
+    <span class="PY_KEYWORD">import</span> time
+    startTime = time.time()
+</pre>
+<!--footer-->
+
+</body>
+</html>

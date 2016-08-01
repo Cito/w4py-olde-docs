@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiddleKit/Core.Klasses</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiddleKit/Core.Klasses</h2>
+<p>You can also browse the <a href="../Files/Klasses.html">complete source file</a>
+or the <a href="../Docs/MiddleKit/Core.Klasses.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Klasses</span>(dict, ModelObject):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, model)</span>
+<span class="line_def">    def <span class="name_def">classNames</span>(self)</span>
+<span class="line_def">    def <span class="name_def">initTypeMap</span>(self)</span>
+<span class="line_def">    def <span class="name_def">assignClassIds</span>(self, generator)</span>
+
+<span class="line_category">    ## Accessing ##</span>
+<span class="line_def">    def <span class="name_def">model</span>(self)</span>
+<span class="line_def">    def <span class="name_def">filename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">klassesInOrder</span>(self)</span>
+
+<span class="line_category">    ## Reading files ##</span>
+<span class="line_def">    def <span class="name_def">read</span>(self, filename)</span>
+<span class="line_def">    def <span class="name_def">awakeFromRead</span>(self, model)</span>
+<span class="line_def">    def <span class="name_def">__getstate__</span>(self)</span>
+
+<span class="line_category">    ## Adding classes ##</span>
+<span class="line_def">    def <span class="name_def">addKlass</span>(self, klass)</span>
+
+<span class="line_category">    ## Self utility ##</span>
+<span class="line_def">    def <span class="name_def">pyClassNameForAttrDict</span>(self, attrDict)</span>
+<span class="line_def">    def <span class="name_def">setting</span>(self, name, default=NoDefault)</span>
+
+<span class="line_category">    ## Debugging ##</span>
+<span class="line_def">    def <span class="name_def">dump</span>(self)</span>
+<span class="line_def">    def <span class="name_def">debugString</span>(self)</span>
+
+</pre>
+</body>
+</html>

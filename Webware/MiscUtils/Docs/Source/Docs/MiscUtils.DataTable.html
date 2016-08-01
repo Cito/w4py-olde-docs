@@ -1,0 +1,528 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.DataTable</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.DataTable</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/DataTable.py">/var/www/docs/Webware-1.1.1/MiscUtils/DataTable.py</a></font></td></tr></table>
+    <p><tt><a href="#DataTable">DataTable</a>.py<br>
+&nbsp;<br>
+&nbsp;<br>
+INTRODUCTION<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;is&nbsp;useful&nbsp;for&nbsp;representing&nbsp;a&nbsp;table&nbsp;of&nbsp;data&nbsp;arranged&nbsp;by&nbsp;named<br>
+columns,&nbsp;where&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;table&nbsp;can&nbsp;be&nbsp;thought&nbsp;of&nbsp;as&nbsp;a&nbsp;record:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;phoneNumber<br>
+&nbsp;&nbsp;&nbsp;&nbsp;------&nbsp;-----------<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Chuck&nbsp;&nbsp;893-3498<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bill&nbsp;&nbsp;&nbsp;893-0439<br>
+&nbsp;&nbsp;&nbsp;&nbsp;John&nbsp;&nbsp;&nbsp;893-5901<br>
+&nbsp;<br>
+This&nbsp;data&nbsp;often&nbsp;comes&nbsp;from&nbsp;delimited&nbsp;text&nbsp;files&nbsp;which&nbsp;typically<br>
+have&nbsp;well&nbsp;defined&nbsp;columns&nbsp;or&nbsp;fields&nbsp;with&nbsp;several&nbsp;rows&nbsp;each&nbsp;of&nbsp;which&nbsp;can<br>
+be&nbsp;thought&nbsp;of&nbsp;as&nbsp;a&nbsp;record.<br>
+&nbsp;<br>
+Using&nbsp;a&nbsp;<a href="#DataTable">DataTable</a>&nbsp;can&nbsp;be&nbsp;as&nbsp;easy&nbsp;as&nbsp;using&nbsp;lists&nbsp;and&nbsp;dictionaries:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>('users.csv')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;row&nbsp;in&nbsp;table:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;row['name'],&nbsp;row['phoneNumber']<br>
+&nbsp;<br>
+Or&nbsp;even:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>('users.csv')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;row&nbsp;in&nbsp;table:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;'%(name)s&nbsp;%(phoneNumber)s'&nbsp;%&nbsp;row<br>
+&nbsp;<br>
+The&nbsp;above&nbsp;print&nbsp;statement&nbsp;relies&nbsp;on&nbsp;the&nbsp;fact&nbsp;that&nbsp;rows&nbsp;can&nbsp;be&nbsp;treated<br>
+like&nbsp;dictionaries,&nbsp;using&nbsp;the&nbsp;column&nbsp;headings&nbsp;as&nbsp;keys.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;also&nbsp;treat&nbsp;a&nbsp;row&nbsp;like&nbsp;an&nbsp;array:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>('something.tabbed',&nbsp;delimiter='&nbsp;&nbsp;&nbsp;')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;row&nbsp;in&nbsp;table:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;item&nbsp;in&nbsp;row:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;item,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print<br>
+&nbsp;<br>
+&nbsp;<br>
+COLUMNS<br>
+&nbsp;<br>
+Column&nbsp;headings&nbsp;can&nbsp;have&nbsp;a&nbsp;type&nbsp;specification&nbsp;like&nbsp;so:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name,&nbsp;age:int,&nbsp;zip:int<br>
+&nbsp;<br>
+Possible&nbsp;types&nbsp;include&nbsp;string,&nbsp;int,&nbsp;float&nbsp;and&nbsp;datetime.<br>
+&nbsp;<br>
+String&nbsp;is&nbsp;assumed&nbsp;if&nbsp;no&nbsp;type&nbsp;is&nbsp;specified&nbsp;but&nbsp;you&nbsp;can&nbsp;set&nbsp;that<br>
+assumption&nbsp;when&nbsp;you&nbsp;create&nbsp;the&nbsp;table:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>(headings,&nbsp;defaultType='float')<br>
+&nbsp;<br>
+Using&nbsp;types&nbsp;like&nbsp;int&nbsp;and&nbsp;float&nbsp;will&nbsp;cause&nbsp;<a href="#DataTable">DataTable</a>&nbsp;to&nbsp;actually<br>
+convert&nbsp;the&nbsp;string&nbsp;values&nbsp;(perhaps&nbsp;read&nbsp;from&nbsp;a&nbsp;file)&nbsp;to&nbsp;these&nbsp;types<br>
+so&nbsp;that&nbsp;you&nbsp;can&nbsp;use&nbsp;them&nbsp;in&nbsp;natural&nbsp;operations.&nbsp;For&nbsp;example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;row['age']&nbsp;&gt;&nbsp;120:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flagData(row,&nbsp;'age&nbsp;looks&nbsp;high')<br>
+&nbsp;<br>
+As&nbsp;you&nbsp;can&nbsp;see,&nbsp;each&nbsp;row&nbsp;can&nbsp;be&nbsp;accessed&nbsp;as&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;keys<br>
+according&nbsp;the&nbsp;column&nbsp;headings.&nbsp;Names&nbsp;are&nbsp;case&nbsp;sensitive.<br>
+&nbsp;<br>
+&nbsp;<br>
+ADDING&nbsp;ROWS<br>
+&nbsp;<br>
+Like&nbsp;Python&nbsp;lists,&nbsp;data&nbsp;tables&nbsp;have&nbsp;an&nbsp;append()&nbsp;method.&nbsp;You&nbsp;can&nbsp;append<br>
+TableRecords,&nbsp;or&nbsp;you&nbsp;pass&nbsp;a&nbsp;dictionary,&nbsp;list&nbsp;or&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
+<a href="#TableRecord">TableRecord</a>&nbsp;is&nbsp;created&nbsp;based&nbsp;on&nbsp;given&nbsp;values.&nbsp;See&nbsp;the&nbsp;method&nbsp;docs&nbsp;below<br>
+for&nbsp;more&nbsp;details.<br>
+&nbsp;<br>
+&nbsp;<br>
+FILES<br>
+&nbsp;<br>
+By&nbsp;default,&nbsp;the&nbsp;files&nbsp;that&nbsp;<a href="#DataTable">DataTable</a>&nbsp;reads&nbsp;from&nbsp;are&nbsp;expected&nbsp;to&nbsp;be<br>
+comma-separated&nbsp;value&nbsp;files.<br>
+&nbsp;<br>
+Limited&nbsp;comments&nbsp;are&nbsp;supported:&nbsp;A&nbsp;comment&nbsp;is&nbsp;any&nbsp;line&nbsp;whose&nbsp;very&nbsp;first<br>
+character&nbsp;is&nbsp;a&nbsp;#.&nbsp;This&nbsp;allows&nbsp;you&nbsp;to&nbsp;easily&nbsp;comment&nbsp;out&nbsp;lines&nbsp;in&nbsp;your<br>
+data&nbsp;files&nbsp;without&nbsp;having&nbsp;to&nbsp;remove&nbsp;them.<br>
+&nbsp;<br>
+Whitespace&nbsp;around&nbsp;field&nbsp;values&nbsp;is&nbsp;stripped.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;control&nbsp;all&nbsp;this&nbsp;behavior&nbsp;through&nbsp;the&nbsp;arguments&nbsp;found&nbsp;in&nbsp;the<br>
+initializer&nbsp;and&nbsp;the&nbsp;various&nbsp;readFoo()&nbsp;methods:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...delimiter=',',&nbsp;allowComments=True,&nbsp;stripWhite=True<br>
+&nbsp;<br>
+For&nbsp;example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>('foo.tabbed',&nbsp;delimiter='&nbsp;',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allowComments=False,&nbsp;stripWhite=False)<br>
+&nbsp;<br>
+You&nbsp;should&nbsp;access&nbsp;these&nbsp;parameters&nbsp;by&nbsp;their&nbsp;name&nbsp;since&nbsp;additional&nbsp;ones<br>
+could&nbsp;appear&nbsp;in&nbsp;the&nbsp;future,&nbsp;thereby&nbsp;changing&nbsp;the&nbsp;order.<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;are&nbsp;creating&nbsp;these&nbsp;text&nbsp;files,&nbsp;we&nbsp;recommend&nbsp;the<br>
+comma-separated-value&nbsp;format,&nbsp;or&nbsp;CSV.&nbsp;This&nbsp;format&nbsp;is&nbsp;better&nbsp;defined<br>
+than&nbsp;the&nbsp;tab&nbsp;delimited&nbsp;format,&nbsp;and&nbsp;can&nbsp;easily&nbsp;be&nbsp;edited&nbsp;and&nbsp;manipulated<br>
+by&nbsp;popular&nbsp;spreadsheets&nbsp;and&nbsp;databases.<br>
+&nbsp;<br>
+&nbsp;<br>
+MICROSOFT&nbsp;EXCEL<br>
+&nbsp;<br>
+On&nbsp;Microsoft&nbsp;Windows&nbsp;systems&nbsp;with&nbsp;Excel&nbsp;and&nbsp;the&nbsp;win32all&nbsp;package<br>
+(<a href="http://starship.python.net/crew/mhammond/">http://starship.python.net/crew/mhammond/</a>),&nbsp;<a href="#DataTable">DataTable</a>&nbsp;will&nbsp;use&nbsp;Excel<br>
+(via&nbsp;COM)&nbsp;to&nbsp;read&nbsp;".xls"&nbsp;files.<br>
+&nbsp;<br>
+from&nbsp;MiscUtils&nbsp;import&nbsp;<a href="#DataTable">DataTable</a><br>
+assert&nbsp;<a href="#DataTable">DataTable</a>.<a href="#-canReadExcel">canReadExcel</a>()<br>
+table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>.<a href="#DataTable">DataTable</a>('foo.xls')<br>
+&nbsp;<br>
+With&nbsp;consistency&nbsp;to&nbsp;its&nbsp;CSV&nbsp;processing,&nbsp;<a href="#DataTable">DataTable</a>&nbsp;will&nbsp;ignore&nbsp;any&nbsp;row<br>
+whose&nbsp;first&nbsp;cell&nbsp;is&nbsp;'#'&nbsp;and&nbsp;strip&nbsp;surrounding&nbsp;whitespace&nbsp;around&nbsp;strings.<br>
+&nbsp;<br>
+&nbsp;<br>
+TABLES&nbsp;FROM&nbsp;SCRATCH<br>
+&nbsp;<br>
+Here's&nbsp;an&nbsp;example&nbsp;that&nbsp;constructs&nbsp;a&nbsp;table&nbsp;from&nbsp;scratch:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;=&nbsp;<a href="#DataTable">DataTable</a>(['name',&nbsp;'age:int'])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table.append(['John',&nbsp;80])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table.append({'name':&nbsp;'John',&nbsp;'age':&nbsp;80})<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;table<br>
+&nbsp;<br>
+&nbsp;<br>
+QUERIES<br>
+&nbsp;<br>
+A&nbsp;simple&nbsp;query&nbsp;mechanism&nbsp;is&nbsp;supported&nbsp;for&nbsp;equality&nbsp;of&nbsp;fields:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;matches&nbsp;=&nbsp;table.recordsEqualTo({'uid':&nbsp;5})<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;matches:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;match&nbsp;in&nbsp;matches:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;match<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;'No&nbsp;matches.'<br>
+&nbsp;<br>
+&nbsp;<br>
+COMMON&nbsp;USES<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Programs&nbsp;can&nbsp;keep&nbsp;configuration&nbsp;and&nbsp;other&nbsp;data&nbsp;in&nbsp;simple&nbsp;comma-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;separated&nbsp;text&nbsp;files&nbsp;and&nbsp;use&nbsp;<a href="#DataTable">DataTable</a>&nbsp;to&nbsp;access&nbsp;them.&nbsp;For&nbsp;example,&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;web&nbsp;site&nbsp;could&nbsp;read&nbsp;its&nbsp;sidebar&nbsp;links&nbsp;from&nbsp;such&nbsp;a&nbsp;file,&nbsp;thereby&nbsp;allowing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;people&nbsp;who&nbsp;don't&nbsp;know&nbsp;Python&nbsp;(or&nbsp;even&nbsp;HTML)&nbsp;to&nbsp;edit&nbsp;these&nbsp;links&nbsp;without<br>
+&nbsp;&nbsp;&nbsp;&nbsp;having&nbsp;to&nbsp;understand&nbsp;other&nbsp;implementation&nbsp;parts&nbsp;of&nbsp;the&nbsp;site.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Servers&nbsp;can&nbsp;use&nbsp;<a href="#DataTable">DataTable</a>&nbsp;to&nbsp;read&nbsp;and&nbsp;write&nbsp;log&nbsp;files.<br>
+&nbsp;<br>
+&nbsp;<br>
+FROM&nbsp;THE&nbsp;COMMAND&nbsp;LINE<br>
+&nbsp;<br>
+The&nbsp;only&nbsp;purpose&nbsp;in&nbsp;invoking&nbsp;<a href="#DataTable">DataTable</a>&nbsp;from&nbsp;the&nbsp;command&nbsp;line&nbsp;is&nbsp;to&nbsp;see<br>
+if&nbsp;it&nbsp;will&nbsp;read&nbsp;a&nbsp;file:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&gt;&nbsp;python&nbsp;<a href="#DataTable">DataTable</a>.py&nbsp;foo.csv<br>
+&nbsp;<br>
+The&nbsp;data&nbsp;table&nbsp;is&nbsp;printed&nbsp;to&nbsp;stdout.<br>
+&nbsp;<br>
+&nbsp;<br>
+CACHING<br>
+&nbsp;<br>
+<a href="#DataTable">DataTable</a>&nbsp;uses&nbsp;"pickle&nbsp;caching"&nbsp;so&nbsp;that&nbsp;it&nbsp;can&nbsp;read&nbsp;.csv&nbsp;files&nbsp;faster<br>
+on&nbsp;subsequent&nbsp;loads.&nbsp;You&nbsp;can&nbsp;disable&nbsp;this&nbsp;across&nbsp;the&nbsp;board&nbsp;with:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;MiscUtils.<a href="#DataTable">DataTable</a>&nbsp;import&nbsp;<a href="#DataTable">DataTable</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#DataTable">DataTable</a>._usePickleCache&nbsp;=&nbsp;False<br>
+&nbsp;<br>
+Or&nbsp;per&nbsp;instance&nbsp;by&nbsp;passing&nbsp;"usePickleCache=False"&nbsp;to&nbsp;the&nbsp;constructor.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;docstring&nbsp;of&nbsp;PickleCache.py&nbsp;for&nbsp;more&nbsp;information.<br>
+&nbsp;<br>
+&nbsp;<br>
+MORE&nbsp;DOCS<br>
+&nbsp;<br>
+Some&nbsp;of&nbsp;the&nbsp;methods&nbsp;in&nbsp;this&nbsp;module&nbsp;have&nbsp;worthwhile&nbsp;doc&nbsp;strings&nbsp;to&nbsp;look&nbsp;at.<br>
+See&nbsp;below.<br>
+&nbsp;<br>
+&nbsp;<br>
+TO&nbsp;DO<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Allow&nbsp;callback&nbsp;parameter&nbsp;or&nbsp;setting&nbsp;for&nbsp;parsing&nbsp;CSV&nbsp;records.<br>
+&nbsp;&nbsp;*&nbsp;Perhaps&nbsp;<a href="#TableRecord">TableRecord</a>&nbsp;should&nbsp;inherit&nbsp;list&nbsp;and&nbsp;dict&nbsp;and&nbsp;override<br>
+&nbsp;&nbsp;&nbsp;&nbsp;methods&nbsp;as&nbsp;appropriate?<br>
+&nbsp;&nbsp;*&nbsp;_types&nbsp;and&nbsp;_blankValues&nbsp;aren't&nbsp;really&nbsp;packaged,&nbsp;advertised&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;documented&nbsp;for&nbsp;customization&nbsp;by&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;module.<br>
+&nbsp;&nbsp;*&nbsp;<a href="#DataTable">DataTable</a>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Parameterize&nbsp;the&nbsp;TextColumn&nbsp;class.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Parameterize&nbsp;the&nbsp;<a href="#TableRecord">TableRecord</a>&nbsp;class.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;More&nbsp;list-like&nbsp;methods&nbsp;such&nbsp;as&nbsp;insert()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;writeFileNamed()&nbsp;is&nbsp;flawed:&nbsp;it&nbsp;doesn't&nbsp;write&nbsp;the&nbsp;table&nbsp;column&nbsp;type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Should&nbsp;it&nbsp;inherit&nbsp;from&nbsp;list?<br>
+&nbsp;&nbsp;*&nbsp;Add&nbsp;error&nbsp;checking&nbsp;that&nbsp;a&nbsp;column&nbsp;name&nbsp;is&nbsp;not&nbsp;a&nbsp;number&nbsp;(which&nbsp;could<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cause&nbsp;problems).<br>
+&nbsp;&nbsp;*&nbsp;Reading&nbsp;Excel&nbsp;sheets&nbsp;with&nbsp;xlrd,&nbsp;not&nbsp;only&nbsp;with&nbsp;win32com.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.DataTable.html#DataTable">DataTable</a>
+</font></dt><dt><font face="helvetica, arial"><a href="MiscUtils.DataTable.html#TableColumn">TableColumn</a>
+</font></dt><dt><font face="helvetica, arial"><a href="MiscUtils.DataTable.html#TableRecord">TableRecord</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.DataTable.html#DataTableError">DataTableError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DataTable">class <strong>DataTable</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Representation&nbsp;of&nbsp;a&nbsp;data&nbsp;table.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;doc&nbsp;string&nbsp;for&nbsp;this&nbsp;module.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DataTable-__getitem__"><strong>__getitem__</strong></a>(self, index)</dt></dl>
+
+<dl><dt><a name="DataTable-__init__"><strong>__init__</strong></a>(self, filenameOrHeadings<font color="#909090">=None</font>, delimiter<font color="#909090">=','</font>, allowComments<font color="#909090">=True</font>, stripWhite<font color="#909090">=True</font>, defaultType<font color="#909090">=None</font>, usePickleCache<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="DataTable-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-append"><strong>append</strong></a>(self, obj)</dt><dd><tt>Append&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;the&nbsp;table.<br>
+&nbsp;<br>
+If&nbsp;obj&nbsp;is&nbsp;not&nbsp;a&nbsp;<a href="#TableRecord">TableRecord</a>,&nbsp;then&nbsp;one&nbsp;is&nbsp;created,<br>
+passing&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;initialize&nbsp;the&nbsp;<a href="#TableRecord">TableRecord</a>.<br>
+Therefore,&nbsp;obj&nbsp;can&nbsp;be&nbsp;a&nbsp;<a href="#TableRecord">TableRecord</a>,&nbsp;list,&nbsp;dictionary&nbsp;or&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+See&nbsp;<a href="#TableRecord">TableRecord</a>&nbsp;for&nbsp;details.</tt></dd></dl>
+
+<dl><dt><a name="DataTable-commit"><strong>commit</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-createNameToIndexMap"><strong>createNameToIndexMap</strong></a>(self)</dt><dd><tt>Create&nbsp;speed-up&nbsp;index.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;self&nbsp;to&nbsp;create&nbsp;the&nbsp;nameToIndexMap&nbsp;after&nbsp;the&nbsp;table's<br>
+headings&nbsp;have&nbsp;been&nbsp;read/initialized.</tt></dd></dl>
+
+<dl><dt><a name="DataTable-dictKeyedBy"><strong>dictKeyedBy</strong></a>(self, key)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;containing&nbsp;the&nbsp;contents&nbsp;of&nbsp;the&nbsp;table.<br>
+&nbsp;<br>
+The&nbsp;content&nbsp;is&nbsp;indexed&nbsp;by&nbsp;the&nbsp;particular&nbsp;key.&nbsp;This&nbsp;is&nbsp;useful<br>
+for&nbsp;tables&nbsp;that&nbsp;have&nbsp;a&nbsp;column&nbsp;which&nbsp;represents&nbsp;a&nbsp;unique&nbsp;key<br>
+(such&nbsp;as&nbsp;a&nbsp;name,&nbsp;serial&nbsp;number,&nbsp;etc.).</tt></dd></dl>
+
+<dl><dt><a name="DataTable-filename"><strong>filename</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-hasHeading"><strong>hasHeading</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="DataTable-heading"><strong>heading</strong></a>(self, index)</dt></dl>
+
+<dl><dt><a name="DataTable-headings"><strong>headings</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-nameToIndexMap"><strong>nameToIndexMap</strong></a>(self)</dt><dd><tt>Speed-up&nbsp;index.<br>
+&nbsp;<br>
+Table&nbsp;rows&nbsp;keep&nbsp;a&nbsp;reference&nbsp;to&nbsp;this&nbsp;map&nbsp;in&nbsp;order&nbsp;to&nbsp;speed&nbsp;up<br>
+index-by-names&nbsp;(as&nbsp;in&nbsp;row['name']).</tt></dd></dl>
+
+<dl><dt><a name="DataTable-numHeadings"><strong>numHeadings</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-readExcel"><strong>readExcel</strong></a>(self, worksheet<font color="#909090">=1</font>, row<font color="#909090">=1</font>, column<font color="#909090">=1</font>)</dt></dl>
+
+<dl><dt><a name="DataTable-readFile"><strong>readFile</strong></a>(self, file, delimiter<font color="#909090">=','</font>, allowComments<font color="#909090">=True</font>, stripWhite<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="DataTable-readFileNamed"><strong>readFileNamed</strong></a>(self, filename, delimiter<font color="#909090">=','</font>, allowComments<font color="#909090">=True</font>, stripWhite<font color="#909090">=True</font>, worksheet<font color="#909090">=1</font>, row<font color="#909090">=1</font>, column<font color="#909090">=1</font>)</dt></dl>
+
+<dl><dt><a name="DataTable-readLines"><strong>readLines</strong></a>(self, lines, delimiter<font color="#909090">=','</font>, allowComments<font color="#909090">=True</font>, stripWhite<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="DataTable-readString"><strong>readString</strong></a>(self, string, delimiter<font color="#909090">=','</font>, allowComments<font color="#909090">=True</font>, stripWhite<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="DataTable-recordsEqualTo"><strong>recordsEqualTo</strong></a>(self, record)</dt></dl>
+
+<dl><dt><a name="DataTable-save"><strong>save</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DataTable-setHeadings"><strong>setHeadings</strong></a>(self, headings)</dt><dd><tt>Set&nbsp;table&nbsp;headings.<br>
+&nbsp;<br>
+Headings&nbsp;can&nbsp;be&nbsp;a&nbsp;list&nbsp;of&nbsp;strings&nbsp;(like&nbsp;['name',&nbsp;'age:int'])<br>
+or&nbsp;a&nbsp;list&nbsp;of&nbsp;TableColumns&nbsp;or&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="DataTable-writeFile"><strong>writeFile</strong></a>(self, file)</dt><dd><tt>Write&nbsp;the&nbsp;table&nbsp;out&nbsp;as&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+This&nbsp;doesn't&nbsp;write&nbsp;the&nbsp;column&nbsp;types&nbsp;(like&nbsp;int)&nbsp;back&nbsp;out.<br>
+&nbsp;<br>
+It's&nbsp;notable&nbsp;that&nbsp;a&nbsp;blank&nbsp;numeric&nbsp;value&nbsp;gets&nbsp;read&nbsp;as&nbsp;zero<br>
+and&nbsp;written&nbsp;out&nbsp;that&nbsp;way.&nbsp;Also,&nbsp;values&nbsp;None&nbsp;are&nbsp;written&nbsp;as&nbsp;blanks.</tt></dd></dl>
+
+<dl><dt><a name="DataTable-writeFileNamed"><strong>writeFileNamed</strong></a>(self, filename)</dt></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="DataTable-canReadExcel"><strong>canReadExcel</strong></a>()</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DataTableError">class <strong>DataTableError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Data&nbsp;table&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.DataTable.html#DataTableError">DataTableError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="DataTableError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#DataTableError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="DataTableError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DataTableError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="DataTableError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#DataTableError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="DataTableError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TableColumn">class <strong>TableColumn</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Representation&nbsp;of&nbsp;a&nbsp;table&nbsp;column.<br>
+&nbsp;<br>
+A&nbsp;table&nbsp;column&nbsp;represents&nbsp;a&nbsp;column&nbsp;of&nbsp;the&nbsp;table&nbsp;including&nbsp;name&nbsp;and&nbsp;type.<br>
+It&nbsp;does&nbsp;not&nbsp;contain&nbsp;the&nbsp;actual&nbsp;values&nbsp;of&nbsp;the&nbsp;column.&nbsp;These&nbsp;are&nbsp;stored<br>
+individually&nbsp;in&nbsp;the&nbsp;rows.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="TableColumn-__init__"><strong>__init__</strong></a>(self, spec)</dt><dd><tt>Initialize&nbsp;the&nbsp;table&nbsp;column.<br>
+&nbsp;<br>
+The&nbsp;spec&nbsp;parameter&nbsp;is&nbsp;a&nbsp;string&nbsp;such&nbsp;as&nbsp;'name'&nbsp;or&nbsp;'name:type'.</tt></dd></dl>
+
+<dl><dt><a name="TableColumn-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableColumn-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableColumn-name"><strong>name</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableColumn-setType"><strong>setType</strong></a>(self, type)</dt><dd><tt>Set&nbsp;the&nbsp;type&nbsp;(by&nbsp;a&nbsp;string&nbsp;containing&nbsp;the&nbsp;name)&nbsp;of&nbsp;the&nbsp;heading.<br>
+&nbsp;<br>
+Usually&nbsp;invoked&nbsp;by&nbsp;<a href="#DataTable">DataTable</a>&nbsp;to&nbsp;set&nbsp;the&nbsp;default&nbsp;type&nbsp;for&nbsp;columns<br>
+whose&nbsp;types&nbsp;were&nbsp;not&nbsp;specified.</tt></dd></dl>
+
+<dl><dt><a name="TableColumn-type"><strong>type</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableColumn-valueForRawValue"><strong>valueForRawValue</strong></a>(self, value)</dt><dd><tt>Set&nbsp;correct&nbsp;type&nbsp;for&nbsp;raw&nbsp;value.<br>
+&nbsp;<br>
+The&nbsp;rawValue&nbsp;is&nbsp;typically&nbsp;a&nbsp;string&nbsp;or&nbsp;value&nbsp;already&nbsp;of&nbsp;the&nbsp;appropriate<br>
+type.&nbsp;<a href="#TableRecord">TableRecord</a>&nbsp;invokes&nbsp;this&nbsp;method&nbsp;to&nbsp;ensure&nbsp;that&nbsp;values&nbsp;(especially<br>
+strings&nbsp;that&nbsp;come&nbsp;from&nbsp;files)&nbsp;are&nbsp;the&nbsp;correct&nbsp;types&nbsp;(e.g.,&nbsp;ints&nbsp;are<br>
+ints&nbsp;and&nbsp;floats&nbsp;are&nbsp;floats).</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TableRecord">class <strong>TableRecord</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Representation&nbsp;of&nbsp;a&nbsp;table&nbsp;record.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="TableRecord-__contains__"><strong>__contains__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="TableRecord-__delitem__"><strong>__delitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="TableRecord-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="TableRecord-__init__"><strong>__init__</strong></a>(self, table, values<font color="#909090">=None</font>, headings<font color="#909090">=None</font>)</dt><dd><tt>Initialize&nbsp;table&nbsp;record.<br>
+&nbsp;<br>
+Dispatches&nbsp;control&nbsp;to&nbsp;one&nbsp;of&nbsp;the&nbsp;other&nbsp;init&nbsp;methods&nbsp;based&nbsp;on&nbsp;the&nbsp;type<br>
+of&nbsp;values.&nbsp;Values&nbsp;can&nbsp;be&nbsp;one&nbsp;of&nbsp;three&nbsp;things:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;A&nbsp;<a href="#TableRecord">TableRecord</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;A&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;A&nbsp;dictionary<br>
+&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;Any&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;responding&nbsp;to&nbsp;hasValueForKey()&nbsp;and&nbsp;<a href="#TableRecord-valueForKey">valueForKey</a>().</tt></dd></dl>
+
+<dl><dt><a name="TableRecord-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-__setitem__"><strong>__setitem__</strong></a>(self, key, value)</dt></dl>
+
+<dl><dt><a name="TableRecord-asDict"><strong>asDict</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;whose&nbsp;key-values&nbsp;match&nbsp;the&nbsp;table&nbsp;record.</tt></dd></dl>
+
+<dl><dt><a name="TableRecord-asList"><strong>asList</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;sequence&nbsp;whose&nbsp;values&nbsp;are&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;record's.<br>
+&nbsp;<br>
+The&nbsp;order&nbsp;of&nbsp;the&nbsp;sequence&nbsp;is&nbsp;the&nbsp;one&nbsp;defined&nbsp;by&nbsp;the&nbsp;table.</tt></dd></dl>
+
+<dl><dt><a name="TableRecord-get"><strong>get</strong></a>(self, key, default<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="TableRecord-has_key"><strong>has_key</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="TableRecord-initFromDict"><strong>initFromDict</strong></a>(self, values)</dt></dl>
+
+<dl><dt><a name="TableRecord-initFromObject"><strong>initFromObject</strong></a>(self, obj)</dt><dd><tt>Initialize&nbsp;from&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+The&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;expected&nbsp;to&nbsp;response&nbsp;to&nbsp;hasValueForKey(name)&nbsp;and<br>
+<a href="#TableRecord-valueForKey">valueForKey</a>(name)&nbsp;for&nbsp;each&nbsp;of&nbsp;the&nbsp;headings&nbsp;in&nbsp;the&nbsp;table.&nbsp;It's&nbsp;alright<br>
+if&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;returns&nbsp;False&nbsp;for&nbsp;hasValueForKey().&nbsp;In&nbsp;that&nbsp;case,&nbsp;a<br>
+"blank"&nbsp;value&nbsp;is&nbsp;assumed&nbsp;(such&nbsp;as&nbsp;zero&nbsp;or&nbsp;an&nbsp;empty&nbsp;string).&nbsp;If<br>
+hasValueForKey()&nbsp;returns&nbsp;True,&nbsp;then&nbsp;<a href="#TableRecord-valueForKey">valueForKey</a>()&nbsp;must&nbsp;return&nbsp;a&nbsp;value.</tt></dd></dl>
+
+<dl><dt><a name="TableRecord-initFromSequence"><strong>initFromSequence</strong></a>(self, values)</dt></dl>
+
+<dl><dt><a name="TableRecord-items"><strong>items</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-iteritems"><strong>iteritems</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-iterkeys"><strong>iterkeys</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-itervalues"><strong>itervalues</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-keys"><strong>keys</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TableRecord-valueForAttr"><strong>valueForAttr</strong></a>(self, attr, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="TableRecord-valueForKey"><strong>valueForKey</strong></a>(self, key, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="TableRecord-values"><strong>values</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-canReadExcel"><strong>canReadExcel</strong></a>()</dt></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>(args<font color="#909090">=None</font>)</dt></dl>
+</td></tr></table>
+</body></html>

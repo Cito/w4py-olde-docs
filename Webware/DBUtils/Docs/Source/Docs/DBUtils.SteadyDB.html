@@ -1,0 +1,365 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module DBUtils.SteadyDB</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="DBUtils.html"><font color="#ffffff">DBUtils</font></a>.SteadyDB</strong></big></big> (version 1.1, $Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/DBUtils/SteadyDB.py">/var/www/docs/Webware-1.1.1/DBUtils/SteadyDB.py</a></font></td></tr></table>
+    <p><tt>SteadyDB&nbsp;-&nbsp;hardened&nbsp;DB-API&nbsp;2&nbsp;connections.<br>
+&nbsp;<br>
+Implements&nbsp;steady&nbsp;connections&nbsp;to&nbsp;a&nbsp;database&nbsp;based&nbsp;on&nbsp;an<br>
+arbitrary&nbsp;DB-API&nbsp;2&nbsp;compliant&nbsp;database&nbsp;interface&nbsp;module.<br>
+&nbsp;<br>
+The&nbsp;connections&nbsp;are&nbsp;transparently&nbsp;reopened&nbsp;when&nbsp;they&nbsp;are<br>
+closed&nbsp;or&nbsp;the&nbsp;database&nbsp;connection&nbsp;has&nbsp;been&nbsp;lost&nbsp;or&nbsp;when<br>
+they&nbsp;are&nbsp;used&nbsp;more&nbsp;often&nbsp;than&nbsp;an&nbsp;optional&nbsp;usage&nbsp;limit.<br>
+Database&nbsp;cursors&nbsp;are&nbsp;transparently&nbsp;reopened&nbsp;as&nbsp;well&nbsp;when<br>
+the&nbsp;execution&nbsp;of&nbsp;a&nbsp;database&nbsp;operation&nbsp;cannot&nbsp;be&nbsp;performed<br>
+due&nbsp;to&nbsp;a&nbsp;lost&nbsp;connection.&nbsp;Only&nbsp;if&nbsp;the&nbsp;connection&nbsp;is&nbsp;lost<br>
+after&nbsp;the&nbsp;execution,&nbsp;when&nbsp;rows&nbsp;are&nbsp;already&nbsp;fetched&nbsp;from&nbsp;the<br>
+database,&nbsp;this&nbsp;will&nbsp;give&nbsp;an&nbsp;error&nbsp;and&nbsp;the&nbsp;cursor&nbsp;will&nbsp;not<br>
+be&nbsp;reopened&nbsp;automatically,&nbsp;because&nbsp;there&nbsp;is&nbsp;no&nbsp;reliable&nbsp;way<br>
+to&nbsp;recover&nbsp;the&nbsp;state&nbsp;of&nbsp;the&nbsp;cursor&nbsp;in&nbsp;such&nbsp;a&nbsp;situation.<br>
+Connections&nbsp;which&nbsp;have&nbsp;been&nbsp;marked&nbsp;as&nbsp;being&nbsp;in&nbsp;a&nbsp;transaction<br>
+with&nbsp;a&nbsp;begin()&nbsp;call&nbsp;will&nbsp;not&nbsp;be&nbsp;silently&nbsp;replaced&nbsp;either.<br>
+&nbsp;<br>
+A&nbsp;typical&nbsp;situation&nbsp;where&nbsp;database&nbsp;connections&nbsp;are&nbsp;lost<br>
+is&nbsp;when&nbsp;the&nbsp;database&nbsp;server&nbsp;or&nbsp;an&nbsp;intervening&nbsp;firewall&nbsp;is<br>
+shutdown&nbsp;and&nbsp;restarted&nbsp;for&nbsp;maintenance&nbsp;reasons.&nbsp;In&nbsp;such&nbsp;a<br>
+case,&nbsp;all&nbsp;database&nbsp;connections&nbsp;would&nbsp;become&nbsp;unusable,&nbsp;even<br>
+though&nbsp;the&nbsp;database&nbsp;service&nbsp;may&nbsp;be&nbsp;already&nbsp;available&nbsp;again.<br>
+&nbsp;<br>
+The&nbsp;"hardened"&nbsp;connections&nbsp;provided&nbsp;by&nbsp;this&nbsp;module&nbsp;will<br>
+make&nbsp;the&nbsp;database&nbsp;connections&nbsp;immediately&nbsp;available&nbsp;again.<br>
+&nbsp;<br>
+This&nbsp;approach&nbsp;results&nbsp;in&nbsp;a&nbsp;steady&nbsp;database&nbsp;connection&nbsp;that<br>
+can&nbsp;be&nbsp;used&nbsp;by&nbsp;PooledDB&nbsp;or&nbsp;PersistentDB&nbsp;to&nbsp;create&nbsp;pooled&nbsp;or<br>
+persistent&nbsp;connections&nbsp;to&nbsp;a&nbsp;database&nbsp;in&nbsp;a&nbsp;threaded&nbsp;environment<br>
+such&nbsp;as&nbsp;the&nbsp;application&nbsp;server&nbsp;of&nbsp;"Webware&nbsp;for&nbsp;Python."<br>
+Note,&nbsp;however,&nbsp;that&nbsp;the&nbsp;connections&nbsp;themselves&nbsp;may&nbsp;not&nbsp;be<br>
+thread-safe&nbsp;(depending&nbsp;on&nbsp;the&nbsp;used&nbsp;DB-API&nbsp;module).<br>
+&nbsp;<br>
+For&nbsp;the&nbsp;Python&nbsp;DB-API&nbsp;2&nbsp;specification,&nbsp;see:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.python.org/peps/pep-0249.html">http://www.python.org/peps/pep-0249.html</a><br>
+For&nbsp;information&nbsp;on&nbsp;Webware&nbsp;for&nbsp;Python,&nbsp;see:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.webwareforpython.org">http://www.webwareforpython.org</a><br>
+&nbsp;<br>
+Usage:<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;use&nbsp;the&nbsp;connection&nbsp;constructor&nbsp;<a href="#-connect">connect</a>()&nbsp;in&nbsp;the&nbsp;same<br>
+way&nbsp;as&nbsp;you&nbsp;would&nbsp;use&nbsp;the&nbsp;connection&nbsp;constructor&nbsp;of&nbsp;a&nbsp;DB-API&nbsp;2<br>
+module&nbsp;if&nbsp;you&nbsp;specify&nbsp;the&nbsp;DB-API&nbsp;2&nbsp;module&nbsp;to&nbsp;be&nbsp;used&nbsp;as&nbsp;the<br>
+first&nbsp;parameter,&nbsp;or&nbsp;alternatively&nbsp;you&nbsp;can&nbsp;specify&nbsp;an&nbsp;arbitrary<br>
+constructor&nbsp;function&nbsp;returning&nbsp;new&nbsp;DB-API&nbsp;2&nbsp;compliant&nbsp;connection<br>
+objects&nbsp;as&nbsp;the&nbsp;first&nbsp;parameter.&nbsp;Passing&nbsp;just&nbsp;a&nbsp;function&nbsp;allows<br>
+implementing&nbsp;failover&nbsp;mechanisms&nbsp;and&nbsp;load&nbsp;balancing&nbsp;strategies.<br>
+&nbsp;<br>
+You&nbsp;may&nbsp;also&nbsp;specify&nbsp;a&nbsp;usage&nbsp;limit&nbsp;as&nbsp;the&nbsp;second&nbsp;parameter<br>
+(set&nbsp;it&nbsp;to&nbsp;None&nbsp;if&nbsp;you&nbsp;prefer&nbsp;unlimited&nbsp;usage),&nbsp;an&nbsp;optional<br>
+list&nbsp;of&nbsp;commands&nbsp;that&nbsp;may&nbsp;serve&nbsp;to&nbsp;prepare&nbsp;the&nbsp;session&nbsp;as&nbsp;a<br>
+third&nbsp;parameter,&nbsp;the&nbsp;exception&nbsp;classes&nbsp;for&nbsp;which&nbsp;the&nbsp;failover<br>
+mechanism&nbsp;shall&nbsp;be&nbsp;applied,&nbsp;and&nbsp;you&nbsp;can&nbsp;specify&nbsp;whether&nbsp;is&nbsp;is<br>
+allowed&nbsp;to&nbsp;close&nbsp;the&nbsp;connection&nbsp;(by&nbsp;default&nbsp;this&nbsp;is&nbsp;true).<br>
+When&nbsp;the&nbsp;connection&nbsp;to&nbsp;the&nbsp;database&nbsp;is&nbsp;lost&nbsp;or&nbsp;has&nbsp;been&nbsp;used<br>
+too&nbsp;often,&nbsp;it&nbsp;will&nbsp;be&nbsp;transparently&nbsp;reset&nbsp;in&nbsp;most&nbsp;situations,<br>
+without&nbsp;further&nbsp;notice.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;pgdb&nbsp;#&nbsp;import&nbsp;used&nbsp;DB-API&nbsp;2&nbsp;module<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;DBUtils.SteadyDB&nbsp;import&nbsp;connect<br>
+&nbsp;&nbsp;&nbsp;&nbsp;db&nbsp;=&nbsp;<a href="#-connect">connect</a>(pgdb,&nbsp;10000,&nbsp;["set&nbsp;datestyle&nbsp;to&nbsp;german"],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;host=...,&nbsp;database=...,&nbsp;user=...,&nbsp;...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cursor&nbsp;=&nbsp;db.cursor()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cursor.execute('select&nbsp;...')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;result&nbsp;=&nbsp;cursor.fetchall()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cursor.close()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;db.close()<br>
+&nbsp;<br>
+&nbsp;<br>
+Ideas&nbsp;for&nbsp;improvement:<br>
+&nbsp;<br>
+*&nbsp;Alternatively&nbsp;to&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;uses,<br>
+&nbsp;&nbsp;implement&nbsp;a&nbsp;maximum&nbsp;time&nbsp;to&nbsp;live&nbsp;for&nbsp;connections.<br>
+*&nbsp;Optionally&nbsp;log&nbsp;usage&nbsp;and&nbsp;loss&nbsp;of&nbsp;connection.<br>
+&nbsp;<br>
+&nbsp;<br>
+Copyright,&nbsp;credits&nbsp;and&nbsp;license:<br>
+&nbsp;<br>
+*&nbsp;Contributed&nbsp;as&nbsp;supplement&nbsp;for&nbsp;Webware&nbsp;for&nbsp;Python&nbsp;and&nbsp;PyGreSQL<br>
+&nbsp;&nbsp;by&nbsp;Christoph&nbsp;Zwerschke&nbsp;in&nbsp;September&nbsp;2005<br>
+*&nbsp;Allowing&nbsp;creator&nbsp;functions&nbsp;as&nbsp;first&nbsp;parameter&nbsp;as&nbsp;in&nbsp;SQLAlchemy<br>
+&nbsp;&nbsp;suggested&nbsp;by&nbsp;Ezio&nbsp;Vernacotola&nbsp;in&nbsp;December&nbsp;2006<br>
+&nbsp;<br>
+Licensed&nbsp;under&nbsp;the&nbsp;Open&nbsp;Software&nbsp;License&nbsp;version&nbsp;2.1.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.SteadyDB.html#SteadyDBConnection">SteadyDBConnection</a>
+</font></dt><dt><font face="helvetica, arial"><a href="DBUtils.SteadyDB.html#SteadyDBCursor">SteadyDBCursor</a>
+</font></dt><dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.SteadyDB.html#SteadyDBError">SteadyDBError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="DBUtils.SteadyDB.html#InvalidCursor">InvalidCursor</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="InvalidCursor">class <strong>InvalidCursor</strong></a>(<a href="DBUtils.SteadyDB.html#SteadyDBError">SteadyDBError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Database&nbsp;cursor&nbsp;is&nbsp;invalid.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="DBUtils.SteadyDB.html#InvalidCursor">InvalidCursor</a></dd>
+<dd><a href="DBUtils.SteadyDB.html#SteadyDBError">SteadyDBError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="DBUtils.SteadyDB.html#SteadyDBError">SteadyDBError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="InvalidCursor-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#InvalidCursor-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="InvalidCursor-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidCursor-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidCursor-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCursor-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="InvalidCursor-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SteadyDBConnection">class <strong>SteadyDBConnection</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;"tough"&nbsp;version&nbsp;of&nbsp;DB-API&nbsp;2&nbsp;connections.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SteadyDBConnection-__del__"><strong>__del__</strong></a>(self)</dt><dd><tt>Delete&nbsp;the&nbsp;steady&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-__init__"><strong>__init__</strong></a>(self, creator, maxusage<font color="#909090">=None</font>, setsession<font color="#909090">=None</font>, failures<font color="#909090">=None</font>, ping<font color="#909090">=1</font>, closeable<font color="#909090">=True</font>, *args, **kwargs)</dt><dd><tt>Create&nbsp;a&nbsp;"tough"&nbsp;DB-API&nbsp;2&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-begin"><strong>begin</strong></a>(self, *args, **kwargs)</dt><dd><tt>Indicate&nbsp;the&nbsp;beginning&nbsp;of&nbsp;a&nbsp;transaction.<br>
+&nbsp;<br>
+During&nbsp;a&nbsp;transaction,&nbsp;connections&nbsp;will&nbsp;not&nbsp;not&nbsp;transparently<br>
+replaced,&nbsp;and&nbsp;all&nbsp;errors&nbsp;will&nbsp;be&nbsp;raised&nbsp;to&nbsp;the&nbsp;application.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;underlying&nbsp;driver&nbsp;supports&nbsp;this&nbsp;method,&nbsp;it&nbsp;will&nbsp;be&nbsp;called<br>
+with&nbsp;the&nbsp;given&nbsp;parameters&nbsp;(e.g.&nbsp;for&nbsp;distributed&nbsp;transactions).</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-cancel"><strong>cancel</strong></a>(self)</dt><dd><tt>Cancel&nbsp;a&nbsp;long-running&nbsp;transaction.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;underlying&nbsp;driver&nbsp;supports&nbsp;this&nbsp;method,&nbsp;it&nbsp;will&nbsp;be&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;tough&nbsp;connection.<br>
+&nbsp;<br>
+You&nbsp;are&nbsp;allowed&nbsp;to&nbsp;close&nbsp;a&nbsp;tough&nbsp;connection&nbsp;by&nbsp;default<br>
+and&nbsp;it&nbsp;will&nbsp;not&nbsp;complain&nbsp;if&nbsp;you&nbsp;close&nbsp;it&nbsp;more&nbsp;than&nbsp;once.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;disallow&nbsp;closing&nbsp;connections&nbsp;by&nbsp;setting<br>
+the&nbsp;closeable&nbsp;parameter&nbsp;to&nbsp;something&nbsp;false.&nbsp;In&nbsp;this&nbsp;case,<br>
+closing&nbsp;tough&nbsp;connections&nbsp;will&nbsp;be&nbsp;silently&nbsp;ignored.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-commit"><strong>commit</strong></a>(self)</dt><dd><tt>Commit&nbsp;any&nbsp;pending&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-cursor"><strong>cursor</strong></a>(self, *args, **kwargs)</dt><dd><tt>Return&nbsp;a&nbsp;new&nbsp;Cursor&nbsp;Object&nbsp;using&nbsp;the&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-dbapi"><strong>dbapi</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;underlying&nbsp;DB-API&nbsp;2&nbsp;module&nbsp;of&nbsp;the&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-ping"><strong>ping</strong></a>(self, *args, **kwargs)</dt><dd><tt>Ping&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-rollback"><strong>rollback</strong></a>(self)</dt><dd><tt>Rollback&nbsp;pending&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBConnection-threadsafety"><strong>threadsafety</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;thread&nbsp;safety&nbsp;level&nbsp;of&nbsp;the&nbsp;connection.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>version</strong> = '1.1'</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SteadyDBCursor">class <strong>SteadyDBCursor</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;"tough"&nbsp;version&nbsp;of&nbsp;DB-API&nbsp;2&nbsp;cursors.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SteadyDBCursor-__del__"><strong>__del__</strong></a>(self)</dt><dd><tt>Delete&nbsp;the&nbsp;steady&nbsp;cursor.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBCursor-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt><dd><tt>Inherit&nbsp;methods&nbsp;and&nbsp;attributes&nbsp;of&nbsp;underlying&nbsp;cursor.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBCursor-__init__"><strong>__init__</strong></a>(self, con, *args, **kwargs)</dt><dd><tt>Create&nbsp;a&nbsp;"tough"&nbsp;DB-API&nbsp;2&nbsp;cursor.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBCursor-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;tough&nbsp;cursor.<br>
+&nbsp;<br>
+It&nbsp;will&nbsp;not&nbsp;complain&nbsp;if&nbsp;you&nbsp;close&nbsp;it&nbsp;more&nbsp;than&nbsp;once.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBCursor-setinputsizes"><strong>setinputsizes</strong></a>(self, sizes)</dt><dd><tt>Store&nbsp;input&nbsp;sizes&nbsp;in&nbsp;case&nbsp;cursor&nbsp;needs&nbsp;to&nbsp;be&nbsp;reopened.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBCursor-setoutputsize"><strong>setoutputsize</strong></a>(self, size, column<font color="#909090">=None</font>)</dt><dd><tt>Store&nbsp;output&nbsp;sizes&nbsp;in&nbsp;case&nbsp;cursor&nbsp;needs&nbsp;to&nbsp;be&nbsp;reopened.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SteadyDBError">class <strong>SteadyDBError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>General&nbsp;SteadyDB&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="DBUtils.SteadyDB.html#SteadyDBError">SteadyDBError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="SteadyDBError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#SteadyDBError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="SteadyDBError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="SteadyDBError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="SteadyDBError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#SteadyDBError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="SteadyDBError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-connect"><strong>connect</strong></a>(creator, maxusage<font color="#909090">=None</font>, setsession<font color="#909090">=None</font>, failures<font color="#909090">=None</font>, ping<font color="#909090">=1</font>, closeable<font color="#909090">=True</font>, *args, **kwargs)</dt><dd><tt>A&nbsp;tough&nbsp;version&nbsp;of&nbsp;the&nbsp;connection&nbsp;constructor&nbsp;of&nbsp;a&nbsp;DB-API&nbsp;2&nbsp;module.<br>
+&nbsp;<br>
+creator:&nbsp;either&nbsp;an&nbsp;arbitrary&nbsp;function&nbsp;returning&nbsp;new&nbsp;DB-API&nbsp;2&nbsp;compliant<br>
+&nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;objects&nbsp;or&nbsp;a&nbsp;DB-API&nbsp;2&nbsp;compliant&nbsp;database&nbsp;module<br>
+maxusage:&nbsp;maximum&nbsp;usage&nbsp;limit&nbsp;for&nbsp;the&nbsp;underlying&nbsp;DB-API&nbsp;2&nbsp;connection<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(number&nbsp;of&nbsp;database&nbsp;operations,&nbsp;0&nbsp;or&nbsp;None&nbsp;means&nbsp;unlimited&nbsp;usage)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;callproc(),&nbsp;execute()&nbsp;and&nbsp;executemany()&nbsp;count&nbsp;as&nbsp;one&nbsp;operation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;the&nbsp;limit&nbsp;is&nbsp;reached,&nbsp;the&nbsp;connection&nbsp;is&nbsp;automatically&nbsp;reset.<br>
+setsession:&nbsp;an&nbsp;optional&nbsp;list&nbsp;of&nbsp;SQL&nbsp;commands&nbsp;that&nbsp;may&nbsp;serve&nbsp;to&nbsp;prepare<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;session,&nbsp;e.g.&nbsp;["set&nbsp;datestyle&nbsp;to&nbsp;german",&nbsp;"set&nbsp;time&nbsp;zone&nbsp;mez"]<br>
+failures:&nbsp;an&nbsp;optional&nbsp;exception&nbsp;class&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;exception&nbsp;classes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;which&nbsp;the&nbsp;failover&nbsp;mechanism&nbsp;shall&nbsp;be&nbsp;applied,&nbsp;if&nbsp;the&nbsp;default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(OperationalError,&nbsp;InternalError)&nbsp;is&nbsp;not&nbsp;adequate<br>
+ping:&nbsp;determines&nbsp;when&nbsp;the&nbsp;connection&nbsp;should&nbsp;be&nbsp;checked&nbsp;with&nbsp;ping()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(0&nbsp;=&nbsp;None&nbsp;=&nbsp;never,&nbsp;1&nbsp;=&nbsp;default&nbsp;=&nbsp;when&nbsp;_ping_check()&nbsp;is&nbsp;called,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;whenever&nbsp;a&nbsp;cursor&nbsp;is&nbsp;created,&nbsp;4&nbsp;=&nbsp;when&nbsp;a&nbsp;query&nbsp;is&nbsp;executed,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;=&nbsp;always,&nbsp;and&nbsp;all&nbsp;other&nbsp;bit&nbsp;combinations&nbsp;of&nbsp;these&nbsp;values)<br>
+closeable:&nbsp;if&nbsp;this&nbsp;is&nbsp;set&nbsp;to&nbsp;false,&nbsp;then&nbsp;closing&nbsp;the&nbsp;connection&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;silently&nbsp;ignored,&nbsp;but&nbsp;by&nbsp;default&nbsp;the&nbsp;connection&nbsp;can&nbsp;be&nbsp;closed<br>
+args,&nbsp;kwargs:&nbsp;the&nbsp;parameters&nbsp;that&nbsp;shall&nbsp;be&nbsp;passed&nbsp;to&nbsp;the&nbsp;creator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;or&nbsp;the&nbsp;connection&nbsp;constructor&nbsp;of&nbsp;the&nbsp;DB-API&nbsp;2&nbsp;module</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__date__</strong> = '$Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $'<br>
+<strong>__revision__</strong> = '$Rev: 8218 $'<br>
+<strong>__version__</strong> = '1.1'</td></tr></table>
+</body></html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/Error.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Universal error class."""</span>
+
+
+<span class="PY_KEYWORD">class</span> Error(dict):
+    <span class="PY_STRING">"""Universal error class.
+
+    An error is a dictionary-like object, containing a specific
+    user-readable error message and an object associated with it.
+    Since Error inherits dict, other informative values can be arbitrarily
+    attached to errors. For this reason, subclassing Error is rare.
+
+    Example:
+        err = Error(user, 'Invalid password.')
+        err['time'] = time.time()
+        err['attempts'] = attempts
+
+    The object and message can be accessed via methods:
+        print err.object()
+        print err.message()
+
+    When creating errors, you can pass None for both the object and the message.
+    You can also pass additional values, which are then included in the error:
+        &gt;&gt;&gt; err = Error(None, 'Too bad.', timestamp=time.time())
+        &gt;&gt;&gt; err.keys()
+        ['timestamp']
+
+    Or include the values as a dictionary, instead of keyword arguments:
+        &gt;&gt;&gt; info = {'timestamp': time.time()}
+        &gt;&gt;&gt; err = Error(None, 'Too bad.', info)
+
+    Or you could even do both if you needed to.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, obj, message, valueDict={}, **valueArgs):
+        <span class="PY_STRING">"""Initialize the error.
+
+        Takes the object the error occurred for, and the user-readable
+        error message. The message should be self sufficient such that
+        if printed by itself, the user would understand it.
+
+        """</span>
+        dict.__init__(self)
+        self._object = obj
+        self._message = message
+        self.update(valueDict)
+        self.update(valueArgs)
+
+    <span class="PY_KEYWORD">def</span> object(self):
+        <span class="PY_KEYWORD">return</span> self._object
+
+    <span class="PY_KEYWORD">def</span> message(self):
+        <span class="PY_KEYWORD">return</span> self._message
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'ERROR(object=%s; message=%s; data=%r)'</span> % (
+            repr(self._object), repr(self._message), dict(self))
+
+    <span class="PY_KEYWORD">def</span> __str__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'ERROR: %s'</span> % self._message
+
+    <span class="PY_KEYWORD">def</span> __nonzero__(self):
+        <span class="PY_KEYWORD">return</span> True
+</pre>
+<!--footer-->
+
+</body>
+</html>

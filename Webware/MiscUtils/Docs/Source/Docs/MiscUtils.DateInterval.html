@@ -1,0 +1,49 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.DateInterval</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.DateInterval</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/DateInterval.py">/var/www/docs/Webware-1.1.1/MiscUtils/DateInterval.py</a></font></td></tr></table>
+    <p><tt>DateInterval.py<br>
+&nbsp;<br>
+Convert&nbsp;interval&nbsp;strings&nbsp;(in&nbsp;the&nbsp;form&nbsp;of&nbsp;1w2d,&nbsp;etc)&nbsp;to&nbsp;seconds,&nbsp;and&nbsp;back&nbsp;again.<br>
+Is&nbsp;not&nbsp;exactly&nbsp;about&nbsp;months&nbsp;or&nbsp;years&nbsp;(leap&nbsp;years&nbsp;in&nbsp;particular).<br>
+&nbsp;<br>
+Accepts&nbsp;(y)ear,&nbsp;(b)month,&nbsp;(w)eek,&nbsp;(d)ay,&nbsp;(h)our,&nbsp;(m)inute,&nbsp;(s)econd.<br>
+&nbsp;<br>
+Exports&nbsp;only&nbsp;timeEncode&nbsp;and&nbsp;timeDecode&nbsp;functions.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="re.html">re</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-timeDecode"><strong>timeDecode</strong></a>(s)</dt><dd><tt>Decode&nbsp;a&nbsp;number&nbsp;in&nbsp;the&nbsp;format&nbsp;1h4d3m&nbsp;(1&nbsp;hour,&nbsp;3&nbsp;days,&nbsp;3&nbsp;minutes).<br>
+&nbsp;<br>
+Decode&nbsp;the&nbsp;format&nbsp;into&nbsp;a&nbsp;number&nbsp;of&nbsp;seconds.</tt></dd></dl>
+ <dl><dt><a name="-timeEncode"><strong>timeEncode</strong></a>(seconds)</dt><dd><tt>Encode&nbsp;a&nbsp;number&nbsp;of&nbsp;seconds&nbsp;(representing&nbsp;a&nbsp;time&nbsp;interval).<br>
+&nbsp;<br>
+Encode&nbsp;the&nbsp;number&nbsp;into&nbsp;a&nbsp;form&nbsp;like&nbsp;2d1h3s.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['timeEncode', 'timeDecode']</td></tr></table>
+</body></html>

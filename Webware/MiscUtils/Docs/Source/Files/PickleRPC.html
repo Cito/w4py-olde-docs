@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/PickleRPC.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""PickleRPC.py
+
+PickleRPC provides a Server object for connection to Pickle-RPC servers
+for the purpose of making requests and receiving the responses.
+
+    &gt;&gt;&gt; from MiscUtils.PickleRPC import Server
+    &gt;&gt;&gt; server = Server('http://localhost:8080/Examples/PickleRPCExample')
+    &gt;&gt;&gt; server.multiply(10,20)
+    200
+    &gt;&gt;&gt; server.add(10,20)
+    30
+
+
+See also: Server, Webkit.PickleRPCServlet, WebKit.Examples.PickleRPCExample
+
+
+UNDER THE HOOD
+
+Requests look like this:
+    {
+        'version':    1,  # default
+        'action':     'call', # default
+        'methodName': 'NAME',
+        'args':       (A, B, ...), # default = (,)
+        'keywords':   {'A': A, 'B': B, ...} # default = {}
+    }
+
+Only 'methodName' is required since that is the only key without a
+default value.
+
+Responses look like this:
+    {
+        'timeReceived': N,
+        'timeReponded': M,
+        'value': V,
+        'exception': E,
+        'requestError': E,
+    }
+
+TimeReceived is the time the initial request was received.
+TimeResponded is the time at which the response was finished, as
+close to transmission as possible. The times are expressed as
+number of seconds since the Epoch, e.g., time.time().
+
+Value is whatever the method happened to return.
+
+Exception may be 'occurred' to indicate that an exception
+occurred, the specific exception, such as "KeyError: foo" or the
+entire traceback (as a string), at the discretion of the server.
+It will always be a non-empty string if it is present.
+
+RequestError is an exception such as "Missing method
+in request." (with no traceback) that indicates a problem with the
+actual request received by the Pickle-RPC server.
+
+Value, exception and requestError are all exclusive to each other.
+
+
+SECURITY
+
+Pickle RPC uses the SafeUnpickler class (in this module) to
+prevent unpickling of unauthorized classes.  By default, it
+doesn't allow _any_ classes to be unpickled.  You can override
+allowedGlobals() or findGlobal() in a subclass as needed to
+allow specific class instances to be unpickled.
+
+Note that both Transport in this module and PickleRPCServlet in
+WebKit are derived from SafeUnpickler.
+
+
+CREDIT
+
+The implementation of this module was taken directly from Python 2.2's
+xmlrpclib and then transformed from XML-orientation to Pickle-orientation.
+
+The zlib compression was adapted from code by Skip Montanaro that I found
+here: http://manatee.mojam.com/~skip/python/
+
+"""</span>
+
+__version__ = 1 <span class="PY_COMMENT"># PickleRPC protocol version (not the pickle protocol used)</span>
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cPickle <span class="PY_KEYWORD">import</span> dumps, Unpickler, UnpicklingError
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> pickle <span class="PY_KEYWORD">import</span> dumps, Unpickler, UnpicklingError
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">import</span> zlib
+<span class="PY_KEYWORD">except</span> ImportError:
+    zlib = None
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> StringIO
+
+
+<span class="PY_KEYWORD">class</span> Error(Exception):
+    <span class="PY_STRING">"""The abstract exception/error class for all PickleRPC errors."""</span>
+
+
+<span class="PY_KEYWORD">class</span> ResponseError(Error):
+    <span class="PY_STRING">"""Unhandled exceptions raised when the server was computing a response.
+
+    These will indicate errors such as:
+      * exception in the actual target method on the server
+      * malformed responses
+      * non "200 OK" status code responses
+
+    """</span>
+
+
+<span class="PY_KEYWORD">from</span> xmlrpclib <span class="PY_KEYWORD">import</span> ProtocolError <span class="PY_KEYWORD">as</span> _PE
+
+<span class="PY_COMMENT"># @@ 2002-01-31 ce: should this be caught somewhere for special handling?</span>
+<span class="PY_COMMENT"># Perhaps in XMLRPCServlet?</span>
+
+<span class="PY_KEYWORD">class</span> ProtocolError(ResponseError, _PE):
+    <span class="PY_STRING">"""RPC protocol error."""</span>
+
+
+<span class="PY_KEYWORD">class</span> RequestError(Error):
+    <span class="PY_STRING">"""Errors originally raised by the server complaining about malformed requests."""</span>
+
+
+<span class="PY_KEYWORD">class</span> InvalidContentTypeError(ResponseError):
+    <span class="PY_STRING">"""Invalid content type error."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, headers, content):
+        ResponseError.__init__(self)
+        self.headers = headers
+        self.content = content
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        content = self.content
+        <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'%s: Content type is not text/x-python-pickled-dict\n'</span>
+            <span class="PY_STRING">' headers = %s\ncontent =\n%s'</span>) % (
+                self.__class__.__name__, self.headers, content)
+
+    __str__ = __repr__
+
+
+<span class="PY_KEYWORD">class</span> SafeUnpickler(object):
+    <span class="PY_STRING">"""Safe unpickler.
+
+    For security reasons, we don't want to allow just anyone to unpickle
+    anything.  That can cause arbitrary code to be executed.
+    So this SafeUnpickler base class is used to control what can be unpickled.
+    By default it doesn't let you unpickle any class instances at all,
+    but you can create subclass that overrides allowedGlobals().
+
+    Note that the PickleRPCServlet class in WebKit is derived from this class
+    and uses its load() and loads() methods to do all unpickling.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> allowedGlobals(self):
+        <span class="PY_STRING">"""Allowed class names.
+
+        Must return a list of (moduleName, klassName) tuples for all
+        classes that you want to allow to be unpickled.
+
+        Example:
+            return [('datetime', 'date')]
+        allows datetime.date instances to be unpickled.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> []
+
+    <span class="PY_KEYWORD">def</span> findGlobal(self, module, klass):
+        <span class="PY_STRING">"""Find class name."""</span>
+        <span class="PY_KEYWORD">if</span> (module, klass) <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self.allowedGlobals():
+            <span class="PY_KEYWORD">raise</span> UnpicklingError(<span class="PY_STRING">"For security reasons, you can\'t unpickle"</span>
+                <span class="PY_STRING">" objects from module %s with type %s."</span> % (module, klass))
+        g = {}
+        <span class="PY_KEYWORD">exec</span> <span class="PY_STRING">'from %s import %s as theClass'</span> % (module, klass) <span class="PY_KEYWORD">in</span> g
+        <span class="PY_KEYWORD">return</span> g[<span class="PY_STRING">'theClass'</span>]
+
+    <span class="PY_KEYWORD">def</span> load(self, file):
+        <span class="PY_STRING">"""Unpickle a file."""</span>
+        safeUnpickler = Unpickler(file)
+        safeUnpickler.find_global = self.findGlobal
+        <span class="PY_KEYWORD">return</span> safeUnpickler.load()
+
+    <span class="PY_KEYWORD">def</span> loads(self, str):
+        <span class="PY_STRING">"""Unpickle a string."""</span>
+        <span class="PY_KEYWORD">return</span> self.load(StringIO(str))
+
+
+<span class="PY_COMMENT"># @@ 2002-01-31 ce: Could we reduce code duplication and automatically</span>
+<span class="PY_COMMENT"># inherit future improvements by actually importing and using the</span>
+<span class="PY_COMMENT"># xmlrpclib classes below either as base classes or mix-ins?</span>
+
+
+<span class="PY_KEYWORD">class</span> Server(object):
+    <span class="PY_STRING">"""uri [,options] -&gt; a logical connection to an XML-RPC server
+
+    uri is the connection point on the server, given as
+    scheme://host/target.
+
+    The standard implementation always supports the "http" scheme.
+    If SSL socket support is available, it also supports "https".
+
+    If the target part and the slash preceding it are both omitted,
+    "/PickleRPC" is assumed.
+
+    See the module doc string for more information.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, uri, transport=None, verbose=False, binary=True,
+            compressRequest=True, acceptCompressedResponse=True):
+        <span class="PY_STRING">"""Establish a "logical" server connection."""</span>
+        <span class="PY_COMMENT"># get the url</span>
+        <span class="PY_KEYWORD">import</span> urllib
+        typ, uri = urllib.splittype(uri)
+        <span class="PY_KEYWORD">if</span> typ <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'http'</span>, <span class="PY_STRING">'https'</span>):
+            <span class="PY_KEYWORD">raise</span> IOError(<span class="PY_STRING">'unsupported Pickle-RPC protocol'</span>)
+        self._host, self._handler = urllib.splithost(uri)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._handler:
+            self._handler = <span class="PY_STRING">'/PickleRPC'</span>
+
+        <span class="PY_KEYWORD">if</span> transport <span class="PY_KEYWORD">is</span> None:
+            transport = (typ == <span class="PY_STRING">'https'</span> <span class="PY_KEYWORD">and</span> SafeTransport <span class="PY_KEYWORD">or</span> Transport)()
+        self._transport = transport
+
+        self._verbose = verbose
+        self._binary = binary
+        self._compressRequest = compressRequest
+        self._acceptCompressedResponse = acceptCompressedResponse
+
+    <span class="PY_KEYWORD">def</span> _request(self, methodName, args, keywords):
+        <span class="PY_STRING">"""Call a method on the remote server."""</span>
+        request = {
+            <span class="PY_STRING">'version'</span>:    __version__,
+            <span class="PY_STRING">'action'</span>:     <span class="PY_STRING">'call'</span>,
+            <span class="PY_STRING">'methodName'</span>: methodName,
+            <span class="PY_STRING">'args'</span>:       args,
+            <span class="PY_STRING">'keywords'</span>:   keywords,
+        }
+        request = dumps(request, self._binary <span class="PY_KEYWORD">and</span> -1 <span class="PY_KEYWORD">or</span> 0)
+        <span class="PY_KEYWORD">if</span> zlib <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> self._compressRequest <span class="PY_KEYWORD">and</span> len(request) &gt; 1000:
+            request = zlib.compress(request, 1)
+            compressed = True
+        <span class="PY_KEYWORD">else</span>:
+            compressed = False
+
+        response = self._transport.request(self._host, self._handler, request,
+            verbose=self._verbose, binary=self._binary, compressed=compressed,
+            acceptCompressedResponse=self._acceptCompressedResponse)
+
+        <span class="PY_KEYWORD">return</span> response
+
+    <span class="PY_KEYWORD">def</span> _requestValue(self, methodName, args, keywords):
+        d = self._request(methodName, args, keywords)
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'value'</span> <span class="PY_KEYWORD">in</span> d:
+            <span class="PY_KEYWORD">return</span> d[<span class="PY_STRING">'value'</span>]
+        <span class="PY_KEYWORD">elif</span> <span class="PY_STRING">'exception'</span> <span class="PY_KEYWORD">in</span> d:
+            <span class="PY_KEYWORD">raise</span> ResponseError(d[<span class="PY_STRING">'exception'</span>])
+        <span class="PY_KEYWORD">elif</span> <span class="PY_STRING">'requestError'</span> <span class="PY_KEYWORD">in</span> d:
+            <span class="PY_KEYWORD">raise</span> RequestError(d[<span class="PY_STRING">'requestError'</span>])
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> RequestError(
+                <span class="PY_STRING">'Response does not have a value, expection or requestError.'</span>)
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;%s for %s%s&gt;'</span> % (self.__class__.__name__, self._host, self._handler)
+
+    __str__ = __repr__
+
+    <span class="PY_KEYWORD">def</span> __getattr__(self, name):
+        <span class="PY_STRING">"""Magic method dispatcher.
+
+        Note: to call a remote object with an non-standard name,
+        use result getattr(server, "strange-python-name")(args)
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> _Method(self._requestValue, name)
+
+ServerProxy = Server <span class="PY_COMMENT"># be like xmlrpclib for those who might guess or expect it</span>
+
+
+<span class="PY_KEYWORD">class</span> _Method(object):
+    <span class="PY_STRING">"""Some magic to bind a Pickle-RPC method to an RPC server.
+
+    Supports "nested" methods (e.g. examples.getStateName).
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, send, name):
+        self._send = send
+        self._name = name
+
+    <span class="PY_KEYWORD">def</span> __getattr__(self, name):
+        <span class="PY_KEYWORD">return</span> _Method(self._send, <span class="PY_STRING">'%s.%s'</span> % (self._name, name))
+
+    <span class="PY_KEYWORD">def</span> __call__(self, *args, **keywords): <span class="PY_COMMENT"># note that keywords are supported</span>
+        <span class="PY_KEYWORD">return</span> self._send(self._name, args, keywords)
+
+
+<span class="PY_KEYWORD">class</span> Transport(SafeUnpickler):
+    <span class="PY_STRING">"""Handle an HTTP transaction to a Pickle-RPC server."""</span>
+
+    <span class="PY_COMMENT"># client identifier (may be overridden)</span>
+    user_agent = <span class="PY_STRING">'PickleRPC/%s (by http://www.webwareforpython.org)'</span> % __version__
+
+    <span class="PY_KEYWORD">def</span> request(self, host, handler, request_body,
+            verbose=False, binary=False, compressed=False, acceptCompressedResponse=False):
+        <span class="PY_STRING">"""Issue a Pickle-RPC request."""</span>
+
+        h = self.make_connection(host)
+        <span class="PY_KEYWORD">if</span> verbose:
+            h.set_debuglevel(1)
+
+        self.send_request(h, handler, request_body)
+        self.send_host(h, host)
+        self.send_user_agent(h)
+        self.send_content(h, request_body,
+            binary, compressed, acceptCompressedResponse)
+
+        response = h.getresponse()
+        h.headers, h.file = response.msg, response.fp
+
+        <span class="PY_KEYWORD">if</span> response.status != 200:
+            <span class="PY_KEYWORD">raise</span> ProtocolError(host + handler,
+                response.status, response.reason, h.headers)
+
+        self.verbose = verbose
+
+        <span class="PY_KEYWORD">if</span> h.headers[<span class="PY_STRING">'content-type'</span>] <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'text/x-python-pickled-dict'</span>,
+                <span class="PY_STRING">'application/x-python-binary-pickled-dict'</span>):
+            headers = h.headers.headers
+            content = h.file.read()
+            <span class="PY_KEYWORD">raise</span> InvalidContentTypeError(headers, content)
+
+        <span class="PY_KEYWORD">try</span>:
+            content_encoding = h.headers[<span class="PY_STRING">'content-encoding'</span>]
+            <span class="PY_KEYWORD">if</span> content_encoding <span class="PY_KEYWORD">and</span> content_encoding == <span class="PY_STRING">'x-gzip'</span>:
+                <span class="PY_KEYWORD">return</span> self.parse_response_gzip(h.file)
+            <span class="PY_KEYWORD">elif</span> content_encoding:
+                <span class="PY_KEYWORD">raise</span> ProtocolError(host + handler, 500,
+                    <span class="PY_STRING">'Unknown encoding type: %s'</span> % content_encoding, h.headers)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> self.parse_response(h.file)
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">return</span> self.parse_response(h.file)
+
+    <span class="PY_KEYWORD">def</span> make_connection(self, host, port=None):
+        <span class="PY_STRING">"""Create an HTTP connection object from a host descriptor."""</span>
+        <span class="PY_KEYWORD">import</span> httplib
+        <span class="PY_KEYWORD">return</span> httplib.HTTPConnection(host, port)
+
+    <span class="PY_KEYWORD">def</span> send_request(self, connection, handler, request_body):
+        <span class="PY_STRING">"""Send request."""</span>
+        connection.putrequest(<span class="PY_STRING">'POST'</span>, handler)
+
+    <span class="PY_KEYWORD">def</span> send_host(self, connection, host):
+        <span class="PY_STRING">"""Send host header."""</span>
+        connection.putheader(<span class="PY_STRING">'Host'</span>, host)
+
+    <span class="PY_KEYWORD">def</span> send_user_agent(self, connection):
+        <span class="PY_STRING">"""Send user-agent header."""</span>
+        connection.putheader(<span class="PY_STRING">'User-Agent'</span>, self.user_agent)
+
+    <span class="PY_KEYWORD">def</span> send_content(self, connection, request_body,
+            binary=False, compressed=False, acceptCompressedResponse=False):
+        <span class="PY_STRING">"""Send content."""</span>
+        connection.putheader(<span class="PY_STRING">'Content-Type'</span>,
+            binary <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'application/x-python-binary-pickled-dict'</span>
+                <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'text/x-python-pickled-dict'</span>)
+        connection.putheader(<span class="PY_STRING">'Content-Length'</span>, str(len(request_body)))
+        <span class="PY_KEYWORD">if</span> compressed:
+            connection.putheader(<span class="PY_STRING">'Content-Encoding'</span>, <span class="PY_STRING">'x-gzip'</span>)
+        <span class="PY_KEYWORD">if</span> zlib <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> acceptCompressedResponse:
+            connection.putheader(<span class="PY_STRING">'Accept-Encoding'</span>, <span class="PY_STRING">'gzip'</span>)
+        connection.endheaders()
+        <span class="PY_KEYWORD">if</span> request_body:
+            connection.send(request_body)
+
+    <span class="PY_KEYWORD">def</span> parse_response(self, f):
+        <span class="PY_STRING">"""Read response from input file and parse it."""</span>
+        <span class="PY_KEYWORD">return</span> self.load(f)
+
+    <span class="PY_KEYWORD">def</span> parse_response_gzip(self, f):
+        <span class="PY_STRING">"""Read response from input file, decompress it, and parse it."""</span>
+        <span class="PY_KEYWORD">return</span> self.loads(zlib.decompress(f.read()))
+
+
+<span class="PY_KEYWORD">class</span> SafeTransport(Transport):
+    <span class="PY_STRING">"""Handle an HTTPS transaction to a Pickle-RPC server."""</span>
+
+    <span class="PY_KEYWORD">def</span> make_connection(self, host, port=None, key_file=None, cert_file=None):
+        <span class="PY_STRING">"""Create an HTTPS connection object from a host descriptor."""</span>
+        <span class="PY_KEYWORD">import</span> httplib
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> httplib.HTTPSConnection(host, port, key_file, cert_file)
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">raise</span> NotImplementedError(
+                <span class="PY_STRING">"Your version of httplib doesn't support HTTPS"</span>)
+</pre>
+<!--footer-->
+
+</body>
+</html>

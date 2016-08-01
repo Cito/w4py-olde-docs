@@ -1,0 +1,86 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.ImportSpy</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.ImportSpy</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/ImportSpy.py">/var/www/docs/Webware-1.1.1/WebKit/ImportSpy.py</a></font></td></tr></table>
+    <p><tt><a href="#ImportSpy">ImportSpy</a><br>
+&nbsp;<br>
+Keeps&nbsp;track&nbsp;of&nbsp;modules&nbsp;not&nbsp;imported&nbsp;directly&nbsp;by&nbsp;Webware&nbsp;for&nbsp;Python.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;helps&nbsp;save&nbsp;the&nbsp;filepath&nbsp;of&nbsp;every&nbsp;module&nbsp;which&nbsp;is&nbsp;imported.<br>
+This&nbsp;is&nbsp;used&nbsp;by&nbsp;the&nbsp;`AutoReloadingAppServer`&nbsp;(see&nbsp;doc&nbsp;strings&nbsp;for&nbsp;more<br>
+information)&nbsp;to&nbsp;restart&nbsp;the&nbsp;server&nbsp;if&nbsp;any&nbsp;source&nbsp;files&nbsp;change.<br>
+&nbsp;<br>
+Other&nbsp;than&nbsp;keeping&nbsp;track&nbsp;of&nbsp;the&nbsp;filepaths,&nbsp;the&nbsp;behaviour&nbsp;of&nbsp;this&nbsp;module<br>
+loader&nbsp;is&nbsp;identical&nbsp;to&nbsp;Python's&nbsp;default&nbsp;behaviour.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;system&nbsp;supports&nbsp;FAM&nbsp;(file&nbsp;alteration&nbsp;monitor)&nbsp;and&nbsp;python-fam&nbsp;is<br>
+installed,&nbsp;then&nbsp;the&nbsp;need&nbsp;for&nbsp;reloading&nbsp;can&nbsp;be&nbsp;monitored&nbsp;very&nbsp;effectively<br>
+with&nbsp;the&nbsp;use&nbsp;of&nbsp;<a href="#ImportSpy">ImportSpy</a>.&nbsp;Otherwise,&nbsp;<a href="#ImportSpy">ImportSpy</a>&nbsp;will&nbsp;not&nbsp;have&nbsp;much&nbsp;benefit.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;<a href="#ImportSpy">ImportSpy</a>&nbsp;is&nbsp;based&nbsp;on&nbsp;the&nbsp;new&nbsp;import&nbsp;hooks&nbsp;of&nbsp;Python&nbsp;described<br>
+in&nbsp;<a href="http://www.python.org/dev/peps/pep-0302/">PEP&nbsp;302</a>.&nbsp;It&nbsp;is&nbsp;possible&nbsp;to&nbsp;suppress&nbsp;the&nbsp;use&nbsp;of&nbsp;<a href="#ImportSpy">ImportSpy</a>&nbsp;by&nbsp;setting<br>
+`UseImportSpy`&nbsp;in&nbsp;AppServer.config&nbsp;to&nbsp;False.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ImportSpy.html#ImportSpy">ImportSpy</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ImportSpy">class <strong>ImportSpy</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>New&nbsp;style&nbsp;import&nbsp;tracker.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ImportSpy-__init__"><strong>__init__</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;importer.</tt></dd></dl>
+
+<dl><dt><a name="ImportSpy-find_module"><strong>find_module</strong></a>(self, fullname)</dt><dd><tt>Replaces&nbsp;imp.find_module.</tt></dd></dl>
+
+<dl><dt><a name="ImportSpy-load_module"><strong>load_module</strong></a>(self, fullname)</dt><dd><tt>Replaces&nbsp;imp.load_module.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-activate"><strong>activate</strong></a>(impManager)</dt><dd><tt>Activate&nbsp;<a href="#ImportSpy">ImportSpy</a>.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>path_hooks</strong> = [&lt;type 'zipimport.zipimporter'&gt;]<br>
+<strong>path_importer_cache</strong> = {'': None, '.': None, './install.py': &lt;imp.NullImporter object&gt;, '/usr/lib/pymodules/python2.6': None, '/usr/lib/python2.6': None, '/usr/lib/python2.6/': None, '/usr/lib/python2.6/ctypes': None, '/usr/lib/python2.6/dist-packages': None, '/usr/lib/python2.6/dist-packages/PIL': None, '/usr/lib/python2.6/email': None, ...}</td></tr></table>
+</body></html>

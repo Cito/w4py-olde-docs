@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.HTTPRequest</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.HTTPRequest</h2>
+<p>You can also browse the <a href="../Files/HTTPRequest.html">complete source file</a>
+or the <a href="../Docs/WebKit.HTTPRequest.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">HTTPRequest</span>(Request):</span>
+
+<span class="line_category">    ## Initialization ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, requestDict=None)</span>
+
+<span class="line_category">    ## Protocol ##</span>
+<span class="line_def">    def <span class="name_def">protocol</span>(self)</span>
+
+<span class="line_category">    ## Security ##</span>
+<span class="line_def">    def <span class="name_def">isSecure</span>(self)</span>
+
+<span class="line_category">    ## Transactions ##</span>
+<span class="line_def">    def <span class="name_def">responseClass</span>(self)</span>
+
+<span class="line_category">    ## Values ##</span>
+<span class="line_def">    def <span class="name_def">value</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">hasValue</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">extraURLPath</span>(self)</span>
+
+<span class="line_category">    ## Fields ##</span>
+<span class="line_def">    def <span class="name_def">fieldStorage</span>(self)</span>
+<span class="line_def">    def <span class="name_def">field</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">hasField</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">fields</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setField</span>(self, name, value)</span>
+<span class="line_def">    def <span class="name_def">delField</span>(self, name)</span>
+
+<span class="line_category">    ## Cookies ##</span>
+<span class="line_def">    def <span class="name_def">cookie</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">hasCookie</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">cookies</span>(self)</span>
+
+<span class="line_category">    ## Variables passed by server ##</span>
+<span class="line_def">    def <span class="name_def">serverDictionary</span>(self)</span>
+
+<span class="line_category">    ## Sessions ##</span>
+<span class="line_def">    def <span class="name_def">session</span>(self)</span>
+<span class="line_def">    def <span class="name_def">isSessionExpired</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setSessionExpired</span>(self, sessionExpired)</span>
+
+<span class="line_category">    ## Remote info ##</span>
+<span class="line_def">    def <span class="name_def">remoteUser</span>(self)</span>
+<span class="line_def">    def <span class="name_def">remoteAddress</span>(self)</span>
+<span class="line_def">    def <span class="name_def">remoteName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">accept</span>(self, which=None)</span>
+
+<span class="line_category">    ## Path ##</span>
+<span class="line_def">    def <span class="name_def">urlPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">urlPathDir</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setURLPath</span>(self, path)</span>
+<span class="line_def">    def <span class="name_def">serverSidePath</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">serverSideContextPath</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">contextName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">servletURI</span>(self)</span>
+<span class="line_def">    def <span class="name_def">uriWebKitRoot</span>(self)</span>
+<span class="line_def">    def <span class="name_def">fsPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">scheme</span>(self)</span>
+<span class="line_def">    def <span class="name_def">hostAndPort</span>(self)</span>
+<span class="line_def">    def <span class="name_def">serverURL</span>(self, canonical=False)</span>
+<span class="line_def">    def <span class="name_def">serverURLDir</span>(self)</span>
+<span class="line_def">    def <span class="name_def">serverPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">serverPathDir</span>(self)</span>
+<span class="line_def">    def <span class="name_def">siteRoot</span>(self)</span>
+<span class="line_def">    def <span class="name_def">siteRootFromCurrentServlet</span>(self)</span>
+<span class="line_def">    def <span class="name_def">servletPathFromSiteRoot</span>(self)</span>
+
+<span class="line_category">    ## Special ##</span>
+<span class="line_def">    def <span class="name_def">adapterName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">adapterFileName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">environ</span>(self)</span>
+<span class="line_def">    def <span class="name_def">push</span>(self, servlet, url=None)</span>
+<span class="line_def">    def <span class="name_def">pop</span>(self)</span>
+<span class="line_def">    def <span class="name_def">servlet</span>(self)</span>
+<span class="line_def">    def <span class="name_def">originalServlet</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousServlet</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousServlets</span>(self)</span>
+<span class="line_def">    def <span class="name_def">originalURLPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousURLPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousURLPaths</span>(self)</span>
+<span class="line_def">    def <span class="name_def">originalURI</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousURI</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousURIs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">originalContextName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousContextName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">previousContextNames</span>(self)</span>
+<span class="line_def">    def <span class="name_def">rawInput</span>(self, rewind=False)</span>
+<span class="line_def">    def <span class="name_def">time</span>(self)</span>
+<span class="line_def">    def <span class="name_def">requestID</span>(self)</span>
+
+<span class="line_category">    ## Information ##</span>
+<span class="line_def">    def <span class="name_def">servletPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">contextPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">pathInfo</span>(self)</span>
+<span class="line_def">    def <span class="name_def">pathTranslated</span>(self)</span>
+<span class="line_def">    def <span class="name_def">queryString</span>(self)</span>
+<span class="line_def">    def <span class="name_def">uri</span>(self)</span>
+<span class="line_def">    def <span class="name_def">method</span>(self)</span>
+<span class="line_def">    def <span class="name_def">sessionId</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setSessionId</span>(self, sessionID, force=False)</span>
+
+<span class="line_category">    ## Inspection ##</span>
+<span class="line_def">    def <span class="name_def">info</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htmlInfo</span>(self)</span>
+
+
+<span class="line_category">## Info Structure ##</span>
+<span class="line_def">def <span class="name_def">htmlInfo</span>(info)</span>
+
+</pre>
+</body>
+</html>

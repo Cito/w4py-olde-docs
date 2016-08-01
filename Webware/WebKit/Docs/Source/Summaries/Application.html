@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.Application</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.Application</h2>
+<p>You can also browse the <a href="../Files/Application.html">complete source file</a>
+or the <a href="../Docs/WebKit.Application.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">EndResponse</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">Application</span>(ConfigurableForServerSidePath):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, server, useSessionSweeper=True)</span>
+<span class="line_def">    def <span class="name_def">initErrorPage</span>(self)</span>
+<span class="line_def">    def <span class="name_def">initSessions</span>(self)</span>
+<span class="line_def">    def <span class="name_def">makeDirs</span>(self)</span>
+<span class="line_def">    def <span class="name_def">initVersions</span>(self)</span>
+<span class="line_def">    def <span class="name_def">taskManager</span>(self)</span>
+<span class="line_def">    def <span class="name_def">startSessionSweeper</span>(self)</span>
+<span class="line_def">    def <span class="name_def">shutDown</span>(self)</span>
+<span class="line_def">    def <span class="name_def">addShutDownHandler</span>(self, func)</span>
+
+<span class="line_category">    ## Config ##</span>
+<span class="line_def">    def <span class="name_def">defaultConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">configFilename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">configReplacementValues</span>(self)</span>
+
+<span class="line_category">    ## Versions ##</span>
+<span class="line_def">    def <span class="name_def">webwareVersion</span>(self)</span>
+<span class="line_def">    def <span class="name_def">webwareVersionString</span>(self)</span>
+<span class="line_def">    def <span class="name_def">webKitVersion</span>(self)</span>
+<span class="line_def">    def <span class="name_def">webKitVersionString</span>(self)</span>
+
+<span class="line_category">    ## Sessions ##</span>
+<span class="line_def">    def <span class="name_def">session</span>(self, sessionId, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">hasSession</span>(self, sessionId)</span>
+<span class="line_def">    def <span class="name_def">sessions</span>(self)</span>
+<span class="line_def">    def <span class="name_def">createSessionForTransaction</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">createSessionWithID</span>(self, trans, sessionID)</span>
+<span class="line_def">    def <span class="name_def">sessionTimeout</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">sessionPrefix</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">sessionName</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">sessionCookiePath</span>(self, trans)</span>
+
+<span class="line_category">    ## Misc Access ##</span>
+<span class="line_def">    def <span class="name_def">server</span>(self)</span>
+<span class="line_def">    def <span class="name_def">serverSidePath</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">webwarePath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">webKitPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">name</span>()</span>
+
+<span class="line_category">    ## Activity Log ##</span>
+<span class="line_def">    def <span class="name_def">writeActivityLog</span>(self, trans)</span>
+
+<span class="line_category">    ## Request Dispatching ##</span>
+<span class="line_def">    def <span class="name_def">dispatchRawRequest</span>(self, requestDict, strmOut)</span>
+<span class="line_def">    def <span class="name_def">createRequestForDict</span>(requestDict)</span>
+<span class="line_def">    def <span class="name_def">runTransaction</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">runTransactionViaServlet</span>(servlet, trans)</span>
+<span class="line_def">    def <span class="name_def">forward</span>(self, trans, url)</span>
+<span class="line_def">    def <span class="name_def">callMethodOfServlet</span>(self, trans, url, method, *args, **kw)</span>
+<span class="line_def">    def <span class="name_def">includeURL</span>(self, trans, url)</span>
+<span class="line_def">    def <span class="name_def">resolveInternalRelativePath</span>(trans, url)</span>
+<span class="line_def">    def <span class="name_def">returnServlet</span>(servlet)</span>
+<span class="line_def">    def <span class="name_def">errorPage</span>(self, errorClass)</span>
+<span class="line_def">    def <span class="name_def">handleException</span>(self)</span>
+<span class="line_def">    def <span class="name_def">handleExceptionInTransaction</span>(self, excInfo, trans)</span>
+<span class="line_def">    def <span class="name_def">rootURLParser</span>(self)</span>
+<span class="line_def">    def <span class="name_def">hasContext</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">addContext</span>(self, name, path)</span>
+<span class="line_def">    def <span class="name_def">addServletFactory</span>(factory)</span>
+<span class="line_def">    def <span class="name_def">contexts</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeExceptionReport</span>(self, handler)</span>
+<span class="line_def">    def <span class="name_def">removePathSession</span>(trans)</span>
+<span class="line_def">    def <span class="name_def">handlePathSession</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">handleMissingPathSession</span>(self, trans)</span>
+<span class="line_def">    def <span class="name_def">handleUnnecessaryPathSession</span>(self, trans)</span>
+
+</pre>
+</body>
+</html>

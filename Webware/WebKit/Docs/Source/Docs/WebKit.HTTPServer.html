@@ -1,0 +1,470 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.HTTPServer</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.HTTPServer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/HTTPServer.py">/var/www/docs/Webware-1.1.1/WebKit/HTTPServer.py</a></font></td></tr></table>
+    <p><tt>HTTP&nbsp;servlets</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="BaseHTTPServer.html">BaseHTTPServer</a><br>
+</td><td width="25%" valign=top><a href="errno.html">errno</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="socket.html">socket</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a>(<a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPServer.html#HTTPAppServerHandler">HTTPAppServerHandler</a>(<a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a>, <a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a>)
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.HTTPServer.html#HTTPAppServerHandler">HTTPAppServerHandler</a>(<a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a>, <a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a>)
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPAppServerHandler">class <strong>HTTPAppServerHandler</strong></a>(<a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a>, <a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>AppServer&nbsp;interface.<br>
+&nbsp;<br>
+Adapters&nbsp;<a href="#HTTPHandler">HTTPHandler</a>&nbsp;to&nbsp;fit&nbsp;with&nbsp;ThreadedAppServer's&nbsp;model&nbsp;of&nbsp;an&nbsp;adapter.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPServer.html#HTTPAppServerHandler">HTTPAppServerHandler</a></dd>
+<dd><a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+<dd><a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a></dd>
+<dd><a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a></dd>
+<dd><a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a></dd>
+<dd><a href="SocketServer.html#BaseRequestHandler">SocketServer.BaseRequestHandler</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPAppServerHandler-dispatchRawRequest"><strong>dispatchRawRequest</strong></a>(self, requestDict, streamOut)</dt><dd><tt>Dispatch&nbsp;the&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-doTransaction"><strong>doTransaction</strong></a>(self, env, input)</dt><dd><tt>Process&nbsp;transaction.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-handleRequest"><strong>handleRequest</strong></a>(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>protocolName</strong> = 'http'</dl>
+
+<dl><dt><strong>settingPrefix</strong> = 'HTTP'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a>:<br>
+<dl><dt><a name="HTTPAppServerHandler-__init__"><strong>__init__</strong></a>(self, server, serverAddress)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Each&nbsp;handler&nbsp;is&nbsp;attached&nbsp;to&nbsp;a&nbsp;specific&nbsp;host&nbsp;and&nbsp;port,<br>
+and&nbsp;of&nbsp;course&nbsp;to&nbsp;the&nbsp;AppServer.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-activate"><strong>activate</strong></a>(self, sock, requestID)</dt><dd><tt>Activate&nbsp;the&nbsp;handler&nbsp;for&nbsp;processing&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+`sock`&nbsp;is&nbsp;the&nbsp;incoming&nbsp;socket&nbsp;that&nbsp;this&nbsp;handler&nbsp;will&nbsp;work&nbsp;with,<br>
+and&nbsp;`requestID`&nbsp;is&nbsp;a&nbsp;serial&nbsp;number&nbsp;unique&nbsp;for&nbsp;each&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;isn't&nbsp;where&nbsp;work&nbsp;gets&nbsp;done&nbsp;--&nbsp;the&nbsp;handler&nbsp;is&nbsp;queued&nbsp;after&nbsp;this,<br>
+and&nbsp;work&nbsp;is&nbsp;done&nbsp;when&nbsp;`handleRequest`&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Called&nbsp;when&nbsp;the&nbsp;handler&nbsp;is&nbsp;finished.&nbsp;Closes&nbsp;the&nbsp;socket&nbsp;and<br>
+returns&nbsp;the&nbsp;handler&nbsp;to&nbsp;the&nbsp;pool&nbsp;of&nbsp;inactive&nbsp;handlers.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-endRequest"><strong>endRequest</strong></a>(self, error<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;end&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-receiveDict"><strong>receiveDict</strong></a>(self)</dt><dd><tt>Receive&nbsp;a&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+&nbsp;<br>
+Utility&nbsp;function&nbsp;to&nbsp;receive&nbsp;a&nbsp;marshalled&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;socket.<br>
+Returns&nbsp;None&nbsp;if&nbsp;the&nbsp;request&nbsp;was&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-startRequest"><strong>startRequest</strong></a>(self, requestDict<font color="#909090">=None</font>)</dt><dd><tt>Track&nbsp;start&nbsp;of&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;use&nbsp;and&nbsp;override&nbsp;this&nbsp;method.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebKit.ThreadedAppServer.html#Handler">WebKit.ThreadedAppServer.Handler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a>:<br>
+<dl><dt><a name="HTTPAppServerHandler-do_COPY"><strong>do_COPY</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_DELETE"><strong>do_DELETE</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_GET"><strong>do_GET</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_HEAD"><strong>do_HEAD</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_MKCOL"><strong>do_MKCOL</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_MOVE"><strong>do_MOVE</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_OPTIONS"><strong>do_OPTIONS</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_POST"><strong>do_POST</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_PROPFIND"><strong>do_PROPFIND</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-do_PUT"><strong>do_PUT</strong></a> = handleRequest(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+<a href="#HTTPAppServerHandler-doTransaction">doTransaction</a>(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-log_request"><strong>log_request</strong></a>(self, code<font color="#909090">='-'</font>, size<font color="#909090">='-'</font>)</dt><dd><tt>Log&nbsp;an&nbsp;accepted&nbsp;request.<br>
+&nbsp;<br>
+Do&nbsp;nothing&nbsp;(use&nbsp;the&nbsp;LogActivity&nbsp;setting&nbsp;instead).</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-processResponse"><strong>processResponse</strong></a>(self, data)</dt><dd><tt>Process&nbsp;response.<br>
+&nbsp;<br>
+Takes&nbsp;a&nbsp;string&nbsp;(like&nbsp;what&nbsp;a&nbsp;CGI&nbsp;script&nbsp;would&nbsp;print)&nbsp;and<br>
+sends&nbsp;the&nbsp;actual&nbsp;HTTP&nbsp;response&nbsp;(response&nbsp;code,&nbsp;headers,&nbsp;body).</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a>:<br>
+<dl><dt><a name="HTTPAppServerHandler-headersToEnviron"><strong>headersToEnviron</strong></a>(headers, env)</dt><dd><tt>Convert&nbsp;headers&nbsp;to&nbsp;environment&nbsp;variables.<br>
+&nbsp;<br>
+Use&nbsp;a&nbsp;simple&nbsp;heuristic&nbsp;to&nbsp;convert&nbsp;all&nbsp;the&nbsp;headers&nbsp;to<br>
+environmental&nbsp;variables.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a>:<br>
+<dl><dt><a name="HTTPAppServerHandler-address_string"><strong>address_string</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;client&nbsp;address&nbsp;formatted&nbsp;for&nbsp;logging.<br>
+&nbsp;<br>
+This&nbsp;version&nbsp;looks&nbsp;up&nbsp;the&nbsp;full&nbsp;hostname&nbsp;using&nbsp;gethostbyaddr(),<br>
+and&nbsp;tries&nbsp;to&nbsp;find&nbsp;a&nbsp;name&nbsp;that&nbsp;contains&nbsp;at&nbsp;least&nbsp;one&nbsp;dot.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-date_time_string"><strong>date_time_string</strong></a>(self, timestamp<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;date&nbsp;and&nbsp;time&nbsp;formatted&nbsp;for&nbsp;a&nbsp;message&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-end_headers"><strong>end_headers</strong></a>(self)</dt><dd><tt>Send&nbsp;the&nbsp;blank&nbsp;line&nbsp;ending&nbsp;the&nbsp;MIME&nbsp;headers.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-handle"><strong>handle</strong></a>(self)</dt><dd><tt>Handle&nbsp;multiple&nbsp;requests&nbsp;if&nbsp;necessary.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-handle_one_request"><strong>handle_one_request</strong></a>(self)</dt><dd><tt>Handle&nbsp;a&nbsp;single&nbsp;HTTP&nbsp;request.<br>
+&nbsp;<br>
+You&nbsp;normally&nbsp;don't&nbsp;need&nbsp;to&nbsp;override&nbsp;this&nbsp;method;&nbsp;see&nbsp;the&nbsp;class<br>
+__doc__&nbsp;string&nbsp;for&nbsp;information&nbsp;on&nbsp;how&nbsp;to&nbsp;handle&nbsp;specific&nbsp;HTTP<br>
+commands&nbsp;such&nbsp;as&nbsp;GET&nbsp;and&nbsp;POST.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-log_date_time_string"><strong>log_date_time_string</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;time&nbsp;formatted&nbsp;for&nbsp;logging.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-log_error"><strong>log_error</strong></a>(self, format, *args)</dt><dd><tt>Log&nbsp;an&nbsp;error.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;called&nbsp;when&nbsp;a&nbsp;request&nbsp;cannot&nbsp;be&nbsp;fulfilled.&nbsp;&nbsp;By<br>
+default&nbsp;it&nbsp;passes&nbsp;the&nbsp;message&nbsp;on&nbsp;to&nbsp;<a href="#HTTPAppServerHandler-log_message">log_message</a>().<br>
+&nbsp;<br>
+Arguments&nbsp;are&nbsp;the&nbsp;same&nbsp;as&nbsp;for&nbsp;<a href="#HTTPAppServerHandler-log_message">log_message</a>().<br>
+&nbsp;<br>
+XXX&nbsp;This&nbsp;should&nbsp;go&nbsp;to&nbsp;the&nbsp;separate&nbsp;error&nbsp;log.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-log_message"><strong>log_message</strong></a>(self, format, *args)</dt><dd><tt>Log&nbsp;an&nbsp;arbitrary&nbsp;message.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;used&nbsp;by&nbsp;all&nbsp;other&nbsp;logging&nbsp;functions.&nbsp;&nbsp;Override<br>
+it&nbsp;if&nbsp;you&nbsp;have&nbsp;specific&nbsp;logging&nbsp;wishes.<br>
+&nbsp;<br>
+The&nbsp;first&nbsp;argument,&nbsp;FORMAT,&nbsp;is&nbsp;a&nbsp;format&nbsp;string&nbsp;for&nbsp;the<br>
+message&nbsp;to&nbsp;be&nbsp;logged.&nbsp;&nbsp;If&nbsp;the&nbsp;format&nbsp;string&nbsp;contains<br>
+any&nbsp;%&nbsp;escapes&nbsp;requiring&nbsp;parameters,&nbsp;they&nbsp;should&nbsp;be<br>
+specified&nbsp;as&nbsp;subsequent&nbsp;arguments&nbsp;(it's&nbsp;just&nbsp;like<br>
+printf!).<br>
+&nbsp;<br>
+The&nbsp;client&nbsp;host&nbsp;and&nbsp;current&nbsp;date/time&nbsp;are&nbsp;prefixed&nbsp;to<br>
+every&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-parse_request"><strong>parse_request</strong></a>(self)</dt><dd><tt>Parse&nbsp;a&nbsp;request&nbsp;(internal).<br>
+&nbsp;<br>
+The&nbsp;request&nbsp;should&nbsp;be&nbsp;stored&nbsp;in&nbsp;self.<strong>raw_requestline</strong>;&nbsp;the&nbsp;results<br>
+are&nbsp;in&nbsp;self.<strong>command</strong>,&nbsp;self.<strong>path</strong>,&nbsp;self.<strong>request_version</strong>&nbsp;and<br>
+self.<strong>headers</strong>.<br>
+&nbsp;<br>
+Return&nbsp;True&nbsp;for&nbsp;success,&nbsp;False&nbsp;for&nbsp;failure;&nbsp;on&nbsp;failure,&nbsp;an<br>
+error&nbsp;is&nbsp;sent&nbsp;back.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-send_error"><strong>send_error</strong></a>(self, code, message<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;and&nbsp;log&nbsp;an&nbsp;error&nbsp;reply.<br>
+&nbsp;<br>
+Arguments&nbsp;are&nbsp;the&nbsp;error&nbsp;code,&nbsp;and&nbsp;a&nbsp;detailed&nbsp;message.<br>
+The&nbsp;detailed&nbsp;message&nbsp;defaults&nbsp;to&nbsp;the&nbsp;short&nbsp;entry&nbsp;matching&nbsp;the<br>
+response&nbsp;code.<br>
+&nbsp;<br>
+This&nbsp;sends&nbsp;an&nbsp;error&nbsp;response&nbsp;(so&nbsp;it&nbsp;must&nbsp;be&nbsp;called&nbsp;before&nbsp;any<br>
+output&nbsp;has&nbsp;been&nbsp;generated),&nbsp;logs&nbsp;the&nbsp;error,&nbsp;and&nbsp;finally&nbsp;sends<br>
+a&nbsp;piece&nbsp;of&nbsp;HTML&nbsp;explaining&nbsp;the&nbsp;error&nbsp;to&nbsp;the&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-send_header"><strong>send_header</strong></a>(self, keyword, value)</dt><dd><tt>Send&nbsp;a&nbsp;MIME&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-send_response"><strong>send_response</strong></a>(self, code, message<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;the&nbsp;response&nbsp;header&nbsp;and&nbsp;log&nbsp;the&nbsp;response&nbsp;code.<br>
+&nbsp;<br>
+Also&nbsp;send&nbsp;two&nbsp;standard&nbsp;headers&nbsp;with&nbsp;the&nbsp;server&nbsp;software<br>
+version&nbsp;and&nbsp;the&nbsp;current&nbsp;date.</tt></dd></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-version_string"><strong>version_string</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;server&nbsp;software&nbsp;version&nbsp;string.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a>:<br>
+<dl><dt><strong>MessageClass</strong> = &lt;class mimetools.Message&gt;</dl>
+
+<dl><dt><strong>default_request_version</strong> = 'HTTP/0.9'</dl>
+
+<dl><dt><strong>error_content_type</strong> = 'text/html'</dl>
+
+<dl><dt><strong>error_message_format</strong> = '&lt;head&gt;<font color="#c040c0">\n</font>&lt;title&gt;Error response&lt;/title&gt;<font color="#c040c0">\n</font>&lt;/head&gt;<font color="#c040c0">\n</font>&lt;bo...ode explanation: %(code)s = %(explain)s.<font color="#c040c0">\n</font>&lt;/body&gt;<font color="#c040c0">\n</font>'</dl>
+
+<dl><dt><strong>monthname</strong> = [None, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']</dl>
+
+<dl><dt><strong>protocol_version</strong> = 'HTTP/1.0'</dl>
+
+<dl><dt><strong>responses</strong> = {100: ('Continue', 'Request received, please continue'), 101: ('Switching Protocols', 'Switching to new protocol; obey Upgrade header'), 200: ('OK', 'Request fulfilled, document follows'), 201: ('Created', 'Document created, URL follows'), 202: ('Accepted', 'Request accepted, processing continues off-line'), 203: ('Non-Authoritative Information', 'Request fulfilled from cache'), 204: ('No Content', 'Request fulfilled, nothing follows'), 205: ('Reset Content', 'Clear input form for further input.'), 206: ('Partial Content', 'Partial content follows.'), 300: ('Multiple Choices', 'Object has several resources -- see URI list'), ...}</dl>
+
+<dl><dt><strong>server_version</strong> = 'BaseHTTP/0.3'</dl>
+
+<dl><dt><strong>sys_version</strong> = 'Python/2.6.5'</dl>
+
+<dl><dt><strong>weekdayname</strong> = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']</dl>
+
+<hr>
+Methods inherited from <a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a>:<br>
+<dl><dt><a name="HTTPAppServerHandler-finish"><strong>finish</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPAppServerHandler-setup"><strong>setup</strong></a>(self)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a>:<br>
+<dl><dt><strong>rbufsize</strong> = -1</dl>
+
+<dl><dt><strong>wbufsize</strong> = 0</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPHandler">class <strong>HTTPHandler</strong></a>(<a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Handles&nbsp;incoming&nbsp;requests.<br>
+&nbsp;<br>
+Recreated&nbsp;with&nbsp;every&nbsp;request.&nbsp;Abstract&nbsp;base&nbsp;class.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.HTTPServer.html#HTTPHandler">HTTPHandler</a></dd>
+<dd><a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a></dd>
+<dd><a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a></dd>
+<dd><a href="SocketServer.html#BaseRequestHandler">SocketServer.BaseRequestHandler</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPHandler-do_COPY"><strong>do_COPY</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_DELETE"><strong>do_DELETE</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_GET"><strong>do_GET</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_HEAD"><strong>do_HEAD</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_MKCOL"><strong>do_MKCOL</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_MOVE"><strong>do_MOVE</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_OPTIONS"><strong>do_OPTIONS</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_POST"><strong>do_POST</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_PROPFIND"><strong>do_PROPFIND</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-do_PUT"><strong>do_PUT</strong></a> = <a href="#HTTPHandler-handleRequest">handleRequest</a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-handleRequest"><strong>handleRequest</strong></a>(self)</dt><dd><tt>Handle&nbsp;a&nbsp;request.<br>
+&nbsp;<br>
+Actually&nbsp;performs&nbsp;the&nbsp;request,&nbsp;creating&nbsp;the&nbsp;environment&nbsp;and&nbsp;calling<br>
+doTransaction(env,&nbsp;input)&nbsp;to&nbsp;perform&nbsp;the&nbsp;response.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-log_request"><strong>log_request</strong></a>(self, code<font color="#909090">='-'</font>, size<font color="#909090">='-'</font>)</dt><dd><tt>Log&nbsp;an&nbsp;accepted&nbsp;request.<br>
+&nbsp;<br>
+Do&nbsp;nothing&nbsp;(use&nbsp;the&nbsp;LogActivity&nbsp;setting&nbsp;instead).</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-processResponse"><strong>processResponse</strong></a>(self, data)</dt><dd><tt>Process&nbsp;response.<br>
+&nbsp;<br>
+Takes&nbsp;a&nbsp;string&nbsp;(like&nbsp;what&nbsp;a&nbsp;CGI&nbsp;script&nbsp;would&nbsp;print)&nbsp;and<br>
+sends&nbsp;the&nbsp;actual&nbsp;HTTP&nbsp;response&nbsp;(response&nbsp;code,&nbsp;headers,&nbsp;body).</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="HTTPHandler-headersToEnviron"><strong>headersToEnviron</strong></a>(headers, env)</dt><dd><tt>Convert&nbsp;headers&nbsp;to&nbsp;environment&nbsp;variables.<br>
+&nbsp;<br>
+Use&nbsp;a&nbsp;simple&nbsp;heuristic&nbsp;to&nbsp;convert&nbsp;all&nbsp;the&nbsp;headers&nbsp;to<br>
+environmental&nbsp;variables.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a>:<br>
+<dl><dt><a name="HTTPHandler-address_string"><strong>address_string</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;client&nbsp;address&nbsp;formatted&nbsp;for&nbsp;logging.<br>
+&nbsp;<br>
+This&nbsp;version&nbsp;looks&nbsp;up&nbsp;the&nbsp;full&nbsp;hostname&nbsp;using&nbsp;gethostbyaddr(),<br>
+and&nbsp;tries&nbsp;to&nbsp;find&nbsp;a&nbsp;name&nbsp;that&nbsp;contains&nbsp;at&nbsp;least&nbsp;one&nbsp;dot.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-date_time_string"><strong>date_time_string</strong></a>(self, timestamp<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;date&nbsp;and&nbsp;time&nbsp;formatted&nbsp;for&nbsp;a&nbsp;message&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-end_headers"><strong>end_headers</strong></a>(self)</dt><dd><tt>Send&nbsp;the&nbsp;blank&nbsp;line&nbsp;ending&nbsp;the&nbsp;MIME&nbsp;headers.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-handle"><strong>handle</strong></a>(self)</dt><dd><tt>Handle&nbsp;multiple&nbsp;requests&nbsp;if&nbsp;necessary.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-handle_one_request"><strong>handle_one_request</strong></a>(self)</dt><dd><tt>Handle&nbsp;a&nbsp;single&nbsp;HTTP&nbsp;request.<br>
+&nbsp;<br>
+You&nbsp;normally&nbsp;don't&nbsp;need&nbsp;to&nbsp;override&nbsp;this&nbsp;method;&nbsp;see&nbsp;the&nbsp;class<br>
+__doc__&nbsp;string&nbsp;for&nbsp;information&nbsp;on&nbsp;how&nbsp;to&nbsp;handle&nbsp;specific&nbsp;HTTP<br>
+commands&nbsp;such&nbsp;as&nbsp;GET&nbsp;and&nbsp;POST.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-log_date_time_string"><strong>log_date_time_string</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;time&nbsp;formatted&nbsp;for&nbsp;logging.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-log_error"><strong>log_error</strong></a>(self, format, *args)</dt><dd><tt>Log&nbsp;an&nbsp;error.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;called&nbsp;when&nbsp;a&nbsp;request&nbsp;cannot&nbsp;be&nbsp;fulfilled.&nbsp;&nbsp;By<br>
+default&nbsp;it&nbsp;passes&nbsp;the&nbsp;message&nbsp;on&nbsp;to&nbsp;<a href="#HTTPHandler-log_message">log_message</a>().<br>
+&nbsp;<br>
+Arguments&nbsp;are&nbsp;the&nbsp;same&nbsp;as&nbsp;for&nbsp;<a href="#HTTPHandler-log_message">log_message</a>().<br>
+&nbsp;<br>
+XXX&nbsp;This&nbsp;should&nbsp;go&nbsp;to&nbsp;the&nbsp;separate&nbsp;error&nbsp;log.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-log_message"><strong>log_message</strong></a>(self, format, *args)</dt><dd><tt>Log&nbsp;an&nbsp;arbitrary&nbsp;message.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;used&nbsp;by&nbsp;all&nbsp;other&nbsp;logging&nbsp;functions.&nbsp;&nbsp;Override<br>
+it&nbsp;if&nbsp;you&nbsp;have&nbsp;specific&nbsp;logging&nbsp;wishes.<br>
+&nbsp;<br>
+The&nbsp;first&nbsp;argument,&nbsp;FORMAT,&nbsp;is&nbsp;a&nbsp;format&nbsp;string&nbsp;for&nbsp;the<br>
+message&nbsp;to&nbsp;be&nbsp;logged.&nbsp;&nbsp;If&nbsp;the&nbsp;format&nbsp;string&nbsp;contains<br>
+any&nbsp;%&nbsp;escapes&nbsp;requiring&nbsp;parameters,&nbsp;they&nbsp;should&nbsp;be<br>
+specified&nbsp;as&nbsp;subsequent&nbsp;arguments&nbsp;(it's&nbsp;just&nbsp;like<br>
+printf!).<br>
+&nbsp;<br>
+The&nbsp;client&nbsp;host&nbsp;and&nbsp;current&nbsp;date/time&nbsp;are&nbsp;prefixed&nbsp;to<br>
+every&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-parse_request"><strong>parse_request</strong></a>(self)</dt><dd><tt>Parse&nbsp;a&nbsp;request&nbsp;(internal).<br>
+&nbsp;<br>
+The&nbsp;request&nbsp;should&nbsp;be&nbsp;stored&nbsp;in&nbsp;self.<strong>raw_requestline</strong>;&nbsp;the&nbsp;results<br>
+are&nbsp;in&nbsp;self.<strong>command</strong>,&nbsp;self.<strong>path</strong>,&nbsp;self.<strong>request_version</strong>&nbsp;and<br>
+self.<strong>headers</strong>.<br>
+&nbsp;<br>
+Return&nbsp;True&nbsp;for&nbsp;success,&nbsp;False&nbsp;for&nbsp;failure;&nbsp;on&nbsp;failure,&nbsp;an<br>
+error&nbsp;is&nbsp;sent&nbsp;back.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-send_error"><strong>send_error</strong></a>(self, code, message<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;and&nbsp;log&nbsp;an&nbsp;error&nbsp;reply.<br>
+&nbsp;<br>
+Arguments&nbsp;are&nbsp;the&nbsp;error&nbsp;code,&nbsp;and&nbsp;a&nbsp;detailed&nbsp;message.<br>
+The&nbsp;detailed&nbsp;message&nbsp;defaults&nbsp;to&nbsp;the&nbsp;short&nbsp;entry&nbsp;matching&nbsp;the<br>
+response&nbsp;code.<br>
+&nbsp;<br>
+This&nbsp;sends&nbsp;an&nbsp;error&nbsp;response&nbsp;(so&nbsp;it&nbsp;must&nbsp;be&nbsp;called&nbsp;before&nbsp;any<br>
+output&nbsp;has&nbsp;been&nbsp;generated),&nbsp;logs&nbsp;the&nbsp;error,&nbsp;and&nbsp;finally&nbsp;sends<br>
+a&nbsp;piece&nbsp;of&nbsp;HTML&nbsp;explaining&nbsp;the&nbsp;error&nbsp;to&nbsp;the&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-send_header"><strong>send_header</strong></a>(self, keyword, value)</dt><dd><tt>Send&nbsp;a&nbsp;MIME&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-send_response"><strong>send_response</strong></a>(self, code, message<font color="#909090">=None</font>)</dt><dd><tt>Send&nbsp;the&nbsp;response&nbsp;header&nbsp;and&nbsp;log&nbsp;the&nbsp;response&nbsp;code.<br>
+&nbsp;<br>
+Also&nbsp;send&nbsp;two&nbsp;standard&nbsp;headers&nbsp;with&nbsp;the&nbsp;server&nbsp;software<br>
+version&nbsp;and&nbsp;the&nbsp;current&nbsp;date.</tt></dd></dl>
+
+<dl><dt><a name="HTTPHandler-version_string"><strong>version_string</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;server&nbsp;software&nbsp;version&nbsp;string.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="BaseHTTPServer.html#BaseHTTPRequestHandler">BaseHTTPServer.BaseHTTPRequestHandler</a>:<br>
+<dl><dt><strong>MessageClass</strong> = &lt;class mimetools.Message&gt;</dl>
+
+<dl><dt><strong>default_request_version</strong> = 'HTTP/0.9'</dl>
+
+<dl><dt><strong>error_content_type</strong> = 'text/html'</dl>
+
+<dl><dt><strong>error_message_format</strong> = '&lt;head&gt;<font color="#c040c0">\n</font>&lt;title&gt;Error response&lt;/title&gt;<font color="#c040c0">\n</font>&lt;/head&gt;<font color="#c040c0">\n</font>&lt;bo...ode explanation: %(code)s = %(explain)s.<font color="#c040c0">\n</font>&lt;/body&gt;<font color="#c040c0">\n</font>'</dl>
+
+<dl><dt><strong>monthname</strong> = [None, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']</dl>
+
+<dl><dt><strong>protocol_version</strong> = 'HTTP/1.0'</dl>
+
+<dl><dt><strong>responses</strong> = {100: ('Continue', 'Request received, please continue'), 101: ('Switching Protocols', 'Switching to new protocol; obey Upgrade header'), 200: ('OK', 'Request fulfilled, document follows'), 201: ('Created', 'Document created, URL follows'), 202: ('Accepted', 'Request accepted, processing continues off-line'), 203: ('Non-Authoritative Information', 'Request fulfilled from cache'), 204: ('No Content', 'Request fulfilled, nothing follows'), 205: ('Reset Content', 'Clear input form for further input.'), 206: ('Partial Content', 'Partial content follows.'), 300: ('Multiple Choices', 'Object has several resources -- see URI list'), ...}</dl>
+
+<dl><dt><strong>server_version</strong> = 'BaseHTTP/0.3'</dl>
+
+<dl><dt><strong>sys_version</strong> = 'Python/2.6.5'</dl>
+
+<dl><dt><strong>weekdayname</strong> = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']</dl>
+
+<hr>
+Methods inherited from <a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a>:<br>
+<dl><dt><a name="HTTPHandler-finish"><strong>finish</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTTPHandler-setup"><strong>setup</strong></a>(self)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="SocketServer.html#StreamRequestHandler">SocketServer.StreamRequestHandler</a>:<br>
+<dl><dt><strong>rbufsize</strong> = -1</dl>
+
+<dl><dt><strong>wbufsize</strong> = 0</dl>
+
+<hr>
+Methods inherited from <a href="SocketServer.html#BaseRequestHandler">SocketServer.BaseRequestHandler</a>:<br>
+<dl><dt><a name="HTTPHandler-__init__"><strong>__init__</strong></a>(self, request, client_address, server)</dt></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

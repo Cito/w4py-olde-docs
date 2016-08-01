@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/PSPServletFactory.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""This module handles requests from the application for PSP pages.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">from</span> glob <span class="PY_KEYWORD">import</span> glob
+<span class="PY_KEYWORD">from</span> string <span class="PY_KEYWORD">import</span> digits, letters
+
+<span class="PY_KEYWORD">from</span> WebKit.ServletFactory <span class="PY_KEYWORD">import</span> ServletFactory
+<span class="PY_KEYWORD">from</span> PSP <span class="PY_KEYWORD">import</span> Context, PSPCompiler
+
+
+<span class="PY_KEYWORD">class</span> PSPServletFactory(ServletFactory):
+    <span class="PY_STRING">"""Servlet Factory for PSP files."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, application):
+        ServletFactory.__init__(self, application)
+        self._cacheDir = os.path.join(application._cacheDir, <span class="PY_STRING">'PSP'</span>)
+        sys.path.append(self._cacheDir)
+        self._cacheClassFiles = self._cacheClasses
+        t = [<span class="PY_STRING">'_'</span>] * 256
+        <span class="PY_KEYWORD">for</span> c <span class="PY_KEYWORD">in</span> digits + letters:
+            t[ord(c)] = c
+        self._classNameTrans = <span class="PY_STRING">''</span>.join(t)
+        setting = application.setting
+        self._extensions = setting(<span class="PY_STRING">'ExtensionsForPSP'</span>, [<span class="PY_STRING">'.psp'</span>])
+        self._fileEncoding = setting(<span class="PY_STRING">'PSPFileEncoding'</span>, None)
+        <span class="PY_KEYWORD">if</span> setting(<span class="PY_STRING">'ClearPSPCacheOnStart'</span>, False):
+            self.clearFileCache()
+        self._recordFile = application._imp.recordFile
+
+    <span class="PY_KEYWORD">def</span> uniqueness(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'file'</span>
+
+    <span class="PY_KEYWORD">def</span> extensions(self):
+        <span class="PY_KEYWORD">return</span> self._extensions
+
+    <span class="PY_KEYWORD">def</span> fileEncoding(self):
+        <span class="PY_STRING">"""Return the file encoding used in PSP files."""</span>
+        <span class="PY_KEYWORD">return</span> self._fileEncoding
+
+    <span class="PY_KEYWORD">def</span> flushCache(self):
+        <span class="PY_STRING">"""Clean out the cache of classes in memory and on disk."""</span>
+        ServletFactory.flushCache(self)
+        self.clearFileCache()
+
+    <span class="PY_KEYWORD">def</span> clearFileCache(self):
+        <span class="PY_STRING">"""Clear class files stored on disk."""</span>
+        files = glob(os.path.join(self._cacheDir, <span class="PY_STRING">'*.*'</span>))
+        map(os.remove, files)
+
+    <span class="PY_KEYWORD">def</span> computeClassName(self, pagename):
+        <span class="PY_STRING">"""Generates a (hopefully) unique class/file name for each PSP file.
+
+        Argument: pagename: the path to the PSP source file
+        Returns: a unique name for the class generated fom this PSP source file
+
+        """</span>
+        <span class="PY_COMMENT"># Compute class name by taking the path and substituting</span>
+        <span class="PY_COMMENT"># underscores for all non-alphanumeric characters:</span>
+        <span class="PY_KEYWORD">return</span> os.path.splitdrive(pagename)[1].translate(self._classNameTrans)
+
+    <span class="PY_KEYWORD">def</span> loadClassFromFile(self, transaction, filename, classname):
+        <span class="PY_STRING">"""Create an actual class instance.
+
+        The module containing the class is imported as though it were a
+        module within the context's package (and appropriate subpackages).
+
+        """</span>
+        module = self.importAsPackage(transaction, filename)
+        <span class="PY_KEYWORD">assert</span> classname <span class="PY_KEYWORD">in</span> module.__dict__, (
+            <span class="PY_STRING">'Cannot find expected class named %r in %r.'</span>
+            % (classname, filename))
+        theClass = getattr(module, classname)
+        <span class="PY_KEYWORD">return</span> theClass
+
+    <span class="PY_KEYWORD">def</span> loadClass(self, transaction, path):
+        classname = self.computeClassName(path)
+        classfile = os.path.join(self._cacheDir, classname + <span class="PY_STRING">".py"</span>)
+        mtime = os.path.getmtime(path)
+        <span class="PY_KEYWORD">if</span> (<span class="PY_KEYWORD">not</span> os.path.exists(classfile)
+                <span class="PY_KEYWORD">or</span> os.path.getmtime(classfile) != mtime):
+            context = Context.PSPCLContext(path)
+            context.setClassName(classname)
+            context.setPythonFileName(classfile)
+            context.setPythonFileEncoding(self._fileEncoding)
+            clc = PSPCompiler.Compiler(context)
+            sourcefiles = clc.compile()
+            <span class="PY_COMMENT"># Set the modification time of the compiled file</span>
+            <span class="PY_COMMENT"># to be the same as the source file;</span>
+            <span class="PY_COMMENT"># that's how we'll know if it needs to be recompiled:</span>
+            os.utime(classfile, (os.path.getatime(classfile), mtime))
+            <span class="PY_COMMENT"># Record all included files so we can spot any changes:</span>
+            <span class="PY_KEYWORD">for</span> sourcefile <span class="PY_KEYWORD">in</span> sourcefiles:
+                self._recordFile(sourcefile)
+        theClass = self.loadClassFromFile(transaction, classfile, classname)
+        <span class="PY_KEYWORD">return</span> theClass
+</pre>
+<!--footer-->
+
+</body>
+</html>

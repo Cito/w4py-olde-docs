@@ -1,0 +1,939 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebUtils.HTMLTag</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebUtils.html"><font color="#ffffff">WebUtils</font></a>.HTMLTag</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebUtils/HTMLTag.py">/var/www/docs/Webware-1.1.1/WebUtils/HTMLTag.py</a></font></td></tr></table>
+    <p><tt><a href="#HTMLTag">HTMLTag</a>.py<br>
+&nbsp;<br>
+<a href="#HTMLTag">HTMLTag</a>&nbsp;defines&nbsp;a&nbsp;class&nbsp;of&nbsp;the&nbsp;same&nbsp;name&nbsp;that&nbsp;represents&nbsp;HTML&nbsp;content.<br>
+An&nbsp;additional&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;class&nbsp;kicks&nbsp;off&nbsp;the&nbsp;process&nbsp;of&nbsp;reading&nbsp;an&nbsp;HTML<br>
+file&nbsp;into&nbsp;a&nbsp;set&nbsp;of&nbsp;tags:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;WebUtils.<a href="#HTMLTag">HTMLTag</a>&nbsp;import&nbsp;<a href="#HTMLReader">HTMLReader</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;reader&nbsp;=&nbsp;<a href="#HTMLReader">HTMLReader</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag&nbsp;=&nbsp;reader.readFileNamed('foo.html')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag.pprint()<br>
+&nbsp;<br>
+Tags&nbsp;have&nbsp;attributes&nbsp;and&nbsp;children,&nbsp;which&nbsp;makes&nbsp;them&nbsp;hierarchical.<br>
+See&nbsp;<a href="#HTMLTag">HTMLTag</a>&nbsp;class&nbsp;docs&nbsp;for&nbsp;more&nbsp;info.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;you&nbsp;imported&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;instead&nbsp;of&nbsp;<a href="#HTMLTag">HTMLTag</a>.<br>
+You&nbsp;only&nbsp;need&nbsp;the&nbsp;latter&nbsp;if&nbsp;you&nbsp;plan&nbsp;on&nbsp;creating&nbsp;tags&nbsp;directly.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;discard&nbsp;the&nbsp;reader&nbsp;immediately&nbsp;if&nbsp;you&nbsp;like:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag&nbsp;=&nbsp;<a href="#HTMLReader">HTMLReader</a>().readFileNamed('foo.html')<br>
+&nbsp;<br>
+The&nbsp;point&nbsp;of&nbsp;reading&nbsp;HTML&nbsp;into&nbsp;tag&nbsp;objects&nbsp;is&nbsp;so&nbsp;that&nbsp;you&nbsp;have&nbsp;a&nbsp;concrete,<br>
+Pythonic&nbsp;data&nbsp;structure&nbsp;to&nbsp;work&nbsp;with.&nbsp;The&nbsp;original&nbsp;motiviation&nbsp;for&nbsp;such&nbsp;a<br>
+beast&nbsp;was&nbsp;in&nbsp;building&nbsp;automated&nbsp;regression&nbsp;test&nbsp;suites&nbsp;that&nbsp;wanted&nbsp;granular,<br>
+structured&nbsp;access&nbsp;to&nbsp;the&nbsp;HTML&nbsp;output&nbsp;by&nbsp;the&nbsp;web&nbsp;application.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;doc&nbsp;string&nbsp;for&nbsp;<a href="#HTMLTag">HTMLTag</a>&nbsp;for&nbsp;examples&nbsp;of&nbsp;what&nbsp;you&nbsp;can&nbsp;do&nbsp;with&nbsp;tags.<br>
+&nbsp;<br>
+&nbsp;<br>
+CAVEATS<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;needs&nbsp;special&nbsp;attention&nbsp;with&nbsp;regards&nbsp;to&nbsp;tags&nbsp;like&nbsp;&lt;p&gt;&nbsp;and&nbsp;&lt;li&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;sometimes&nbsp;are&nbsp;closed&nbsp;(&lt;/p&gt;&nbsp;&lt;/li&gt;)&nbsp;and&nbsp;sometimes&nbsp;not.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;its&nbsp;doc&nbsp;string&nbsp;for&nbsp;full&nbsp;information.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;is&nbsp;picky&nbsp;about&nbsp;the&nbsp;correctness&nbsp;of&nbsp;the&nbsp;HTML&nbsp;you&nbsp;feed&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Again&nbsp;see&nbsp;the&nbsp;class&nbsp;docs&nbsp;for&nbsp;full&nbsp;info.<br>
+&nbsp;<br>
+&nbsp;<br>
+TO&nbsp;DO<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;See&nbsp;the&nbsp;TO&nbsp;DO&nbsp;sections&nbsp;for&nbsp;each&nbsp;class.<br>
+&nbsp;<br>
+&nbsp;<br>
+CREDITS<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;I&nbsp;didn't&nbsp;grok&nbsp;how&nbsp;to&nbsp;write&nbsp;an&nbsp;<a href="sgmllib.html#SGMLParser">SGMLParser</a>&nbsp;subclass&nbsp;until&nbsp;I&nbsp;read&nbsp;the&nbsp;very<br>
+&nbsp;&nbsp;&nbsp;&nbsp;small&nbsp;example&nbsp;by&nbsp;Sean&nbsp;McGrath&nbsp;at&nbsp;<a href="http://www.digitome.com/html2pyx.py">http://www.digitome.com/html2pyx.py</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(which&nbsp;I&nbsp;believe&nbsp;is&nbsp;broken&nbsp;for&nbsp;empty&nbsp;tags).<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Determined&nbsp;what&nbsp;HTML&nbsp;tags&nbsp;are&nbsp;empty&nbsp;by&nbsp;scanning&nbsp;O'Reilly's&nbsp;HTML&nbsp;Pocket<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Reference.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLTag">HTMLTag</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#TagCanOnlyHaveConfig">TagCanOnlyHaveConfig</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#TagCannotHaveConfig">TagCannotHaveConfig</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLNotAllowedError">HTMLNotAllowedError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLTagAttrLookupError">HTMLTagAttrLookupError</a>(<a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>, <a href="exceptions.html#LookupError">exceptions.LookupError</a>)
+</font></dt><dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLTagIncompleteError">HTMLTagIncompleteError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLTagProcessingInstructionError">HTMLTagProcessingInstructionError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLTagUnbalancedError">HTMLTagUnbalancedError</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="sgmllib.html#SGMLParser">sgmllib.SGMLParser</a>(<a href="markupbase.html#ParserBase">markupbase.ParserBase</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebUtils.HTMLTag.html#HTMLReader">HTMLReader</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLNotAllowedError">class <strong>HTMLNotAllowedError</strong></a>(<a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTML&nbsp;tag&nbsp;not&nbsp;allowed&nbsp;here&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLNotAllowedError">HTMLNotAllowedError</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><a name="HTMLNotAllowedError-__init__"><strong>__init__</strong></a>(self, msg, **values)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTMLNotAllowedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTMLNotAllowedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLNotAllowedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLNotAllowedError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLReader">class <strong>HTMLReader</strong></a>(<a href="sgmllib.html#SGMLParser">sgmllib.SGMLParser</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Reader&nbsp;class&nbsp;for&nbsp;representing&nbsp;HTML&nbsp;as&nbsp;tag&nbsp;objects.<br>
+&nbsp;<br>
+NOTES<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Special&nbsp;attention&nbsp;is&nbsp;required&nbsp;regarding&nbsp;tags&nbsp;like&nbsp;&lt;p&gt;&nbsp;and&nbsp;&lt;li&gt;&nbsp;which<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sometimes&nbsp;are&nbsp;closed&nbsp;and&nbsp;sometimes&nbsp;not.&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;can&nbsp;deal&nbsp;with&nbsp;both<br>
+&nbsp;&nbsp;&nbsp;&nbsp;situations&nbsp;(closed&nbsp;and&nbsp;not)&nbsp;provided&nbsp;that:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;the&nbsp;file&nbsp;doesn't&nbsp;change&nbsp;conventions&nbsp;for&nbsp;a&nbsp;given&nbsp;tag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;the&nbsp;reader&nbsp;knows&nbsp;ahead&nbsp;of&nbsp;time&nbsp;what&nbsp;to&nbsp;expect<br>
+&nbsp;<br>
+Be&nbsp;default,&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;assumes&nbsp;that&nbsp;&lt;p&gt;&nbsp;and&nbsp;&lt;li&gt;&nbsp;will&nbsp;be&nbsp;closed&nbsp;with&nbsp;&lt;/p&gt;<br>
+and&nbsp;&lt;/li&gt;&nbsp;as&nbsp;the&nbsp;official&nbsp;HTML&nbsp;spec,&nbsp;as&nbsp;well&nbsp;as&nbsp;upcomer&nbsp;XHTML,&nbsp;encourage<br>
+or&nbsp;require,&nbsp;respectively.<br>
+&nbsp;<br>
+But&nbsp;if&nbsp;your&nbsp;files&nbsp;don't&nbsp;close&nbsp;certain&nbsp;tags&nbsp;that&nbsp;are&nbsp;supposed&nbsp;to&nbsp;be&nbsp;required,<br>
+you&nbsp;can&nbsp;do&nbsp;this:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#HTMLReader">HTMLReader</a>(extraEmptyTags=['p',&nbsp;'li'])<br>
+or:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;reader.<a href="#HTMLReader-extendEmptyTags">extendEmptyTags</a>(['p',&nbsp;'li'])<br>
+or&nbsp;just&nbsp;set&nbsp;them&nbsp;entirely:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#HTMLReader">HTMLReader</a>(emptyTags=['br',&nbsp;'hr',&nbsp;'p'])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;reader.<a href="#HTMLReader-setEmptyTags">setEmptyTags</a>(['br',&nbsp;'hr',&nbsp;'p'])<br>
+&nbsp;<br>
+Although&nbsp;there&nbsp;are&nbsp;quite&nbsp;a&nbsp;few.&nbsp;Consider&nbsp;the&nbsp;DefaultEmptyTags&nbsp;global<br>
+list&nbsp;(which&nbsp;is&nbsp;used&nbsp;to&nbsp;initialize&nbsp;the&nbsp;reader's&nbsp;tags)&nbsp;which&nbsp;contains<br>
+about&nbsp;16&nbsp;tag&nbsp;names.<br>
+&nbsp;<br>
+If&nbsp;an&nbsp;HTML&nbsp;file&nbsp;doesn't&nbsp;conform&nbsp;to&nbsp;the&nbsp;reader's&nbsp;expectation,&nbsp;you&nbsp;will&nbsp;get<br>
+an&nbsp;exception&nbsp;(see&nbsp;more&nbsp;below&nbsp;for&nbsp;details).<br>
+&nbsp;<br>
+If&nbsp;your&nbsp;HTML&nbsp;file&nbsp;doesn't&nbsp;contain&nbsp;root&nbsp;&lt;html&gt;&nbsp;...&nbsp;&lt;/html&gt;&nbsp;tags&nbsp;wrapping<br>
+everything,&nbsp;a&nbsp;fake&nbsp;root&nbsp;tag&nbsp;will&nbsp;be&nbsp;constructed&nbsp;for&nbsp;you,&nbsp;unless&nbsp;you&nbsp;pass<br>
+in&nbsp;fakeRootTagIfNeeded=False.<br>
+&nbsp;<br>
+Besides&nbsp;fixing&nbsp;your&nbsp;reader&nbsp;manually,&nbsp;you&nbsp;could&nbsp;conceivably&nbsp;loop&nbsp;through<br>
+the&nbsp;permutations&nbsp;of&nbsp;the&nbsp;various&nbsp;empty&nbsp;tags&nbsp;to&nbsp;see&nbsp;if&nbsp;one&nbsp;of&nbsp;them&nbsp;resulted<br>
+in&nbsp;a&nbsp;correct&nbsp;read.<br>
+&nbsp;<br>
+Or&nbsp;you&nbsp;could&nbsp;fix&nbsp;the&nbsp;HTML.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;The&nbsp;reader&nbsp;ignores&nbsp;extra&nbsp;preceding&nbsp;and&nbsp;trailing&nbsp;whitespace&nbsp;by&nbsp;stripping<br>
+&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;from&nbsp;strings.&nbsp;I&nbsp;suppose&nbsp;this&nbsp;is&nbsp;a&nbsp;little&nbsp;harsher&nbsp;than&nbsp;reducing&nbsp;spans<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;preceding&nbsp;and&nbsp;trailing&nbsp;whitespace&nbsp;down&nbsp;to&nbsp;one&nbsp;space,&nbsp;which&nbsp;is&nbsp;what<br>
+&nbsp;&nbsp;&nbsp;&nbsp;really&nbsp;happens&nbsp;in&nbsp;an&nbsp;HTML&nbsp;browser.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;The&nbsp;reader&nbsp;will&nbsp;not&nbsp;read&nbsp;past&nbsp;the&nbsp;closing&nbsp;&lt;/html&gt;&nbsp;tag.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;The&nbsp;reader&nbsp;is&nbsp;picky&nbsp;about&nbsp;the&nbsp;correctness&nbsp;of&nbsp;the&nbsp;HTML&nbsp;you&nbsp;feed&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;tags&nbsp;are&nbsp;not&nbsp;closed,&nbsp;overlap&nbsp;(instead&nbsp;of&nbsp;nest)&nbsp;or&nbsp;left&nbsp;unfinished,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;exception&nbsp;is&nbsp;thrown.&nbsp;These&nbsp;include&nbsp;<a href="#HTMLTagUnbalancedError">HTMLTagUnbalancedError</a>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#HTMLTagIncompleteError">HTMLTagIncompleteError</a>&nbsp;and&nbsp;<a href="#HTMLNotAllowedError">HTMLNotAllowedError</a>&nbsp;which&nbsp;all&nbsp;inherit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#HTMLTagError">HTMLTagError</a>.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;pickiness&nbsp;can&nbsp;be&nbsp;quite&nbsp;useful&nbsp;for&nbsp;the&nbsp;validation&nbsp;of&nbsp;the&nbsp;HTML&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;your&nbsp;own&nbsp;applications.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;believe&nbsp;it&nbsp;is&nbsp;possible&nbsp;that&nbsp;others&nbsp;kinds&nbsp;of&nbsp;HTML&nbsp;errors&nbsp;could&nbsp;raise<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exceptions&nbsp;from&nbsp;sgmlib.<a href="sgmllib.html#SGMLParser">SGMLParser</a>&nbsp;(from&nbsp;which&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;inherits),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;although&nbsp;in&nbsp;practice,&nbsp;I&nbsp;have&nbsp;not&nbsp;seen&nbsp;them.<br>
+&nbsp;<br>
+&nbsp;<br>
+TO&nbsp;DO<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Could&nbsp;the&nbsp;"empty"&nbsp;tag&nbsp;issue&nbsp;be&nbsp;dealt&nbsp;with&nbsp;more&nbsp;sophistication<br>
+&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;automatically&nbsp;closing&nbsp;&lt;p&gt;&nbsp;and&nbsp;&lt;li&gt;&nbsp;(e.g.,&nbsp;popping&nbsp;them&nbsp;off<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;_tagStack)&nbsp;when&nbsp;other&nbsp;major&nbsp;tags&nbsp;were&nbsp;encountered&nbsp;such&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;,&nbsp;&lt;li&gt;,&nbsp;&lt;table&gt;,&nbsp;&lt;center&gt;,&nbsp;etc.?<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;Readers&nbsp;don't&nbsp;handle&nbsp;processing&nbsp;instructions:&nbsp;&lt;?&nbsp;foobar&nbsp;?&gt;.<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;The&nbsp;tagContainmentConfig&nbsp;class&nbsp;var&nbsp;can&nbsp;certainly&nbsp;be&nbsp;expanded<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;even&nbsp;better&nbsp;validation.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLReader">HTMLReader</a></dd>
+<dd><a href="sgmllib.html#SGMLParser">sgmllib.SGMLParser</a></dd>
+<dd><a href="markupbase.html#ParserBase">markupbase.ParserBase</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTMLReader-__init__"><strong>__init__</strong></a>(self, emptyTags<font color="#909090">=None</font>, extraEmptyTags<font color="#909090">=None</font>, fakeRootTagIfNeeded<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="HTMLReader-close"><strong>close</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLReader-computeTagContainmentConfig"><strong>computeTagContainmentConfig</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLReader-emptyTags"><strong>emptyTags</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;empty&nbsp;tags.<br>
+&nbsp;<br>
+See&nbsp;also:&nbsp;class&nbsp;docs&nbsp;and&nbsp;<a href="#HTMLReader-setEmptyTags">setEmptyTags</a>().</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-extendEmptyTags"><strong>extendEmptyTags</strong></a>(self, tagList)</dt><dd><tt>Extend&nbsp;the&nbsp;current&nbsp;list&nbsp;of&nbsp;empty&nbsp;tags&nbsp;with&nbsp;the&nbsp;given&nbsp;list.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-filename"><strong>filename</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;filename&nbsp;that&nbsp;was&nbsp;read,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;file&nbsp;was&nbsp;processed.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-finish_endtag"><strong>finish_endtag</strong></a> = <a href="#HTMLReader-unknown_endtag">unknown_endtag</a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTMLReader-finish_starttag"><strong>finish_starttag</strong></a> = <a href="#HTMLReader-unknown_starttag">unknown_starttag</a>(self, name, attrs)</dt></dl>
+
+<dl><dt><a name="HTMLReader-handle_data"><strong>handle_data</strong></a>(self, data)</dt></dl>
+
+<dl><dt><a name="HTMLReader-handle_pi"><strong>handle_pi</strong></a>(self, data)</dt></dl>
+
+<dl><dt><a name="HTMLReader-main"><strong>main</strong></a>(self, args<font color="#909090">=None</font>)</dt><dd><tt>The&nbsp;command&nbsp;line&nbsp;equivalent&nbsp;of&nbsp;<a href="#HTMLReader-readFileNamed">readFileNamed</a>().<br>
+&nbsp;<br>
+Invoked&nbsp;when&nbsp;<a href="#HTMLTag">HTMLTag</a>&nbsp;is&nbsp;run&nbsp;as&nbsp;a&nbsp;program.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-pprint"><strong>pprint</strong></a>(self, out<font color="#909090">=None</font>)</dt><dd><tt>Pretty&nbsp;prints&nbsp;the&nbsp;tag,&nbsp;its&nbsp;attributes&nbsp;and&nbsp;all&nbsp;its&nbsp;children.<br>
+&nbsp;<br>
+Indentation&nbsp;is&nbsp;used&nbsp;for&nbsp;subtags.<br>
+Print&nbsp;'Empty.'&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;root&nbsp;tag.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-printsStack"><strong>printsStack</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLReader-readFileNamed"><strong>readFileNamed</strong></a>(self, filename, retainRootTag<font color="#909090">=True</font>)</dt><dd><tt>Read&nbsp;the&nbsp;given&nbsp;file.<br>
+&nbsp;<br>
+Relies&nbsp;on&nbsp;<a href="#HTMLReader-readString">readString</a>().&nbsp;See&nbsp;that&nbsp;method&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-readString"><strong>readString</strong></a>(self, string, retainRootTag<font color="#909090">=True</font>)</dt><dd><tt>Read&nbsp;the&nbsp;given&nbsp;string,&nbsp;store&nbsp;the&nbsp;results&nbsp;and&nbsp;return&nbsp;the&nbsp;root&nbsp;tag.<br>
+&nbsp;<br>
+You&nbsp;could&nbsp;continue&nbsp;to&nbsp;use&nbsp;<a href="#HTMLReader">HTMLReader</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;disregard&nbsp;it&nbsp;and&nbsp;simply<br>
+use&nbsp;the&nbsp;root&nbsp;tag.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-rootTag"><strong>rootTag</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;root&nbsp;tag.<br>
+&nbsp;<br>
+May&nbsp;return&nbsp;None&nbsp;if&nbsp;no&nbsp;HTML&nbsp;has&nbsp;been&nbsp;read&nbsp;yet,&nbsp;or&nbsp;if&nbsp;the&nbsp;last<br>
+invocation&nbsp;of&nbsp;one&nbsp;of&nbsp;the&nbsp;read&nbsp;methods&nbsp;was&nbsp;passed&nbsp;retainRootTag=False.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-setEmptyTags"><strong>setEmptyTags</strong></a>(self, tagList)</dt><dd><tt>Set&nbsp;the&nbsp;HTML&nbsp;tags&nbsp;that&nbsp;are&nbsp;considered&nbsp;empty&nbsp;such&nbsp;as&nbsp;&lt;br&gt;&nbsp;and&nbsp;&lt;hr&gt;.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;is&nbsp;found&nbsp;in&nbsp;the&nbsp;global,&nbsp;DefaultEmptyTags,&nbsp;and&nbsp;is&nbsp;fairly<br>
+thorough,&nbsp;but&nbsp;does&nbsp;not&nbsp;include&nbsp;&lt;p&gt;,&nbsp;&lt;li&gt;&nbsp;and&nbsp;some&nbsp;other&nbsp;tags&nbsp;that<br>
+HTML&nbsp;authors&nbsp;often&nbsp;use&nbsp;as&nbsp;empty&nbsp;tags.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-setPrintsStack"><strong>setPrintsStack</strong></a>(self, flag)</dt><dd><tt>Set&nbsp;the&nbsp;boolean&nbsp;value&nbsp;of&nbsp;the&nbsp;"prints&nbsp;stack"&nbsp;option.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;debugging&nbsp;option&nbsp;which&nbsp;will&nbsp;print&nbsp;the&nbsp;internal&nbsp;tag&nbsp;stack<br>
+during&nbsp;HTML&nbsp;processing.&nbsp;The&nbsp;default&nbsp;value&nbsp;is&nbsp;False.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-unknown_endtag"><strong>unknown_endtag</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTMLReader-unknown_starttag"><strong>unknown_starttag</strong></a>(self, name, attrs)</dt></dl>
+
+<dl><dt><a name="HTMLReader-usage"><strong>usage</strong></a>(self)</dt></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>tagContainmentConfig</strong> = {'body': 'cannotHave  html head body', 'head': 'cannotHave  html head body', 'html': 'canOnlyHave head body', 'select': 'canOnlyHave option', 'table': 'canOnlyHave tr thead tbody tfoot a', 'td': 'cannotHave  td tr', 'tr': 'canOnlyHave th td'}</dl>
+
+<hr>
+Methods inherited from <a href="sgmllib.html#SGMLParser">sgmllib.SGMLParser</a>:<br>
+<dl><dt><a name="HTMLReader-convert_charref"><strong>convert_charref</strong></a>(self, name)</dt><dd><tt>Convert&nbsp;character&nbsp;reference,&nbsp;may&nbsp;be&nbsp;overridden.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-convert_codepoint"><strong>convert_codepoint</strong></a>(self, codepoint)</dt></dl>
+
+<dl><dt><a name="HTMLReader-convert_entityref"><strong>convert_entityref</strong></a>(self, name)</dt><dd><tt>Convert&nbsp;entity&nbsp;references.<br>
+&nbsp;<br>
+As&nbsp;an&nbsp;alternative&nbsp;to&nbsp;overriding&nbsp;this&nbsp;method;&nbsp;one&nbsp;can&nbsp;tailor&nbsp;the<br>
+results&nbsp;by&nbsp;setting&nbsp;up&nbsp;the&nbsp;self.<strong>entitydefs</strong>&nbsp;mapping&nbsp;appropriately.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-error"><strong>error</strong></a>(self, message)</dt></dl>
+
+<dl><dt><a name="HTMLReader-feed"><strong>feed</strong></a>(self, data)</dt><dd><tt>Feed&nbsp;some&nbsp;data&nbsp;to&nbsp;the&nbsp;parser.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Call&nbsp;this&nbsp;as&nbsp;often&nbsp;as&nbsp;you&nbsp;want,&nbsp;with&nbsp;as&nbsp;little&nbsp;or&nbsp;as&nbsp;much&nbsp;text<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;as&nbsp;you&nbsp;want&nbsp;(may&nbsp;include&nbsp;'<br>
+').&nbsp;&nbsp;(This&nbsp;just&nbsp;saves&nbsp;the&nbsp;text,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;the&nbsp;processing&nbsp;is&nbsp;done&nbsp;by&nbsp;<a href="#HTMLReader-goahead">goahead</a>().)</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-finish_shorttag"><strong>finish_shorttag</strong></a>(self, tag, data)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;finish&nbsp;parsing&nbsp;of&nbsp;&lt;tag/data/&nbsp;(same&nbsp;as&nbsp;&lt;tag&gt;data&lt;/tag&gt;)</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-get_starttag_text"><strong>get_starttag_text</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLReader-goahead"><strong>goahead</strong></a>(self, end)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;handle&nbsp;data&nbsp;as&nbsp;far&nbsp;as&nbsp;reasonable.&nbsp;&nbsp;May&nbsp;leave&nbsp;state<br>
+#&nbsp;and&nbsp;data&nbsp;to&nbsp;be&nbsp;processed&nbsp;by&nbsp;a&nbsp;subsequent&nbsp;call.&nbsp;&nbsp;If&nbsp;'end'&nbsp;is<br>
+#&nbsp;true,&nbsp;force&nbsp;handling&nbsp;all&nbsp;data&nbsp;as&nbsp;if&nbsp;followed&nbsp;by&nbsp;EOF&nbsp;marker.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-handle_charref"><strong>handle_charref</strong></a>(self, name)</dt><dd><tt>Handle&nbsp;character&nbsp;reference,&nbsp;no&nbsp;need&nbsp;to&nbsp;override.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-handle_comment"><strong>handle_comment</strong></a>(self, data)</dt><dd><tt>#&nbsp;Example&nbsp;--&nbsp;handle&nbsp;comment,&nbsp;could&nbsp;be&nbsp;overridden</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-handle_decl"><strong>handle_decl</strong></a>(self, decl)</dt><dd><tt>#&nbsp;Example&nbsp;--&nbsp;handle&nbsp;declaration,&nbsp;could&nbsp;be&nbsp;overridden</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-handle_endtag"><strong>handle_endtag</strong></a>(self, tag, method)</dt><dd><tt>#&nbsp;Overridable&nbsp;--&nbsp;handle&nbsp;end&nbsp;tag</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-handle_entityref"><strong>handle_entityref</strong></a>(self, name)</dt><dd><tt>Handle&nbsp;entity&nbsp;references,&nbsp;no&nbsp;need&nbsp;to&nbsp;override.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-handle_starttag"><strong>handle_starttag</strong></a>(self, tag, method, attrs)</dt><dd><tt>#&nbsp;Overridable&nbsp;--&nbsp;handle&nbsp;start&nbsp;tag</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-parse_endtag"><strong>parse_endtag</strong></a>(self, i)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;parse&nbsp;endtag</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-parse_pi"><strong>parse_pi</strong></a>(self, i)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;parse&nbsp;processing&nbsp;instr,&nbsp;return&nbsp;length&nbsp;or&nbsp;-1&nbsp;if&nbsp;not&nbsp;terminated</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-parse_starttag"><strong>parse_starttag</strong></a>(self, i)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;handle&nbsp;starttag,&nbsp;return&nbsp;length&nbsp;or&nbsp;-1&nbsp;if&nbsp;not&nbsp;terminated</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-report_unbalanced"><strong>report_unbalanced</strong></a>(self, tag)</dt><dd><tt>#&nbsp;Example&nbsp;--&nbsp;report&nbsp;an&nbsp;unbalanced&nbsp;&lt;/...&gt;&nbsp;tag.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-reset"><strong>reset</strong></a>(self)</dt><dd><tt>Reset&nbsp;this&nbsp;instance.&nbsp;Loses&nbsp;all&nbsp;unprocessed&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-setliteral"><strong>setliteral</strong></a>(self, *args)</dt><dd><tt>Enter&nbsp;literal&nbsp;mode&nbsp;(CDATA).<br>
+&nbsp;<br>
+Intended&nbsp;for&nbsp;derived&nbsp;classes&nbsp;only.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-setnomoretags"><strong>setnomoretags</strong></a>(self)</dt><dd><tt>Enter&nbsp;literal&nbsp;mode&nbsp;(CDATA)&nbsp;till&nbsp;EOF.<br>
+&nbsp;<br>
+Intended&nbsp;for&nbsp;derived&nbsp;classes&nbsp;only.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-unknown_charref"><strong>unknown_charref</strong></a>(self, ref)</dt></dl>
+
+<dl><dt><a name="HTMLReader-unknown_entityref"><strong>unknown_entityref</strong></a>(self, ref)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="sgmllib.html#SGMLParser">sgmllib.SGMLParser</a>:<br>
+<dl><dt><strong>entity_or_charref</strong> = &lt;_sre.SRE_Pattern object&gt;</dl>
+
+<dl><dt><strong>entitydefs</strong> = {'amp': '&amp;', 'apos': "'", 'gt': '&gt;', 'lt': '&lt;', 'quot': '"'}</dl>
+
+<hr>
+Methods inherited from <a href="markupbase.html#ParserBase">markupbase.ParserBase</a>:<br>
+<dl><dt><a name="HTMLReader-getpos"><strong>getpos</strong></a>(self)</dt><dd><tt>Return&nbsp;current&nbsp;line&nbsp;number&nbsp;and&nbsp;offset.</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-parse_comment"><strong>parse_comment</strong></a>(self, i, report<font color="#909090">=1</font>)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;parse&nbsp;comment,&nbsp;return&nbsp;length&nbsp;or&nbsp;-1&nbsp;if&nbsp;not&nbsp;terminated</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-parse_declaration"><strong>parse_declaration</strong></a>(self, i)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;parse&nbsp;declaration&nbsp;(for&nbsp;use&nbsp;by&nbsp;subclasses).</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-parse_marked_section"><strong>parse_marked_section</strong></a>(self, i, report<font color="#909090">=1</font>)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;parse&nbsp;a&nbsp;marked&nbsp;section<br>
+#&nbsp;Override&nbsp;this&nbsp;to&nbsp;handle&nbsp;MS-word&nbsp;extension&nbsp;syntax&nbsp;&lt;![if&nbsp;word]&gt;content&lt;![endif]&gt;</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-unknown_decl"><strong>unknown_decl</strong></a>(self, data)</dt><dd><tt>#&nbsp;To&nbsp;be&nbsp;overridden&nbsp;--&nbsp;handlers&nbsp;for&nbsp;unknown&nbsp;objects</tt></dd></dl>
+
+<dl><dt><a name="HTMLReader-updatepos"><strong>updatepos</strong></a>(self, i, j)</dt><dd><tt>#&nbsp;Internal&nbsp;--&nbsp;update&nbsp;line&nbsp;number&nbsp;and&nbsp;offset.&nbsp;&nbsp;This&nbsp;should&nbsp;be<br>
+#&nbsp;called&nbsp;for&nbsp;each&nbsp;piece&nbsp;of&nbsp;data&nbsp;exactly&nbsp;once,&nbsp;in&nbsp;order&nbsp;--&nbsp;in&nbsp;other<br>
+#&nbsp;words&nbsp;the&nbsp;concatenation&nbsp;of&nbsp;all&nbsp;the&nbsp;input&nbsp;strings&nbsp;to&nbsp;this<br>
+#&nbsp;function&nbsp;should&nbsp;be&nbsp;exactly&nbsp;the&nbsp;entire&nbsp;input.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLTag">class <strong>HTMLTag</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Container&nbsp;class&nbsp;for&nbsp;representing&nbsp;HTML&nbsp;as&nbsp;tag&nbsp;objects.<br>
+&nbsp;<br>
+Tags&nbsp;essentially&nbsp;have&nbsp;4&nbsp;major&nbsp;attributes:<br>
+&nbsp;&nbsp;*&nbsp;name<br>
+&nbsp;&nbsp;*&nbsp;attributes<br>
+&nbsp;&nbsp;*&nbsp;children<br>
+&nbsp;&nbsp;*&nbsp;subtags<br>
+&nbsp;<br>
+Name&nbsp;is&nbsp;simple:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-name">name</a>()<br>
+&nbsp;<br>
+Attributes&nbsp;are&nbsp;dictionary-like&nbsp;in&nbsp;nature:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-attr">attr</a>('color')&nbsp;#&nbsp;throws&nbsp;an&nbsp;exception&nbsp;if&nbsp;no&nbsp;color<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-attr">attr</a>('bgcolor',&nbsp;None)&nbsp;#&nbsp;returns&nbsp;None&nbsp;if&nbsp;no&nbsp;bgcolor<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-attrs">attrs</a>()<br>
+&nbsp;<br>
+Children&nbsp;are&nbsp;all&nbsp;the&nbsp;leaf&nbsp;parts&nbsp;of&nbsp;a&nbsp;tag,&nbsp;consisting&nbsp;of&nbsp;other&nbsp;tags<br>
+and&nbsp;strings&nbsp;of&nbsp;character&nbsp;data.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-numChildren">numChildren</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-childAt">childAt</a>(0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-children">children</a>()<br>
+&nbsp;<br>
+Subtags&nbsp;is&nbsp;a&nbsp;convenient&nbsp;list&nbsp;of&nbsp;only&nbsp;the&nbsp;tags&nbsp;in&nbsp;the&nbsp;children:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-numSubtags">numSubtags</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-subtagAt">subtagAt</a>(0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-subtags">subtags</a>()<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;search&nbsp;a&nbsp;tag&nbsp;and&nbsp;all&nbsp;the&nbsp;tags&nbsp;it&nbsp;contains&nbsp;for&nbsp;a&nbsp;tag&nbsp;with<br>
+a&nbsp;particular&nbsp;attribute&nbsp;matching&nbsp;a&nbsp;particular&nbsp;value:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-tagWithMatchingAttr">tagWithMatchingAttr</a>('width',&nbsp;'100%')<br>
+&nbsp;<br>
+An&nbsp;<a href="#HTMLTagAttrLookupError">HTMLTagAttrLookupError</a>&nbsp;is&nbsp;raised&nbsp;if&nbsp;no&nbsp;matching&nbsp;tag&nbsp;is&nbsp;found.<br>
+You&nbsp;can&nbsp;avoid&nbsp;this&nbsp;by&nbsp;providing&nbsp;a&nbsp;default&nbsp;value:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;tag.<a href="#HTMLTag-tagWithMatchingAttr">tagWithMatchingAttr</a>('width',&nbsp;'100%',&nbsp;None)<br>
+&nbsp;<br>
+Looking&nbsp;for&nbsp;specific&nbsp;'id'&nbsp;attributes&nbsp;is&nbsp;common&nbsp;in&nbsp;regression&nbsp;testing<br>
+(it&nbsp;allows&nbsp;you&nbsp;to&nbsp;zero&nbsp;in&nbsp;on&nbsp;logical&nbsp;portions&nbsp;of&nbsp;a&nbsp;page),<br>
+so&nbsp;a&nbsp;convenience&nbsp;method&nbsp;is&nbsp;provided:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag&nbsp;=&nbsp;htmlTag.<a href="#HTMLTag-tagWithId">tagWithId</a>('accountTable')<br>
+&nbsp;<br>
+&nbsp;<br>
+TO&nbsp;DO<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;A&nbsp;walker()&nbsp;method&nbsp;for&nbsp;traversing&nbsp;the&nbsp;tag&nbsp;tree.<br>
+&nbsp;&nbsp;*&nbsp;Search&nbsp;for&nbsp;a&nbsp;subtag&nbsp;with&nbsp;a&nbsp;given&nbsp;name,&nbsp;recursive&nbsp;or&nbsp;not.<br>
+&nbsp;&nbsp;*&nbsp;Attribute&nbsp;traversal&nbsp;with&nbsp;dotted&nbsp;notation?<br>
+&nbsp;&nbsp;*&nbsp;Do&nbsp;we&nbsp;need&nbsp;to&nbsp;convert&nbsp;tag&nbsp;names&nbsp;and&nbsp;attribute&nbsp;names&nbsp;to&nbsp;lower&nbsp;case,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;does&nbsp;<a href="sgmllib.html#SGMLParser">SGMLParser</a>&nbsp;already&nbsp;do&nbsp;that?<br>
+&nbsp;&nbsp;*&nbsp;Should&nbsp;attribute&nbsp;values&nbsp;be&nbsp;strip()ed?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;not.&nbsp;<a href="sgmllib.html#SGMLParser">SGMLParser</a>&nbsp;probably&nbsp;strips&nbsp;them&nbsp;already&nbsp;unless&nbsp;they<br>
+&nbsp;&nbsp;&nbsp;&nbsp;really&nbsp;do&nbsp;have&nbsp;spaces&nbsp;as&nbsp;in&nbsp;"&nbsp;&nbsp;quoted&nbsp;&nbsp;".&nbsp;But&nbsp;that's&nbsp;speculation.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="HTMLTag-__init__"><strong>__init__</strong></a>(self, name, lineNumber<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="HTMLTag-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-addChild"><strong>addChild</strong></a>(self, child)</dt><dd><tt>Add&nbsp;a&nbsp;child&nbsp;to&nbsp;the&nbsp;receiver.<br>
+&nbsp;<br>
+The&nbsp;child&nbsp;will&nbsp;be&nbsp;another&nbsp;tag&nbsp;or&nbsp;a&nbsp;string&nbsp;(CDATA).</tt></dd></dl>
+
+<dl><dt><a name="HTMLTag-attr"><strong>attr</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="HTMLTag-attrs"><strong>attrs</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-childAt"><strong>childAt</strong></a>(self, index)</dt></dl>
+
+<dl><dt><a name="HTMLTag-children"><strong>children</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-closedBy"><strong>closedBy</strong></a>(self, name, lineNumber)</dt></dl>
+
+<dl><dt><a name="HTMLTag-hasAttr"><strong>hasAttr</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="HTMLTag-name"><strong>name</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-numAttrs"><strong>numAttrs</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-numChildren"><strong>numChildren</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-numSubtags"><strong>numSubtags</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-pprint"><strong>pprint</strong></a>(self, out<font color="#909090">=None</font>, indent<font color="#909090">=0</font>)</dt></dl>
+
+<dl><dt><a name="HTMLTag-readAttr"><strong>readAttr</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;an&nbsp;attribute&nbsp;of&nbsp;the&nbsp;tag&nbsp;with&nbsp;the&nbsp;given&nbsp;name&nbsp;and&nbsp;value.<br>
+&nbsp;<br>
+An&nbsp;assertion&nbsp;fails&nbsp;if&nbsp;an&nbsp;attribute&nbsp;is&nbsp;set&nbsp;twice.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTag-subtagAt"><strong>subtagAt</strong></a>(self, index)</dt></dl>
+
+<dl><dt><a name="HTMLTag-subtags"><strong>subtags</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLTag-tagWithId"><strong>tagWithId</strong></a>(self, id, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Search&nbsp;for&nbsp;tag&nbsp;with&nbsp;a&nbsp;given&nbsp;id.<br>
+&nbsp;<br>
+Finds&nbsp;and&nbsp;returns&nbsp;the&nbsp;tag&nbsp;with&nbsp;the&nbsp;given&nbsp;id.&nbsp;As&nbsp;in:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&nbsp;id=foo&gt;&nbsp;bar&nbsp;&lt;/td&gt;<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;just&nbsp;a&nbsp;cover&nbsp;for:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#HTMLTag-tagWithMatchingAttr">tagWithMatchingAttr</a>('id',&nbsp;id,&nbsp;default)<br>
+&nbsp;<br>
+But&nbsp;searching&nbsp;for&nbsp;id's&nbsp;is&nbsp;so&nbsp;popular&nbsp;(at&nbsp;least&nbsp;in&nbsp;regression&nbsp;testing<br>
+web&nbsp;sites)&nbsp;that&nbsp;this&nbsp;convenience&nbsp;method&nbsp;is&nbsp;provided.<br>
+Why&nbsp;is&nbsp;it&nbsp;so&nbsp;popular?&nbsp;Because&nbsp;by&nbsp;attaching&nbsp;ids&nbsp;to&nbsp;logical&nbsp;portions<br>
+of&nbsp;your&nbsp;HTML,&nbsp;your&nbsp;regression&nbsp;test&nbsp;suite&nbsp;can&nbsp;quickly&nbsp;zero&nbsp;in&nbsp;on&nbsp;them<br>
+for&nbsp;examination.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTag-tagWithMatchingAttr"><strong>tagWithMatchingAttr</strong></a>(self, name, value, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Search&nbsp;for&nbsp;tag&nbsp;with&nbsp;matching&nbsp;attributes.<br>
+&nbsp;<br>
+Performs&nbsp;a&nbsp;depth-first&nbsp;search&nbsp;for&nbsp;a&nbsp;tag&nbsp;with&nbsp;an&nbsp;attribute&nbsp;that&nbsp;matches<br>
+the&nbsp;given&nbsp;value.&nbsp;If&nbsp;the&nbsp;tag&nbsp;cannot&nbsp;be&nbsp;found,&nbsp;a&nbsp;KeyError&nbsp;will&nbsp;be&nbsp;raised<br>
+*unless*&nbsp;a&nbsp;default&nbsp;value&nbsp;was&nbsp;specified,&nbsp;which&nbsp;is&nbsp;then&nbsp;returned.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag&nbsp;=&nbsp;tag.<a href="#HTMLTag-tagWithMatchingAttr">tagWithMatchingAttr</a>('bgcolor',&nbsp;'#FFFF',&nbsp;None)</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLTagAttrLookupError">class <strong>HTMLTagAttrLookupError</strong></a>(<a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>, <a href="exceptions.html#LookupError">exceptions.LookupError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTML&nbsp;tag&nbsp;attribute&nbsp;lookup&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagAttrLookupError">HTMLTagAttrLookupError</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a></dd>
+<dd><a href="exceptions.html#LookupError">exceptions.LookupError</a></dd>
+<dd><a href="exceptions.html#StandardError">exceptions.StandardError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><a name="HTMLTagAttrLookupError-__init__"><strong>__init__</strong></a>(self, msg, **values)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#LookupError">exceptions.LookupError</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTMLTagAttrLookupError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTMLTagAttrLookupError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagAttrLookupError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagAttrLookupError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLTagError">class <strong>HTMLTagError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>General&nbsp;HTML&nbsp;tag&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTMLTagError-__init__"><strong>__init__</strong></a>(self, msg, **values)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTMLTagError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTMLTagError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLTagIncompleteError">class <strong>HTMLTagIncompleteError</strong></a>(<a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTML&nbsp;tag&nbsp;incomplete&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagIncompleteError">HTMLTagIncompleteError</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><a name="HTMLTagIncompleteError-__init__"><strong>__init__</strong></a>(self, msg, **values)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTMLTagIncompleteError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTMLTagIncompleteError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagIncompleteError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagIncompleteError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLTagProcessingInstructionError">class <strong>HTMLTagProcessingInstructionError</strong></a>(<a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>HTML&nbsp;tag&nbsp;processing&nbsp;instruction&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagProcessingInstructionError">HTMLTagProcessingInstructionError</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><a name="HTMLTagProcessingInstructionError-__init__"><strong>__init__</strong></a>(self, msg, **values)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTMLTagProcessingInstructionError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTMLTagProcessingInstructionError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagProcessingInstructionError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagProcessingInstructionError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLTagUnbalancedError">class <strong>HTMLTagUnbalancedError</strong></a>(<a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Unbalanced&nbsp;HTML&nbsp;tag&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagUnbalancedError">HTMLTagUnbalancedError</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><a name="HTMLTagUnbalancedError-__init__"><strong>__init__</strong></a>(self, msg, **values)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#HTMLTagError">HTMLTagError</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTMLTagUnbalancedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTMLTagUnbalancedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTMLTagUnbalancedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTMLTagUnbalancedError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TagCanOnlyHaveConfig">class <strong>TagCanOnlyHaveConfig</strong></a>(<a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#TagCanOnlyHaveConfig">TagCanOnlyHaveConfig</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="TagCanOnlyHaveConfig-encounteredTag"><strong>encounteredTag</strong></a>(self, tag, lineNum)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>:<br>
+<dl><dt><a name="TagCanOnlyHaveConfig-__init__"><strong>__init__</strong></a>(self, name, tags)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TagCannotHaveConfig">class <strong>TagCannotHaveConfig</strong></a>(<a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebUtils.HTMLTag.html#TagCannotHaveConfig">TagCannotHaveConfig</a></dd>
+<dd><a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="TagCannotHaveConfig-encounteredTag"><strong>encounteredTag</strong></a>(self, tag, lineNum)</dt></dl>
+
+<hr>
+Methods inherited from <a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>:<br>
+<dl><dt><a name="TagCannotHaveConfig-__init__"><strong>__init__</strong></a>(self, name, tags)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="WebUtils.HTMLTag.html#TagConfig">TagConfig</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TagConfig">class <strong>TagConfig</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="TagConfig-__init__"><strong>__init__</strong></a>(self, name, tags)</dt></dl>
+
+<dl><dt><a name="TagConfig-encounteredTag"><strong>encounteredTag</strong></a>(self, tag, lineNum)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>DefaultEmptyTags</strong> = ['area', 'basefont', 'base', 'bgsound', 'br', 'col', 'colgroup', 'frame', 'hr', 'img', 'input', 'isindex', 'link', 'meta', 'spacer', 'wbr']<br>
+<strong>configClassForName</strong> = {'canOnlyHave': &lt;class 'WebUtils.HTMLTag.TagCanOnlyHaveConfig'&gt;, 'cannotHave': &lt;class 'WebUtils.HTMLTag.TagCannotHaveConfig'&gt;}<br>
+<strong>runFast</strong> = True</td></tr></table>
+</body></html>

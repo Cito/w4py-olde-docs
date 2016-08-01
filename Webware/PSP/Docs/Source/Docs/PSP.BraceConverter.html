@@ -1,0 +1,102 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.BraceConverter</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.BraceConverter</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/BraceConverter.py">/var/www/docs/Webware-1.1.1/PSP/BraceConverter.py</a></font></td></tr></table>
+    <p><tt><a href="#BraceConverter">BraceConverter</a>.py<br>
+&nbsp;<br>
+Contributed&nbsp;2000-09-04&nbsp;by&nbsp;Dave&nbsp;Wallace&nbsp;(dwallace@delanet.com)<br>
+&nbsp;<br>
+Converts&nbsp;Brace-blocked&nbsp;Python&nbsp;into&nbsp;normal&nbsp;indented&nbsp;Python.<br>
+Brace-blocked&nbsp;Python&nbsp;is&nbsp;non-indentation&nbsp;aware&nbsp;and&nbsp;blocks&nbsp;are<br>
+delimited&nbsp;by&nbsp;':{'&nbsp;and&nbsp;'}'&nbsp;pairs.<br>
+&nbsp;<br>
+Thus:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;x&nbsp;in&nbsp;range(10)&nbsp;:{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;x%2&nbsp;:{&nbsp;print&nbsp;x&nbsp;}&nbsp;else&nbsp;:{&nbsp;print&nbsp;z&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Becomes&nbsp;(roughly,&nbsp;barring&nbsp;some&nbsp;spurious&nbsp;newlines):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;x&nbsp;in&nbsp;range(10)&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;x%2&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;z<br>
+&nbsp;<br>
+This&nbsp;implementation&nbsp;is&nbsp;fed&nbsp;a&nbsp;line&nbsp;at&nbsp;a&nbsp;time&nbsp;via&nbsp;parseLine(),<br>
+outputs&nbsp;to&nbsp;a&nbsp;PSPServletWriter,&nbsp;and&nbsp;tracks&nbsp;the&nbsp;current&nbsp;quotation<br>
+and&nbsp;block&nbsp;levels&nbsp;internally.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.BraceConverter.html#BraceConverter">BraceConverter</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BraceConverter">class <strong>BraceConverter</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BraceConverter-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="BraceConverter-closeBrace"><strong>closeBrace</strong></a>(self, writer)</dt><dd><tt>Close&nbsp;brace&nbsp;encountered.</tt></dd></dl>
+
+<dl><dt><a name="BraceConverter-handleQuote"><strong>handleQuote</strong></a>(self, quote, writer)</dt><dd><tt>Check&nbsp;and&nbsp;handle&nbsp;if&nbsp;current&nbsp;pos&nbsp;is&nbsp;a&nbsp;single&nbsp;or&nbsp;triple&nbsp;quote.</tt></dd></dl>
+
+<dl><dt><a name="BraceConverter-openBlock"><strong>openBlock</strong></a>(self, writer)</dt><dd><tt>Open&nbsp;a&nbsp;new&nbsp;block.</tt></dd></dl>
+
+<dl><dt><a name="BraceConverter-openBrace"><strong>openBrace</strong></a>(self, writer)</dt><dd><tt>Open&nbsp;brace&nbsp;encountered.</tt></dd></dl>
+
+<dl><dt><a name="BraceConverter-parseLine"><strong>parseLine</strong></a>(self, line, writer)</dt><dd><tt>Parse&nbsp;a&nbsp;line.<br>
+&nbsp;<br>
+The&nbsp;only&nbsp;public&nbsp;method&nbsp;of&nbsp;this&nbsp;class,&nbsp;call&nbsp;with&nbsp;subsequent&nbsp;lines<br>
+and&nbsp;an&nbsp;instance&nbsp;of&nbsp;PSPServletWriter.</tt></dd></dl>
+
+<dl><dt><a name="BraceConverter-skipquote"><strong>skipquote</strong></a>(self, writer)</dt><dd><tt>Skip&nbsp;to&nbsp;end&nbsp;of&nbsp;quote.<br>
+&nbsp;<br>
+Skip&nbsp;over&nbsp;all&nbsp;chars&nbsp;until&nbsp;the&nbsp;line&nbsp;is&nbsp;exhausted<br>
+or&nbsp;the&nbsp;current&nbsp;non-escaped&nbsp;quote&nbsp;sequence&nbsp;is&nbsp;encountered.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>COLONBRACE</strong> = &lt;_sre.SRE_Pattern object&gt;</dl>
+
+<dl><dt><strong>CSKIP</strong> = &lt;_sre.SRE_Pattern object&gt;</dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

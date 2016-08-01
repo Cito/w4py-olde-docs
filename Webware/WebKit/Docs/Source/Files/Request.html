@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Request.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""An abstract request"""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> asclocaltime
+<span class="PY_KEYWORD">from</span> Message <span class="PY_KEYWORD">import</span> Message
+
+
+<span class="PY_KEYWORD">class</span> Request(Message):
+    <span class="PY_STRING">"""The abstract request class.
+
+    Request is a type of Message that offers the following:
+
+      * A time stamp (indicating when the request was made)
+      * An input stream
+      * Remote request information (address, name)
+      * Local host information (address, name, port)
+      * A security indicator
+
+    Request is an abstract class; developers typically use HTTPRequest.
+
+    FUTURE
+
+      * Consider if the local host information should be moved up to Message.
+      * Locales
+      * Secure requests, authentication, etc.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        <span class="PY_STRING">"""Initialize the request.
+
+        Subclasses are responsible for invoking super
+        and initializing self._time.
+
+        """</span>
+        Message.__init__(self)
+        self._transaction = None
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> time(self):
+        <span class="PY_KEYWORD">return</span> self._time
+
+    <span class="PY_KEYWORD">def</span> timeStamp(self):
+        <span class="PY_STRING">"""Return time() as a human readable string, useful for logging and debugging."""</span>
+        <span class="PY_KEYWORD">return</span> asclocaltime(self.time())
+
+
+    <span class="PY_COMMENT">## Input ##</span>
+
+    <span class="PY_KEYWORD">def</span> input(self):
+        <span class="PY_STRING">"""Return a file-style object that the contents can be read from.
+
+        # @@ 2000-05-03 ce: This is bogus. Disregard for now.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Remote info ##</span>
+
+    <span class="PY_COMMENT"># @@ 2000-05-07 ce: Do remoteAddress() and remoteName()</span>
+    <span class="PY_COMMENT"># have to be implemented here or should it be a subclass responsibility?</span>
+
+    <span class="PY_KEYWORD">def</span> remoteAddress(self):
+        <span class="PY_STRING">"""Get the remote address.
+
+        Returns a string containing the Internet Protocol (IP) address
+        of the client that sent the request.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> remoteName(self):
+        <span class="PY_STRING">"""Get the remote name.
+
+        Returns the fully qualified name of the client that sent the request,
+        or the IP address of the client if the name cannot be determined.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+
+    <span class="PY_COMMENT">## Local info ##</span>
+
+    <span class="PY_KEYWORD">def</span> localAddress(self):
+        <span class="PY_STRING">"""Get local address.
+
+        Returns a string containing the Internet Protocol (IP) address
+        of the local host (e.g., the server) that received the request.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> localName():
+        <span class="PY_STRING">"""Get local name.
+
+        Returns the fully qualified name of the local host (e.g., the server)
+        that received the request.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'localhost'</span>
+
+    <span class="PY_KEYWORD">def</span> localPort(self):
+        <span class="PY_STRING">"""Get local port.
+
+        Returns the port of the local host (e.g., the server)
+        that received the request.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+
+    <span class="PY_COMMENT">## Security ##</span>
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> isSecure():
+        <span class="PY_STRING">"""Check whether this is a secure channel.
+
+        Returns true if request was made using a secure channel,
+        such as HTTPS. This currently always returns false,
+        since secure channels are not yet supported.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> False
+
+
+    <span class="PY_COMMENT">## Transactions ##</span>
+
+    <span class="PY_KEYWORD">def</span> responseClass(self):
+        <span class="PY_STRING">"""Get the corresponding response class."""</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> setTransaction(self, trans):
+        <span class="PY_STRING">"""Set a transaction container."""</span>
+        self._transaction = trans
+
+    <span class="PY_KEYWORD">def</span> transaction(self):
+        <span class="PY_STRING">"""Get the transaction container."""</span>
+        <span class="PY_KEYWORD">return</span> self._transaction
+
+
+    <span class="PY_COMMENT">## Cleanup ##</span>
+
+    <span class="PY_KEYWORD">def</span> clearTransaction(self):
+        <span class="PY_KEYWORD">del</span> self._transaction
+</pre>
+<!--footer-->
+
+</body>
+</html>

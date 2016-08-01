@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.ExceptionHandler</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.ExceptionHandler</h2>
+<p>You can also browse the <a href="../Files/ExceptionHandler.html">complete source file</a>
+or the <a href="../Docs/WebKit.ExceptionHandler.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Singleton</span>(object):</span>
+
+
+<span class="line_class">class <span class="name_class">ExceptionHandler</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, application, transaction, excInfo,</span>
+
+<span class="line_category">    ## Accessors ##</span>
+<span class="line_def">    def <span class="name_def">setting</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">servletPathname</span>(self)</span>
+<span class="line_def">    def <span class="name_def">basicServletName</span>(self)</span>
+
+<span class="line_category">    ## Exception Handling ##</span>
+<span class="line_def">    def <span class="name_def">work</span>(self)</span>
+<span class="line_def">    def <span class="name_def">logExceptionToConsole</span>(self, stderr=None)</span>
+<span class="line_def">    def <span class="name_def">publicErrorPage</span>(self)</span>
+<span class="line_def">    def <span class="name_def">privateErrorPage</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htmlDebugInfo</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeHTML</span>(self)</span>
+
+<span class="line_category">    ## Write Methods ##</span>
+<span class="line_def">    def <span class="name_def">write</span>(self, s)</span>
+<span class="line_def">    def <span class="name_def">writeln</span>(self, s)</span>
+<span class="line_def">    def <span class="name_def">writeTitle</span>(self, s)</span>
+<span class="line_def">    def <span class="name_def">writeDict</span>(self, d, heading=None, encoded=None)</span>
+<span class="line_def">    def <span class="name_def">writeAttrs</span>(self, obj, attrNames)</span>
+
+<span class="line_category">    ## Traceback sections ##</span>
+<span class="line_def">    def <span class="name_def">writeTraceback</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeMiscInfo</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeTransaction</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeEnvironment</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeIds</span>(self)</span>
+<span class="line_def">    def <span class="name_def">writeFancyTraceback</span>(self)</span>
+<span class="line_def">    def <span class="name_def">saveErrorPage</span>(self, html)</span>
+<span class="line_def">    def <span class="name_def">errorPageFilename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">logExceptionToDisk</span>(self, errorMsgFilename=None)</span>
+<span class="line_def">    def <span class="name_def">emailException</span>(self, htmlErrMsg)</span>
+
+<span class="line_category">    ## Filtering ##</span>
+<span class="line_def">    def <span class="name_def">filterDictValue</span>(self, value, key, dict)</span>
+<span class="line_def">    def <span class="name_def">filterValue</span>(self, value, key)</span>
+
+<span class="line_category">    ## Utility ##</span>
+<span class="line_def">    def <span class="name_def">repr</span>(self, value)</span>
+
+
+<span class="line_category">## Misc functions ##</span>
+<span class="line_def">def <span class="name_def">docType</span>()</span>
+<span class="line_def">def <span class="name_def">htStyle</span>()</span>
+<span class="line_def">def <span class="name_def">htTitle</span>(name)</span>
+<span class="line_def">def <span class="name_def">osIdDict</span>()</span>
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,1528 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/ThreadedAppServer.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""Threaded Application Server
+
+The AppServer is the main process of WebKit. It handles requests for
+servlets from webservers.
+
+ThreadedAppServer uses a threaded model for handling multiple requests.
+
+At one time there were other experimental execution models for AppServer,
+but none of these were successful and have been removed.
+The ThreadedAppServer/AppServer distinction is thus largely historical.
+
+ThreadedAppServer takes the following command line arguments:
+
+start: start the AppServer (default argument)
+stop: stop the currently running Apperver
+daemon: run as a daemon
+ClassName.SettingName=value: change configuration settings
+
+When started, the app server records its pid in appserver.pid.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> errno
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> select
+<span class="PY_KEYWORD">import</span> socket
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">import</span> threading
+<span class="PY_KEYWORD">import</span> traceback
+<span class="PY_KEYWORD">import</span> Queue
+
+<span class="PY_KEYWORD">from</span> marshal <span class="PY_KEYWORD">import</span> dumps, loads
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Thread, currentThread
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time, localtime, sleep
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> ctypes <span class="PY_KEYWORD">import</span> pythonapi, c_long, py_object
+<span class="PY_KEYWORD">except</span> ImportError:
+    py_object = c_long = pythonapi = None
+<span class="PY_KEYWORD">try</span>:
+    PyThreadState_SetAsyncExc = pythonapi.PyThreadState_SetAsyncExc
+<span class="PY_KEYWORD">except</span> (TypeError, AttributeError):
+    PyThreadState_SetAsyncExc = None
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">import</span> fcntl
+    F_GETFD, F_SETFD = fcntl.F_SETFD, fcntl.F_SETFD
+<span class="PY_KEYWORD">except</span> (ImportError, AttributeError): <span class="PY_COMMENT"># not Unix</span>
+    fcntl = None
+<span class="PY_KEYWORD">else</span>:
+    <span class="PY_KEYWORD">try</span>:
+        FD_CLOEXEC = fcntl.FD_CLOEXEC
+    <span class="PY_KEYWORD">except</span> AttributeError: <span class="PY_COMMENT"># not always defined</span>
+        FD_CLOEXEC = 1
+
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> asclocaltime
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> requestURI
+
+<span class="PY_KEYWORD">import</span> AppServer <span class="PY_KEYWORD">as</span> AppServerModule
+<span class="PY_KEYWORD">from</span> PidFile <span class="PY_KEYWORD">import</span> ProcessRunning
+<span class="PY_KEYWORD">from</span> AutoReloadingAppServer <span class="PY_KEYWORD">import</span> AutoReloadingAppServer <span class="PY_KEYWORD">as</span> AppServer
+<span class="PY_KEYWORD">from</span> ASStreamOut <span class="PY_KEYWORD">import</span> ASStreamOut, ConnectionAbortedError
+<span class="PY_KEYWORD">from</span> HTTPExceptions <span class="PY_KEYWORD">import</span> HTTPServiceUnavailable
+
+debug = False
+
+defaultConfig = dict(
+    Host = <span class="PY_STRING">'localhost'</span>, <span class="PY_COMMENT"># same as '127.0.0.1'</span>
+    EnableAdapter = True, <span class="PY_COMMENT"># enable WebKit adapter</span>
+    AdapterPort = 8086,
+    EnableMonitor = False, <span class="PY_COMMENT"># disable status monitoring</span>
+    SCGIPort = 8084,
+    EnableSCGI = False, <span class="PY_COMMENT"># disable SCGI adapter</span>
+    MonitorPort = 8085,
+    EnableHTTP = True, <span class="PY_COMMENT"># enable built-in HTTP server</span>
+    HTTPPort = 8080,
+    StartServerThreads = 10, <span class="PY_COMMENT"># initial number of server threads</span>
+    MinServerThreads = 5, <span class="PY_COMMENT"># minimum number</span>
+    MaxServerThreads = 20, <span class="PY_COMMENT"># maxium number</span>
+    UseDaemonThreads = True, <span class="PY_COMMENT"># use daemonic worker threads</span>
+    MaxRequestTime = 300, <span class="PY_COMMENT"># maximum request execution time in seconds</span>
+    RequestQueueSize = 0, <span class="PY_COMMENT"># means twice the maximum number of threads</span>
+    RequestBufferSize = 8*1024, <span class="PY_COMMENT"># 8 kBytes</span>
+    ResponseBufferSize = 8*1024, <span class="PY_COMMENT"># 8 kBytes</span>
+    AddressFiles = <span class="PY_STRING">'%s.address'</span>, <span class="PY_COMMENT"># %s stands for the protocol name</span>
+    <span class="PY_COMMENT"># @@ the following setting is not yet implemented</span>
+    <span class="PY_COMMENT"># SocketType = 'inet', # inet, inet6, unix</span>
+)
+
+<span class="PY_COMMENT"># Need to know this value for communications</span>
+<span class="PY_COMMENT"># (note that this limits the size of the dictionary we receive</span>
+<span class="PY_COMMENT"># from the AppServer to 2,147,483,647 bytes):</span>
+intLength = len(dumps(int(1)))
+
+<span class="PY_COMMENT"># Initialize global variables</span>
+server = None
+exitStatus = 0
+
+
+<span class="PY_KEYWORD">class</span> NotEnoughDataError(Exception):
+    <span class="PY_STRING">"""Not enough data received error"""</span>
+
+<span class="PY_KEYWORD">class</span> ProtocolError(Exception):
+    <span class="PY_STRING">"""Network protocol error"""</span>
+
+<span class="PY_KEYWORD">class</span> ThreadAbortedError(HTTPServiceUnavailable):
+    <span class="PY_STRING">"""Thread aborted error"""</span>
+
+<span class="PY_KEYWORD">class</span> RequestAbortedError(ThreadAbortedError):
+    <span class="PY_STRING">"""Request aborted error"""</span>
+
+<span class="PY_KEYWORD">class</span> RequestTooLongError(RequestAbortedError):
+    <span class="PY_STRING">"""Request lasts too long error"""</span>
+
+<span class="PY_KEYWORD">class</span> ServerShutDownError(ThreadAbortedError):
+    <span class="PY_STRING">"""Server has been shut down error"""</span>
+
+
+<span class="PY_KEYWORD">class</span> WorkerThread(Thread):
+    <span class="PY_STRING">"""Base class for Webware worker threads that can be aborted.
+
+    (Idea taken from: http://sebulba.wikispaces.com/recipe+thread2)
+
+    """</span>
+
+    _canAbort = PyThreadState_SetAsyncExc <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None
+
+    <span class="PY_KEYWORD">def</span> threadID(self):
+        <span class="PY_STRING">"""Return the thread's internal id."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._threadID
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">for</span> threadID, t <span class="PY_KEYWORD">in</span> threading._active.items():
+                <span class="PY_KEYWORD">if</span> t <span class="PY_KEYWORD">is</span> self:
+                    self._threadID = threadID
+                    <span class="PY_KEYWORD">return</span> threadID
+
+    <span class="PY_KEYWORD">def</span> abort(self, exception=ThreadAbortedError):
+        <span class="PY_STRING">"""Abort the current thread by raising an exception in its context.
+
+        A return value of one means the thread was successfully aborted,
+        a value of zero means the thread could not be found,
+        any other value indicates that an error has occurred.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._canAbort:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Aborting threads is not possible"</span>
+            <span class="PY_KEYWORD">return</span> -1
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Aborting worker thread..."</span>
+        <span class="PY_KEYWORD">try</span>:
+            processing = self.isAlive() <span class="PY_KEYWORD">and</span> self._processing
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            processing = False
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> processing:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Thread is not working."</span>
+        threadID = self.threadID()
+        <span class="PY_KEYWORD">if</span> threadID <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Worker thread id not found"</span>
+            <span class="PY_KEYWORD">return</span> 0
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Worker thread id is"</span>, threadID
+        <span class="PY_KEYWORD">try</span>:
+            ret = PyThreadState_SetAsyncExc(
+                c_long(threadID), py_object(exception))
+            <span class="PY_COMMENT"># If it returns a number greater than one, we're in trouble,</span>
+            <span class="PY_COMMENT"># and should call it again with exc=NULL to revert the effect</span>
+            <span class="PY_KEYWORD">if</span> ret &gt; 1:
+                PyThreadState_SetAsyncExc(c_long(threadID), py_object())
+        <span class="PY_KEYWORD">except</span> Exception:
+            ret = -1
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">if</span> ret == 0:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Could not find thread"</span>, threadID
+            <span class="PY_KEYWORD">elif</span> ret != 1:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Could not abort thread"</span>, threadID
+        <span class="PY_KEYWORD">return</span> ret
+
+
+<span class="PY_KEYWORD">def</span> setCloseOnExecFlag(fd):
+    <span class="PY_STRING">"""Set flag for file descriptor not to be inherited by child processes."""</span>
+    <span class="PY_KEYWORD">try</span>:
+        fcntl.fcntl(fd, F_SETFD, fcntl.fcntl(fd, F_GETFD) | FD_CLOEXEC)
+    <span class="PY_KEYWORD">except</span> IOError:
+        <span class="PY_KEYWORD">pass</span>
+
+
+<span class="PY_KEYWORD">class</span> ThreadedAppServer(AppServer):
+    <span class="PY_STRING">"""Threaded Application Server.
+
+    `ThreadedAppServer` accepts incoming socket requests, spawns a
+    new thread or reuses an existing one, then dispatches the request
+    to the appropriate handler (e.g., an Adapter handler, HTTP handler,
+    etc., one for each protocol).
+
+    The transaction is connected directly to the socket, so that the
+    response is sent directly (if streaming is used, like if you call
+    `response.flush()`). Thus the ThreadedAppServer packages the
+    socket/response, rather than value being returned up the call chain.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path=None):
+        <span class="PY_STRING">"""Setup the AppServer.
+
+        Create an initial thread pool (threads created with `spawnThread`),
+        and the request queue, record the PID in a file, and add any enabled
+        handlers (Adapter, HTTP, Monitor).
+
+        """</span>
+        self._threadPool = []
+        self._threadCount = 0
+        self._threadUseCounter = []
+        self._addr = {}
+        self._requestID = 0
+        self._socketHandlers = {}
+        self._handlerCache = {}
+        self._threadHandler = {}
+        self._sockets = {}
+
+        self._defaultConfig = None
+        AppServer.__init__(self, path)
+
+        <span class="PY_KEYWORD">try</span>:
+            threadCount = self.setting(<span class="PY_STRING">'StartServerThreads'</span>)
+            self._maxServerThreads = self.setting(<span class="PY_STRING">'MaxServerThreads'</span>)
+            self._minServerThreads = self.setting(<span class="PY_STRING">'MinServerThreads'</span>)
+            self._useDaemonThreads = self.setting(<span class="PY_STRING">'UseDaemonThreads'</span>)
+            self._requestQueueSize = self.setting(<span class="PY_STRING">'RequestQueueSize'</span>)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._requestQueueSize:
+                <span class="PY_COMMENT"># if not set, make queue size twice the max number of threads</span>
+                self._requestQueueSize = 2 * self._maxServerThreads
+            <span class="PY_KEYWORD">elif</span> self._requestQueueSize &lt; self._maxServerThreads:
+                <span class="PY_COMMENT"># otherwise do not make it smaller than the max number of threads</span>
+                self._requestQueueSize = self._maxServerThreads
+            self._requestBufferSize = self.setting(<span class="PY_STRING">'RequestBufferSize'</span>)
+            self._responseBufferSize = self.setting(<span class="PY_STRING">'ResponseBufferSize'</span>)
+
+            self._requestQueue = Queue.Queue(self._requestQueueSize)
+
+            maxRequestTime = self.setting(<span class="PY_STRING">'MaxRequestTime'</span>) <span class="PY_KEYWORD">or</span> None
+            <span class="PY_KEYWORD">if</span> maxRequestTime <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> self._canAbortRequest:
+                <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"Warning: MaxRequestTime setting ineffective"</span>
+                    <span class="PY_STRING">" (cannot abort requests)"</span>)
+                maxRequestTime = None
+            self._maxRequestTime = maxRequestTime
+            self._checkRequestTime = None
+
+            out = sys.stdout
+            out.write(<span class="PY_STRING">'Creating %d threads'</span> % threadCount)
+            <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(threadCount):
+                self.spawnThread()
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> debug:
+                    out.write(<span class="PY_STRING">"."</span>)
+                out.flush()
+            out.write(<span class="PY_STRING">"\n"</span>)
+
+            <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EnableAdapter'</span>):
+                self.addSocketHandler(AdapterHandler)
+            <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EnableMonitor'</span>):
+                self.addSocketHandler(MonitorHandler)
+            <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EnableSCGI'</span>):
+                self.addSocketHandler(SCGIHandler)
+            <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EnableHTTP'</span>):
+                <span class="PY_KEYWORD">from</span> HTTPServer <span class="PY_KEYWORD">import</span> HTTPAppServerHandler
+                self.addSocketHandler(HTTPAppServerHandler)
+
+            self.readyForRequests()
+
+            <span class="PY_KEYWORD">if</span> maxRequestTime:
+                self._checkRequestTime = time() + maxRequestTime
+        <span class="PY_KEYWORD">except</span>:
+            AppServer.initiateShutdown(self)
+            <span class="PY_KEYWORD">raise</span>
+
+    <span class="PY_KEYWORD">def</span> addSocketHandler(self, handlerClass, serverAddress=None):
+        <span class="PY_STRING">"""Add socket handler.
+
+        Adds a socket handler for `serverAddress` -- `serverAddress`
+        is a tuple ``(host, port)``, where ``host`` is the interface
+        to connect to (for instance, the IP address on a machine with
+        multiple IP numbers), and ``port`` is the port (e.g. HTTP is on
+        80 by default, and Webware adapters use 8086 by default).
+
+        The `handlerClass` is a subclass of `Handler`, and is used to
+        handle the actual request -- usually returning control back
+        to ThreadedAppServer in some fashion. See `Handler` for more.
+
+        """</span>
+
+        <span class="PY_KEYWORD">if</span> serverAddress <span class="PY_KEYWORD">is</span> None:
+            serverAddress = self.address(handlerClass.settingPrefix)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        <span class="PY_KEYWORD">try</span>:
+            sock.bind(serverAddress)
+            sock.listen(1024)
+            <span class="PY_KEYWORD">if</span> fcntl:
+                setCloseOnExecFlag(sock.fileno())
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Can not listen for %s on %s"</span> % (
+                handlerClass.settingPrefix, str(serverAddress))
+            sys.stdout.flush()
+            <span class="PY_KEYWORD">raise</span>
+        serverAddress = sock.getsockname() <span class="PY_COMMENT"># resolve/normalize</span>
+        self._socketHandlers[serverAddress] = handlerClass
+        self._handlerCache[serverAddress] = []
+        self._sockets[serverAddress] = sock
+        adrStr = <span class="PY_STRING">':'</span>.join(map(str, serverAddress))
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Listening for %s on %s"</span> % (handlerClass.settingPrefix, adrStr)
+        <span class="PY_COMMENT"># write text file with server address</span>
+        adrFile = self.addressFileName(handlerClass)
+        <span class="PY_KEYWORD">if</span> os.path.exists(adrFile):
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Warning: %s already exists"</span> % adrFile
+            <span class="PY_KEYWORD">try</span>:
+                os.unlink(adrFile)
+            <span class="PY_KEYWORD">except</span> (AttributeError, OSError): <span class="PY_COMMENT"># we cannot remove the file</span>
+                <span class="PY_KEYWORD">if</span> open(adrFile).read() == adrStr:
+                    <span class="PY_KEYWORD">return</span> <span class="PY_COMMENT"># same content, so never mind</span>
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Could not remove"</span>, adrFile
+                    sys.stdout.flush()
+                    <span class="PY_KEYWORD">raise</span>
+        <span class="PY_KEYWORD">try</span>:
+            f = open(adrFile, <span class="PY_STRING">'w'</span>)
+            f.write(adrStr)
+            f.close()
+        <span class="PY_KEYWORD">except</span> IOError:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Could not write"</span>, adrFile
+            sys.stdout.flush()
+            <span class="PY_KEYWORD">raise</span>
+
+    <span class="PY_KEYWORD">def</span> isPersistent(self):
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""The default AppServer.config."""</span>
+        <span class="PY_KEYWORD">if</span> self._defaultConfig <span class="PY_KEYWORD">is</span> None:
+            self._defaultConfig = AppServer.defaultConfig(self).copy()
+            <span class="PY_COMMENT"># Update with ThreadedAppServer specific settings</span>
+            <span class="PY_COMMENT"># as defined in defaultConfig on the module level:</span>
+            self._defaultConfig.update(defaultConfig)
+        <span class="PY_KEYWORD">return</span> self._defaultConfig
+
+    _ignoreErrnos = [] <span class="PY_COMMENT"># silently ignore these errors:</span>
+    <span class="PY_KEYWORD">for</span> e <span class="PY_KEYWORD">in</span> <span class="PY_STRING">'EAGAIN'</span>, <span class="PY_STRING">'EWOULDBLOCK'</span>, <span class="PY_STRING">'EINTR'</span>, <span class="PY_STRING">'ECONNABORTED'</span>, <span class="PY_STRING">'EPROTO'</span>:
+        <span class="PY_KEYWORD">try</span>:
+            _ignoreErrnos.append(getattr(errno, e))
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> mainloop(self, timeout=1):
+        <span class="PY_STRING">"""Main thread loop.
+
+        This is the main thread loop that accepts and dispatches
+        socket requests.
+
+        It goes through a loop as long as ``self._running &gt; 2``.
+        Setting ``self._running = 2`` asks the the main loop to end.
+        When the main loop is finished, it sets ``self._running = 1``.
+        When the AppServer is completely down, it sets ``self._running = 0``.
+
+        The loop waits for connections, then based on the connecting
+        port it initiates the proper Handler (e.g.,
+        AdapterHandler, HTTPHandler). Handlers are reused when possible.
+
+        The initiated handlers are put into a queue, and
+        worker threads poll that queue to look for requests that
+        need to be handled (worker threads use `threadloop`).
+
+        Every so often (every 5 loops) it updates thread usage
+        information (`updateThreadUsage`), and every
+        ``MaxServerThreads * 2`` loops it it will manage
+        threads (killing or spawning new ones, in `manageThreadCount`).
+
+        """</span>
+
+        threadCheckInterval = self._maxServerThreads * 2
+        threadUpdateDivisor = 5 <span class="PY_COMMENT"># grab stat interval</span>
+        threadCheck = 0
+
+        self._running = 3 <span class="PY_COMMENT"># server is in the main loop now</span>
+
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">while</span> self._running &gt; 2:
+
+                <span class="PY_COMMENT"># block for timeout seconds waiting for connections</span>
+                <span class="PY_KEYWORD">try</span>:
+                    input, output, exc = select.select(
+                        self._sockets.values(), [], [], timeout)
+                <span class="PY_KEYWORD">except</span> select.error, e:
+                    <span class="PY_KEYWORD">if</span> e[0] <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._ignoreErrnos:
+                        <span class="PY_KEYWORD">raise</span>
+                    <span class="PY_KEYWORD">if</span> debug:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Socket select error:"</span>, e
+                    <span class="PY_KEYWORD">continue</span>
+
+                <span class="PY_KEYWORD">for</span> sock <span class="PY_KEYWORD">in</span> input:
+
+                    <span class="PY_KEYWORD">try</span>:
+                        client, addr = sock.accept()
+                    <span class="PY_KEYWORD">except</span> select.error, e:
+                        <span class="PY_KEYWORD">if</span> e[0] <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._ignoreErrnos:
+                            <span class="PY_KEYWORD">raise</span>
+                        <span class="PY_KEYWORD">if</span> debug:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Socket accept error:"</span>, e
+                        <span class="PY_KEYWORD">continue</span>
+
+                    serverAddress = sock.getsockname()
+                    <span class="PY_KEYWORD">try</span>:
+                        handler = self._handlerCache[serverAddress].pop()
+                    <span class="PY_KEYWORD">except</span> IndexError:
+                        handler = self._socketHandlers[serverAddress](self,
+                            serverAddress)
+                    self._requestID += 1
+                    handler.activate(client, self._requestID)
+                    self._requestQueue.put(handler)
+
+                <span class="PY_KEYWORD">if</span> threadCheck % threadUpdateDivisor == 0:
+                    self.updateThreadUsage()
+
+                <span class="PY_KEYWORD">if</span> threadCheck &gt; threadCheckInterval:
+                    threadCheck = 0
+                    self.manageThreadCount()
+                <span class="PY_KEYWORD">else</span>:
+                    threadCheck += 1
+
+                self.abortLongRequests()
+                self.restartIfNecessary()
+
+        <span class="PY_KEYWORD">finally</span>:
+            self._running = 1
+
+
+    <span class="PY_COMMENT">## Thread Management ##</span>
+
+    <span class="PY_COMMENT"># These methods handle the thread pool. The AppServer pre-allocates</span>
+    <span class="PY_COMMENT"># threads, and reuses threads for requests. So as more threads</span>
+    <span class="PY_COMMENT"># are needed with varying load, new threads are spawned, and if there</span>
+    <span class="PY_COMMENT"># are excess threads, then threads are removed.</span>
+
+    <span class="PY_KEYWORD">def</span> updateThreadUsage(self):
+        <span class="PY_STRING">"""Update the threadUseCounter list.
+
+        Called periodically     from `mainloop`.
+
+        """</span>
+        count = self.activeThreadCount()
+        <span class="PY_KEYWORD">if</span> len(self._threadUseCounter) &gt; self._maxServerThreads:
+            self._threadUseCounter.pop(0)
+        self._threadUseCounter.append(count)
+
+    <span class="PY_KEYWORD">def</span> activeThreadCount(self):
+        <span class="PY_STRING">"""Get a snapshot of the number of threads currently in use.
+
+        Called from `updateThreadUsage`.
+
+        """</span>
+        count = 0
+        <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+            <span class="PY_KEYWORD">if</span> t._processing:
+                count += 1
+        <span class="PY_KEYWORD">return</span> count
+
+    <span class="PY_KEYWORD">def</span> manageThreadCount(self):
+        <span class="PY_STRING">"""Adjust the number of threads in use.
+
+        From information gleened from `updateThreadUsage`, we see about how
+        many threads are being used, to see if we have too many threads or
+        too few. Based on this we create or absorb threads.
+
+        """</span>
+
+        <span class="PY_COMMENT"># @@: This algorithm needs work. The edges (i.e. at the</span>
+        <span class="PY_COMMENT"># minserverthreads) are tricky. When working with this,</span>
+        <span class="PY_COMMENT"># remember thread creation is *cheap*.</span>
+
+        average = max = 0
+
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ThreadUse Samples:"</span>, self._threadUseCounter
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> self._threadUseCounter:
+            average += i
+            <span class="PY_KEYWORD">if</span> i &gt; max:
+                max = i
+        average /= len(self._threadUseCounter)
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Average Thread Use: "</span>, average
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Max Thread Use: "</span>, max
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ThreadCount: "</span>, self._threadCount
+
+        <span class="PY_KEYWORD">if</span> len(self._threadUseCounter) &lt; self._maxServerThreads:
+            <span class="PY_KEYWORD">return</span> <span class="PY_COMMENT"># not enough samples</span>
+
+        margin = self._threadCount / 2 <span class="PY_COMMENT"># smoothing factor</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Margin:"</span>, margin
+
+        <span class="PY_KEYWORD">if</span> (average &gt; self._threadCount - margin
+                <span class="PY_KEYWORD">and</span> self._threadCount &lt; self._maxServerThreads):
+            <span class="PY_COMMENT"># Running low: double thread count</span>
+            n = min(self._threadCount,
+                self._maxServerThreads - self._threadCount)
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Adding %s threads"</span> % n
+            <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(n):
+                self.spawnThread()
+        <span class="PY_KEYWORD">elif</span> (average &lt; self._threadCount - margin
+                <span class="PY_KEYWORD">and</span> self._threadCount &gt; self._minServerThreads):
+            n = min(self._threadCount - self._minServerThreads,
+                self._threadCount - max)
+            self.absorbThread(n)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># cleanup any stale threads that we killed but haven't joined</span>
+            self.absorbThread(0)
+
+    <span class="PY_KEYWORD">def</span> spawnThread(self):
+        <span class="PY_STRING">"""Create a new worker thread.
+
+        Worker threads poll with the `threadloop` method.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Spawning new thread"</span>
+        t = WorkerThread(target=self.threadloop)
+        t._processing = False
+        <span class="PY_KEYWORD">if</span> self._useDaemonThreads:
+            t.setDaemon(True)
+        t.start()
+        self._threadPool.append(t)
+        self._threadCount += 1
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"New thread spawned, threadCount ="</span>, self._threadCount
+
+    <span class="PY_KEYWORD">def</span> absorbThread(self, count=1):
+        <span class="PY_STRING">"""Absorb a thread.
+
+        We do this by putting a None on the Queue.
+        When a thread gets it, that tells it to exit.
+
+        We also keep track of the threads, so after killing
+        threads we go through all the threads and find the
+        thread(s) that have exited, so that we can take them
+        out of the thread pool.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(count):
+            self._requestQueue.put(None)
+            <span class="PY_COMMENT"># _threadCount is an estimate, just because we</span>
+            <span class="PY_COMMENT"># put None in the queue, the threads don't immediately</span>
+            <span class="PY_COMMENT"># disappear, but they will eventually.</span>
+            self._threadCount -= 1
+        <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+            <span class="PY_COMMENT"># There may still be a None in the queue, and some</span>
+            <span class="PY_COMMENT"># of the threads we want gone may not yet be gone.</span>
+            <span class="PY_COMMENT"># But we'll pick them up later -- they'll wait.</span>
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> t.isAlive():
+                t.join() <span class="PY_COMMENT"># don't need a timeout, it isn't alive</span>
+                self._threadPool.remove(t)
+                <span class="PY_KEYWORD">if</span> debug:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Thread absorbed, real threadCount ="</span>, len(self._threadPool)
+
+    _canAbortRequest = WorkerThread._canAbort
+
+    <span class="PY_KEYWORD">def</span> abortRequest(self, requestID, exception=RequestAbortedError):
+        <span class="PY_STRING">"""Abort a request by raising an exception in its worker thread.
+
+        A return value of one means the thread was successfully aborted,
+        a value of zero means the thread could not be found,
+        any other value indicates that an error has occurred.
+
+        """</span>
+        verbose = self._verbose
+        <span class="PY_KEYWORD">if</span> verbose:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Aborting request"</span>, requestID
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._canAbortRequest:
+            <span class="PY_KEYWORD">if</span> verbose:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Cannot abort requests"</span>
+            <span class="PY_KEYWORD">return</span> -1
+        <span class="PY_KEYWORD">for</span> t, h <span class="PY_KEYWORD">in</span> self._threadHandler.items():
+            <span class="PY_KEYWORD">try</span>:
+                handlerRequestID = h._requestID
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                handlerRequestID = None
+            <span class="PY_KEYWORD">if</span> requestID == handlerRequestID:
+                t._abortHandler = h
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> self._threadHandler[t] <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> h:
+                        <span class="PY_COMMENT"># request already finished in the meantime</span>
+                        <span class="PY_KEYWORD">raise</span> KeyError
+                    ret = t.abort(exception)
+                <span class="PY_KEYWORD">except</span> Exception:
+                    ret = 0
+                t._abortHandler = None
+                <span class="PY_KEYWORD">break</span>
+        <span class="PY_KEYWORD">else</span>:
+            ret = 0
+        <span class="PY_KEYWORD">if</span> verbose:
+            <span class="PY_KEYWORD">if</span> ret == 0:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Could not find thread for this request"</span>
+            <span class="PY_KEYWORD">elif</span> ret == 1:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"The worker thread for this request has been aborted"</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error: Could not abort thread for this request"</span>
+        <span class="PY_KEYWORD">return</span> ret
+
+    <span class="PY_KEYWORD">def</span> abortLongRequests(self):
+        <span class="PY_STRING">"""Check for long-running requests and cancel these.
+
+        The longest allowed execution time for requests is controlled
+        by the MaxRequestTime setting.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._checkRequestTime <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span>
+        currentTime = time()
+        <span class="PY_KEYWORD">if</span> currentTime &gt; self._checkRequestTime:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Checking for long-running requests"</span>
+            verbose = self._verbose
+            minRequestTime = currentTime - self._maxRequestTime
+            <span class="PY_KEYWORD">for</span> t, h <span class="PY_KEYWORD">in</span> self._threadHandler.items():
+                <span class="PY_KEYWORD">try</span>:
+                    requestDict = h._requestDict
+                    requestID = requestDict[<span class="PY_STRING">'requestID'</span>]
+                    requestTime = requestDict[<span class="PY_STRING">'time'</span>]
+                <span class="PY_KEYWORD">except</span> (AttributeError, KeyError):
+                    <span class="PY_KEYWORD">continue</span>
+                <span class="PY_KEYWORD">if</span> requestTime &lt; minRequestTime:
+                    t._abortHandler = h
+                    <span class="PY_KEYWORD">try</span>:
+                        <span class="PY_KEYWORD">if</span> self._threadHandler[t] <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> h:
+                            <span class="PY_COMMENT"># request already finished in the meantime</span>
+                            <span class="PY_KEYWORD">raise</span> KeyError
+                        <span class="PY_KEYWORD">if</span> verbose:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Aborting long-running request"</span>, requestID
+                        t.abort(RequestTooLongError)
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">pass</span>
+                    t._abortHandler = None
+                <span class="PY_KEYWORD">elif</span> requestTime &lt; currentTime:
+                    currentTime = requestTime
+            self._checkRequestTime = currentTime + self._maxRequestTime
+
+
+    <span class="PY_COMMENT">## Worker Threads ##</span>
+
+    <span class="PY_KEYWORD">def</span> threadloop(self):
+        <span class="PY_STRING">"""The main loop for worker threads.
+
+        Worker threads poll the `_requestQueue` to find a request handler
+        waiting to run. If they find a None in the queue, this thread has
+        been selected to die, which is the way the loop ends.
+
+        The handler object does all the work when its `handleRequest` method
+        is called.
+
+        `initThread` and `delThread` methods are called at the beginning and
+        end of the thread loop, but they aren't being used for anything
+        (future use as a hook).
+
+        """</span>
+        self.initThread()
+        t = currentThread()
+        t._processing = False
+        t._abortHandler = None
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">while</span> 1:
+                <span class="PY_KEYWORD">try</span>:
+                    handler = self._requestQueue.get()
+                <span class="PY_KEYWORD">except</span> Queue.Empty:
+                    <span class="PY_KEYWORD">continue</span>
+                <span class="PY_KEYWORD">if</span> handler <span class="PY_KEYWORD">is</span> None:
+                    <span class="PY_COMMENT"># None means time to quit</span>
+                    <span class="PY_KEYWORD">break</span>
+                <span class="PY_KEYWORD">try</span>:
+                    t._processing = True
+                    self._threadHandler[t] = handler
+                    <span class="PY_KEYWORD">try</span>:
+                        handler.handleRequest()
+                    <span class="PY_KEYWORD">except</span> ThreadAbortedError:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Worker thread has been aborted"</span>
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exception in worker thread"</span>
+                        traceback.print_exc(file=sys.stderr)
+                    <span class="PY_KEYWORD">del</span> self._threadHandler[t]
+                    t._processing = False
+                <span class="PY_KEYWORD">finally</span>:
+                    handler.close()
+                <span class="PY_KEYWORD">while</span> t._abortHandler <span class="PY_KEYWORD">is</span> handler:
+                    <span class="PY_COMMENT"># this handler is to be aborted,</span>
+                    <span class="PY_COMMENT"># so don't handle another request now</span>
+                    sleep(0.1)
+        <span class="PY_KEYWORD">finally</span>:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">del</span> self._threadHandler[t]
+                t._processing = False
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+            self.delThread()
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Quitting"</span>, t
+
+    <span class="PY_KEYWORD">def</span> initThread(self):
+        <span class="PY_STRING">"""Initialize thread.
+
+        Invoked immediately by threadloop() as a hook for subclasses.
+        This implementation does nothing and subclasses need not invoke super.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> delThread(self):
+        <span class="PY_STRING">"""Delete thread.
+
+        Invoked immediately by threadloop() as a hook for subclasses.
+        This implementation does nothing and subclasses need not invoke super.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Shutting Down ##</span>
+
+    <span class="PY_KEYWORD">def</span> shutDown(self):
+        <span class="PY_STRING">"""Called on shutdown.
+
+        Also calls `AppServer.shutDown`, but first closes all sockets
+        and tells all the threads to die.
+
+        """</span>
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ThreadedAppServer is shutting down..."</span>
+        <span class="PY_KEYWORD">if</span> self._running &gt; 2:
+            self._running = 2 <span class="PY_COMMENT"># ask main loop to finish</span>
+            self.awakeSelect() <span class="PY_COMMENT"># unblock select call in mainloop()</span>
+            sys.stdout.flush()
+            <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(30): <span class="PY_COMMENT"># wait at most 3 seconds for shutdown</span>
+                <span class="PY_KEYWORD">if</span> self._running &lt; 2:
+                    <span class="PY_KEYWORD">break</span>
+                sleep(0.1)
+        <span class="PY_KEYWORD">if</span> self._sockets:
+            <span class="PY_COMMENT"># Close all sockets now:</span>
+            <span class="PY_KEYWORD">for</span> sock <span class="PY_KEYWORD">in</span> self._sockets.values():
+                sock.close()
+        <span class="PY_KEYWORD">if</span> self._socketHandlers:
+            <span class="PY_COMMENT"># Remove the text files with the server addresses:</span>
+            <span class="PY_KEYWORD">for</span> handler <span class="PY_KEYWORD">in</span> self._socketHandlers.values():
+                adrFile = self.addressFileName(handler)
+                <span class="PY_KEYWORD">if</span> os.path.exists(adrFile):
+                    <span class="PY_KEYWORD">try</span>:
+                        os.unlink(adrFile)
+                    <span class="PY_KEYWORD">except</span> (AttributeError, OSError):
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Warning: Could not remove"</span>, adrFile
+        <span class="PY_COMMENT"># Tell all threads to end:</span>
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(self._threadCount):
+            self._requestQueue.put(None)
+        <span class="PY_COMMENT"># Join all threads:</span>
+        closeTime = time() + 3
+        <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+            timeout = max(0.1, closeTime - time())
+            <span class="PY_KEYWORD">try</span>:
+                t.join(timeout)
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_COMMENT"># Check whether all threads have ended:</span>
+        <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+            <span class="PY_KEYWORD">if</span> t.isAlive():
+                <span class="PY_KEYWORD">if</span> debug:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Hanging worker thread"</span>, t.threadID()
+                running = True
+                <span class="PY_KEYWORD">break</span>
+        <span class="PY_KEYWORD">else</span>:
+            running = False
+        <span class="PY_KEYWORD">if</span> running <span class="PY_KEYWORD">and</span> self._canAbortRequest:
+            <span class="PY_COMMENT"># Abort all remaining threads:</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Aborting hanging worker threads..."</span>
+            <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+                <span class="PY_KEYWORD">if</span> t.isAlive():
+                    t.abort(ServerShutDownError)
+            <span class="PY_COMMENT"># Join remaining threads:</span>
+            closeTime = time() + 3
+            <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+                <span class="PY_KEYWORD">if</span> t.isAlive():
+                    timeout = max(0.1, closeTime - time())
+                    <span class="PY_KEYWORD">try</span>:
+                        t.join(timeout)
+                    <span class="PY_KEYWORD">except</span> Exception:
+                        <span class="PY_KEYWORD">pass</span>
+            <span class="PY_COMMENT"># Check whether remaining threads have ended:</span>
+            <span class="PY_KEYWORD">for</span> t <span class="PY_KEYWORD">in</span> self._threadPool:
+                <span class="PY_KEYWORD">if</span> t.isAlive():
+                    <span class="PY_KEYWORD">if</span> debug:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Warning: Could not abort thread"</span>, t.threadID()
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Warning: Could not abort all worker threads"</span>
+                    <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Hanging worker threads have been aborted."</span>
+                running = False
+        <span class="PY_COMMENT"># Call super's shutdown:</span>
+        AppServer.shutDown(self)
+
+    <span class="PY_KEYWORD">def</span> awakeSelect(self):
+        <span class="PY_STRING">"""Awake the select() call.
+
+        The `select()` in `mainloop()` is blocking, so when
+        we shut down we have to make a connect to unblock it.
+        Here's where we do that.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> host, port <span class="PY_KEYWORD">in</span> self._sockets:
+            <span class="PY_KEYWORD">if</span> host == <span class="PY_STRING">'0.0.0.0'</span>:
+                <span class="PY_COMMENT"># Can't connect to 0.0.0.0; use 127.0.0.1 instead</span>
+                host = <span class="PY_STRING">'127.0.0.1'</span>
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            <span class="PY_KEYWORD">try</span>:
+                sock.connect((host, port))
+                sock.close()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Misc ##</span>
+
+    <span class="PY_KEYWORD">def</span> address(self, settingPrefix):
+        <span class="PY_STRING">"""Get host address.
+
+        The address for the Adapter (Host/interface, and port),
+        as taken from ``Configs/AppServer.config``,
+        settings ``Host`` and ``AdapterPort``.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._addr[settingPrefix]
+        <span class="PY_KEYWORD">except</span> KeyError:
+            host = self.setting(settingPrefix + <span class="PY_STRING">'Host'</span>, self.setting(<span class="PY_STRING">'Host'</span>))
+            port = self.setting(settingPrefix + <span class="PY_STRING">'Port'</span>)
+            self._addr[settingPrefix] = (host, port)
+            <span class="PY_KEYWORD">return</span> self._addr[settingPrefix]
+
+    <span class="PY_KEYWORD">def</span> addressFileName(self, handlerClass):
+        <span class="PY_STRING">"""Get the name of the text file with the server address."""</span>
+        <span class="PY_KEYWORD">return</span> self.serverSidePath(
+            self.setting(<span class="PY_STRING">'AddressFiles'</span>) % handlerClass.protocolName)
+
+
+<span class="PY_KEYWORD">class</span> Handler(object):
+    <span class="PY_STRING">"""A very general socket handler.
+
+    Handler is an abstract superclass -- specific protocol implementations
+    will subclass this. A Handler takes a socket to interact with, and
+    creates a raw request.
+
+    Handlers will be reused. When a socket is received `activate` will be
+    called -- but the handler should not do anything, as it is still running
+    in the main thread. The handler is put into a queue, and a worker thread
+    picks it up and runs `handleRequest`, which subclasses should override.
+
+    Several methods are provided which are typically used by subclasses.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, server, serverAddress):
+        <span class="PY_STRING">"""Create a new socket handler.
+
+        Each handler is attached to a specific host and port,
+        and of course to the AppServer.
+
+        """</span>
+        self._server = server
+        self._serverAddress = serverAddress
+        self._verbose = server._verbose
+        self._silentURIs = server._silentURIs
+
+    <span class="PY_KEYWORD">def</span> activate(self, sock, requestID):
+        <span class="PY_STRING">"""Activate the handler for processing the request.
+
+        `sock` is the incoming socket that this handler will work with,
+        and `requestID` is a serial number unique for each request.
+
+        This isn't where work gets done -- the handler is queued after this,
+        and work is done when `handleRequest` is called.
+
+        """</span>
+        self._requestID = requestID
+        self._sock = sock
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close the socket.
+
+        Called when the handler is finished. Closes the socket and
+        returns the handler to the pool of inactive handlers.
+
+        """</span>
+        self._sock = None
+        self._server._handlerCache[self._serverAddress].append(self)
+
+    <span class="PY_KEYWORD">def</span> receiveDict(self):
+        <span class="PY_STRING">"""Receive a dictionary from the socket.
+
+        Utility function to receive a marshalled dictionary from the socket.
+        Returns None if the request was empty.
+
+        """</span>
+        chunk = <span class="PY_STRING">''</span>
+        missing = intLength
+        <span class="PY_KEYWORD">while</span> missing &gt; 0:
+            block = self._sock.recv(missing)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> block:
+                self._sock.close()
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> chunk:
+                    <span class="PY_COMMENT"># We probably awakened due to awakeSelect being called.</span>
+                    <span class="PY_KEYWORD">return</span> None
+                <span class="PY_COMMENT"># We got a partial request -- something went wrong.</span>
+                <span class="PY_KEYWORD">raise</span> NotEnoughDataError(<span class="PY_STRING">'received only %d of %d bytes'</span>
+                    <span class="PY_STRING">' when receiving dictLength'</span> % (len(chunk), intLength))
+            chunk += block
+            missing -= len(block)
+        <span class="PY_KEYWORD">try</span>:
+            dictLength = loads(chunk)
+        <span class="PY_KEYWORD">except</span> (ValueError, EOFError), msg:
+            <span class="PY_KEYWORD">if</span> chunk[:3] == <span class="PY_STRING">'GET'</span>:
+                <span class="PY_COMMENT"># Common error: client is speaking HTTP.</span>
+                <span class="PY_KEYWORD">while</span> msg <span class="PY_KEYWORD">and</span> len(chunk) &lt; 8192:
+                    block = self._sock.recv(1)
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> block:
+                        <span class="PY_KEYWORD">break</span>
+                    chunk += block
+                    <span class="PY_KEYWORD">if</span> (chunk.endswith(<span class="PY_STRING">'\r\r'</span>) <span class="PY_KEYWORD">or</span> chunk.endswith(<span class="PY_STRING">'\n\n'</span>)
+                            <span class="PY_KEYWORD">or</span> chunk.endswith(<span class="PY_STRING">'\r\n\r\n'</span>)):
+                        msg = None
+            <span class="PY_KEYWORD">if</span> msg:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ERROR:"</span>, msg
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ERROR: HTTP GET from WebKit adapter port."</span>
+                self._sock.sendall(<span class="PY_STRING">'''\
+HTTP/1.0 505 HTTP Version Not Supported\r
+Content-Type: text/plain\r
+\r
+Error: Invalid AppServer protocol.\r
+Sorry, I don't speak HTTP. You must connect via an adapter.\r
+See the Troubleshooting section of the WebKit Install Guide.\r'''</span>)
+            self._sock.close()
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"       You can only connect to %s via an adapter"</span>
+                <span class="PY_STRING">" like mod_webkit or wkcgi."</span> % self._serverAddress[1])
+            <span class="PY_KEYWORD">return</span> None
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(dictLength, int):
+            self._sock.close()
+            <span class="PY_KEYWORD">raise</span> ProtocolError(<span class="PY_STRING">"Invalid AppServer protocol"</span>)
+        chunk = <span class="PY_STRING">''</span>
+        missing = dictLength
+        <span class="PY_KEYWORD">while</span> missing &gt; 0:
+            block = self._sock.recv(missing)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> block:
+                self._sock.close()
+                <span class="PY_KEYWORD">raise</span> NotEnoughDataError(<span class="PY_STRING">'received only %d of %d bytes'</span>
+                    <span class="PY_STRING">' when receiving dict'</span> % (len(chunk), dictLength))
+            chunk += block
+            missing -= len(block)
+        <span class="PY_KEYWORD">return</span> loads(chunk)
+
+    <span class="PY_KEYWORD">def</span> handleRequest(self):
+        <span class="PY_STRING">"""Handle a raw request.
+
+        This is where the work gets done. Subclasses should override.
+
+        """</span>
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> startRequest(self, requestDict=None):
+        <span class="PY_STRING">"""Track start of a raw request.
+
+        Subclasses can use and override this method.
+
+        """</span>
+        requestDict = requestDict <span class="PY_KEYWORD">or</span> {}
+        requestID = self._requestID
+        requestTime = requestDict.get(<span class="PY_STRING">'time'</span>) <span class="PY_KEYWORD">or</span> time()
+        requestDict[<span class="PY_STRING">'requestID'</span>] = requestID
+        requestDict[<span class="PY_STRING">'time'</span>] = requestTime
+        <span class="PY_COMMENT"># The request object is stored for tracking/debugging purposes.</span>
+        self._requestDict = requestDict
+        <span class="PY_KEYWORD">if</span> self._verbose:
+            env = requestDict.get(<span class="PY_STRING">'environ'</span>)
+            uri = env <span class="PY_KEYWORD">and</span> requestURI(env) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'-'</span>
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._silentURIs <span class="PY_KEYWORD">or</span> <span class="PY_KEYWORD">not</span> self._silentURIs.search(uri):
+                requestDict[<span class="PY_STRING">'verbose'</span>] = True
+                requestTime = localtime(requestTime)[:6]
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%5d  %4d-%02d-%02d %02d:%02d:%02d  %s'</span> % (
+                    (requestID,) + requestTime + (uri,))
+
+    <span class="PY_KEYWORD">def</span> endRequest(self, error=None):
+        <span class="PY_STRING">"""Track end of a raw request.
+
+        Subclasses can use and override this method.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._verbose:
+            requestDict = self._requestDict
+            <span class="PY_KEYWORD">if</span> requestDict.get(<span class="PY_STRING">'verbose'</span>):
+                requestID = requestDict[<span class="PY_STRING">'requestID'</span>]
+                duration = round((time() - requestDict[<span class="PY_STRING">'time'</span>])*1000)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> error:
+                    env = requestDict.get(<span class="PY_STRING">'environ'</span>)
+                    error = env <span class="PY_KEYWORD">and</span> requestURI(env) <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'-'</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%5d  %14.0f msec  %s\n'</span> % (
+                    requestID, duration, error)
+
+
+<span class="PY_KEYWORD">class</span> MonitorHandler(Handler):
+    <span class="PY_STRING">"""Monitor server status.
+
+    Monitor is a minimal service that accepts a simple protocol,
+    and returns a value indicating the status of the server.
+
+    The protocol passes a marshalled dict, much like the Adapter
+    interface, which looks like ``{'format': 'CMD'}``, where CMD
+    is a command (``STATUS`` or ``QUIT``). Responds with a simple
+    string, either the number of requests we've received (for
+    ``STATUS``) or ``OK`` for ``QUIT`` (which also stops the server).
+
+    """</span>
+    <span class="PY_COMMENT"># @@ 2003-03 ib: we should have a RESTART command, and</span>
+    <span class="PY_COMMENT"># perhaps better status indicators (number of threads, etc).</span>
+
+    protocolName = <span class="PY_STRING">'monitor'</span>
+    settingPrefix = <span class="PY_STRING">'Monitor'</span>
+
+    <span class="PY_KEYWORD">def</span> handleRequest(self):
+        requestDict = self.receiveDict()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> requestDict:
+            <span class="PY_KEYWORD">return</span>
+
+        requestDict[<span class="PY_STRING">'environ'</span>] = {<span class="PY_STRING">'REQUEST_URI'</span>: <span class="PY_STRING">'*%s %s*'</span>
+            % (self.settingPrefix, requestDict[<span class="PY_STRING">'format'</span>])}
+        self.startRequest(requestDict)
+
+        conn = self._sock
+        <span class="PY_KEYWORD">if</span> requestDict[<span class="PY_STRING">'format'</span>] == <span class="PY_STRING">"STATUS"</span>:
+            conn.send(str(self._server._requestID))
+        <span class="PY_KEYWORD">elif</span> requestDict[<span class="PY_STRING">'format'</span>] == <span class="PY_STRING">'QUIT'</span>:
+            conn.send(<span class="PY_STRING">"OK"</span>)
+            conn.close()
+            self._server.shutDown()
+
+
+<span class="PY_KEYWORD">class</span> TASStreamOut(ASStreamOut):
+    <span class="PY_STRING">"""Response stream for ThreadedAppServer.
+
+    The `TASStreamOut` class streams to a given socket, so that when `flush`
+    is called and the buffer is ready to be written, it sends the data from the
+    buffer out on the socket. This is the response stream used for requests
+    generated by ThreadedAppServer.
+
+    """</span>
+
+    _ignoreErrnos = [] <span class="PY_COMMENT"># silently ignore these errors:</span>
+    <span class="PY_KEYWORD">for</span> e <span class="PY_KEYWORD">in</span> <span class="PY_STRING">'EPIPE'</span>, <span class="PY_STRING">'ECONNABORTED'</span>, <span class="PY_STRING">'ECONNRESET'</span>:
+        <span class="PY_KEYWORD">try</span>:
+            _ignoreErrnos.append(getattr(errno, e))
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, sock, autoCommit=False, bufferSize=8192):
+        <span class="PY_STRING">"""Create stream.
+
+        We get an extra `sock` argument, which is the socket which we'll
+        stream output to (if we're streaming).
+
+        """</span>
+        ASStreamOut.__init__(self, autoCommit, bufferSize)
+        self._socket = sock
+
+    <span class="PY_KEYWORD">def</span> flush(self):
+        <span class="PY_STRING">"""Flush stream.
+
+        Calls `ASStreamOut.ASStreamOut.flush`, and if that returns True
+        (indicating the buffer is full enough) then we send data from
+        the buffer out on the socket.
+
+        """</span>
+        result = ASStreamOut.flush(self)
+        <span class="PY_KEYWORD">if</span> result: <span class="PY_COMMENT"># a true return value means we can send</span>
+            reslen = len(self._buffer)
+            sent = 0
+            bufferSize = self._bufferSize
+            <span class="PY_KEYWORD">while</span> sent &lt; reslen:
+                <span class="PY_KEYWORD">try</span>:
+                    sent += self._socket.send(
+                        self._buffer[sent:sent+bufferSize])
+                <span class="PY_KEYWORD">except</span> socket.error, e:
+                    <span class="PY_KEYWORD">if</span> debug <span class="PY_KEYWORD">or</span> e[0] <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._ignoreErrnos:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"StreamOut Error:"</span>, e
+                    self._closed = True
+                    <span class="PY_KEYWORD">raise</span> ConnectionAbortedError
+            self.pop(sent)
+
+
+<span class="PY_KEYWORD">class</span> AdapterHandler(Handler):
+    <span class="PY_STRING">"""Adapter handler.
+
+    Handles the Adapter protocol (as used in mod_webkit, wkcgi,
+    WebKit.cgi, HTTPAdapter, etc). This protocol passes a marshalled
+    dictionary which contains the keys ``format`` and ``environ``.
+    ``format`` is currently always the string ``CGI``, and ``environ``
+    is a dictionary of string: string, with values like those passed
+    in the environment to a CGI request (QUERY_STRING, HTTP_HOST, etc).
+
+    The handler adds one more key, ``input``, which contains a file
+    object based off the socket, which contains the body of the
+    request (the POST data, for instance). It's left to Application
+    to handle that data.
+
+    """</span>
+    protocolName = <span class="PY_STRING">'adapter'</span>
+    settingPrefix = <span class="PY_STRING">'Adapter'</span>
+
+    <span class="PY_KEYWORD">def</span> handleRequest(self):
+        <span class="PY_STRING">"""Handle request.
+
+        Creates the request dictionary, and creates a `TASStreamOut` object
+        for the response, then calls `Application.dispatchRawRequest`, which
+        does the rest of the work (here we just clean up after).
+
+        """</span>
+        requestDict = self.receiveDict()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> requestDict:
+            <span class="PY_KEYWORD">return</span>
+
+        self.startRequest(requestDict)
+        requestDict[<span class="PY_STRING">'input'</span>] = self.makeInput()
+
+        streamOut = TASStreamOut(self._sock,
+            bufferSize=self._server._responseBufferSize)
+        transaction = self._server._app.dispatchRawRequest(
+            requestDict, streamOut)
+        <span class="PY_KEYWORD">try</span>:
+            streamOut.close()
+            aborted = False
+        <span class="PY_KEYWORD">except</span> ConnectionAbortedError:
+            aborted = True
+
+        <span class="PY_KEYWORD">try</span>:
+            self._sock.shutdown(1)
+            self._sock.close()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+
+        self.endRequest(aborted <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'*connection aborted*'</span>)
+
+        transaction._application = None
+        transaction.die()
+        <span class="PY_KEYWORD">del</span> transaction
+
+    <span class="PY_KEYWORD">def</span> makeInput(self):
+        <span class="PY_STRING">"""Create a file-like object from the socket."""</span>
+        <span class="PY_KEYWORD">return</span> self._sock.makefile(<span class="PY_STRING">"rb"</span>, self._server._requestBufferSize)
+
+
+<span class="PY_KEYWORD">class</span> SCGIHandler(AdapterHandler):
+    <span class="PY_STRING">"""SCGI handler.
+
+    Modified Adapter handler speaking the SCGI protocol.
+
+    """</span>
+    protocolName = <span class="PY_STRING">'scgi'</span>
+    settingPrefix = <span class="PY_STRING">'SCGI'</span>
+
+    <span class="PY_KEYWORD">def</span> receiveDict(self):
+        <span class="PY_STRING">"""Receive a dictionary from the socket.
+
+        Utility function to receive the SCGI headers from the socket.
+        Returns None if the request was empty.
+
+        """</span>
+        chunk = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">while</span> 1:
+            c = self._sock.recv(1)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> c <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> chunk:
+                self._sock.close()
+                <span class="PY_KEYWORD">return</span> None
+            <span class="PY_KEYWORD">if</span> c == <span class="PY_STRING">':'</span>:
+                <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                chunk += c
+            <span class="PY_KEYWORD">if</span> len(chunk) &gt; 12:
+                <span class="PY_KEYWORD">break</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> len(chunk) &gt; 12 <span class="PY_KEYWORD">or</span> <span class="PY_KEYWORD">not</span> chunk.isdigit():
+                <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Malformed SCGI netstring'</span>)
+            dictLength = long(chunk)
+        <span class="PY_KEYWORD">except</span> ValueError, msg:
+            <span class="PY_KEYWORD">if</span> chunk[:3] == <span class="PY_STRING">'GET'</span>:
+                <span class="PY_COMMENT"># Common error: client is speaking HTTP.</span>
+                <span class="PY_KEYWORD">while</span> msg <span class="PY_KEYWORD">and</span> len(chunk) &lt; 8192:
+                    block = self._sock.recv(1)
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> block:
+                        <span class="PY_KEYWORD">break</span>
+                    chunk += block
+                    <span class="PY_KEYWORD">if</span> (chunk.endswith(<span class="PY_STRING">'\r\r'</span>) <span class="PY_KEYWORD">or</span> chunk.endswith(<span class="PY_STRING">'\n\n'</span>)
+                            <span class="PY_KEYWORD">or</span> chunk.endswith(<span class="PY_STRING">'\r\n\r\n'</span>)):
+                        msg = None
+            <span class="PY_KEYWORD">if</span> msg:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ERROR:"</span>, msg
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ERROR: HTTP GET from SCGI adapter port."</span>
+                self._sock.sendall(<span class="PY_STRING">'''\
+HTTP/1.0 505 HTTP Version Not Supported\r
+Content-Type: text/plain\r
+\r
+Error: Invalid AppServer protocol.\r
+Sorry, I don't speak HTTP. You must connect via an SCGI adapter.\r
+See the Troubleshooting section of the WebKit Install Guide.\r'''</span>)
+            self._sock.close()
+            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"       You can only connect to %s via an adapter"</span>
+                <span class="PY_STRING">" like mod_scgi or pyscgi."</span> % self._serverAddress[1])
+            <span class="PY_KEYWORD">return</span> None
+        chunk = <span class="PY_STRING">''</span>
+        missing = dictLength
+        <span class="PY_KEYWORD">while</span> missing &gt; 0:
+            block = self._sock.recv(missing)
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> block:
+                self._sock.close()
+                <span class="PY_KEYWORD">raise</span> NotEnoughDataError(<span class="PY_STRING">'received only %d of %d bytes'</span>
+                    <span class="PY_STRING">' when receiving netstring'</span> % (len(chunk), dictLength))
+            chunk += block
+            missing -= len(block)
+        <span class="PY_KEYWORD">if</span> self._sock.recv(1) != <span class="PY_STRING">','</span>:
+            self._sock.close()
+            <span class="PY_KEYWORD">raise</span> ProtocolError(<span class="PY_STRING">'Missing SCGI netstring terminator'</span>)
+        items = chunk.split(<span class="PY_STRING">'\0'</span>)[:-1]
+        environ = {}
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(0, len(items), 2):
+                environ[items[i]] = items[i+1]
+        <span class="PY_KEYWORD">except</span> IndexError:
+            <span class="PY_KEYWORD">raise</span> ProtocolError(<span class="PY_STRING">'Malformed SCGI headers'</span>)
+        <span class="PY_KEYWORD">return</span> dict(format=<span class="PY_STRING">'CGI'</span>, time=time(), environ=environ)
+
+
+<span class="PY_COMMENT"># Determines whether the main look should run in another thread.</span>
+<span class="PY_COMMENT"># On Win NT/2K/XP, we run the mainloop in a different thread because</span>
+<span class="PY_COMMENT"># it's not safe for Ctrl-C to be caught while manipulating the queues.</span>
+<span class="PY_COMMENT"># It's not safe on Linux either, but there, it appears that Ctrl-C will</span>
+<span class="PY_COMMENT"># trigger an exception in ANY thread, so this fix doesn't help.</span>
+<span class="PY_KEYWORD">def</span> runMainLoopInThread():
+    <span class="PY_KEYWORD">return</span> os.name == <span class="PY_STRING">'nt'</span>
+
+<span class="PY_COMMENT"># Set to False in DebugAppServer so Python debuggers can trap exceptions:</span>
+doesRunHandleExceptions = True
+
+
+<span class="PY_KEYWORD">class</span> RestartAppServerError(Exception):
+    <span class="PY_STRING">"""Raised by DebugAppServer when needed."""</span>
+    <span class="PY_KEYWORD">pass</span>
+
+
+_chdir = os.chdir
+
+<span class="PY_KEYWORD">def</span> chdir(path, force=False):
+    <span class="PY_STRING">"""Execute os.chdir() with safety provision."""</span>
+    <span class="PY_KEYWORD">assert</span> force, (
+        <span class="PY_STRING">"You cannot reliably use os.chdir() in a threaded environment.\n"</span>
+        + 16*<span class="PY_STRING">" "</span> + <span class="PY_STRING">"Set force=True if you want to do it anway (using a lock)."</span>)
+    _chdir(path)
+
+
+<span class="PY_COMMENT">## Script usage ##</span>
+
+<span class="PY_KEYWORD">def</span> run(workDir=None):
+    <span class="PY_STRING">"""Start the server (`ThreadedAppServer`).
+
+    `workDir` is the server-side path for the server, which may not be
+    the ``Webware/WebKit`` directory (though by default it is).
+
+    After setting up the ThreadedAppServer we call `ThreadedAppServer.mainloop`
+    to start the server main loop. It also catches exceptions as a last resort.
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> server
+    server = None
+    <span class="PY_KEYWORD">global</span> exitStatus
+    exitStatus = 0
+    os.chdir = chdir <span class="PY_COMMENT"># inhibit use of os.chdir()</span>
+    runAgain = True
+    <span class="PY_KEYWORD">while</span> runAgain: <span class="PY_COMMENT"># looping in support of RestartAppServerError</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">try</span>:
+                runAgain = False
+                server = ThreadedAppServer(workDir)
+                <span class="PY_KEYWORD">if</span> runMainLoopInThread():
+                    <span class="PY_COMMENT"># catch the exception raised by sys.exit so</span>
+                    <span class="PY_COMMENT"># that we can re-call it in the main thread.</span>
+                    <span class="PY_KEYWORD">def</span> _windowsmainloop():
+                        <span class="PY_KEYWORD">global</span> exitStatus
+                        <span class="PY_KEYWORD">try</span>:
+                            server.mainloop()
+                        <span class="PY_KEYWORD">except</span> SystemExit, e:
+                            exitStatus = e[0]
+                    <span class="PY_COMMENT"># Run the server thread</span>
+                    server._running = 2
+                    t = Thread(target=_windowsmainloop)
+                    t.start()
+                    <span class="PY_KEYWORD">try</span>:
+                        <span class="PY_KEYWORD">while</span> server._running &gt; 1:
+                            <span class="PY_KEYWORD">try</span>:
+                                sleep(1) <span class="PY_COMMENT"># wait for interrupt</span>
+                            <span class="PY_KEYWORD">except</span> Exception:
+                                <span class="PY_KEYWORD">if</span> server._running &lt; 3:
+                                    <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># shutdown</span>
+                    <span class="PY_KEYWORD">finally</span>:
+                        t.join()
+                <span class="PY_KEYWORD">else</span>:
+                    server.mainloop()
+                sys.exit(exitStatus)
+            <span class="PY_KEYWORD">except</span> RestartAppServerError:
+                <span class="PY_KEYWORD">print</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Restarting AppServer:"</span>
+                sys.stdout.flush()
+                sys.stderr.flush()
+                runAgain = True
+            <span class="PY_KEYWORD">except</span> SystemExit, e:
+                <span class="PY_KEYWORD">print</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting AppServer%s."</span> % (
+                    e[0] == 3 <span class="PY_KEYWORD">and</span> <span class="PY_STRING">' for reload'</span> <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>)
+                exitStatus = e[0]
+            <span class="PY_KEYWORD">except</span> KeyboardInterrupt:
+                <span class="PY_KEYWORD">print</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting AppServer due to keyboard interrupt."</span>
+                exitStatus = 0
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                <span class="PY_KEYWORD">if</span> isinstance(e, IOError) <span class="PY_KEYWORD">and</span> e[0] == errno.EINTR:
+                    <span class="PY_KEYWORD">print</span>
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting AppServer due to interrupt signal."</span>
+                    exitStatus = 0
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">if</span> doesRunHandleExceptions:
+                        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> server <span class="PY_KEYWORD">and</span> isinstance(e, ProcessRunning):
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Error:"</span>, str(e)
+                        <span class="PY_KEYWORD">else</span>:
+                            <span class="PY_KEYWORD">print</span>
+                            traceback.print_exc()
+                            <span class="PY_KEYWORD">print</span>
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Exiting AppServer due to above exception."</span>
+                        exitStatus = 1
+                    <span class="PY_KEYWORD">else</span>:
+                        <span class="PY_KEYWORD">raise</span>
+        <span class="PY_KEYWORD">finally</span>:
+            sys.stdout.flush()
+            sys.stderr.flush()
+            <span class="PY_KEYWORD">if</span> server <span class="PY_KEYWORD">and</span> server._running:
+                server.initiateShutdown()
+                server._closeThread.join()
+            AppServerModule.globalAppServer = None
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os.chdir = _chdir <span class="PY_COMMENT"># allow use of os.chdir() again</span>
+    <span class="PY_KEYWORD">return</span> exitStatus
+
+
+<span class="PY_COMMENT"># Signal handlers</span>
+
+<span class="PY_KEYWORD">def</span> shutDown(signum, frame):
+    <span class="PY_STRING">"""Signal handler for shutting down the server."""</span>
+    <span class="PY_KEYWORD">print</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"App server has been signaled to shutdown."</span>
+    <span class="PY_KEYWORD">if</span> server <span class="PY_KEYWORD">and</span> server._running &gt; 2:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Shutting down at"</span>, asclocaltime()
+        sys.stdout.flush()
+        server._running = 2
+        <span class="PY_KEYWORD">if</span> signum == SIGINT:
+            <span class="PY_KEYWORD">raise</span> KeyboardInterrupt
+        <span class="PY_KEYWORD">elif</span> signum == SIGHUP:
+            sys.exit(3) <span class="PY_COMMENT"># force reload</span>
+        <span class="PY_KEYWORD">else</span>:
+            sys.exit(0) <span class="PY_COMMENT"># normal exit</span>
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"No running app server was found."</span>
+
+<span class="PY_KEYWORD">try</span>:
+    currentFrames = sys._current_frames
+<span class="PY_KEYWORD">except</span> AttributeError: <span class="PY_COMMENT"># Python &lt; 2.5</span>
+    <span class="PY_COMMENT"># Use the threadframe module for dumping thread stack frames:</span>
+    <span class="PY_COMMENT"># http://www.majid.info/mylos/stories/2004/06/10/threadframe.html</span>
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">import</span> threadframe
+    <span class="PY_KEYWORD">except</span> ImportError: <span class="PY_COMMENT"># threadframe module not installed</span>
+        currentFrames = None
+    <span class="PY_KEYWORD">else</span>:
+        currentFrames = threadframe.dict
+
+<span class="PY_KEYWORD">def</span> threadDump(signum, frame):
+    <span class="PY_STRING">"""Signal handler for dumping thread stack frames to stdout."""</span>
+    <span class="PY_KEYWORD">print</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"App server has been signaled to attempt a thread dump."</span>
+    <span class="PY_KEYWORD">print</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Thread stack frame dump at"</span>, asclocaltime()
+    sys.stdout.flush()
+    frames = currentFrames()
+    <span class="PY_KEYWORD">print</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"-"</span> * 79
+    <span class="PY_KEYWORD">print</span>
+    <span class="PY_KEYWORD">for</span> threadID <span class="PY_KEYWORD">in</span> sorted(frames):
+        frame = frames[threadID]
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Thread ID: %d (reference count = %d)"</span> % (
+            threadID, sys.getrefcount(frame))
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">''</span>.join(traceback.format_list(traceback.extract_stack(frame)))
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"-"</span> * 79
+    sys.stdout.flush()
+
+<span class="PY_KEYWORD">import</span> signal
+
+<span class="PY_COMMENT"># Shutdown signals</span>
+
+<span class="PY_KEYWORD">try</span>:
+    SIGHUP = signal.SIGHUP
+    signal.signal(SIGHUP, shutDown)
+<span class="PY_KEYWORD">except</span> AttributeError:
+    SIGHUP = None
+<span class="PY_KEYWORD">try</span>:
+    SIGTERM = signal.SIGTERM
+    signal.signal(SIGTERM, shutDown)
+<span class="PY_KEYWORD">except</span> AttributeError:
+    SIGTERM = None
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_COMMENT"># this is Ctrl-C on Windows</span>
+    SIGINT = signal.SIGINT
+    signal.signal(SIGINT, shutDown)
+<span class="PY_KEYWORD">except</span> AttributeError:
+    SIGINT = None
+
+<span class="PY_KEYWORD">if</span> currentFrames:
+
+    <span class="PY_COMMENT"># Signals for creating a thread dump</span>
+
+    <span class="PY_KEYWORD">try</span>:
+        SIGQUIT = signal.SIGQUIT
+        signal.signal(SIGQUIT, threadDump)
+    <span class="PY_KEYWORD">except</span> AttributeError:
+        SIGQUIT = None
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_COMMENT"># this is Ctrl-Break on Windows (not Cygwin)</span>
+        SIGBREAK = signal.SIGBREAK
+        signal.signal(SIGBREAK, threadDump)
+    <span class="PY_KEYWORD">except</span> AttributeError:
+        SIGBREAK = None
+
+
+<span class="PY_COMMENT"># Command line interface</span>
+
+<span class="PY_KEYWORD">import</span> re
+settingRE = re.compile(r<span class="PY_STRING">'^(?:--)?([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)='</span>)
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> Configurable
+
+usage = re.search(<span class="PY_STRING">'\n.* arguments:\n\n(.*\n)*?\n'</span>, __doc__).group(0)
+
+<span class="PY_KEYWORD">def</span> main(args):
+    <span class="PY_STRING">"""Command line interface.
+
+    Run by `Launch`, this is the main entrance and command-line interface
+    for ThreadedAppServer.
+
+    """</span>
+    function = run
+    daemon = False
+    workDir = None
+    <span class="PY_KEYWORD">for</span> arg <span class="PY_KEYWORD">in</span> args:
+        <span class="PY_KEYWORD">if</span> settingRE.match(arg):
+            match = settingRE.match(arg)
+            name = match.group(1)
+            value = arg[match.end():]
+            Configurable.addCommandLineSetting(name, value)
+        <span class="PY_KEYWORD">elif</span> arg == <span class="PY_STRING">"stop"</span>:
+            function = AppServerModule.stop
+        <span class="PY_KEYWORD">elif</span> arg == <span class="PY_STRING">"daemon"</span>:
+            daemon = True
+        <span class="PY_KEYWORD">elif</span> arg == <span class="PY_STRING">"start"</span>:
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">elif</span> arg[:8] == <span class="PY_STRING">"workdir="</span>:
+            workDir = arg[8:]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">print</span> usage
+            <span class="PY_KEYWORD">return</span>
+    <span class="PY_KEYWORD">if</span> daemon:
+        <span class="PY_KEYWORD">if</span> os.name == <span class="PY_STRING">"posix"</span>:
+            pid = os.fork()
+            <span class="PY_KEYWORD">if</span> pid:
+                sys.exit()
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Daemon mode not available on your OS."</span>
+    <span class="PY_KEYWORD">return</span> function(workDir=workDir)
+</pre>
+<!--footer-->
+
+</body>
+</html>

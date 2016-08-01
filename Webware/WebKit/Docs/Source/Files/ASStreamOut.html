@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/ASStreamOut.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""This module defines a class for handling writing reponses."""</span>
+
+debug = False
+
+<span class="PY_KEYWORD">class</span> InvalidCommandSequence(Exception):
+    <span class="PY_STRING">"""Invalid command sequence error"""</span>
+
+<span class="PY_KEYWORD">class</span> ConnectionAbortedError(Exception):
+    <span class="PY_STRING">"""Connection aborted error"""</span>
+
+
+<span class="PY_KEYWORD">class</span> ASStreamOut(object):
+    <span class="PY_STRING">"""This is a response stream to the client.
+
+    The key attributes of this class are:
+
+    `_autoCommit`:
+        If True, the stream will automatically start sending data
+        once it has accumulated `_bufferSize` data. This means that
+        it will ask the response to commit itself, without developer
+        interaction. By default, this is set to False.
+    `_bufferSize`:
+        The size of the data buffer. This is only used when autocommit
+        is True. If not using autocommit, the whole response is
+        buffered and sent in one shot when the servlet is done.
+    `flush()`:
+        Send the accumulated response data now. Will ask the `Response`
+        to commit if it hasn't already done so.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, autoCommit=False, bufferSize=8192):
+        self._autoCommit = autoCommit
+        self._bufferSize = bufferSize
+        self._committed = False
+        self._needCommit = False
+        self._chunks = []
+        self._buffer = <span class="PY_STRING">''</span>
+        self._chunkLen = 0
+        self._closed = False
+
+    <span class="PY_KEYWORD">def</span> autoCommit(self):
+        <span class="PY_STRING">"""Get the auto commit mode."""</span>
+        <span class="PY_KEYWORD">return</span> self._autoCommit
+
+    <span class="PY_KEYWORD">def</span> setAutoCommit(self, autoCommit=True):
+        <span class="PY_STRING">"""Set the auto commit mode."""</span>
+        self._autoCommit = bool(autoCommit)
+
+    <span class="PY_KEYWORD">def</span> bufferSize(self):
+        <span class="PY_STRING">"""Get the buffer size."""</span>
+        <span class="PY_KEYWORD">return</span> self._bufferSize
+
+    <span class="PY_KEYWORD">def</span> setBufferSize(self, bufferSize=8192):
+        <span class="PY_STRING">"""Set the buffer size."""</span>
+        self._bufferSize = int(bufferSize)
+
+    <span class="PY_KEYWORD">def</span> flush(self):
+        <span class="PY_STRING">"""Flush stream.
+
+        Send available data as soon as possible, i.e. *now*.
+
+        Returns True if we are ready to send, otherwise False (i.e.,
+        if the buffer is full enough).
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._closed:
+            <span class="PY_KEYWORD">raise</span> ConnectionAbortedError
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt;&gt; Flushing ASStreamOut"</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._committed:
+            <span class="PY_KEYWORD">if</span> self._autoCommit:
+                <span class="PY_KEYWORD">if</span> debug:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ASSTreamOut.flush setting needCommit"</span>
+                self._needCommit = True
+            <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">try</span>:
+            self._buffer += <span class="PY_STRING">''</span>.join(self._chunks)
+        <span class="PY_KEYWORD">finally</span>:
+            self._chunks = []
+            self._chunkLen = False
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> buffer(self):
+        <span class="PY_STRING">"""Return accumulated data which has not yet been flushed.
+
+        We want to be able to get at this data without having to call flush
+        first, so that we can (for example) integrate automatic HTML validation.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._buffer: <span class="PY_COMMENT"># if flush has been called, return what was flushed:</span>
+            <span class="PY_KEYWORD">return</span> self._buffer
+        <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># otherwise return the buffered chunks</span>
+            <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(self._chunks)
+
+    <span class="PY_KEYWORD">def</span> clear(self):
+        <span class="PY_STRING">"""Try to clear any accumulated response data.
+
+        Will fail if the response is already sommitted.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt;&gt; strmOut clear called"</span>
+        <span class="PY_KEYWORD">if</span> self._committed:
+            <span class="PY_KEYWORD">raise</span> InvalidCommandSequence()
+        self._buffer = <span class="PY_STRING">''</span>
+        self._chunks = []
+        self._chunkLen = 0
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close this buffer. No more data may be sent."""</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt;&gt; ASStream close called"</span>
+        self.flush()
+        self._closed = True
+        self._committed = True
+        self._autocommit = True
+
+    <span class="PY_KEYWORD">def</span> closed(self):
+        <span class="PY_STRING">"""Check whether we are closed to new data."""</span>
+        <span class="PY_KEYWORD">return</span> self._closed
+
+    <span class="PY_KEYWORD">def</span> size(self):
+        <span class="PY_STRING">"""Return the current size of the data held here."""</span>
+        <span class="PY_KEYWORD">return</span> self._chunkLen + len(self._buffer)
+
+    <span class="PY_KEYWORD">def</span> prepend(self, charstr):
+        <span class="PY_STRING">"""Add the attached string to front of the response buffer.
+
+        Invalid if we are already committed.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self.committed() <span class="PY_KEYWORD">or</span> self.closed():
+            <span class="PY_KEYWORD">raise</span> InvalidCommandSequence()
+        <span class="PY_KEYWORD">if</span> self._buffer:
+            self._buffer = charstr + self._buffer
+        <span class="PY_KEYWORD">else</span>:
+            self._chunks.insert(0, charstr)
+            self._chunkLen += len(charstr)
+
+    <span class="PY_KEYWORD">def</span> pop(self, count):
+        <span class="PY_STRING">"""Remove count bytes from the front of the buffer."""</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"AStreamOut popping %s"</span> % count
+        <span class="PY_COMMENT"># should we check for an excessive pop length?</span>
+        <span class="PY_KEYWORD">assert</span> count &lt;= len(self._buffer)
+        self._buffer = self._buffer[count:]
+
+    <span class="PY_KEYWORD">def</span> committed(self):
+        <span class="PY_STRING">"""Are we committed?"""</span>
+        <span class="PY_KEYWORD">return</span> self._committed
+
+    <span class="PY_KEYWORD">def</span> needCommit(self):
+        <span class="PY_STRING">"""Request for commitment.
+
+        Called by the `HTTPResponse` instance that is using this instance
+        to ask if the response needs to be prepared to be delivered.
+        The response should then commit its headers, etc.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._needCommit
+
+    <span class="PY_KEYWORD">def</span> commit(self, autoCommit=True):
+        <span class="PY_STRING">"""Called by the Response to tell us to go.
+
+        If `_autoCommit` is True, then we will be placed into autoCommit mode.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt;&gt; ASStreamOut Committing"</span>
+        self._committed = True
+        self._autoCommit = autoCommit
+        self.flush()
+
+    <span class="PY_KEYWORD">def</span> write(self, charstr):
+        <span class="PY_STRING">"""Write a string to the buffer."""</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt;&gt; ASStreamOut writing %s characters"</span> % len(charstr)
+        <span class="PY_KEYWORD">if</span> self._closed:
+            <span class="PY_KEYWORD">raise</span> ConnectionAbortedError
+        self._chunks.append(charstr)
+        self._chunkLen += len(charstr)
+        <span class="PY_KEYWORD">if</span> self._autoCommit <span class="PY_KEYWORD">and</span> self._chunkLen &gt; self._bufferSize:
+            <span class="PY_KEYWORD">if</span> debug:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"&gt;&gt;&gt; ASStreamOut.write flushing"</span>
+            self.flush()
+</pre>
+<!--footer-->
+
+</body>
+</html>

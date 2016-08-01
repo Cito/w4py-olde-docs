@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>CGIWrapper/_dumpErrors.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""CGIWrapper dump errors admin script."""</span>
+
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> htmlEncode
+<span class="PY_KEYWORD">from</span> _dumpCSV <span class="PY_KEYWORD">import</span> _dumpCSV
+
+
+<span class="PY_KEYWORD">class</span> _dumpErrors(_dumpCSV):
+
+    <span class="PY_KEYWORD">def</span> cellContents(self, rowIndex, colIndex, value):
+        <span class="PY_STRING">"""Return cell contents of CSV file.
+
+        This subclass adds a link to error files.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._headings[colIndex] == <span class="PY_STRING">'error report filename'</span>:
+            <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;a href="_viewError?filename=%s"&gt;%s&lt;/a&gt;'</span> % (value, value)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> htmlEncode(value)
+</pre>
+<!--footer-->
+
+</body>
+</html>

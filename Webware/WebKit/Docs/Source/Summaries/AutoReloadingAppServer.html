@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.AutoReloadingAppServer</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.AutoReloadingAppServer</h2>
+<p>You can also browse the <a href="../Files/AutoReloadingAppServer.html">complete source file</a>
+or the <a href="../Docs/WebKit.AutoReloadingAppServer.html">generated documentation</a>.</p>
+<pre><span class="line_def">def <span class="name_def">getFAM</span>(modules)</span>
+
+<span class="line_class">            class <span class="name_class">FAM</span>(object):</span>
+<span class="line_def">                def <span class="name_def">name</span>()</span>
+<span class="line_def">                def <span class="name_def">__init__</span>(self)</span>
+<span class="line_def">                def <span class="name_def">close</span>(self)</span>
+<span class="line_def">                def <span class="name_def">fd</span>(self)</span>
+<span class="line_def">                def <span class="name_def">monitorFile</span>(self, filepath)</span>
+<span class="line_def">                def <span class="name_def">pending</span>(self)</span>
+<span class="line_def">                def <span class="name_def">nextFile</span>(self)</span>
+<span class="line_def">                def <span class="name_def">callback</span>(self, event)</span>
+
+<span class="line_class">            class <span class="name_class">FAM</span>(object):</span>
+<span class="line_def">                def <span class="name_def">name</span>()</span>
+<span class="line_def">                def <span class="name_def">__init__</span>(self)</span>
+<span class="line_def">                def <span class="name_def">close</span>(self)</span>
+<span class="line_def">                def <span class="name_def">fd</span>(self)</span>
+<span class="line_def">                def <span class="name_def">monitorFile</span>(self, filepath)</span>
+<span class="line_def">                def <span class="name_def">pending</span>(self)</span>
+<span class="line_def">                def <span class="name_def">nextFile</span>(self)</span>
+<span class="line_def">                def <span class="name_def">callback</span>(self, filepath, event)</span>
+
+<span class="line_class">            class <span class="name_class">FAM</span>(object):</span>
+<span class="line_def">                def <span class="name_def">name</span>()</span>
+<span class="line_def">                def <span class="name_def">__init__</span>(self)</span>
+<span class="line_def">                def <span class="name_def">close</span>(self)</span>
+<span class="line_def">                def <span class="name_def">fd</span>(self)</span>
+<span class="line_def">                def <span class="name_def">monitorFile</span>(self, filepath)</span>
+<span class="line_def">                def <span class="name_def">pending</span>(self)</span>
+<span class="line_def">                def <span class="name_def">nextFile</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">AutoReloadingAppServer</span>(AppServer):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, path=None)</span>
+<span class="line_def">    def <span class="name_def">defaultConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">shutDown</span>(self)</span>
+
+<span class="line_category">    ## Activation of AutoReload ##</span>
+<span class="line_def">    def <span class="name_def">activateAutoReload</span>(self)</span>
+<span class="line_def">    def <span class="name_def">deactivateAutoReload</span>(self)</span>
+
+<span class="line_category">    ## Restart methods ##</span>
+<span class="line_def">    def <span class="name_def">restartIfNecessary</span>(self)</span>
+<span class="line_def">    def <span class="name_def">restart</span>()</span>
+<span class="line_def">    def <span class="name_def">monitorNewModule</span>(self, filepath, mtime=None)</span>
+
+<span class="line_category">    ## Internal methods ##</span>
+<span class="line_def">    def <span class="name_def">shouldRestart</span>(self)</span>
+<span class="line_def">    def <span class="name_def">fileMonitorThreadLoop</span>(self)</span>
+<span class="line_def">    def <span class="name_def">fileMonitorThreadLoopFAM</span>(self)</span>
+
+</pre>
+</body>
+</html>

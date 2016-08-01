@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/ConfigurableForServerSidePath.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">from</span> MiscUtils.Configurable <span class="PY_KEYWORD">import</span> Configurable, NoDefault
+
+
+<span class="PY_KEYWORD">class</span> ConfigurableForServerSidePath(Configurable):
+    <span class="PY_STRING">"""Configuration file functionality incorporating a server side path.
+
+    This is a version of `MiscUtils.Configurable.Configurable`
+    that provides a customized `setting` method for classes which
+    have a `serverSidePath` method. If a setting's name ends with
+    ``Filename`` or ``Dir``, its value is passed through
+    `serverSidePath` before being returned.
+
+    In other words, relative filenames and directory names are expanded
+    with the location of the object, NOT the current directory.
+
+    Application and AppServer are two well known users of this
+    mix-in. Any class that has a `serverSidePath` method and a
+    `Configurable` base class, should inherit this class instead.
+
+    This is used with for MakeAppWorkDir, which changes the serverSidePath.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> setting(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return setting, using the server side path when indicated.
+
+        Returns the setting, filtered by self.serverSidePath(),
+        if the name ends with ``Filename`` or ``Dir``.
+
+        """</span>
+        value = Configurable.setting(self, name, default)
+        <span class="PY_KEYWORD">if</span> name[-8:] == <span class="PY_STRING">'Filename'</span> <span class="PY_KEYWORD">or</span> name[-3:] == <span class="PY_STRING">'Dir'</span>:
+            value = self.serverSidePath(value)
+        <span class="PY_KEYWORD">return</span> value
+</pre>
+<!--footer-->
+
+</body>
+</html>

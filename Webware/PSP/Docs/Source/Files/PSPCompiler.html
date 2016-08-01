@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/PSPCompiler.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre>
+<span class="PY_STRING">"""A simple little module that organizes the actual page generation.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> StreamReader <span class="PY_KEYWORD">import</span> StreamReader
+<span class="PY_KEYWORD">from</span> ServletWriter <span class="PY_KEYWORD">import</span> ServletWriter
+<span class="PY_KEYWORD">from</span> PSPParser <span class="PY_KEYWORD">import</span> PSPParser
+<span class="PY_KEYWORD">from</span> ParseEventHandler <span class="PY_KEYWORD">import</span> ParseEventHandler
+
+
+<span class="PY_KEYWORD">class</span> Compiler(object):
+    <span class="PY_STRING">"""The main compilation class."""</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, context):
+        self._ctxt = context
+
+    <span class="PY_KEYWORD">def</span> compile(self):
+        <span class="PY_STRING">"""Compile the PSP context and return a list of all source files."""</span>
+        reader = StreamReader(self._ctxt.getPspFileName(), self._ctxt)
+        reader.init()
+        writer = ServletWriter(self._ctxt)
+        self._ctxt.setPSPReader(reader)
+        self._ctxt.setServletWriter(writer)
+        parser = PSPParser(self._ctxt)
+        handler = ParseEventHandler(self._ctxt, parser)
+        parser.setEventHandler(handler)
+        handler.beginProcessing()
+        parser.parse()
+        sourcefiles = set(reader.sourcefiles)
+        handler.endProcessing()
+        writer.close()
+        <span class="PY_KEYWORD">return</span> sourcefiles
+</pre>
+<!--footer-->
+
+</body>
+</html>

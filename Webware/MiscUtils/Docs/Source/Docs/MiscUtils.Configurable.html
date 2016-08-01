@@ -1,0 +1,216 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.Configurable</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.Configurable</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/Configurable.py">/var/www/docs/Webware-1.1.1/MiscUtils/Configurable.py</a></font></td></tr></table>
+    <p><tt><a href="#Configurable">Configurable</a>.py<br>
+&nbsp;<br>
+Provides&nbsp;configuration&nbsp;file&nbsp;functionality.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.Configurable.html#Configurable">Configurable</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.Configurable.html#ConfigurationError">ConfigurationError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Configurable">class <strong>Configurable</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Abstract&nbsp;superclass&nbsp;for&nbsp;configuration&nbsp;file&nbsp;functionality.<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;override:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;<a href="#Configurable-defaultConfig">defaultConfig</a>()&nbsp;&nbsp;to&nbsp;return&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;default&nbsp;settings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;such&nbsp;as&nbsp;{'Frequency':&nbsp;5}<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;<a href="#Configurable-configFilename">configFilename</a>()&nbsp;to&nbsp;return&nbsp;the&nbsp;filename&nbsp;by&nbsp;which&nbsp;users&nbsp;can<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;override&nbsp;the&nbsp;configuration&nbsp;such&nbsp;as&nbsp;'Pinger.config'<br>
+&nbsp;<br>
+Subclasses&nbsp;typically&nbsp;use&nbsp;the&nbsp;<a href="#Configurable-setting">setting</a>()&nbsp;method,&nbsp;for&nbsp;example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;time.sleep(<a href="#Configurable-setting">setting</a>('Frequency'))<br>
+&nbsp;<br>
+They&nbsp;might&nbsp;also&nbsp;use&nbsp;the&nbsp;<a href="#Configurable-printConfig">printConfig</a>()&nbsp;method,&nbsp;for&nbsp;example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Configurable-printConfig">printConfig</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Configurable-printConfig">printConfig</a>(file)<br>
+&nbsp;<br>
+Users&nbsp;of&nbsp;your&nbsp;software&nbsp;can&nbsp;create&nbsp;a&nbsp;file&nbsp;with&nbsp;the&nbsp;same&nbsp;name&nbsp;as<br>
+<a href="#Configurable-configFilename">configFilename</a>()&nbsp;and&nbsp;selectively&nbsp;override&nbsp;settings.&nbsp;The&nbsp;format&nbsp;of<br>
+the&nbsp;file&nbsp;is&nbsp;a&nbsp;Python&nbsp;dictionary.<br>
+&nbsp;<br>
+Subclasses&nbsp;can&nbsp;also&nbsp;override&nbsp;<a href="#Configurable-userConfig">userConfig</a>()&nbsp;in&nbsp;order&nbsp;to&nbsp;obtain&nbsp;the<br>
+user&nbsp;configuration&nbsp;settings&nbsp;from&nbsp;another&nbsp;source.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Configurable-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Configurable-commandLineConfig"><strong>commandLineConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;settings&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;command-line.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;come&nbsp;via&nbsp;<a href="#-addCommandLineSetting">addCommandLineSetting</a>().</tt></dd></dl>
+
+<dl><dt><a name="Configurable-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;configuration&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;as&nbsp;a&nbsp;dictionary.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;combination&nbsp;of&nbsp;<a href="#Configurable-defaultConfig">defaultConfig</a>()&nbsp;and&nbsp;<a href="#Configurable-userConfig">userConfig</a>().<br>
+This&nbsp;method&nbsp;caches&nbsp;the&nbsp;config.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-configFilename"><strong>configFilename</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;full&nbsp;name&nbsp;of&nbsp;the&nbsp;user&nbsp;config&nbsp;file.<br>
+&nbsp;<br>
+Users&nbsp;can&nbsp;override&nbsp;the&nbsp;configuration&nbsp;by&nbsp;this&nbsp;config&nbsp;file.<br>
+Subclasses&nbsp;must&nbsp;override&nbsp;to&nbsp;specify&nbsp;a&nbsp;name.<br>
+Returning&nbsp;None&nbsp;is&nbsp;valid,&nbsp;in&nbsp;which&nbsp;case&nbsp;no&nbsp;user&nbsp;config&nbsp;file<br>
+will&nbsp;be&nbsp;loaded.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-configName"><strong>configName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;configuration&nbsp;file&nbsp;without&nbsp;the&nbsp;extension.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;name&nbsp;before&nbsp;the&nbsp;'.config'.<br>
+This&nbsp;is&nbsp;used&nbsp;on&nbsp;the&nbsp;command-line.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-configReplacementValues"><strong>configReplacementValues</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;for&nbsp;substitutions&nbsp;in&nbsp;the&nbsp;config&nbsp;file.<br>
+&nbsp;<br>
+This&nbsp;must&nbsp;be&nbsp;a&nbsp;dictionary&nbsp;suitable&nbsp;for&nbsp;use&nbsp;with&nbsp;"string&nbsp;%&nbsp;dict"<br>
+that&nbsp;should&nbsp;be&nbsp;used&nbsp;on&nbsp;the&nbsp;text&nbsp;in&nbsp;the&nbsp;config&nbsp;file.<br>
+If&nbsp;an&nbsp;empty&nbsp;dictionary&nbsp;(or&nbsp;None)&nbsp;is&nbsp;returned,&nbsp;then&nbsp;no&nbsp;substitution<br>
+will&nbsp;be&nbsp;attempted.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;default&nbsp;values&nbsp;for&nbsp;the&nbsp;settings.<br>
+&nbsp;<br>
+This&nbsp;implementation&nbsp;returns&nbsp;{}.&nbsp;Subclasses&nbsp;should&nbsp;override.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-hasSetting"><strong>hasSetting</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;a&nbsp;configuration&nbsp;setting&nbsp;has&nbsp;been&nbsp;changed.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-printConfig"><strong>printConfig</strong></a>(self, dest<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;the&nbsp;configuration&nbsp;to&nbsp;the&nbsp;given&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;destination&nbsp;is&nbsp;stdout.&nbsp;A&nbsp;fixed&nbsp;with&nbsp;font&nbsp;is&nbsp;assumed<br>
+for&nbsp;aligning&nbsp;the&nbsp;values&nbsp;to&nbsp;start&nbsp;at&nbsp;the&nbsp;same&nbsp;column.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-setSetting"><strong>setSetting</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;particular&nbsp;setting&nbsp;in&nbsp;the&nbsp;configuration.</tt></dd></dl>
+
+<dl><dt><a name="Configurable-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;config&nbsp;overrides.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;config&nbsp;file.<br>
+Returns&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken&nbsp;from&nbsp;<a href="#Configurable-configFilename">configFilename</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ConfigurationError">class <strong>ConfigurationError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Error&nbsp;in&nbsp;configuration&nbsp;file.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.Configurable.html#ConfigurationError">ConfigurationError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ConfigurationError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ConfigurationError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ConfigurationError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ConfigurationError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ConfigurationError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#ConfigurationError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="ConfigurationError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-addCommandLineSetting"><strong>addCommandLineSetting</strong></a>(name, value)</dt><dd><tt>Override&nbsp;the&nbsp;configuration&nbsp;with&nbsp;a&nbsp;command-line&nbsp;setting.<br>
+&nbsp;<br>
+Take&nbsp;a&nbsp;setting,&nbsp;like&nbsp;"AppServer.Verbose=0",&nbsp;and&nbsp;call<br>
+<a href="#-addCommandLineSetting">addCommandLineSetting</a>('AppServer.Verbose',&nbsp;'0'),&nbsp;and<br>
+it&nbsp;will&nbsp;override&nbsp;any&nbsp;settings&nbsp;in&nbsp;AppServer.config</tt></dd></dl>
+ <dl><dt><a name="-commandLineSetting"><strong>commandLineSetting</strong></a>(configName, settingName, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Retrieve&nbsp;a&nbsp;command-line&nbsp;setting.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;use&nbsp;this&nbsp;with&nbsp;non-existent&nbsp;classes,&nbsp;like&nbsp;"Context.Root=/WK",<br>
+and&nbsp;then&nbsp;fetch&nbsp;it&nbsp;back&nbsp;with&nbsp;<a href="#-commandLineSetting">commandLineSetting</a>('Context',&nbsp;'Root').</tt></dd></dl>
+</td></tr></table>
+</body></html>

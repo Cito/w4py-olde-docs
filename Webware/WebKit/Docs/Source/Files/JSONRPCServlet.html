@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/JSONRPCServlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""JSON-RPC servlet base class
+
+Written by Jean-Francois Pieronne
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> traceback
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">import</span> simplejson
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"ERROR: simplejson is not installed."</span>
+    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"Get it from http://cheeseshop.python.org/pypi/simplejson"</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> StringIO
+<span class="PY_KEYWORD">from</span> HTTPContent <span class="PY_KEYWORD">import</span> HTTPContent
+
+
+<span class="PY_KEYWORD">class</span> JSONRPCServlet(HTTPContent):
+    <span class="PY_STRING">"""A superclass for Webware servlets using JSON-RPC techniques.
+
+    JSONRPCServlet can be used to make coding JSON-RPC applications easier.
+
+    Subclasses should override the method json_methods() which returns a list
+    of method names. These method names refer to Webware Servlet methods that
+    are able to be called by an JSON-RPC-enabled web page. This is very similar
+    in functionality to Webware's actions.
+
+    Some basic security measures against JavaScript hijacking are taken     by
+    default which can be deactivated if you're not dealing with sensitive data.
+    You can further increase security by adding shared secret mechanisms.
+
+    """</span>
+
+    <span class="PY_COMMENT"># Class level variables that can be overridden by servlet instances:</span>
+    _debug = False <span class="PY_COMMENT"># set to True if you want to see debugging output</span>
+    <span class="PY_COMMENT"># The following variables control security precautions concerning</span>
+    <span class="PY_COMMENT"># a vulnerability known as "JavaScript hijacking". See also:</span>
+    <span class="PY_COMMENT"># http://www.fortifysoftware.com/servlet/downloads/public/JavaScript_Hijacking.pdf</span>
+    <span class="PY_COMMENT"># http://ajaxian.com/archives/protecting-a-javascript-service</span>
+    _allowGet = False <span class="PY_COMMENT"># set to True if you want to allow GET requests</span>
+    _allowEval = False <span class="PY_COMMENT"># set to True to allow direct evaluation of the response</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        HTTPContent.__init__(self)
+
+    <span class="PY_KEYWORD">def</span> respondToGet(self, transaction):
+        <span class="PY_KEYWORD">if</span> self._allowGet:
+            self.writeError(<span class="PY_STRING">"GET method not allowed"</span>)
+        HTTPContent.respondToGet(self, transaction)
+
+    <span class="PY_KEYWORD">def</span> defaultAction(self):
+        self.jsonCall()
+
+    <span class="PY_KEYWORD">def</span> actions(self):
+        actions = HTTPContent.actions(self)
+        actions.append(<span class="PY_STRING">'jsonCall'</span>)
+        <span class="PY_KEYWORD">return</span> actions
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> exposedMethods():
+        <span class="PY_STRING">"""Return a list or a set of all exposed RPC methods."""</span>
+        <span class="PY_KEYWORD">return</span> []
+
+    <span class="PY_KEYWORD">def</span> writeError(self, msg):
+        self.write(simplejson.dumps(
+            {<span class="PY_STRING">'id'</span>: self._id, <span class="PY_STRING">'code'</span>: -1, <span class="PY_STRING">'error'</span>: msg}))
+
+    <span class="PY_KEYWORD">def</span> writeResult(self, data):
+        data = simplejson.dumps(
+            {<span class="PY_STRING">'id'</span>: self._id, <span class="PY_STRING">'result'</span>: data})
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._allowEval:
+            data = (<span class="PY_STRING">'throw new Error'</span>
+                <span class="PY_STRING">'("Direct evaluation not allowed");\n/*%s*/'</span> % (data,))
+        self.write(data)
+
+    <span class="PY_KEYWORD">def</span> jsonCall(self):
+        <span class="PY_STRING">"""Execute method with arguments on the server side.
+
+        Returns Javascript function to be executed by the client immediately.
+
+        """</span>
+        request = self.request()
+        data = simplejson.loads(request.rawInput().read())
+        self._id, call, params = data[<span class="PY_STRING">'id'</span>], data[<span class="PY_STRING">'method'</span>], data[<span class="PY_STRING">'params'</span>]
+        <span class="PY_KEYWORD">if</span> call == <span class="PY_STRING">'system.listMethods'</span>:
+            self.writeResult(self.exposedMethods())
+        <span class="PY_KEYWORD">elif</span> call <span class="PY_KEYWORD">in</span> self.exposedMethods():
+            <span class="PY_KEYWORD">try</span>:
+                method = getattr(self, call)
+            <span class="PY_KEYWORD">except</span> AttributeError:
+                self.writeError(<span class="PY_STRING">'%s, although an approved method, '</span>
+                    <span class="PY_STRING">'was not found'</span> % call)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> self._debug:
+                        self.log(<span class="PY_STRING">"json call %s(%s)"</span> % (call, params))
+                    self.writeResult(method(*params))
+                <span class="PY_KEYWORD">except</span> Exception:
+                    err = StringIO()
+                    traceback.print_exc(file=err)
+                    e = err.getvalue()
+                    self.writeError(<span class="PY_STRING">'%s was called, '</span>
+                        <span class="PY_STRING">'but encountered an error: %s'</span> % (call, e))
+                    err.close()
+        <span class="PY_KEYWORD">else</span>:
+            self.writeError(<span class="PY_STRING">'%s is not an approved method'</span> % call)
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Python Server Pages 1.0.2 Release Notes</title>
+<link rel="stylesheet" href="../../Docs/Doc.css" type="text/css">
+</head>
+<body>
+<h1 class="header">Python Server Pages 1.0.2 Release Notes</h1>
+
+<p>Python Server Pages version 1.0.2 released on 06/07/09</p>
+
+<a name="NewFeatures"></a><h2>New Features</h2>
+<ul>
+  <li>The file extensions of the files that shall be parsed as PSP
+  can now be configured using the setting <code>ExtensionsForPSP</code>
+  (suggested by Tobias Franz). By default (as before), only files with
+  the extension <code>.psp</code> are regarded as PSP files.</li>
+  <li>You can now use an arbitrary encoding for your PSP files if you
+  specify the encoding in the <code>PSPFileEncoding</code> setting.</li>
+</ul>
+
+<a name="Improvements"></a><h2>Improvements and Refinements</h2>
+<ul>
+  <li>Empty PSP tags are now silently ignored.</li>
+</ul>
+
+<a name="Bugfixes"></a><h2>Bugfixes</h2>
+<ul>
+  <li>When using the psp-handler of mod_webkit, request methods like
+  <code>servletPath()</code> and others returned values which were different
+  from what you get when using the ordinary webkit-handler. This could
+  cause various problems, for instance because the default cookie path
+  is set to the servlet path (reported by Fionn Behrens). To avoid such
+  problems, requests made via the psp-handler now will look much more
+  similar to a request made via the ordinary webkit-handler.</li>
+</ul>
+
+<div class="footer">
+Webware for Python (<a href="http://www.webwareforpython.org">www.webwareforpython.org</a>)
+</div>
+</body>
+</html>

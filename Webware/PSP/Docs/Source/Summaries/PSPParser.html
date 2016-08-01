@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of PSP.PSPParser</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of PSP.PSPParser</h2>
+<p>You can also browse the <a href="../Files/PSPParser.html">complete source file</a>
+or the <a href="../Docs/PSP.PSPParser.html">generated documentation</a>.</p>
+<pre><span class="line_def">def <span class="name_def">checker</span>(method)</span>
+
+
+<span class="line_class">class <span class="name_class">PSPParser</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, ctxt)</span>
+<span class="line_def">    def <span class="name_def">setEventHandler</span>(self, handler)</span>
+<span class="line_def">    def <span class="name_def">flushCharData</span>(self, start, stop)</span>
+<span class="line_def">    def <span class="name_def">commentCheck</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkExpression</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkDirective</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkEndBlock</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkScript</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkScriptFile</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkScriptClass</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkMethod</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkInclude</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">checkInsert</span>(self, handler, reader)</span>
+<span class="line_def">    def <span class="name_def">parse</span>(self, until=None)</span>
+
+</pre>
+</body>
+</html>

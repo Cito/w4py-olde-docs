@@ -1,0 +1,171 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiddleKit.Core.DateAttr</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiddleKit.html"><font color="#ffffff">MiddleKit</font></a>.<a href="MiddleKit.Core.html"><font color="#ffffff">Core</font></a>.DateAttr</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiddleKit/Core/DateAttr.py">/var/www/docs/Webware-1.1.1/MiddleKit/Core/DateAttr.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.AnyDateTimeAttr.html#AnyDateTimeAttr">MiddleKit.Core.AnyDateTimeAttr.AnyDateTimeAttr</a>(<a href="MiddleKit.Core.Attr.html#Attr">MiddleKit.Core.Attr.Attr</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.DateAttr.html#DateAttr">DateAttr</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DateAttr">class <strong>DateAttr</strong></a>(<a href="MiddleKit.Core.AnyDateTimeAttr.html#AnyDateTimeAttr">MiddleKit.Core.AnyDateTimeAttr.AnyDateTimeAttr</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiddleKit.Core.DateAttr.html#DateAttr">DateAttr</a></dd>
+<dd><a href="MiddleKit.Core.AnyDateTimeAttr.html#AnyDateTimeAttr">MiddleKit.Core.AnyDateTimeAttr.AnyDateTimeAttr</a></dd>
+<dd><a href="MiddleKit.Core.Attr.html#Attr">MiddleKit.Core.Attr.Attr</a></dd>
+<dd><a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a></dd>
+<dd><a href="__builtin__.html#dict">__builtin__.dict</a></dd>
+<dd><a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="DateAttr-__init__"><strong>__init__</strong></a>(self, attr)</dt></dl>
+
+<hr>
+Methods inherited from <a href="MiddleKit.Core.Attr.html#Attr">MiddleKit.Core.Attr.Attr</a>:<br>
+<dl><dt><a name="DateAttr-awakeFromRead"><strong>awakeFromRead</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DateAttr-isRequired"><strong>isRequired</strong></a>(self)</dt><dd><tt>Return&nbsp;true&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;required&nbsp;for&nbsp;this&nbsp;attribute.<br>
+&nbsp;<br>
+In&nbsp;Python,&nbsp;that&nbsp;means&nbsp;the&nbsp;value&nbsp;cannot&nbsp;be&nbsp;None.&nbsp;In&nbsp;relational&nbsp;theory<br>
+terms,&nbsp;that&nbsp;means&nbsp;the&nbsp;value&nbsp;cannot&nbsp;be&nbsp;NULL.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-klass"><strong>klass</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;klass&nbsp;that&nbsp;this&nbsp;attribute&nbsp;is&nbsp;declared&nbsp;in&nbsp;and,&nbsp;therefore,&nbsp;belongs&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-model"><strong>model</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DateAttr-name"><strong>name</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DateAttr-printWarnings"><strong>printWarnings</strong></a>(self, out)</dt></dl>
+
+<dl><dt><a name="DateAttr-pyGetName"><strong>pyGetName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;that&nbsp;should&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;Python&nbsp;"get"&nbsp;accessor&nbsp;method&nbsp;for&nbsp;this&nbsp;attribute.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-pySetName"><strong>pySetName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;that&nbsp;should&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;Python&nbsp;"set"&nbsp;accessor&nbsp;method&nbsp;for&nbsp;this&nbsp;attribute.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-setKlass"><strong>setKlass</strong></a>(self, klass)</dt><dd><tt>Set&nbsp;the&nbsp;klass&nbsp;that&nbsp;the&nbsp;attribute&nbsp;belongs&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting&nbsp;taken&nbsp;from&nbsp;the&nbsp;model.<br>
+&nbsp;<br>
+Implementation&nbsp;note:&nbsp;Perhaps&nbsp;a&nbsp;future&nbsp;version&nbsp;should&nbsp;ask&nbsp;the&nbsp;klass&nbsp;and&nbsp;so&nbsp;on&nbsp;up&nbsp;the&nbsp;chain.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>:<br>
+<dl><dt><a name="DateAttr-boolForKey"><strong>boolForKey</strong></a>(self, key, default<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;True&nbsp;or&nbsp;False&nbsp;for&nbsp;the&nbsp;given&nbsp;key.<br>
+&nbsp;<br>
+Returns&nbsp;False&nbsp;if&nbsp;the&nbsp;key&nbsp;does&nbsp;not&nbsp;even&nbsp;exist.<br>
+Raises&nbsp;a&nbsp;value&nbsp;error&nbsp;if&nbsp;the&nbsp;key&nbsp;exists,&nbsp;but&nbsp;cannot&nbsp;be&nbsp;parsed&nbsp;as&nbsp;a&nbsp;bool.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><a name="DateAttr-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-__contains__">__contains__</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__delitem__"><strong>__delitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__delitem__">__delitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__iter__">__iter__</a>()&nbsp;&lt;==&gt;&nbsp;iter(x)</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__len__"><strong>__len__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__len__">__len__</a>()&nbsp;&lt;==&gt;&nbsp;len(x)</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__setitem__"><strong>__setitem__</strong></a>(...)</dt><dd><tt>x.<a href="#DateAttr-__setitem__">__setitem__</a>(i,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i]=y</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-__sizeof__">__sizeof__</a>()&nbsp;-&gt;&nbsp;size&nbsp;of&nbsp;D&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-clear"><strong>clear</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-clear">clear</a>()&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;D.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-copy"><strong>copy</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-copy">copy</a>()&nbsp;-&gt;&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-get"><strong>get</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-get">get</a>(k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;else&nbsp;d.&nbsp;&nbsp;d&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-has_key"><strong>has_key</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-has_key">has_key</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-items"><strong>items</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-items">items</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;(key,&nbsp;value)&nbsp;pairs,&nbsp;as&nbsp;2-tuples</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-iteritems"><strong>iteritems</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-iteritems">iteritems</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;(key,&nbsp;value)&nbsp;items&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-iterkeys"><strong>iterkeys</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-iterkeys">iterkeys</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;keys&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-itervalues"><strong>itervalues</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-itervalues">itervalues</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;values&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-keys"><strong>keys</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-keys">keys</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;keys</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-pop"><strong>pop</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-pop">pop</a>(k[,d])&nbsp;-&gt;&nbsp;v,&nbsp;remove&nbsp;specified&nbsp;key&nbsp;and&nbsp;return&nbsp;the&nbsp;corresponding&nbsp;value.<br>
+If&nbsp;key&nbsp;is&nbsp;not&nbsp;found,&nbsp;d&nbsp;is&nbsp;returned&nbsp;if&nbsp;given,&nbsp;otherwise&nbsp;KeyError&nbsp;is&nbsp;raised</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-popitem"><strong>popitem</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-popitem">popitem</a>()&nbsp;-&gt;&nbsp;(k,&nbsp;v),&nbsp;remove&nbsp;and&nbsp;return&nbsp;some&nbsp;(key,&nbsp;value)&nbsp;pair&nbsp;as&nbsp;a<br>
+2-tuple;&nbsp;but&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;D&nbsp;is&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-setdefault"><strong>setdefault</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-setdefault">setdefault</a>(k[,d])&nbsp;-&gt;&nbsp;D.<a href="#DateAttr-get">get</a>(k,d),&nbsp;also&nbsp;set&nbsp;D[k]=d&nbsp;if&nbsp;k&nbsp;not&nbsp;in&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-update"><strong>update</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-update">update</a>(E,&nbsp;**F)&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Update&nbsp;D&nbsp;from&nbsp;dict/iterable&nbsp;E&nbsp;and&nbsp;F.<br>
+If&nbsp;E&nbsp;has&nbsp;a&nbsp;.<a href="#DateAttr-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;k&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;E[k]<br>
+If&nbsp;E&nbsp;lacks&nbsp;.<a href="#DateAttr-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(k,&nbsp;v)&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;v<br>
+In&nbsp;either&nbsp;case,&nbsp;this&nbsp;is&nbsp;followed&nbsp;by:&nbsp;for&nbsp;k&nbsp;in&nbsp;F:&nbsp;D[k]&nbsp;=&nbsp;F[k]</tt></dd></dl>
+
+<dl><dt><a name="DateAttr-values"><strong>values</strong></a>(...)</dt><dd><tt>D.<a href="#DateAttr-values">values</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;values</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#DateAttr-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<dl><dt><strong>fromkeys</strong> = &lt;built-in method fromkeys of type object&gt;<dd><tt>dict.<a href="#DateAttr-fromkeys">fromkeys</a>(S[,v])&nbsp;-&gt;&nbsp;New&nbsp;dict&nbsp;with&nbsp;keys&nbsp;from&nbsp;S&nbsp;and&nbsp;values&nbsp;equal&nbsp;to&nbsp;v.<br>
+v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dl>
+
+<hr>
+Methods inherited from <a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a>:<br>
+<dl><dt><a name="DateAttr-printAttrs"><strong>printAttrs</strong></a>(self, out<font color="#909090">=None</font>)</dt></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

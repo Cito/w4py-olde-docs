@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>DBUtils/SteadyPg.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""SteadyPg - hardened classic PyGreSQL connections.
+
+Implements steady connections to a PostgreSQL database
+using the classic (not DB-API 2 compliant) PyGreSQL API.
+
+The connections are transparently reopened when they are
+closed or the database connection has been lost or when
+they are used more often than an optional usage limit.
+Only connections which have been marked as being in a database
+transaction with a begin() call will not be silently replaced.
+
+A typical situation where database connections are lost
+is when the database server or an intervening firewall is
+shutdown and restarted for maintenance reasons. In such a
+case, all database connections would become unusable, even
+though the database service may be already available again.
+
+The "hardened" connections provided by this module will
+make the database connections immediately available again.
+
+This results in a steady PostgreSQL connection that can be used
+by PooledPg or PersistentPg to create pooled or persistent
+connections to a PostgreSQL database in a threaded environment
+such as the application server of "Webware for Python."
+Note, however, that the connections themselves are not thread-safe.
+
+For more information on PostgreSQL, see:
+    http://www.postgresql.org
+For more information on PyGreSQL, see:
+    http://www.pygresql.org
+For more information on Webware for Python, see:
+    http://www.webwareforpython.org
+
+
+Usage:
+
+You can use the class SteadyPgConnection in the same way as you
+would use the class DB from the classic PyGreSQL API module db.
+The only difference is that you may specify a usage limit as the
+first parameter when you open a connection (set it to None
+if you prefer unlimited usage), and an optional list of commands
+that may serve to prepare the session as the second parameter,
+and you can specify whether is is allowed to close the connection
+(by default this is true). When the connection to the PostgreSQL
+database is lost or has been used too often, it will be automatically
+reset, without further notice.
+
+    from DBUtils.SteadyPg import SteadyPgConnection
+    db = SteadyPgConnection(10000, ["set datestyle to german"],
+        host=..., dbname=..., user=..., ...)
+    ...
+    result = db.query('...')
+    ...
+    db.close()
+
+
+Ideas for improvement:
+
+* Alternatively to the maximum number of uses,
+  implement a maximum time to live for connections.
+* Optionally log usage and loss of connection.
+
+
+Copyright, credits and license:
+
+* Contributed as supplement for Webware for Python and PyGreSQL
+  by Christoph Zwerschke in September 2005
+
+Licensed under the Open Software License version 2.1.
+
+"""</span>
+
+__version__ = <span class="PY_STRING">'1.1'</span>
+__revision__ = <span class="PY_STRING">"$Rev: 8218 $"</span>
+__date__ = <span class="PY_STRING">"$Date: 2011-08-14 13:57:11 +0200 (So, 14. Aug 2011) $"</span>
+
+
+<span class="PY_KEYWORD">from</span> pg <span class="PY_KEYWORD">import</span> DB <span class="PY_KEYWORD">as</span> PgConnection
+
+
+<span class="PY_KEYWORD">class</span> SteadyPgError(Exception):
+    <span class="PY_STRING">"""General SteadyPg error."""</span>
+
+<span class="PY_KEYWORD">class</span> InvalidConnection(SteadyPgError):
+    <span class="PY_STRING">"""Database connection is invalid."""</span>
+
+
+<span class="PY_KEYWORD">class</span> SteadyPgConnection:
+    <span class="PY_STRING">"""Class representing steady connections to a PostgreSQL database.
+
+    Underlying the connection is a classic PyGreSQL pg API database
+    connection which is reset if the connection is lost or used too often.
+    Thus the resulting connection is steadier ("tough and self-healing").
+
+    If you want the connection to be persistent in a threaded environment,
+    then you should not deal with this class directly, but use either the
+    PooledPg module or the PersistentPg module to get the connections.
+
+    """</span>
+
+    version = __version__
+
+    <span class="PY_KEYWORD">def</span> __init__(self, maxusage=None, setsession=None, closeable=True,
+            *args, **kwargs):
+        <span class="PY_STRING">"""Create a "tough" PostgreSQL connection.
+
+        maxusage: maximum usage limit for the underlying PyGreSQL connection
+            (number of uses, 0 or None means unlimited usage)
+            When this limit is reached, the connection is automatically reset.
+        setsession: optional list of SQL commands that may serve to prepare
+            the session, e.g. ["set datestyle to ...", "set time zone ..."]
+        closeable: if this is set to false, then closing the connection will
+            be silently ignored, but by default the connection can be closed
+        args, kwargs: the parameters that shall be used to establish
+            the PostgreSQL connections with PyGreSQL using pg.DB()
+
+        """</span>
+        <span class="PY_COMMENT"># basic initialization to make finalizer work</span>
+        self._con = None
+        self._closed = True
+        <span class="PY_COMMENT"># proper initialization of the connection</span>
+        <span class="PY_KEYWORD">if</span> maxusage <span class="PY_KEYWORD">is</span> None:
+            maxusage = 0
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(maxusage, (int, long)):
+            <span class="PY_KEYWORD">raise</span> TypeError(<span class="PY_STRING">"'maxusage' must be an integer value."</span>)
+        self._maxusage = maxusage
+        self._setsession_sql = setsession
+        self._closeable = closeable
+        self._con = PgConnection(*args, **kwargs)
+        self._transaction = False
+        self._closed = False
+        self._setsession()
+        self._usage = 0
+
+    <span class="PY_KEYWORD">def</span> _setsession(self):
+        <span class="PY_STRING">"""Execute the SQL commands for session preparation."""</span>
+        <span class="PY_KEYWORD">if</span> self._setsession_sql:
+            <span class="PY_KEYWORD">for</span> sql <span class="PY_KEYWORD">in</span> self._setsession_sql:
+                self._con.query(sql)
+
+    <span class="PY_KEYWORD">def</span> _close(self):
+        <span class="PY_STRING">"""Close the tough connection.
+
+        You can always close a tough connection with this method
+        and it will not complain if you close it more than once.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._closed:
+            <span class="PY_KEYWORD">try</span>:
+                self._con.close()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">pass</span>
+            self._transaction = False
+            self._closed = True
+
+    <span class="PY_KEYWORD">def</span> close(self):
+        <span class="PY_STRING">"""Close the tough connection.
+
+        You are allowed to close a tough connection by default
+        and it will not complain if you close it more than once.
+
+        You can disallow closing connections by setting
+        the closeable parameter to something false. In this case,
+        closing tough connections will be silently ignored.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._closeable:
+            self._close()
+        <span class="PY_KEYWORD">elif</span> self._transaction:
+            self.reset()
+
+    <span class="PY_KEYWORD">def</span> reopen(self):
+        <span class="PY_STRING">"""Reopen the tough connection.
+
+        It will not complain if the connection cannot be reopened.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            self._con.reopen()
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">if</span> self._transcation:
+                self._transaction = False
+                <span class="PY_KEYWORD">try</span>:
+                    self._con.query(<span class="PY_STRING">'rollback'</span>)
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">else</span>:
+            self._transaction = False
+            self._closed = False
+            self._setsession()
+            self._usage = 0
+
+    <span class="PY_KEYWORD">def</span> reset(self):
+        <span class="PY_STRING">"""Reset the tough connection.
+
+        If a reset is not possible, tries to reopen the connection.
+        It will not complain if the connection is already closed.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            self._con.reset()
+            self._transaction = False
+            self._setsession()
+            self._usage = 0
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">try</span>:
+                self.reopen()
+            <span class="PY_KEYWORD">except</span> Exception:
+                <span class="PY_KEYWORD">try</span>:
+                    self.rollback()
+                <span class="PY_KEYWORD">except</span> Exception:
+                    <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> begin(self, sql=None):
+        <span class="PY_STRING">"""Begin a transaction."""</span>
+        self._transaction = True
+        <span class="PY_KEYWORD">try</span>:
+            begin = self._con.begin
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">return</span> self._con.query(sql <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'begin'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># use existing method if available</span>
+            <span class="PY_KEYWORD">if</span> sql:
+                <span class="PY_KEYWORD">return</span> begin(sql=sql)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> begin()
+
+    <span class="PY_KEYWORD">def</span> end(self, sql=None):
+        <span class="PY_STRING">"""Commit the current transaction."""</span>
+        self._transaction = False
+        <span class="PY_KEYWORD">try</span>:
+            end = self._con.end
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">return</span> self._con.query(sql <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'end'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> sql:
+                <span class="PY_KEYWORD">return</span> end(sql=sql)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> end()
+
+    <span class="PY_KEYWORD">def</span> commit(self, sql=None):
+        <span class="PY_STRING">"""Commit the current transaction."""</span>
+        self._transaction = False
+        <span class="PY_KEYWORD">try</span>:
+            commit = self._con.commit
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">return</span> self._con.query(sql <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'commit'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> sql:
+                <span class="PY_KEYWORD">return</span> commit(sql=sql)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> commit()
+
+    <span class="PY_KEYWORD">def</span> rollback(self, sql=None):
+        <span class="PY_STRING">"""Rollback the current transaction."""</span>
+        self._transaction = False
+        <span class="PY_KEYWORD">try</span>:
+            rollback = self._con.rollback
+        <span class="PY_KEYWORD">except</span> AttributeError:
+            <span class="PY_KEYWORD">return</span> self._con.query(sql <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'rollback'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> sql:
+                <span class="PY_KEYWORD">return</span> rollback(sql=sql)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> rollback()
+
+    <span class="PY_KEYWORD">def</span> _get_tough_method(self, method):
+        <span class="PY_STRING">"""Return a "tough" version of a connection class method.
+
+        The tough version checks whether the connection is bad (lost)
+        and automatically and transparently tries to reset the connection
+        if this is the case (for instance, the database has been restarted).
+
+        """</span>
+        <span class="PY_KEYWORD">def</span> tough_method(*args, **kwargs):
+            transaction = self._transaction
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> transaction:
+                <span class="PY_KEYWORD">try</span>: <span class="PY_COMMENT"># check whether connection status is bad</span>
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._con.db.status:
+                        <span class="PY_KEYWORD">raise</span> AttributeError
+                    <span class="PY_KEYWORD">if</span> self._maxusage: <span class="PY_COMMENT"># or connection used too often</span>
+                        <span class="PY_KEYWORD">if</span> self._usage &gt;= self._maxusage:
+                            <span class="PY_KEYWORD">raise</span> AttributeError
+                <span class="PY_KEYWORD">except</span> Exception:
+                    self.reset() <span class="PY_COMMENT"># then reset the connection</span>
+            <span class="PY_KEYWORD">try</span>:
+                result = method(*args, **kwargs) <span class="PY_COMMENT"># try connection method</span>
+            <span class="PY_KEYWORD">except</span> Exception: <span class="PY_COMMENT"># error in query</span>
+                <span class="PY_KEYWORD">if</span> transaction: <span class="PY_COMMENT"># inside a transaction</span>
+                    self._transaction = False
+                    <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># propagate the error</span>
+                <span class="PY_KEYWORD">elif</span> self._con.db.status: <span class="PY_COMMENT"># if it was not a connection problem</span>
+                    <span class="PY_KEYWORD">raise</span> <span class="PY_COMMENT"># then propagate the error</span>
+                <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># otherwise</span>
+                    self.reset() <span class="PY_COMMENT"># reset the connection</span>
+                    result = method(*args, **kwargs) <span class="PY_COMMENT"># and try one more time</span>
+            self._usage += 1
+            <span class="PY_KEYWORD">return</span> result
+        <span class="PY_KEYWORD">return</span> tough_method
+
+    <span class="PY_KEYWORD">def</span> __getattr__(self, name):
+        <span class="PY_STRING">"""Inherit the members of the standard connection class.
+
+        Some methods are made "tougher" than in the standard version.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._con:
+            attr = getattr(self._con, name)
+            <span class="PY_KEYWORD">if</span> (name <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'query'</span>, <span class="PY_STRING">'get'</span>, <span class="PY_STRING">'insert'</span>, <span class="PY_STRING">'update'</span>, <span class="PY_STRING">'delete'</span>)
+                    <span class="PY_KEYWORD">or</span> name.startswith(<span class="PY_STRING">'get_'</span>)):
+                attr = self._get_tough_method(attr)
+            <span class="PY_KEYWORD">return</span> attr
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> InvalidConnection
+
+    <span class="PY_KEYWORD">def</span> __del__(self):
+        <span class="PY_STRING">"""Delete the steady connection."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            self._close() <span class="PY_COMMENT"># make sure the connection is closed</span>
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">pass</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

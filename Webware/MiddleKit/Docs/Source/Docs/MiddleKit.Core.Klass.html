@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiddleKit.Core.Klass</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiddleKit.html"><font color="#ffffff">MiddleKit</font></a>.<a href="MiddleKit.Core.html"><font color="#ffffff">Core</font></a>.Klass</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiddleKit/Core/Klass.py">/var/www/docs/Webware-1.1.1/MiddleKit/Core/Klass.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>(<a href="__builtin__.html#dict">__builtin__.dict</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.Klass.html#Klass">Klass</a>(<a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>, <a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a>)
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiddleKit.Core.Klass.html#Klass">Klass</a>(<a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>, <a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a>)
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Klass">class <strong>Klass</strong></a>(<a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>, <a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;<a href="#Klass">Klass</a>&nbsp;represents&nbsp;a&nbsp;class&nbsp;specification.<br>
+&nbsp;<br>
+It&nbsp;is&nbsp;consisting&nbsp;primarily&nbsp;of&nbsp;a&nbsp;name&nbsp;and&nbsp;a&nbsp;list&nbsp;of&nbsp;attributes.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiddleKit.Core.Klass.html#Klass">Klass</a></dd>
+<dd><a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a></dd>
+<dd><a href="__builtin__.html#dict">__builtin__.dict</a></dd>
+<dd><a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Klass-__cmp__"><strong>__cmp__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Klass-__hash__"><strong>__hash__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-__init__"><strong>__init__</strong></a>(self, klassContainer, rawDict<font color="#909090">=None</font>)</dt><dd><tt>Initialize&nbsp;a&nbsp;<a href="#Klass">Klass</a>&nbsp;definition&nbsp;with&nbsp;a&nbsp;raw&nbsp;dictionary.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;typically&nbsp;read&nbsp;from&nbsp;a&nbsp;file.&nbsp;The&nbsp;'Class'&nbsp;field&nbsp;contains&nbsp;the&nbsp;name<br>
+and&nbsp;can&nbsp;also&nbsp;contain&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;superclass&nbsp;(like&nbsp;"Name&nbsp;:&nbsp;SuperName").<br>
+Multiple&nbsp;inheritance&nbsp;is&nbsp;not&nbsp;yet&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="Klass-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-addAttr"><strong>addAttr</strong></a>(self, attr)</dt></dl>
+
+<dl><dt><a name="Klass-addSubklass"><strong>addSubklass</strong></a>(self, klass)</dt></dl>
+
+<dl><dt><a name="Klass-allAttrs"><strong>allAttrs</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;attributes.<br>
+&nbsp;<br>
+This&nbsp;includes&nbsp;those&nbsp;attributes&nbsp;that&nbsp;are&nbsp;inherited&nbsp;and&nbsp;derived.<br>
+The&nbsp;order&nbsp;is&nbsp;top&nbsp;down;&nbsp;that&nbsp;is,&nbsp;ancestor&nbsp;attributes&nbsp;come&nbsp;first.</tt></dd></dl>
+
+<dl><dt><a name="Klass-allDataAttrs"><strong>allDataAttrs</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;data&nbsp;attributes.<br>
+&nbsp;<br>
+This&nbsp;includes&nbsp;those&nbsp;attributes&nbsp;that&nbsp;are&nbsp;inherited.<br>
+The&nbsp;order&nbsp;is&nbsp;top&nbsp;down;&nbsp;that&nbsp;is,&nbsp;ancestor&nbsp;attributes&nbsp;come&nbsp;first.<br>
+Derived&nbsp;attributes&nbsp;are&nbsp;not&nbsp;included&nbsp;in&nbsp;the&nbsp;list.</tt></dd></dl>
+
+<dl><dt><a name="Klass-allDataRefAttrs"><strong>allDataRefAttrs</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;data&nbsp;referencing&nbsp;attributes.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;data&nbsp;attributes&nbsp;that&nbsp;are&nbsp;obj&nbsp;refs&nbsp;or&nbsp;lists,<br>
+including&nbsp;those&nbsp;that&nbsp;are&nbsp;inherited.</tt></dd></dl>
+
+<dl><dt><a name="Klass-asShortString"><strong>asShortString</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-attr"><strong>attr</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;attribute&nbsp;with&nbsp;the&nbsp;given&nbsp;name.<br>
+&nbsp;<br>
+If&nbsp;no&nbsp;such&nbsp;attribute&nbsp;exists,&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;unless&nbsp;a&nbsp;default<br>
+was&nbsp;provided&nbsp;(which&nbsp;is&nbsp;then&nbsp;returned).</tt></dd></dl>
+
+<dl><dt><a name="Klass-attrs"><strong>attrs</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;klass'&nbsp;attributes&nbsp;not&nbsp;including&nbsp;inheritance.</tt></dd></dl>
+
+<dl><dt><a name="Klass-awakeFromRead"><strong>awakeFromRead</strong></a>(self, klasses)</dt><dd><tt>Perform&nbsp;further&nbsp;initialization.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;Klasses&nbsp;after&nbsp;all&nbsp;basic&nbsp;<a href="#Klass">Klass</a>&nbsp;definitions&nbsp;have&nbsp;been&nbsp;read.</tt></dd></dl>
+
+<dl><dt><a name="Klass-backObjRefAttrs"><strong>backObjRefAttrs</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;potentially&nbsp;referencing&nbsp;attributes.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;ObjRefAttrs&nbsp;in&nbsp;the&nbsp;given&nbsp;object&nbsp;model&nbsp;that&nbsp;can<br>
+potentially&nbsp;refer&nbsp;to&nbsp;this&nbsp;object.&nbsp;The&nbsp;list&nbsp;does&nbsp;NOT&nbsp;include&nbsp;attributes<br>
+inherited&nbsp;from&nbsp;superclasses.</tt></dd></dl>
+
+<dl><dt><a name="Klass-buildDependencies"><strong>buildDependencies</strong></a>(self)</dt><dd><tt>Build&nbsp;dependencies&nbsp;of&nbsp;the&nbsp;klass.<br>
+&nbsp;<br>
+A&nbsp;klass'&nbsp;immediate&nbsp;dependencies&nbsp;are&nbsp;its&nbsp;ancestor&nbsp;classes&nbsp;(which&nbsp;may<br>
+have&nbsp;auxilliary&nbsp;tables&nbsp;such&nbsp;as&nbsp;enums),&nbsp;the&nbsp;target&nbsp;klasses&nbsp;of&nbsp;all&nbsp;its<br>
+obj&nbsp;ref&nbsp;attrs&nbsp;and&nbsp;their&nbsp;descendant&nbsp;classes.</tt></dd></dl>
+
+<dl><dt><a name="Klass-descendants"><strong>descendants</strong></a>(self, init<font color="#909090">=1</font>, memo<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;all&nbsp;descendant&nbsp;klasses&nbsp;of&nbsp;this&nbsp;klass.</tt></dd></dl>
+
+<dl><dt><a name="Klass-hasAttr"><strong>hasAttr</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="Klass-id"><strong>id</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;id&nbsp;of&nbsp;the&nbsp;class,&nbsp;which&nbsp;is&nbsp;an&nbsp;integer.<br>
+&nbsp;<br>
+Ids&nbsp;can&nbsp;be&nbsp;fundamental&nbsp;to&nbsp;storing&nbsp;object&nbsp;references&nbsp;in&nbsp;concrete&nbsp;object&nbsp;stores.<br>
+This&nbsp;method&nbsp;will&nbsp;throw&nbsp;an&nbsp;exception&nbsp;if&nbsp;<a href="#Klass-setId">setId</a>()&nbsp;was&nbsp;not&nbsp;previously&nbsp;invoked.</tt></dd></dl>
+
+<dl><dt><a name="Klass-isAbstract"><strong>isAbstract</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-isKindOfKlassNamed"><strong>isKindOfKlassNamed</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;the&nbsp;klass&nbsp;is&nbsp;from&nbsp;the&nbsp;given&nbsp;kind.<br>
+&nbsp;<br>
+Returns&nbsp;true&nbsp;if&nbsp;the&nbsp;klass&nbsp;is&nbsp;the&nbsp;same&nbsp;as,&nbsp;or&nbsp;inherits&nbsp;from,<br>
+the&nbsp;klass&nbsp;with&nbsp;the&nbsp;given&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Klass-klasses"><strong>klasses</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-lookupAncestorKlass"><strong>lookupAncestorKlass</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Search&nbsp;for&nbsp;and&nbsp;return&nbsp;the&nbsp;ancestor&nbsp;klass&nbsp;with&nbsp;the&nbsp;given&nbsp;name.<br>
+&nbsp;<br>
+Raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;no&nbsp;such&nbsp;klass&nbsp;exists,&nbsp;unless&nbsp;a&nbsp;default<br>
+is&nbsp;specified&nbsp;(in&nbsp;which&nbsp;case&nbsp;it&nbsp;is&nbsp;returned).</tt></dd></dl>
+
+<dl><dt><a name="Klass-lookupAttr"><strong>lookupAttr</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="Klass-model"><strong>model</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-name"><strong>name</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-printWarnings"><strong>printWarnings</strong></a>(self, out)</dt></dl>
+
+<dl><dt><a name="Klass-pyClass"><strong>pyClass</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Python&nbsp;class&nbsp;that&nbsp;corresponds&nbsp;to&nbsp;this&nbsp;class.<br>
+&nbsp;<br>
+This&nbsp;request&nbsp;will&nbsp;even&nbsp;result&nbsp;in&nbsp;the&nbsp;Python&nbsp;class'&nbsp;module&nbsp;being<br>
+imported&nbsp;if&nbsp;necessary.&nbsp;It&nbsp;will&nbsp;also&nbsp;set&nbsp;the&nbsp;Python&nbsp;class<br>
+attribute&nbsp;_mk_klass&nbsp;which&nbsp;is&nbsp;used&nbsp;by&nbsp;MiddleKit.Run.MiddleObject.</tt></dd></dl>
+
+<dl><dt><a name="Klass-readDict"><strong>readDict</strong></a>(self, rawDict)</dt></dl>
+
+<dl><dt><a name="Klass-recordDependencyOrder"><strong>recordDependencyOrder</strong></a>(self, order, visited, indent<font color="#909090">=0</font>)</dt></dl>
+
+<dl><dt><a name="Klass-setId"><strong>setId</strong></a>(self, id)</dt></dl>
+
+<dl><dt><a name="Klass-setKlasses"><strong>setKlasses</strong></a>(self, klasses)</dt><dd><tt>Set&nbsp;the&nbsp;klasses&nbsp;object&nbsp;of&nbsp;the&nbsp;klass.&nbsp;This&nbsp;is&nbsp;the&nbsp;klass'&nbsp;owner.</tt></dd></dl>
+
+<dl><dt><a name="Klass-setSuperklass"><strong>setSuperklass</strong></a>(self, klass)</dt></dl>
+
+<dl><dt><a name="Klass-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting&nbsp;taken&nbsp;from&nbsp;the&nbsp;model.</tt></dd></dl>
+
+<dl><dt><a name="Klass-subklasses"><strong>subklasses</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-superklass"><strong>superklass</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-supername"><strong>supername</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Klass-willBuildDependencies"><strong>willBuildDependencies</strong></a>(self)</dt><dd><tt>Preps&nbsp;the&nbsp;klass&nbsp;for&nbsp;<a href="#Klass-buildDependencies">buildDependencies</a>().</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>:<br>
+<dl><dt><a name="Klass-boolForKey"><strong>boolForKey</strong></a>(self, key, default<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;True&nbsp;or&nbsp;False&nbsp;for&nbsp;the&nbsp;given&nbsp;key.<br>
+&nbsp;<br>
+Returns&nbsp;False&nbsp;if&nbsp;the&nbsp;key&nbsp;does&nbsp;not&nbsp;even&nbsp;exist.<br>
+Raises&nbsp;a&nbsp;value&nbsp;error&nbsp;if&nbsp;the&nbsp;key&nbsp;exists,&nbsp;but&nbsp;cannot&nbsp;be&nbsp;parsed&nbsp;as&nbsp;a&nbsp;bool.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiddleKit.Core.MiddleDict.html#MiddleDict">MiddleKit.Core.MiddleDict.MiddleDict</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><a name="Klass-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-__contains__">__contains__</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="Klass-__delitem__"><strong>__delitem__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__delitem__">__delitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="Klass-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="Klass-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="Klass-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__iter__">__iter__</a>()&nbsp;&lt;==&gt;&nbsp;iter(x)</tt></dd></dl>
+
+<dl><dt><a name="Klass-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__len__"><strong>__len__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__len__">__len__</a>()&nbsp;&lt;==&gt;&nbsp;len(x)</tt></dd></dl>
+
+<dl><dt><a name="Klass-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="Klass-__setitem__"><strong>__setitem__</strong></a>(...)</dt><dd><tt>x.<a href="#Klass-__setitem__">__setitem__</a>(i,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i]=y</tt></dd></dl>
+
+<dl><dt><a name="Klass-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-__sizeof__">__sizeof__</a>()&nbsp;-&gt;&nbsp;size&nbsp;of&nbsp;D&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+
+<dl><dt><a name="Klass-clear"><strong>clear</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-clear">clear</a>()&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;D.</tt></dd></dl>
+
+<dl><dt><a name="Klass-copy"><strong>copy</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-copy">copy</a>()&nbsp;-&gt;&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="Klass-get"><strong>get</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-get">get</a>(k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;else&nbsp;d.&nbsp;&nbsp;d&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="Klass-has_key"><strong>has_key</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-has_key">has_key</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="Klass-items"><strong>items</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-items">items</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;(key,&nbsp;value)&nbsp;pairs,&nbsp;as&nbsp;2-tuples</tt></dd></dl>
+
+<dl><dt><a name="Klass-iteritems"><strong>iteritems</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-iteritems">iteritems</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;(key,&nbsp;value)&nbsp;items&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="Klass-iterkeys"><strong>iterkeys</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-iterkeys">iterkeys</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;keys&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="Klass-itervalues"><strong>itervalues</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-itervalues">itervalues</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;values&nbsp;of&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="Klass-keys"><strong>keys</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-keys">keys</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;keys</tt></dd></dl>
+
+<dl><dt><a name="Klass-pop"><strong>pop</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-pop">pop</a>(k[,d])&nbsp;-&gt;&nbsp;v,&nbsp;remove&nbsp;specified&nbsp;key&nbsp;and&nbsp;return&nbsp;the&nbsp;corresponding&nbsp;value.<br>
+If&nbsp;key&nbsp;is&nbsp;not&nbsp;found,&nbsp;d&nbsp;is&nbsp;returned&nbsp;if&nbsp;given,&nbsp;otherwise&nbsp;KeyError&nbsp;is&nbsp;raised</tt></dd></dl>
+
+<dl><dt><a name="Klass-popitem"><strong>popitem</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-popitem">popitem</a>()&nbsp;-&gt;&nbsp;(k,&nbsp;v),&nbsp;remove&nbsp;and&nbsp;return&nbsp;some&nbsp;(key,&nbsp;value)&nbsp;pair&nbsp;as&nbsp;a<br>
+2-tuple;&nbsp;but&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;D&nbsp;is&nbsp;empty.</tt></dd></dl>
+
+<dl><dt><a name="Klass-setdefault"><strong>setdefault</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-setdefault">setdefault</a>(k[,d])&nbsp;-&gt;&nbsp;D.<a href="#Klass-get">get</a>(k,d),&nbsp;also&nbsp;set&nbsp;D[k]=d&nbsp;if&nbsp;k&nbsp;not&nbsp;in&nbsp;D</tt></dd></dl>
+
+<dl><dt><a name="Klass-update"><strong>update</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-update">update</a>(E,&nbsp;**F)&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Update&nbsp;D&nbsp;from&nbsp;dict/iterable&nbsp;E&nbsp;and&nbsp;F.<br>
+If&nbsp;E&nbsp;has&nbsp;a&nbsp;.<a href="#Klass-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;k&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;E[k]<br>
+If&nbsp;E&nbsp;lacks&nbsp;.<a href="#Klass-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(k,&nbsp;v)&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;v<br>
+In&nbsp;either&nbsp;case,&nbsp;this&nbsp;is&nbsp;followed&nbsp;by:&nbsp;for&nbsp;k&nbsp;in&nbsp;F:&nbsp;D[k]&nbsp;=&nbsp;F[k]</tt></dd></dl>
+
+<dl><dt><a name="Klass-values"><strong>values</strong></a>(...)</dt><dd><tt>D.<a href="#Klass-values">values</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;values</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#Klass-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<dl><dt><strong>fromkeys</strong> = &lt;built-in method fromkeys of type object&gt;<dd><tt>dict.<a href="#Klass-fromkeys">fromkeys</a>(S[,v])&nbsp;-&gt;&nbsp;New&nbsp;dict&nbsp;with&nbsp;keys&nbsp;from&nbsp;S&nbsp;and&nbsp;values&nbsp;equal&nbsp;to&nbsp;v.<br>
+v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dl>
+
+<hr>
+Methods inherited from <a href="MiddleKit.Core.ModelObject.html#ModelObject">MiddleKit.Core.ModelObject.ModelObject</a>:<br>
+<dl><dt><a name="Klass-printAttrs"><strong>printAttrs</strong></a>(self, out<font color="#909090">=None</font>)</dt></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

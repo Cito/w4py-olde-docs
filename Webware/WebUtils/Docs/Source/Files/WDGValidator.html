@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/WDGValidator.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""WDGValidator.py
+
+HTML validation using Web Design Group's HTML validator.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> htmlEncode
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> StringIO
+
+
+<span class="PY_KEYWORD">def</span> encodeWithIndentation(html):
+    <span class="PY_STRING">"""Encode HTML and create indentation from tab characters."""</span>
+    html = htmlEncode(html).replace(<span class="PY_STRING">'  '</span>, <span class="PY_STRING">'&amp;nbsp; '</span>)
+    <span class="PY_KEYWORD">return</span> html.replace(<span class="PY_STRING">'\t'</span>, <span class="PY_STRING">'&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;'</span>)
+
+
+<span class="PY_KEYWORD">def</span> validateHTML(html):
+    <span class="PY_STRING">"""Validate the given html.
+
+    Validate the input using Web Design Group's HTML validator
+    available at http://www.htmlhelp.com/tools/validator/
+
+    Make sure you install the offline validator (called "validate")
+    which can be called from the command-line.
+    The "validate" script must be in your path.
+
+    If no errors are found, an empty string is returned.
+    Otherwise, the HTML with the error messages is returned.
+
+    """</span>
+
+    input, output = os.popen4(<span class="PY_STRING">'validate'</span>)
+    input.write(html)
+    input.close()
+    out = output.readlines()
+    output.close()
+
+    errorLines = {}
+    <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> out:
+        <span class="PY_KEYWORD">if</span> line[0:5] == <span class="PY_STRING">'Line '</span>:
+            i = line.find(<span class="PY_STRING">','</span>)
+            <span class="PY_KEYWORD">if</span> i &gt;= 0:
+                linenum = int(line[5:i])
+                errorLines[linenum] = line
+
+    <span class="PY_COMMENT"># Be quiet if all's well</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> errorLines:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>
+
+    result = StringIO()
+    result.write(<span class="PY_STRING">'&lt;table style="background-color: #ffffff"&gt;'</span>
+        <span class="PY_STRING">'&lt;tr&gt;&lt;td colspan="2"&gt;\n'</span>)
+    result.write(<span class="PY_STRING">"&lt;pre&gt;%s&lt;/pre&gt;"</span> % <span class="PY_STRING">""</span>.join(out))
+    result.write(<span class="PY_STRING">'&lt;/td&gt;&lt;/tr&gt;\n'</span>)
+
+    goodColors = [<span class="PY_STRING">'#d0d0d0'</span>, <span class="PY_STRING">'#e0e0e0'</span>]
+    badColor = <span class="PY_STRING">'#ffd0d0'</span>
+    lines = html.splitlines(True)
+    i = 1
+    <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+        <span class="PY_KEYWORD">if</span> i <span class="PY_KEYWORD">in</span> errorLines:
+            result.write(<span class="PY_STRING">'&lt;tr style="background-color: %s"&gt;'</span>
+                <span class="PY_STRING">'&lt;td rowspan="2"&gt;%d&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;\n'</span>
+                % (badColor, i, encodeWithIndentation(errorLines[i])))
+            result.write(<span class="PY_STRING">'&lt;tr style="background-color: %s"&gt;'</span>
+                <span class="PY_STRING">'&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;\n'</span>
+                % (badColor, encodeWithIndentation(line)))
+        <span class="PY_KEYWORD">else</span>:
+            color = goodColors[i % 2]
+            result.write(<span class="PY_STRING">'&lt;tr style="background-color: %s"&gt;'</span>
+                <span class="PY_STRING">'&lt;td&gt;%d&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;\n'</span>
+                % (color, i, encodeWithIndentation(line)))
+        i += 1
+    result.write(<span class="PY_STRING">'&lt;/table&gt;\n'</span>)
+    <span class="PY_KEYWORD">return</span> result.getvalue()
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.ExceptionHandler</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.ExceptionHandler</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/ExceptionHandler.py">/var/www/docs/Webware-1.1.1/WebKit/ExceptionHandler.py</a></font></td></tr></table>
+    <p><tt>Exception&nbsp;handling.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="poplib.html">poplib</a><br>
+</td><td width="25%" valign=top><a href="smtplib.html">smtplib</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="traceback.html">traceback</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ExceptionHandler.html#ExceptionHandler">ExceptionHandler</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.ExceptionHandler.html#Singleton">Singleton</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ExceptionHandler">class <strong>ExceptionHandler</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Exception&nbsp;handling.<br>
+&nbsp;<br>
+<a href="#ExceptionHandler">ExceptionHandler</a>&nbsp;is&nbsp;a&nbsp;utility&nbsp;class&nbsp;for&nbsp;Application&nbsp;that&nbsp;is&nbsp;created<br>
+to&nbsp;handle&nbsp;a&nbsp;particular&nbsp;exception.&nbsp;The&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;a&nbsp;one-shot&nbsp;deal.<br>
+After&nbsp;handling&nbsp;an&nbsp;exception,&nbsp;it&nbsp;should&nbsp;be&nbsp;removed.<br>
+&nbsp;<br>
+At&nbsp;some&nbsp;point,&nbsp;the&nbsp;exception&nbsp;handler&nbsp;sends<br>
+`writeExceptionReport`&nbsp;to&nbsp;the&nbsp;transaction&nbsp;(if&nbsp;present),&nbsp;which<br>
+in&nbsp;turn&nbsp;sends&nbsp;it&nbsp;to&nbsp;the&nbsp;other&nbsp;transactional&nbsp;objects<br>
+(application,&nbsp;request,&nbsp;response,&nbsp;etc.)&nbsp;&nbsp;The&nbsp;handler&nbsp;is&nbsp;the<br>
+single&nbsp;argument&nbsp;for&nbsp;this&nbsp;message.<br>
+&nbsp;<br>
+Classes&nbsp;may&nbsp;find&nbsp;it&nbsp;useful&nbsp;to&nbsp;do&nbsp;things&nbsp;like&nbsp;this::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exceptionReportAttrs&nbsp;=&nbsp;'foo&nbsp;bar&nbsp;baz'.split()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;writeExceptionReport(self,&nbsp;handler):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;handler.<a href="#ExceptionHandler-writeTitle">writeTitle</a>(self.<strong>__class__</strong>.__name__)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;handler.<a href="#ExceptionHandler-writeAttrs">writeAttrs</a>(self,&nbsp;self.<strong>exceptionReportAttrs</strong>)<br>
+&nbsp;<br>
+The&nbsp;handler&nbsp;write&nbsp;methods&nbsp;that&nbsp;may&nbsp;be&nbsp;useful&nbsp;are:<br>
+&nbsp;<br>
+&nbsp;&nbsp;*&nbsp;write<br>
+&nbsp;&nbsp;*&nbsp;writeTitle<br>
+&nbsp;&nbsp;*&nbsp;writeDict<br>
+&nbsp;&nbsp;*&nbsp;writeAttrs<br>
+&nbsp;<br>
+Derived&nbsp;classes&nbsp;must&nbsp;not&nbsp;assume&nbsp;that&nbsp;the&nbsp;error&nbsp;occured&nbsp;in&nbsp;a<br>
+transaction.&nbsp;&nbsp;self.<strong>_tra</strong>&nbsp;may&nbsp;be&nbsp;None&nbsp;for&nbsp;exceptions&nbsp;outside<br>
+of&nbsp;transactions.<br>
+&nbsp;<br>
+**HOW&nbsp;TO&nbsp;CREATE&nbsp;A&nbsp;CUSTOM&nbsp;EXCEPTION&nbsp;HANDLER**<br>
+&nbsp;<br>
+In&nbsp;the&nbsp;``__init__.py``&nbsp;of&nbsp;your&nbsp;context::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;WebKit.<a href="#ExceptionHandler">ExceptionHandler</a>&nbsp;import&nbsp;<a href="#ExceptionHandler">ExceptionHandler</a>&nbsp;as&nbsp;_ExceptionHandler<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;<a href="#ExceptionHandler">ExceptionHandler</a>(_ExceptionHandler):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_hideValuesForFields&nbsp;=&nbsp;_ExceptionHandler._hideValuesForFields&nbsp;+&nbsp;['foo',&nbsp;'bar']<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#ExceptionHandler-work">work</a>(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_ExceptionHandler.<a href="#ExceptionHandler-work">work</a>(self)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;do&nbsp;whatever<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;override&nbsp;other&nbsp;methods&nbsp;if&nbsp;you&nbsp;like<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;contextInitialize(app,&nbsp;ctxPath):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;app._exceptionHandlerClass&nbsp;=&nbsp;<a href="#ExceptionHandler">ExceptionHandler</a><br>
+&nbsp;<br>
+You&nbsp;can&nbsp;also&nbsp;control&nbsp;the&nbsp;errors&nbsp;with&nbsp;settings&nbsp;in<br>
+``Application.config``<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ExceptionHandler-__init__"><strong>__init__</strong></a>(self, application, transaction, excInfo, formatOptions<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;an&nbsp;exception&nbsp;handler&nbsp;instance.<br>
+&nbsp;<br>
+<a href="#ExceptionHandler">ExceptionHandler</a>&nbsp;instances&nbsp;are&nbsp;created&nbsp;anew&nbsp;for&nbsp;each&nbsp;exception.<br>
+Instantiating&nbsp;<a href="#ExceptionHandler">ExceptionHandler</a>&nbsp;completes&nbsp;the&nbsp;process&nbsp;--<br>
+the&nbsp;caller&nbsp;need&nbsp;not&nbsp;do&nbsp;anything&nbsp;else.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-basicServletName"><strong>basicServletName</strong></a>(self)</dt><dd><tt>The&nbsp;base&nbsp;name&nbsp;for&nbsp;the&nbsp;servlet&nbsp;(sans&nbsp;directory).</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-emailException"><strong>emailException</strong></a>(self, htmlErrMsg)</dt><dd><tt>Email&nbsp;the&nbsp;exception.<br>
+&nbsp;<br>
+Send&nbsp;the&nbsp;exception&nbsp;via&nbsp;mail,&nbsp;either&nbsp;as&nbsp;an&nbsp;attachment,<br>
+or&nbsp;as&nbsp;the&nbsp;body&nbsp;of&nbsp;the&nbsp;mail.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-errorPageFilename"><strong>errorPageFilename</strong></a>(self)</dt><dd><tt>Create&nbsp;filename&nbsp;for&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+Construct&nbsp;a&nbsp;filename&nbsp;for&nbsp;an&nbsp;HTML&nbsp;error&nbsp;page,&nbsp;not&nbsp;including&nbsp;the<br>
+``ErrorMessagesDir``&nbsp;setting&nbsp;(which&nbsp;`saveError`&nbsp;adds&nbsp;on).</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-filterDictValue"><strong>filterDictValue</strong></a>(self, value, key, dict)</dt><dd><tt>Filter&nbsp;dictionary&nbsp;values.<br>
+&nbsp;<br>
+Filters&nbsp;keys&nbsp;from&nbsp;a&nbsp;dict.&nbsp;&nbsp;Currently&nbsp;ignores&nbsp;the<br>
+dictionary,&nbsp;and&nbsp;just&nbsp;filters&nbsp;based&nbsp;on&nbsp;the&nbsp;key.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-filterValue"><strong>filterValue</strong></a>(self, value, key)</dt><dd><tt>Filter&nbsp;values.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;core&nbsp;filter&nbsp;method&nbsp;that&nbsp;is&nbsp;used&nbsp;in&nbsp;all&nbsp;filtering.<br>
+By&nbsp;default,&nbsp;it&nbsp;simply&nbsp;returns&nbsp;self.<strong>_hiddenString</strong>&nbsp;if&nbsp;the&nbsp;key&nbsp;is<br>
+in&nbsp;self.<strong>_hideValuesForField</strong>&nbsp;(case&nbsp;insensitive).&nbsp;Subclasses<br>
+could&nbsp;override&nbsp;for&nbsp;more&nbsp;elaborate&nbsp;filtering&nbsp;techniques.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-htmlDebugInfo"><strong>htmlDebugInfo</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;debug&nbsp;info.<br>
+&nbsp;<br>
+Return&nbsp;HTML-formatted&nbsp;debugging&nbsp;information&nbsp;about&nbsp;the&nbsp;current&nbsp;exception.<br>
+Calls&nbsp;`writeHTML`,&nbsp;which&nbsp;uses&nbsp;``<a href="#ExceptionHandler-write">write</a>(...)``&nbsp;to&nbsp;add&nbsp;content.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-logExceptionToConsole"><strong>logExceptionToConsole</strong></a>(self, stderr<font color="#909090">=None</font>)</dt><dd><tt>Log&nbsp;an&nbsp;exception.<br>
+&nbsp;<br>
+Logs&nbsp;the&nbsp;time,&nbsp;servlet&nbsp;name&nbsp;and&nbsp;traceback&nbsp;to&nbsp;the&nbsp;console<br>
+(typically&nbsp;stderr).&nbsp;This&nbsp;usually&nbsp;results&nbsp;in&nbsp;the&nbsp;information<br>
+appearing&nbsp;in&nbsp;console/terminal&nbsp;from&nbsp;which&nbsp;AppServer&nbsp;was&nbsp;launched.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-logExceptionToDisk"><strong>logExceptionToDisk</strong></a>(self, errorMsgFilename<font color="#909090">=None</font>)</dt><dd><tt>Log&nbsp;the&nbsp;exception&nbsp;to&nbsp;disk.<br>
+&nbsp;<br>
+Writes&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;(date-time,&nbsp;filename,<br>
+pathname,&nbsp;exception-name,&nbsp;exception-data,error&nbsp;report<br>
+filename)&nbsp;to&nbsp;the&nbsp;errors&nbsp;file&nbsp;(typically&nbsp;'Errors.csv')<br>
+in&nbsp;CSV&nbsp;format.&nbsp;Invoked&nbsp;by&nbsp;`handleException`.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-privateErrorPage"><strong>privateErrorPage</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;private&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+Returns&nbsp;an&nbsp;HTML&nbsp;page&nbsp;intended&nbsp;for&nbsp;the&nbsp;developer&nbsp;with<br>
+useful&nbsp;information&nbsp;such&nbsp;as&nbsp;the&nbsp;traceback.<br>
+&nbsp;<br>
+Most&nbsp;of&nbsp;the&nbsp;contents&nbsp;are&nbsp;generated&nbsp;in&nbsp;`htmlDebugInfo`.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-publicErrorPage"><strong>publicErrorPage</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;public&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;brief&nbsp;error&nbsp;page&nbsp;telling&nbsp;the&nbsp;user&nbsp;that&nbsp;an&nbsp;error&nbsp;has&nbsp;occurred.<br>
+Body&nbsp;of&nbsp;the&nbsp;message&nbsp;comes&nbsp;from&nbsp;``UserErrorMessage``&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-repr"><strong>repr</strong></a>(self, value)</dt><dd><tt>Get&nbsp;HTML&nbsp;encoded&nbsp;representation.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;<a href="#ExceptionHandler-repr">repr</a>()&nbsp;of&nbsp;value&nbsp;already&nbsp;HTML&nbsp;encoded.&nbsp;As&nbsp;a&nbsp;special&nbsp;case,<br>
+dictionaries&nbsp;are&nbsp;nicely&nbsp;formatted&nbsp;in&nbsp;table.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;utility&nbsp;method&nbsp;for&nbsp;`writeAttrs`.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-saveErrorPage"><strong>saveErrorPage</strong></a>(self, html)</dt><dd><tt>Save&nbsp;the&nbsp;error&nbsp;page.<br>
+&nbsp;<br>
+Saves&nbsp;the&nbsp;given&nbsp;HTML&nbsp;error&nbsp;page&nbsp;for&nbsp;later&nbsp;viewing&nbsp;by<br>
+the&nbsp;developer,&nbsp;and&nbsp;returns&nbsp;the&nbsp;filename&nbsp;used.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-servletPathname"><strong>servletPathname</strong></a>(self)</dt><dd><tt>The&nbsp;full&nbsp;filesystem&nbsp;path&nbsp;for&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-setting"><strong>setting</strong></a>(self, name)</dt><dd><tt>Settings&nbsp;are&nbsp;inherited&nbsp;from&nbsp;Application.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-work"><strong>work</strong></a>(self)</dt><dd><tt>Main&nbsp;error&nbsp;handling&nbsp;method.<br>
+&nbsp;<br>
+Invoked&nbsp;by&nbsp;`__init__`&nbsp;to&nbsp;do&nbsp;the&nbsp;main&nbsp;work.&nbsp;This&nbsp;calls<br>
+`logExceptionToConsole`,&nbsp;then&nbsp;checks&nbsp;settings&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;should<br>
+call&nbsp;`saveErrorPage`&nbsp;(to&nbsp;save&nbsp;the&nbsp;error&nbsp;to&nbsp;disk)&nbsp;and&nbsp;`emailException`.<br>
+&nbsp;<br>
+It&nbsp;also&nbsp;sends&nbsp;gives&nbsp;a&nbsp;page&nbsp;from&nbsp;`privateErrorPage`&nbsp;or<br>
+`publicErrorPage`&nbsp;(which&nbsp;one&nbsp;based&nbsp;on&nbsp;``ShowDebugInfoOnErrors``).</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-write"><strong>write</strong></a>(self, s)</dt><dd><tt>Output&nbsp;`s`&nbsp;to&nbsp;the&nbsp;body.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeAttrs"><strong>writeAttrs</strong></a>(self, obj, attrNames)</dt><dd><tt>Output&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;attributes.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;attributes&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;as&nbsp;given&nbsp;by&nbsp;attrNames.<br>
+Tries&nbsp;``obj._name`&nbsp;first,&nbsp;followed&nbsp;by&nbsp;``obj.name()``.<br>
+Is&nbsp;resilient&nbsp;regarding&nbsp;exceptions&nbsp;so&nbsp;as&nbsp;not&nbsp;to&nbsp;spoil&nbsp;the<br>
+exception&nbsp;report.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeDict"><strong>writeDict</strong></a>(self, d, heading<font color="#909090">=None</font>, encoded<font color="#909090">=None</font>)</dt><dd><tt>Output&nbsp;a&nbsp;table-formated&nbsp;dictionary.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeEnvironment"><strong>writeEnvironment</strong></a>(self)</dt><dd><tt>Output&nbsp;environment.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;environment&nbsp;this&nbsp;is&nbsp;being&nbsp;run&nbsp;in.&nbsp;This&nbsp;is&nbsp;*not*&nbsp;the<br>
+environment&nbsp;that&nbsp;was&nbsp;passed&nbsp;in&nbsp;with&nbsp;the&nbsp;request&nbsp;(holding&nbsp;the&nbsp;CGI<br>
+information)&nbsp;--&nbsp;it's&nbsp;just&nbsp;the&nbsp;information&nbsp;from&nbsp;the&nbsp;environment<br>
+that&nbsp;the&nbsp;AppServer&nbsp;is&nbsp;being&nbsp;executed&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeFancyTraceback"><strong>writeFancyTraceback</strong></a>(self)</dt><dd><tt>Output&nbsp;a&nbsp;fancy&nbsp;traceback,&nbsp;using&nbsp;CGITraceback.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeHTML"><strong>writeHTML</strong></a>(self)</dt><dd><tt>Write&nbsp;the&nbsp;traceback.<br>
+&nbsp;<br>
+Writes&nbsp;all&nbsp;the&nbsp;parts&nbsp;of&nbsp;the&nbsp;traceback,&nbsp;invoking:<br>
+&nbsp;&nbsp;*&nbsp;`writeTraceback`<br>
+&nbsp;&nbsp;*&nbsp;`writeMiscInfo`<br>
+&nbsp;&nbsp;*&nbsp;`writeTransaction`<br>
+&nbsp;&nbsp;*&nbsp;`writeEnvironment`<br>
+&nbsp;&nbsp;*&nbsp;`writeIds`<br>
+&nbsp;&nbsp;*&nbsp;`writeFancyTraceback`</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeIds"><strong>writeIds</strong></a>(self)</dt><dd><tt>Output&nbsp;OS&nbsp;identification.<br>
+&nbsp;<br>
+Prints&nbsp;some&nbsp;values&nbsp;from&nbsp;the&nbsp;OS&nbsp;(like&nbsp;processor&nbsp;ID).</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeMiscInfo"><strong>writeMiscInfo</strong></a>(self)</dt><dd><tt>Output&nbsp;misc&nbsp;info.<br>
+&nbsp;<br>
+Write&nbsp;a&nbsp;couple&nbsp;little&nbsp;pieces&nbsp;of&nbsp;information&nbsp;about&nbsp;the&nbsp;environment.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeTitle"><strong>writeTitle</strong></a>(self, s)</dt><dd><tt>Output&nbsp;the&nbsp;sub-heading&nbsp;to&nbsp;define&nbsp;a&nbsp;section.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeTraceback"><strong>writeTraceback</strong></a>(self)</dt><dd><tt>Output&nbsp;the&nbsp;traceback.<br>
+&nbsp;<br>
+Writes&nbsp;the&nbsp;traceback,&nbsp;with&nbsp;most&nbsp;of&nbsp;the&nbsp;work&nbsp;done<br>
+by&nbsp;`WebUtils.HTMLForException.HTMLForException`.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeTransaction"><strong>writeTransaction</strong></a>(self)</dt><dd><tt>Output&nbsp;transaction.<br>
+&nbsp;<br>
+Lets&nbsp;the&nbsp;transaction&nbsp;talk&nbsp;about&nbsp;itself,&nbsp;using<br>
+`Transaction.writeExceptionReport`.</tt></dd></dl>
+
+<dl><dt><a name="ExceptionHandler-writeln"><strong>writeln</strong></a>(self, s)</dt><dd><tt>Output&nbsp;`s`&nbsp;plus&nbsp;a&nbsp;newline.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Singleton">class <strong>Singleton</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;singleton&nbsp;<a href="__builtin__.html#object">object</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-StringIO"><strong>StringIO</strong></a>(...)</dt><dd><tt><a href="#-StringIO">StringIO</a>([s])&nbsp;--&nbsp;Return&nbsp;a&nbsp;StringIO-like&nbsp;stream&nbsp;for&nbsp;reading&nbsp;or&nbsp;writing</tt></dd></dl>
+ <dl><dt><a name="-docType"><strong>docType</strong></a>()</dt><dd><tt>Return&nbsp;the&nbsp;document&nbsp;type&nbsp;for&nbsp;the&nbsp;page.</tt></dd></dl>
+ <dl><dt><a name="-htStyle"><strong>htStyle</strong></a>()</dt><dd><tt>Return&nbsp;the&nbsp;page&nbsp;style.</tt></dd></dl>
+ <dl><dt><a name="-htTitle"><strong>htTitle</strong></a>(name)</dt><dd><tt>Format&nbsp;a&nbsp;`name`&nbsp;as&nbsp;a&nbsp;section&nbsp;title.</tt></dd></dl>
+ <dl><dt><a name="-localtime"><strong>localtime</strong></a>(...)</dt><dd><tt><a href="#-localtime">localtime</a>([seconds])&nbsp;-&gt;&nbsp;(tm_year,tm_mon,tm_mday,tm_hour,tm_min,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tm_sec,tm_wday,tm_yday,tm_isdst)<br>
+&nbsp;<br>
+Convert&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch&nbsp;to&nbsp;a&nbsp;time&nbsp;tuple&nbsp;expressing&nbsp;local&nbsp;time.<br>
+When&nbsp;'seconds'&nbsp;is&nbsp;not&nbsp;passed&nbsp;in,&nbsp;convert&nbsp;the&nbsp;current&nbsp;time&nbsp;instead.</tt></dd></dl>
+ <dl><dt><a name="-osIdDict"><strong>osIdDict</strong></a>()</dt><dd><tt>Get&nbsp;all&nbsp;OS&nbsp;id&nbsp;information.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;dictionary&nbsp;containing&nbsp;id&nbsp;information&nbsp;such&nbsp;as<br>
+uid,&nbsp;gid,&nbsp;etc.,&nbsp;all&nbsp;obtained&nbsp;from&nbsp;the&nbsp;os&nbsp;module.</tt></dd></dl>
+ <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+</td></tr></table>
+</body></html>

@@ -1,0 +1,688 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.DebugAppServer</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.DebugAppServer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/DebugAppServer.py">/var/www/docs/Webware-1.1.1/WebKit/DebugAppServer.py</a></font></td></tr></table>
+    <p><tt><a href="#DebugAppServer">DebugAppServer</a><br>
+&nbsp;<br>
+`<a href="#DebugAppServer">DebugAppServer</a>`&nbsp;executes&nbsp;all&nbsp;requests&nbsp;within&nbsp;the&nbsp;main&nbsp;thread,&nbsp;allowing<br>
+servlets&nbsp;to&nbsp;be&nbsp;easily&nbsp;debugged&nbsp;using&nbsp;any&nbsp;Python&nbsp;debugger.&nbsp;The&nbsp;drawback&nbsp;is<br>
+that&nbsp;only&nbsp;one&nbsp;request&nbsp;can&nbsp;be&nbsp;processed&nbsp;at&nbsp;a&nbsp;time&nbsp;using&nbsp;this&nbsp;approach.<br>
+&nbsp;<br>
+Also,&nbsp;exceptions&nbsp;are&nbsp;not&nbsp;caught&nbsp;and&nbsp;gracefully&nbsp;handled&nbsp;with&nbsp;an&nbsp;HTML&nbsp;error<br>
+page.&nbsp;Instead,&nbsp;the&nbsp;exceptions&nbsp;rise&nbsp;uncaught&nbsp;which&nbsp;allows&nbsp;the&nbsp;debugger&nbsp;to<br>
+trap&nbsp;them&nbsp;so&nbsp;you&nbsp;can&nbsp;inspect&nbsp;the&nbsp;program.<br>
+&nbsp;<br>
+To&nbsp;use,&nbsp;simply&nbsp;run&nbsp;"python&nbsp;Launch.py&nbsp;<a href="#DebugAppServer">DebugAppServer</a>"&nbsp;using&nbsp;whatever&nbsp;debugging<br>
+environment&nbsp;you&nbsp;prefer.<br>
+&nbsp;<br>
+Caveats:<br>
+&nbsp;<br>
+This&nbsp;app&nbsp;server&nbsp;supports&nbsp;the&nbsp;AutoReload&nbsp;feature&nbsp;but&nbsp;not&nbsp;for&nbsp;Python's&nbsp;standard<br>
+modules&nbsp;or&nbsp;WebKit&nbsp;or&nbsp;WebKit's&nbsp;dependencies&nbsp;(MiscUtils,&nbsp;WebUtils&nbsp;and&nbsp;TaskKit).<br>
+Even&nbsp;with&nbsp;that&nbsp;limitation,&nbsp;auto-reload&nbsp;is&nbsp;still&nbsp;useful&nbsp;because&nbsp;if&nbsp;you&nbsp;modify<br>
+any&nbsp;module&nbsp;in&nbsp;your&nbsp;site,&nbsp;the&nbsp;auto-reload&nbsp;will&nbsp;happen.&nbsp;Note&nbsp;that&nbsp;the&nbsp;app&nbsp;server<br>
+*will*&nbsp;restart&nbsp;when&nbsp;the&nbsp;aformentioned&nbsp;modules&nbsp;are&nbsp;modified,&nbsp;but&nbsp;the&nbsp;modules<br>
+won't&nbsp;actually&nbsp;be&nbsp;reloaded.<br>
+&nbsp;<br>
+Currently&nbsp;the&nbsp;session&nbsp;sweeper&nbsp;is&nbsp;still&nbsp;run&nbsp;within&nbsp;a&nbsp;separate&nbsp;thread,&nbsp;and<br>
+a&nbsp;"close&nbsp;thread"&nbsp;is&nbsp;started&nbsp;up&nbsp;by&nbsp;the&nbsp;AppServer&nbsp;base&nbsp;class,&nbsp;but&nbsp;neither<br>
+of&nbsp;these&nbsp;two&nbsp;extra&nbsp;threads&nbsp;should&nbsp;pose&nbsp;any&nbsp;problems&nbsp;debugging&nbsp;servlets.<br>
+&nbsp;<br>
+Tested&nbsp;on:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;WingIDE&nbsp;on&nbsp;Windows,&nbsp;<a href="http://wingware.com/">http://wingware.com/</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;PythonWin<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;JEdit&nbsp;with&nbsp;the&nbsp;JPyDbg&nbsp;plugin,&nbsp;on&nbsp;Windows</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="WebKit.Profiler.html">WebKit.Profiler</a><br>
+</td><td width="25%" valign=top><a href="WebKit.ThreadedAppServer.html">WebKit.ThreadedAppServer</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="WebKit.Application.html#Application">WebKit.Application.Application</a>(<a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.DebugAppServer.html#DebugApplication">DebugApplication</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial">WebKit.ThreadedAppServer.ThreadedAppServer(<a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.DebugAppServer.html#DebugAppServer">DebugAppServer</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.DebugAppServer.html#DummyRequestQueue">DummyRequestQueue</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DebugAppServer">class <strong>DebugAppServer</strong></a>(WebKit.ThreadedAppServer.ThreadedAppServer)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Single-threaded&nbsp;AppServer&nbsp;for&nbsp;debugging&nbsp;purposes.<br>
+&nbsp;<br>
+We&nbsp;are&nbsp;piggybacking&nbsp;on&nbsp;99%&nbsp;of&nbsp;the&nbsp;code&nbsp;in&nbsp;ThreadedAppServer.&nbsp;Our<br>
+trick&nbsp;is&nbsp;to&nbsp;replace&nbsp;the&nbsp;request&nbsp;queue&nbsp;with&nbsp;a&nbsp;dummy&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that<br>
+executes&nbsp;requests&nbsp;immediately&nbsp;instead&nbsp;of&nbsp;pushing&nbsp;them&nbsp;onto&nbsp;a&nbsp;queue<br>
+to&nbsp;be&nbsp;handled&nbsp;by&nbsp;other&nbsp;threads.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.DebugAppServer.html#DebugAppServer">DebugAppServer</a></dd>
+<dd>WebKit.ThreadedAppServer.ThreadedAppServer</dd>
+<dd><a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a></dd>
+<dd><a href="WebKit.AppServer.html#AppServer">WebKit.AppServer.AppServer</a></dd>
+<dd><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a></dd>
+<dd><a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="DebugAppServer-__init__"><strong>__init__</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Initialize&nbsp;<a href="#DebugAppServer">DebugAppServer</a>.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;default&nbsp;configuration.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-createApplication"><strong>createApplication</strong></a>(self)</dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;an&nbsp;application&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;Invoked&nbsp;by&nbsp;__init__.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-mainloop"><strong>mainloop</strong></a>(self)</dt><dd><tt>Main&nbsp;loop&nbsp;for&nbsp;Windows.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;needed&nbsp;for&nbsp;COM&nbsp;support&nbsp;on&nbsp;Windows,&nbsp;because&nbsp;special&nbsp;thread<br>
+initialization&nbsp;is&nbsp;required&nbsp;on&nbsp;any&nbsp;thread&nbsp;that&nbsp;runs&nbsp;servlets,&nbsp;in<br>
+this&nbsp;case&nbsp;the&nbsp;main&nbsp;thread&nbsp;itself.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-restart"><strong>restart</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from WebKit.ThreadedAppServer.ThreadedAppServer:<br>
+<dl><dt><a name="DebugAppServer-abortLongRequests"><strong>abortLongRequests</strong></a>(self)</dt><dd><tt>Check&nbsp;for&nbsp;long-running&nbsp;requests&nbsp;and&nbsp;cancel&nbsp;these.<br>
+&nbsp;<br>
+The&nbsp;longest&nbsp;allowed&nbsp;execution&nbsp;time&nbsp;for&nbsp;requests&nbsp;is&nbsp;controlled<br>
+by&nbsp;the&nbsp;MaxRequestTime&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-abortRequest"><strong>abortRequest</strong></a>(self, requestID, exception<font color="#909090">=&lt;class 'WebKit.ThreadedAppServer.RequestAbortedError'&gt;</font>)</dt><dd><tt>Abort&nbsp;a&nbsp;request&nbsp;by&nbsp;raising&nbsp;an&nbsp;exception&nbsp;in&nbsp;its&nbsp;worker&nbsp;thread.<br>
+&nbsp;<br>
+A&nbsp;return&nbsp;value&nbsp;of&nbsp;one&nbsp;means&nbsp;the&nbsp;thread&nbsp;was&nbsp;successfully&nbsp;aborted,<br>
+a&nbsp;value&nbsp;of&nbsp;zero&nbsp;means&nbsp;the&nbsp;thread&nbsp;could&nbsp;not&nbsp;be&nbsp;found,<br>
+any&nbsp;other&nbsp;value&nbsp;indicates&nbsp;that&nbsp;an&nbsp;error&nbsp;has&nbsp;occurred.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-absorbThread"><strong>absorbThread</strong></a>(self, count<font color="#909090">=1</font>)</dt><dd><tt>Absorb&nbsp;a&nbsp;thread.<br>
+&nbsp;<br>
+We&nbsp;do&nbsp;this&nbsp;by&nbsp;putting&nbsp;a&nbsp;None&nbsp;on&nbsp;the&nbsp;Queue.<br>
+When&nbsp;a&nbsp;thread&nbsp;gets&nbsp;it,&nbsp;that&nbsp;tells&nbsp;it&nbsp;to&nbsp;exit.<br>
+&nbsp;<br>
+We&nbsp;also&nbsp;keep&nbsp;track&nbsp;of&nbsp;the&nbsp;threads,&nbsp;so&nbsp;after&nbsp;killing<br>
+threads&nbsp;we&nbsp;go&nbsp;through&nbsp;all&nbsp;the&nbsp;threads&nbsp;and&nbsp;find&nbsp;the<br>
+thread(s)&nbsp;that&nbsp;have&nbsp;exited,&nbsp;so&nbsp;that&nbsp;we&nbsp;can&nbsp;take&nbsp;them<br>
+out&nbsp;of&nbsp;the&nbsp;thread&nbsp;pool.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-activeThreadCount"><strong>activeThreadCount</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;the&nbsp;number&nbsp;of&nbsp;threads&nbsp;currently&nbsp;in&nbsp;use.<br>
+&nbsp;<br>
+Called&nbsp;from&nbsp;`updateThreadUsage`.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-addSocketHandler"><strong>addSocketHandler</strong></a>(self, handlerClass, serverAddress<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;socket&nbsp;handler.<br>
+&nbsp;<br>
+Adds&nbsp;a&nbsp;socket&nbsp;handler&nbsp;for&nbsp;`serverAddress`&nbsp;--&nbsp;`serverAddress`<br>
+is&nbsp;a&nbsp;tuple&nbsp;``(host,&nbsp;port)``,&nbsp;where&nbsp;``host``&nbsp;is&nbsp;the&nbsp;interface<br>
+to&nbsp;connect&nbsp;to&nbsp;(for&nbsp;instance,&nbsp;the&nbsp;IP&nbsp;address&nbsp;on&nbsp;a&nbsp;machine&nbsp;with<br>
+multiple&nbsp;IP&nbsp;numbers),&nbsp;and&nbsp;``port``&nbsp;is&nbsp;the&nbsp;port&nbsp;(e.g.&nbsp;HTTP&nbsp;is&nbsp;on<br>
+80&nbsp;by&nbsp;default,&nbsp;and&nbsp;Webware&nbsp;adapters&nbsp;use&nbsp;8086&nbsp;by&nbsp;default).<br>
+&nbsp;<br>
+The&nbsp;`handlerClass`&nbsp;is&nbsp;a&nbsp;subclass&nbsp;of&nbsp;`Handler`,&nbsp;and&nbsp;is&nbsp;used&nbsp;to<br>
+handle&nbsp;the&nbsp;actual&nbsp;request&nbsp;--&nbsp;usually&nbsp;returning&nbsp;control&nbsp;back<br>
+to&nbsp;ThreadedAppServer&nbsp;in&nbsp;some&nbsp;fashion.&nbsp;See&nbsp;`Handler`&nbsp;for&nbsp;more.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-address"><strong>address</strong></a>(self, settingPrefix)</dt><dd><tt>Get&nbsp;host&nbsp;address.<br>
+&nbsp;<br>
+The&nbsp;address&nbsp;for&nbsp;the&nbsp;Adapter&nbsp;(Host/interface,&nbsp;and&nbsp;port),<br>
+as&nbsp;taken&nbsp;from&nbsp;``Configs/AppServer.config``,<br>
+settings&nbsp;``Host``&nbsp;and&nbsp;``AdapterPort``.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-addressFileName"><strong>addressFileName</strong></a>(self, handlerClass)</dt><dd><tt>Get&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;text&nbsp;file&nbsp;with&nbsp;the&nbsp;server&nbsp;address.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-awakeSelect"><strong>awakeSelect</strong></a>(self)</dt><dd><tt>Awake&nbsp;the&nbsp;select()&nbsp;call.<br>
+&nbsp;<br>
+The&nbsp;`select()`&nbsp;in&nbsp;`<a href="#DebugAppServer-mainloop">mainloop</a>()`&nbsp;is&nbsp;blocking,&nbsp;so&nbsp;when<br>
+we&nbsp;shut&nbsp;down&nbsp;we&nbsp;have&nbsp;to&nbsp;make&nbsp;a&nbsp;connect&nbsp;to&nbsp;unblock&nbsp;it.<br>
+Here's&nbsp;where&nbsp;we&nbsp;do&nbsp;that.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>The&nbsp;default&nbsp;AppServer.config.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-delThread"><strong>delThread</strong></a>(self)</dt><dd><tt>Delete&nbsp;thread.<br>
+&nbsp;<br>
+Invoked&nbsp;immediately&nbsp;by&nbsp;<a href="#DebugAppServer-threadloop">threadloop</a>()&nbsp;as&nbsp;a&nbsp;hook&nbsp;for&nbsp;subclasses.<br>
+This&nbsp;implementation&nbsp;does&nbsp;nothing&nbsp;and&nbsp;subclasses&nbsp;need&nbsp;not&nbsp;invoke&nbsp;super.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-initThread"><strong>initThread</strong></a>(self)</dt><dd><tt>Initialize&nbsp;thread.<br>
+&nbsp;<br>
+Invoked&nbsp;immediately&nbsp;by&nbsp;<a href="#DebugAppServer-threadloop">threadloop</a>()&nbsp;as&nbsp;a&nbsp;hook&nbsp;for&nbsp;subclasses.<br>
+This&nbsp;implementation&nbsp;does&nbsp;nothing&nbsp;and&nbsp;subclasses&nbsp;need&nbsp;not&nbsp;invoke&nbsp;super.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-isPersistent"><strong>isPersistent</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DebugAppServer-manageThreadCount"><strong>manageThreadCount</strong></a>(self)</dt><dd><tt>Adjust&nbsp;the&nbsp;number&nbsp;of&nbsp;threads&nbsp;in&nbsp;use.<br>
+&nbsp;<br>
+From&nbsp;information&nbsp;gleened&nbsp;from&nbsp;`updateThreadUsage`,&nbsp;we&nbsp;see&nbsp;about&nbsp;how<br>
+many&nbsp;threads&nbsp;are&nbsp;being&nbsp;used,&nbsp;to&nbsp;see&nbsp;if&nbsp;we&nbsp;have&nbsp;too&nbsp;many&nbsp;threads&nbsp;or<br>
+too&nbsp;few.&nbsp;Based&nbsp;on&nbsp;this&nbsp;we&nbsp;create&nbsp;or&nbsp;absorb&nbsp;threads.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Called&nbsp;on&nbsp;shutdown.<br>
+&nbsp;<br>
+Also&nbsp;calls&nbsp;`AppServer.shutDown`,&nbsp;but&nbsp;first&nbsp;closes&nbsp;all&nbsp;sockets<br>
+and&nbsp;tells&nbsp;all&nbsp;the&nbsp;threads&nbsp;to&nbsp;die.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-spawnThread"><strong>spawnThread</strong></a>(self)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;worker&nbsp;thread.<br>
+&nbsp;<br>
+Worker&nbsp;threads&nbsp;poll&nbsp;with&nbsp;the&nbsp;`threadloop`&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-threadloop"><strong>threadloop</strong></a>(self)</dt><dd><tt>The&nbsp;main&nbsp;loop&nbsp;for&nbsp;worker&nbsp;threads.<br>
+&nbsp;<br>
+Worker&nbsp;threads&nbsp;poll&nbsp;the&nbsp;`_requestQueue`&nbsp;to&nbsp;find&nbsp;a&nbsp;request&nbsp;handler<br>
+waiting&nbsp;to&nbsp;run.&nbsp;If&nbsp;they&nbsp;find&nbsp;a&nbsp;None&nbsp;in&nbsp;the&nbsp;queue,&nbsp;this&nbsp;thread&nbsp;has<br>
+been&nbsp;selected&nbsp;to&nbsp;die,&nbsp;which&nbsp;is&nbsp;the&nbsp;way&nbsp;the&nbsp;loop&nbsp;ends.<br>
+&nbsp;<br>
+The&nbsp;handler&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;does&nbsp;all&nbsp;the&nbsp;work&nbsp;when&nbsp;its&nbsp;`handleRequest`&nbsp;method<br>
+is&nbsp;called.<br>
+&nbsp;<br>
+`initThread`&nbsp;and&nbsp;`delThread`&nbsp;methods&nbsp;are&nbsp;called&nbsp;at&nbsp;the&nbsp;beginning&nbsp;and<br>
+end&nbsp;of&nbsp;the&nbsp;thread&nbsp;loop,&nbsp;but&nbsp;they&nbsp;aren't&nbsp;being&nbsp;used&nbsp;for&nbsp;anything<br>
+(future&nbsp;use&nbsp;as&nbsp;a&nbsp;hook).</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-updateThreadUsage"><strong>updateThreadUsage</strong></a>(self)</dt><dd><tt>Update&nbsp;the&nbsp;threadUseCounter&nbsp;list.<br>
+&nbsp;<br>
+Called&nbsp;periodically&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;`mainloop`.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from WebKit.ThreadedAppServer.ThreadedAppServer:<br>
+<dl><dt><strong>e</strong> = 'EPROTO'</dl>
+
+<hr>
+Methods inherited from <a href="WebKit.AutoReloadingAppServer.html#AutoReloadingAppServer">WebKit.AutoReloadingAppServer.AutoReloadingAppServer</a>:<br>
+<dl><dt><a name="DebugAppServer-activateAutoReload"><strong>activateAutoReload</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;monitor&nbsp;thread.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-deactivateAutoReload"><strong>deactivateAutoReload</strong></a>(self)</dt><dd><tt>Stop&nbsp;the&nbsp;monitor&nbsp;thread.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-fileMonitorThreadLoop"><strong>fileMonitorThreadLoop</strong></a>(self)</dt><dd><tt>This&nbsp;the&nbsp;the&nbsp;main&nbsp;loop&nbsp;for&nbsp;the&nbsp;monitoring&nbsp;thread.<br>
+&nbsp;<br>
+Runs&nbsp;in&nbsp;its&nbsp;own&nbsp;thread,&nbsp;polling&nbsp;the&nbsp;files&nbsp;for&nbsp;changes&nbsp;directly<br>
+(i.e.,&nbsp;going&nbsp;through&nbsp;every&nbsp;file&nbsp;that's&nbsp;being&nbsp;used&nbsp;and&nbsp;checking<br>
+its&nbsp;last-modified&nbsp;time,&nbsp;seeing&nbsp;if&nbsp;it's&nbsp;been&nbsp;changed&nbsp;since&nbsp;it<br>
+was&nbsp;initially&nbsp;loaded).</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-fileMonitorThreadLoopFAM"><strong>fileMonitorThreadLoopFAM</strong></a>(self)</dt><dd><tt>Monitoring&nbsp;thread&nbsp;loop,&nbsp;but&nbsp;using&nbsp;the&nbsp;FAM&nbsp;library.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-monitorNewModule"><strong>monitorNewModule</strong></a>(self, filepath, mtime<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;file&nbsp;to&nbsp;be&nbsp;monitored.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;callback&nbsp;which&nbsp;ImportSpy&nbsp;invokes&nbsp;to&nbsp;notify&nbsp;us&nbsp;of&nbsp;new&nbsp;files<br>
+to&nbsp;monitor.&nbsp;This&nbsp;is&nbsp;only&nbsp;used&nbsp;when&nbsp;we&nbsp;are&nbsp;using&nbsp;FAM.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-restartIfNecessary"><strong>restartIfNecessary</strong></a>(self)</dt><dd><tt>Check&nbsp;if&nbsp;the&nbsp;app&nbsp;server&nbsp;should&nbsp;be&nbsp;restarted.<br>
+&nbsp;<br>
+This&nbsp;should&nbsp;be&nbsp;called&nbsp;regularly&nbsp;to&nbsp;see&nbsp;if&nbsp;a&nbsp;restart&nbsp;is&nbsp;required.<br>
+The&nbsp;server&nbsp;can&nbsp;only&nbsp;restart&nbsp;from&nbsp;the&nbsp;main&nbsp;thread,&nbsp;other&nbsp;threads<br>
+can't&nbsp;do&nbsp;the&nbsp;restart.&nbsp;So&nbsp;this&nbsp;polls&nbsp;to&nbsp;see&nbsp;if&nbsp;`shouldRestart`<br>
+has&nbsp;been&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-shouldRestart"><strong>shouldRestart</strong></a>(self)</dt><dd><tt>Tell&nbsp;the&nbsp;main&nbsp;thread&nbsp;to&nbsp;restart&nbsp;the&nbsp;server.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.AppServer.html#AppServer">WebKit.AppServer.AppServer</a>:<br>
+<dl><dt><a name="DebugAppServer-application"><strong>application</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;<a href="WebKit.Application.html#Application">Application</a>&nbsp;singleton.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-checkForInstall"><strong>checkForInstall</strong></a>(self)</dt><dd><tt>Check&nbsp;whether&nbsp;Webware&nbsp;was&nbsp;installed.<br>
+&nbsp;<br>
+Exits&nbsp;with&nbsp;an&nbsp;error&nbsp;message&nbsp;if&nbsp;Webware&nbsp;was&nbsp;not&nbsp;installed.<br>
+Called&nbsp;from&nbsp;`__init__`.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-closeThread"><strong>closeThread</strong></a>(self)</dt><dd><tt>This&nbsp;method&nbsp;is&nbsp;called&nbsp;when&nbsp;the&nbsp;shutdown&nbsp;sequence&nbsp;is&nbsp;initiated.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-configFilename"><strong>configFilename</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;AppServer&nbsp;configuration&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-configReplacementValues"><strong>configReplacementValues</strong></a>(self)</dt><dd><tt>Get&nbsp;config&nbsp;values&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;escaped.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-initiateShutdown"><strong>initiateShutdown</strong></a>(self)</dt><dd><tt>Ask&nbsp;the&nbsp;master&nbsp;thread&nbsp;to&nbsp;begin&nbsp;the&nbsp;shutdown.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-loadPlugIn"><strong>loadPlugIn</strong></a>(self, path)</dt><dd><tt>Load&nbsp;and&nbsp;return&nbsp;the&nbsp;given&nbsp;plug-in.<br>
+&nbsp;<br>
+May&nbsp;return&nbsp;None&nbsp;if&nbsp;loading&nbsp;was&nbsp;unsuccessful&nbsp;(in&nbsp;which&nbsp;case&nbsp;this&nbsp;method<br>
+prints&nbsp;a&nbsp;message&nbsp;saying&nbsp;so).&nbsp;Used&nbsp;by&nbsp;`loadPlugIns`&nbsp;(note&nbsp;the&nbsp;**s**).</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-loadPlugIns"><strong>loadPlugIns</strong></a>(self)</dt><dd><tt>Load&nbsp;all&nbsp;plug-ins.<br>
+&nbsp;<br>
+A&nbsp;plug-in&nbsp;allows&nbsp;you&nbsp;to&nbsp;extend&nbsp;the&nbsp;functionality&nbsp;of&nbsp;WebKit&nbsp;without<br>
+necessarily&nbsp;having&nbsp;to&nbsp;modify&nbsp;its&nbsp;source.&nbsp;Plug-ins&nbsp;are&nbsp;loaded&nbsp;by<br>
+AppServer&nbsp;at&nbsp;startup&nbsp;time,&nbsp;just&nbsp;before&nbsp;listening&nbsp;for&nbsp;requests.<br>
+See&nbsp;the&nbsp;docs&nbsp;in&nbsp;`WebKit.PlugIn`&nbsp;for&nbsp;more&nbsp;info.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-numRequests"><strong>numRequests</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;requests.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;requests&nbsp;received&nbsp;by&nbsp;this&nbsp;app&nbsp;server<br>
+since&nbsp;it&nbsp;was&nbsp;launched.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-plugIn"><strong>plugIn</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;plug-in&nbsp;with&nbsp;the&nbsp;given&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-plugIns"><strong>plugIns</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;plug-ins&nbsp;loaded&nbsp;by&nbsp;the&nbsp;app&nbsp;server.<br>
+&nbsp;<br>
+Each&nbsp;plug-in&nbsp;is&nbsp;a&nbsp;Python&nbsp;package.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-printStartUpMessage"><strong>printStartUpMessage</strong></a>(self)</dt><dd><tt>Invoked&nbsp;by&nbsp;__init__,&nbsp;prints&nbsp;a&nbsp;little&nbsp;intro.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-readyForRequests"><strong>readyForRequests</strong></a>(self)</dt><dd><tt>Declare&nbsp;ready&nbsp;for&nbsp;getting&nbsp;requests.<br>
+&nbsp;<br>
+Should&nbsp;be&nbsp;invoked&nbsp;by&nbsp;subclasses&nbsp;when&nbsp;they&nbsp;are&nbsp;finally&nbsp;ready&nbsp;to<br>
+accept&nbsp;requests.&nbsp;Records&nbsp;some&nbsp;stats&nbsp;and&nbsp;prints&nbsp;a&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-recordPID"><strong>recordPID</strong></a>(self)</dt><dd><tt>Save&nbsp;the&nbsp;pid&nbsp;of&nbsp;the&nbsp;AppServer&nbsp;to&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;the&nbsp;absolute&nbsp;server-side&nbsp;path&nbsp;of&nbsp;the&nbsp;WebKit&nbsp;app&nbsp;server.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;optional&nbsp;path&nbsp;is&nbsp;passed&nbsp;in,&nbsp;then&nbsp;it&nbsp;is&nbsp;joined&nbsp;with&nbsp;the<br>
+server&nbsp;side&nbsp;directory&nbsp;to&nbsp;form&nbsp;a&nbsp;path&nbsp;relative&nbsp;to&nbsp;the&nbsp;app&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-startTime"><strong>startTime</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;time&nbsp;the&nbsp;app&nbsp;server&nbsp;was&nbsp;started.<br>
+&nbsp;<br>
+The&nbsp;time&nbsp;is&nbsp;given&nbsp;as&nbsp;seconds,&nbsp;like&nbsp;time().</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-version"><strong>version</strong></a>(self)</dt><dd><tt>Return&nbsp;WebKit&nbsp;version.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-webKitPath"><strong>webKitPath</strong></a>(self)</dt><dd><tt>Return&nbsp;teh&nbsp;WebKit&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-webwarePath"><strong>webwarePath</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Webware&nbsp;path.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>:<br>
+<dl><dt><a name="DebugAppServer-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;setting,&nbsp;using&nbsp;the&nbsp;server&nbsp;side&nbsp;path&nbsp;when&nbsp;indicated.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;setting,&nbsp;filtered&nbsp;by&nbsp;<a href="#DebugAppServer-serverSidePath">serverSidePath</a>(),<br>
+if&nbsp;the&nbsp;name&nbsp;ends&nbsp;with&nbsp;``Filename``&nbsp;or&nbsp;``Dir``.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><a name="DebugAppServer-commandLineConfig"><strong>commandLineConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;settings&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;command-line.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;come&nbsp;via&nbsp;addCommandLineSetting().</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-configName"><strong>configName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;configuration&nbsp;file&nbsp;without&nbsp;the&nbsp;extension.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;name&nbsp;before&nbsp;the&nbsp;'.config'.<br>
+This&nbsp;is&nbsp;used&nbsp;on&nbsp;the&nbsp;command-line.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-hasSetting"><strong>hasSetting</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;a&nbsp;configuration&nbsp;setting&nbsp;has&nbsp;been&nbsp;changed.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-printConfig"><strong>printConfig</strong></a>(self, dest<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;the&nbsp;configuration&nbsp;to&nbsp;the&nbsp;given&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;destination&nbsp;is&nbsp;stdout.&nbsp;A&nbsp;fixed&nbsp;with&nbsp;font&nbsp;is&nbsp;assumed<br>
+for&nbsp;aligning&nbsp;the&nbsp;values&nbsp;to&nbsp;start&nbsp;at&nbsp;the&nbsp;same&nbsp;column.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-setSetting"><strong>setSetting</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="DebugAppServer-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;config&nbsp;overrides.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;config&nbsp;file.<br>
+Returns&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken&nbsp;from&nbsp;<a href="#DebugAppServer-configFilename">configFilename</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DebugApplication">class <strong>DebugApplication</strong></a>(<a href="WebKit.Application.html#Application">WebKit.Application.Application</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;a&nbsp;modified&nbsp;<a href="WebKit.Application.html#Application">Application</a>&nbsp;class&nbsp;for&nbsp;debugging.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.DebugAppServer.html#DebugApplication">DebugApplication</a></dd>
+<dd><a href="WebKit.Application.html#Application">WebKit.Application.Application</a></dd>
+<dd><a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a></dd>
+<dd><a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="DebugApplication-handleException"><strong>handleException</strong></a>(self)</dt><dd><tt>Handle&nbsp;exception.<br>
+&nbsp;<br>
+This&nbsp;should&nbsp;only&nbsp;be&nbsp;used&nbsp;in&nbsp;cases&nbsp;where&nbsp;there&nbsp;is&nbsp;no&nbsp;transaction&nbsp;<a href="__builtin__.html#object">object</a>,<br>
+for&nbsp;example&nbsp;if&nbsp;an&nbsp;exception&nbsp;occurs&nbsp;when&nbsp;attempting&nbsp;to&nbsp;save&nbsp;a&nbsp;session<br>
+to&nbsp;disk.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-handleExceptionInTransaction"><strong>handleExceptionInTransaction</strong></a>(self, excInfo, transaction)</dt><dd><tt>Handle&nbsp;exception&nbsp;with&nbsp;info.<br>
+&nbsp;<br>
+Raises&nbsp;exception&nbsp;`excInfo`&nbsp;(as&nbsp;returned&nbsp;by&nbsp;``sys.exc_info()``)<br>
+that&nbsp;was&nbsp;generated&nbsp;by&nbsp;`transaction`.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.Application.html#Application">WebKit.Application.Application</a>:<br>
+<dl><dt><a name="DebugApplication-__init__"><strong>__init__</strong></a>(self, server, useSessionSweeper<font color="#909090">=True</font>)</dt><dd><tt>Called&nbsp;only&nbsp;by&nbsp;`AppServer`,&nbsp;sets&nbsp;up&nbsp;the&nbsp;<a href="WebKit.Application.html#Application">Application</a>.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-addContext"><strong>addContext</strong></a>(self, name, path)</dt><dd><tt>Add&nbsp;a&nbsp;context&nbsp;by&nbsp;named&nbsp;`name`,&nbsp;rooted&nbsp;at&nbsp;`path`.<br>
+&nbsp;<br>
+This&nbsp;gets&nbsp;imported&nbsp;as&nbsp;a&nbsp;package,&nbsp;and&nbsp;the&nbsp;last&nbsp;directory<br>
+of&nbsp;`path`&nbsp;does&nbsp;not&nbsp;have&nbsp;to&nbsp;match&nbsp;the&nbsp;context&nbsp;name.<br>
+(The&nbsp;package&nbsp;will&nbsp;be&nbsp;named&nbsp;`name`,&nbsp;regardless&nbsp;of&nbsp;`path`).<br>
+&nbsp;<br>
+Delegated&nbsp;to&nbsp;`URLParser.ContextParser`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-addShutDownHandler"><strong>addShutDownHandler</strong></a>(self, func)</dt><dd><tt>Add&nbsp;a&nbsp;shutdown&nbsp;handler.<br>
+&nbsp;<br>
+Functions&nbsp;added&nbsp;through&nbsp;`addShutDownHandler`&nbsp;will&nbsp;be&nbsp;called&nbsp;when<br>
+the&nbsp;AppServer&nbsp;is&nbsp;shutting&nbsp;down.&nbsp;You&nbsp;can&nbsp;use&nbsp;this&nbsp;hook&nbsp;to&nbsp;close<br>
+database&nbsp;connections,&nbsp;clean&nbsp;up&nbsp;resources,&nbsp;save&nbsp;data&nbsp;to&nbsp;disk,&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-callMethodOfServlet"><strong>callMethodOfServlet</strong></a>(self, trans, url, method, *args, **kw)</dt><dd><tt>Call&nbsp;method&nbsp;of&nbsp;another&nbsp;servlet.<br>
+&nbsp;<br>
+Call&nbsp;a&nbsp;method&nbsp;of&nbsp;the&nbsp;servlet&nbsp;referred&nbsp;to&nbsp;by&nbsp;the&nbsp;URL.&nbsp;Calls&nbsp;sleep()<br>
+and&nbsp;awake()&nbsp;before&nbsp;and&nbsp;after&nbsp;the&nbsp;method&nbsp;call.&nbsp;Or,&nbsp;if&nbsp;the&nbsp;servlet<br>
+defines&nbsp;it,&nbsp;then&nbsp;`runMethodForTransaction`&nbsp;is&nbsp;used&nbsp;(analogous&nbsp;to&nbsp;the<br>
+use&nbsp;of&nbsp;`runTransaction`&nbsp;in&nbsp;`forward`).<br>
+&nbsp;<br>
+The&nbsp;entire&nbsp;process&nbsp;is&nbsp;similar&nbsp;to&nbsp;`forward`,&nbsp;except&nbsp;that&nbsp;instead&nbsp;of<br>
+`respond`,&nbsp;`method`&nbsp;is&nbsp;called&nbsp;(`method`&nbsp;should&nbsp;be&nbsp;a&nbsp;string,&nbsp;`*args`<br>
+and&nbsp;`**kw`&nbsp;are&nbsp;passed&nbsp;as&nbsp;arguments&nbsp;to&nbsp;that&nbsp;method).</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-configFilename"><strong>configFilename</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DebugApplication-configReplacementValues"><strong>configReplacementValues</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="DebugApplication-contexts"><strong>contexts</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;context-name:&nbsp;context-path.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-createSessionForTransaction"><strong>createSessionForTransaction</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;session&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;for&nbsp;the&nbsp;transaction.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;session&nbsp;already&nbsp;exists,&nbsp;returns&nbsp;that,&nbsp;otherwise&nbsp;creates<br>
+a&nbsp;new&nbsp;session.<br>
+&nbsp;<br>
+Finding&nbsp;the&nbsp;session&nbsp;ID&nbsp;is&nbsp;done&nbsp;in&nbsp;`Transaction.sessionId`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-createSessionWithID"><strong>createSessionWithID</strong></a>(self, trans, sessionID)</dt><dd><tt>Create&nbsp;a&nbsp;session&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;our&nbsp;session&nbsp;ID.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-defaultConfig"><strong>defaultConfig</strong></a>(self)</dt><dd><tt>The&nbsp;default&nbsp;<a href="WebKit.Application.html#Application">Application</a>.config.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-dispatchRawRequest"><strong>dispatchRawRequest</strong></a>(self, requestDict, strmOut)</dt><dd><tt>Dispatch&nbsp;a&nbsp;raw&nbsp;request.<br>
+&nbsp;<br>
+Dispatch&nbsp;a&nbsp;request&nbsp;as&nbsp;passed&nbsp;from&nbsp;the&nbsp;Adapter&nbsp;through&nbsp;the&nbsp;AppServer.<br>
+This&nbsp;method&nbsp;creates&nbsp;the&nbsp;request,&nbsp;response,&nbsp;and&nbsp;transaction&nbsp;<a href="__builtin__.html#object">object</a>,<br>
+then&nbsp;runs&nbsp;(via&nbsp;`runTransaction`)&nbsp;the&nbsp;transaction.&nbsp;It&nbsp;also&nbsp;catches&nbsp;any<br>
+exceptions,&nbsp;which&nbsp;are&nbsp;then&nbsp;passed&nbsp;on&nbsp;to&nbsp;`handleExceptionInTransaction`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-errorPage"><strong>errorPage</strong></a>(self, errorClass)</dt><dd><tt>Get&nbsp;the&nbsp;error&nbsp;page&nbsp;url&nbsp;corresponding&nbsp;to&nbsp;an&nbsp;error&nbsp;class.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-forward"><strong>forward</strong></a>(self, trans, url)</dt><dd><tt>Forward&nbsp;the&nbsp;request&nbsp;to&nbsp;a&nbsp;different&nbsp;(internal)&nbsp;URL.<br>
+&nbsp;<br>
+The&nbsp;transaction's&nbsp;URL&nbsp;is&nbsp;changed&nbsp;to&nbsp;point&nbsp;to&nbsp;the&nbsp;new&nbsp;servlet,<br>
+and&nbsp;the&nbsp;transaction&nbsp;is&nbsp;simply&nbsp;run&nbsp;again.<br>
+&nbsp;<br>
+Output&nbsp;is&nbsp;_not_&nbsp;accumulated,&nbsp;so&nbsp;if&nbsp;the&nbsp;original&nbsp;servlet&nbsp;had&nbsp;any&nbsp;output,<br>
+the&nbsp;new&nbsp;output&nbsp;will&nbsp;_replace_&nbsp;the&nbsp;old&nbsp;output.<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;change&nbsp;the&nbsp;request&nbsp;in&nbsp;place&nbsp;to&nbsp;control&nbsp;the&nbsp;servlet&nbsp;you&nbsp;are<br>
+forwarding&nbsp;to&nbsp;--&nbsp;using&nbsp;methods&nbsp;like&nbsp;`HTTPRequest.setField`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-handleMissingPathSession"><strong>handleMissingPathSession</strong></a>(self, trans)</dt><dd><tt>Redirect&nbsp;requests&nbsp;without&nbsp;session&nbsp;info&nbsp;in&nbsp;the&nbsp;path.<br>
+&nbsp;<br>
+If&nbsp;UseAutomaticPathSessions&nbsp;is&nbsp;enabled&nbsp;in&nbsp;<a href="WebKit.Application.html#Application">Application</a>.config<br>
+we&nbsp;redirect&nbsp;the&nbsp;browser&nbsp;to&nbsp;an&nbsp;absolute&nbsp;url&nbsp;with&nbsp;SID&nbsp;in&nbsp;path<br>
+<a href="http://gandalf/a/_SID_=2001080221301877755/Examples/">http://gandalf/a/_SID_=2001080221301877755/Examples/</a><br>
+_SID_&nbsp;is&nbsp;extracted&nbsp;and&nbsp;removed&nbsp;from&nbsp;path&nbsp;in&nbsp;HTTPRequest.py<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;for&nbsp;convinient&nbsp;building&nbsp;of&nbsp;webapps&nbsp;that&nbsp;must&nbsp;not<br>
+depend&nbsp;on&nbsp;cookie&nbsp;support.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;we&nbsp;create&nbsp;an&nbsp;absolute&nbsp;URL&nbsp;with&nbsp;scheme&nbsp;and&nbsp;hostname<br>
+because&nbsp;otherwise&nbsp;IIS&nbsp;will&nbsp;only&nbsp;cause&nbsp;an&nbsp;internal&nbsp;redirect.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-handlePathSession"><strong>handlePathSession</strong></a>(self, trans)</dt><dd><tt>Handle&nbsp;the&nbsp;session&nbsp;identifier&nbsp;that&nbsp;has&nbsp;been&nbsp;found&nbsp;in&nbsp;the&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-handleUnnecessaryPathSession"><strong>handleUnnecessaryPathSession</strong></a>(self, trans)</dt><dd><tt>Redirect&nbsp;request&nbsp;with&nbsp;unnecessary&nbsp;session&nbsp;info&nbsp;in&nbsp;the&nbsp;path.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;called&nbsp;if&nbsp;it&nbsp;has&nbsp;been&nbsp;determined&nbsp;that&nbsp;the&nbsp;request&nbsp;has&nbsp;a&nbsp;path<br>
+session,&nbsp;but&nbsp;also&nbsp;cookies.&nbsp;In&nbsp;that&nbsp;case&nbsp;we&nbsp;redirect&nbsp;to&nbsp;eliminate&nbsp;the<br>
+unnecessary&nbsp;path&nbsp;session.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-hasContext"><strong>hasContext</strong></a>(self, name)</dt><dd><tt>Checks&nbsp;whether&nbsp;context&nbsp;`name`&nbsp;exist.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-hasSession"><strong>hasSession</strong></a>(self, sessionId)</dt><dd><tt>Check&nbsp;whether&nbsp;session&nbsp;`sessionId`&nbsp;exists.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-includeURL"><strong>includeURL</strong></a>(self, trans, url)</dt><dd><tt>Include&nbsp;another&nbsp;servlet.<br>
+&nbsp;<br>
+Include&nbsp;the&nbsp;servlet&nbsp;given&nbsp;by&nbsp;the&nbsp;URL.&nbsp;Like&nbsp;`forward`,<br>
+except&nbsp;control&nbsp;is&nbsp;ultimately&nbsp;returned&nbsp;to&nbsp;the&nbsp;servlet.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-initErrorPage"><strong>initErrorPage</strong></a>(self)</dt><dd><tt>Initialize&nbsp;the&nbsp;error&nbsp;page&nbsp;related&nbsp;attributes.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-initSessions"><strong>initSessions</strong></a>(self)</dt><dd><tt>Initialize&nbsp;all&nbsp;session&nbsp;related&nbsp;attributes.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-initVersions"><strong>initVersions</strong></a>(self)</dt><dd><tt>Get&nbsp;and&nbsp;store&nbsp;versions.<br>
+&nbsp;<br>
+Initialize&nbsp;attributes&nbsp;that&nbsp;store&nbsp;the&nbsp;Webware&nbsp;and&nbsp;WebKit&nbsp;versions&nbsp;as<br>
+both&nbsp;tuples&nbsp;and&nbsp;strings.&nbsp;These&nbsp;are&nbsp;stored&nbsp;in&nbsp;the&nbsp;Properties.py&nbsp;files.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-makeDirs"><strong>makeDirs</strong></a>(self)</dt><dd><tt>Make&nbsp;sure&nbsp;some&nbsp;standard&nbsp;directories&nbsp;are&nbsp;always&nbsp;available.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-rootURLParser"><strong>rootURLParser</strong></a>(self)</dt><dd><tt>Accessor:&nbsp;the&nbsp;Rool&nbsp;URL&nbsp;parser.<br>
+&nbsp;<br>
+URL&nbsp;parsing&nbsp;(as&nbsp;defined&nbsp;by&nbsp;subclasses&nbsp;of&nbsp;`URLParser.URLParser`)<br>
+starts&nbsp;here.&nbsp;Other&nbsp;parsers&nbsp;are&nbsp;called&nbsp;in&nbsp;turn&nbsp;by&nbsp;this&nbsp;parser.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-runTransaction"><strong>runTransaction</strong></a>(self, trans)</dt><dd><tt>Run&nbsp;transation.<br>
+&nbsp;<br>
+Executes&nbsp;the&nbsp;transaction,&nbsp;handling&nbsp;HTTPException&nbsp;errors.<br>
+Finds&nbsp;the&nbsp;servlet&nbsp;(using&nbsp;the&nbsp;root&nbsp;parser,&nbsp;probably<br>
+`URLParser.ContextParser`,&nbsp;to&nbsp;find&nbsp;the&nbsp;servlet&nbsp;for&nbsp;the<br>
+transaction,&nbsp;then&nbsp;calling&nbsp;`runTransactionViaServlet`.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;`dispatchRawRequest`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-server"><strong>server</strong></a>(self)</dt><dd><tt>Acessor:&nbsp;the&nbsp;AppServer</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-serverSidePath"><strong>serverSidePath</strong></a>(self, path<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;the&nbsp;server-side&nbsp;path.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;absolute&nbsp;server-side&nbsp;path&nbsp;of&nbsp;the&nbsp;WebKit&nbsp;application.<br>
+If&nbsp;the&nbsp;optional&nbsp;path&nbsp;is&nbsp;passed&nbsp;in,&nbsp;then&nbsp;it&nbsp;is&nbsp;joined&nbsp;with&nbsp;the<br>
+server&nbsp;side&nbsp;directory&nbsp;to&nbsp;form&nbsp;a&nbsp;path&nbsp;relative&nbsp;to&nbsp;the&nbsp;app&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-session"><strong>session</strong></a>(self, sessionId, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>The&nbsp;session&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;for&nbsp;`sessionId`.<br>
+&nbsp;<br>
+Raises&nbsp;`KeyError`&nbsp;if&nbsp;session&nbsp;not&nbsp;found&nbsp;and&nbsp;no&nbsp;default&nbsp;is&nbsp;given.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-sessionCookiePath"><strong>sessionCookiePath</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;cookie&nbsp;path&nbsp;for&nbsp;this&nbsp;transaction.<br>
+&nbsp;<br>
+If&nbsp;not&nbsp;path&nbsp;is&nbsp;specified&nbsp;in&nbsp;the&nbsp;configuration&nbsp;setting,<br>
+the&nbsp;servlet&nbsp;path&nbsp;is&nbsp;used&nbsp;for&nbsp;security&nbsp;reasons,&nbsp;see:<br>
+<a href="http://www.net-security.org/dl/articles/cookie_path.pdf">http://www.net-security.org/dl/articles/cookie_path.pdf</a></tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-sessionName"><strong>sessionName</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;field&nbsp;holding&nbsp;the&nbsp;session&nbsp;ID.<br>
+&nbsp;<br>
+Overwrite&nbsp;to&nbsp;make&nbsp;this&nbsp;transaction&nbsp;dependent.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-sessionPrefix"><strong>sessionPrefix</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;prefix&nbsp;string&nbsp;for&nbsp;the&nbsp;session&nbsp;ID.<br>
+&nbsp;<br>
+Overwrite&nbsp;to&nbsp;make&nbsp;this&nbsp;transaction&nbsp;dependent.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-sessionTimeout"><strong>sessionTimeout</strong></a>(self, trans)</dt><dd><tt>Get&nbsp;the&nbsp;timeout&nbsp;(in&nbsp;seconds)&nbsp;for&nbsp;a&nbsp;user&nbsp;session.<br>
+&nbsp;<br>
+Overwrite&nbsp;to&nbsp;make&nbsp;this&nbsp;transaction&nbsp;dependent.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-sessions"><strong>sessions</strong></a>(self)</dt><dd><tt>A&nbsp;dictionary&nbsp;of&nbsp;all&nbsp;the&nbsp;session&nbsp;objects.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Shut&nbsp;down&nbsp;the&nbsp;application.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;AppServer&nbsp;when&nbsp;it&nbsp;is&nbsp;shuting&nbsp;down.&nbsp;&nbsp;The&nbsp;`__del__`&nbsp;function<br>
+of&nbsp;<a href="WebKit.Application.html#Application">Application</a>&nbsp;probably&nbsp;won't&nbsp;be&nbsp;called&nbsp;due&nbsp;to&nbsp;circular&nbsp;references.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-startSessionSweeper"><strong>startSessionSweeper</strong></a>(self)</dt><dd><tt>Start&nbsp;session&nbsp;sweeper.<br>
+&nbsp;<br>
+Starts&nbsp;the&nbsp;session&nbsp;sweeper,&nbsp;`WebKit.Tasks.SessionTask`,&nbsp;which&nbsp;deletes<br>
+session&nbsp;objects&nbsp;(and&nbsp;disk&nbsp;copies&nbsp;of&nbsp;those&nbsp;objects)&nbsp;that&nbsp;have&nbsp;expired.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-taskManager"><strong>taskManager</strong></a>(self)</dt><dd><tt>Accessor:&nbsp;`TaskKit.Scheduler`&nbsp;instance.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-webKitPath"><strong>webKitPath</strong></a>(self)</dt><dd><tt>The&nbsp;Path&nbsp;of&nbsp;the&nbsp;``Webware/WebKit/``&nbsp;directory.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-webKitVersion"><strong>webKitVersion</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;WebKit&nbsp;version&nbsp;as&nbsp;a&nbsp;tuple.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-webKitVersionString"><strong>webKitVersionString</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;WebKit&nbsp;version&nbsp;as&nbsp;a&nbsp;printable&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-webwarePath"><strong>webwarePath</strong></a>(self)</dt><dd><tt>The&nbsp;path&nbsp;of&nbsp;the&nbsp;``Webware/``&nbsp;directory.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-webwareVersion"><strong>webwareVersion</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Webware&nbsp;version&nbsp;as&nbsp;a&nbsp;tuple.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-webwareVersionString"><strong>webwareVersionString</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;Webware&nbsp;version&nbsp;as&nbsp;a&nbsp;printable&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-writeActivityLog"><strong>writeActivityLog</strong></a>(self, trans)</dt><dd><tt>Write&nbsp;an&nbsp;entry&nbsp;to&nbsp;the&nbsp;activity&nbsp;log.<br>
+&nbsp;<br>
+Writes&nbsp;an&nbsp;entry&nbsp;to&nbsp;the&nbsp;script&nbsp;log&nbsp;file.&nbsp;Uses&nbsp;settings<br>
+``ActivityLogFilename``&nbsp;and&nbsp;``ActivityLogColumns``.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-writeExceptionReport"><strong>writeExceptionReport</strong></a>(self, handler)</dt><dd><tt>Write&nbsp;extra&nbsp;information&nbsp;to&nbsp;the&nbsp;exception&nbsp;report.<br>
+&nbsp;<br>
+See&nbsp;`WebKit.ExceptionHandler`&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="WebKit.Application.html#Application">WebKit.Application.Application</a>:<br>
+<dl><dt><a name="DebugApplication-addServletFactory"><strong>addServletFactory</strong></a>(factory)</dt><dd><tt>Add&nbsp;a&nbsp;ServletFactory.<br>
+&nbsp;<br>
+Delegated&nbsp;to&nbsp;the&nbsp;`URLParser.ServletFactoryManager`&nbsp;singleton.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-createRequestForDict"><strong>createRequestForDict</strong></a>(requestDict)</dt><dd><tt>Create&nbsp;request&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;for&nbsp;a&nbsp;given&nbsp;dictionary.<br>
+&nbsp;<br>
+Create&nbsp;a&nbsp;request&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;(subclass&nbsp;of&nbsp;`Request`)&nbsp;given&nbsp;the&nbsp;raw<br>
+dictionary&nbsp;as&nbsp;passed&nbsp;by&nbsp;the&nbsp;adapter.<br>
+&nbsp;<br>
+The&nbsp;class&nbsp;of&nbsp;the&nbsp;request&nbsp;may&nbsp;be&nbsp;based&nbsp;on&nbsp;the&nbsp;contents&nbsp;of&nbsp;the<br>
+dictionary&nbsp;(though&nbsp;only&nbsp;`HTTPRequest`&nbsp;is&nbsp;currently&nbsp;created),<br>
+and&nbsp;the&nbsp;request&nbsp;will&nbsp;later&nbsp;determine&nbsp;the&nbsp;class&nbsp;of&nbsp;the&nbsp;response.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;`dispatchRawRequest`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-name"><strong>name</strong></a>()</dt><dd><tt>The&nbsp;name&nbsp;by&nbsp;which&nbsp;this&nbsp;was&nbsp;started.&nbsp;Usually&nbsp;`AppServer`.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-removePathSession"><strong>removePathSession</strong></a>(trans)</dt><dd><tt>Remove&nbsp;a&nbsp;possible&nbsp;session&nbsp;identifier&nbsp;from&nbsp;the&nbsp;path.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-resolveInternalRelativePath"><strong>resolveInternalRelativePath</strong></a>(trans, url)</dt><dd><tt>Return&nbsp;the&nbsp;absolute&nbsp;internal&nbsp;path.<br>
+&nbsp;<br>
+Given&nbsp;a&nbsp;URL,&nbsp;return&nbsp;the&nbsp;absolute&nbsp;internal&nbsp;URL.<br>
+URLs&nbsp;are&nbsp;assumed&nbsp;relative&nbsp;to&nbsp;the&nbsp;current&nbsp;URL.<br>
+Absolute&nbsp;paths&nbsp;are&nbsp;returned&nbsp;unchanged.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-returnServlet"><strong>returnServlet</strong></a>(servlet)</dt><dd><tt>Return&nbsp;the&nbsp;servlet&nbsp;to&nbsp;its&nbsp;pool.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-runTransactionViaServlet"><strong>runTransactionViaServlet</strong></a>(servlet, trans)</dt><dd><tt>Execute&nbsp;the&nbsp;transaction&nbsp;using&nbsp;the&nbsp;servlet.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;`awake`/`respond`/`sleep`&nbsp;sequence&nbsp;of&nbsp;calls,&nbsp;or&nbsp;if<br>
+the&nbsp;servlet&nbsp;supports&nbsp;it,&nbsp;a&nbsp;single&nbsp;`runTransaction`&nbsp;call&nbsp;(which&nbsp;is<br>
+presumed&nbsp;to&nbsp;make&nbsp;the&nbsp;awake/respond/sleep&nbsp;calls&nbsp;on&nbsp;its&nbsp;own).&nbsp;Using<br>
+`runTransaction`&nbsp;allows&nbsp;the&nbsp;servlet&nbsp;to&nbsp;override&nbsp;the&nbsp;basic&nbsp;call<br>
+sequence,&nbsp;or&nbsp;catch&nbsp;errors&nbsp;from&nbsp;that&nbsp;sequence.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;`runTransaction`.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="WebKit.ConfigurableForServerSidePath.html#ConfigurableForServerSidePath">WebKit.ConfigurableForServerSidePath.ConfigurableForServerSidePath</a>:<br>
+<dl><dt><a name="DebugApplication-setting"><strong>setting</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;setting,&nbsp;using&nbsp;the&nbsp;server&nbsp;side&nbsp;path&nbsp;when&nbsp;indicated.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;setting,&nbsp;filtered&nbsp;by&nbsp;<a href="#DebugApplication-serverSidePath">serverSidePath</a>(),<br>
+if&nbsp;the&nbsp;name&nbsp;ends&nbsp;with&nbsp;``Filename``&nbsp;or&nbsp;``Dir``.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><a name="DebugApplication-commandLineConfig"><strong>commandLineConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;settings&nbsp;that&nbsp;came&nbsp;from&nbsp;the&nbsp;command-line.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;come&nbsp;via&nbsp;addCommandLineSetting().</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-config"><strong>config</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;configuration&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;as&nbsp;a&nbsp;dictionary.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;combination&nbsp;of&nbsp;<a href="#DebugApplication-defaultConfig">defaultConfig</a>()&nbsp;and&nbsp;<a href="#DebugApplication-userConfig">userConfig</a>().<br>
+This&nbsp;method&nbsp;caches&nbsp;the&nbsp;config.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-configName"><strong>configName</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;configuration&nbsp;file&nbsp;without&nbsp;the&nbsp;extension.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;portion&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;name&nbsp;before&nbsp;the&nbsp;'.config'.<br>
+This&nbsp;is&nbsp;used&nbsp;on&nbsp;the&nbsp;command-line.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-hasSetting"><strong>hasSetting</strong></a>(self, name)</dt><dd><tt>Check&nbsp;whether&nbsp;a&nbsp;configuration&nbsp;setting&nbsp;has&nbsp;been&nbsp;changed.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-printConfig"><strong>printConfig</strong></a>(self, dest<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;the&nbsp;configuration&nbsp;to&nbsp;the&nbsp;given&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;destination&nbsp;is&nbsp;stdout.&nbsp;A&nbsp;fixed&nbsp;with&nbsp;font&nbsp;is&nbsp;assumed<br>
+for&nbsp;aligning&nbsp;the&nbsp;values&nbsp;to&nbsp;start&nbsp;at&nbsp;the&nbsp;same&nbsp;column.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-setSetting"><strong>setSetting</strong></a>(self, name, value)</dt><dd><tt>Set&nbsp;a&nbsp;particular&nbsp;configuration&nbsp;setting.</tt></dd></dl>
+
+<dl><dt><a name="DebugApplication-userConfig"><strong>userConfig</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;config&nbsp;overrides.<br>
+&nbsp;<br>
+These&nbsp;settings&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;optional&nbsp;config&nbsp;file.<br>
+Returns&nbsp;{}&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;such&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;config&nbsp;filename&nbsp;is&nbsp;taken&nbsp;from&nbsp;<a href="#DebugApplication-configFilename">configFilename</a>().</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.Configurable.html#Configurable">MiscUtils.Configurable.Configurable</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DummyRequestQueue">class <strong>DummyRequestQueue</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;a&nbsp;dummy&nbsp;replacement&nbsp;for&nbsp;the&nbsp;request&nbsp;queue.<br>
+&nbsp;<br>
+It&nbsp;merely&nbsp;executes&nbsp;handlers&nbsp;as&nbsp;soon&nbsp;as&nbsp;they&nbsp;are&nbsp;"pushed".<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Static methods defined here:<br>
+<dl><dt><a name="DummyRequestQueue-put"><strong>put</strong></a>(handler)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-runMainLoopInThread"><strong>runMainLoopInThread</strong></a>()</dt><dd><tt>#&nbsp;Tweak&nbsp;ThreadedAppServer&nbsp;so&nbsp;that&nbsp;it&nbsp;never&nbsp;runs&nbsp;the&nbsp;main&nbsp;loop&nbsp;in&nbsp;a&nbsp;thread:</tt></dd></dl>
+</td></tr></table>
+</body></html>

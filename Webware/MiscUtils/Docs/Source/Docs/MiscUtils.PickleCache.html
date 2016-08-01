@@ -1,0 +1,199 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.PickleCache</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.PickleCache</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/PickleCache.py">/var/www/docs/Webware-1.1.1/MiscUtils/PickleCache.py</a></font></td></tr></table>
+    <p><tt><a href="#PickleCache">PickleCache</a>.py<br>
+&nbsp;<br>
+<a href="#PickleCache">PickleCache</a>&nbsp;provides&nbsp;tools&nbsp;for&nbsp;keeping&nbsp;fast-loading&nbsp;cached&nbsp;versions&nbsp;of<br>
+files&nbsp;so&nbsp;that&nbsp;subsequent&nbsp;loads&nbsp;are&nbsp;faster.&nbsp;This&nbsp;is&nbsp;similar&nbsp;to&nbsp;how&nbsp;Python<br>
+silently&nbsp;caches&nbsp;.pyc&nbsp;files&nbsp;next&nbsp;to&nbsp;.py&nbsp;files.<br>
+&nbsp;<br>
+The&nbsp;typical&nbsp;scenario&nbsp;is&nbsp;that&nbsp;you&nbsp;have&nbsp;a&nbsp;type&nbsp;of&nbsp;text&nbsp;file&nbsp;that&nbsp;gets<br>
+"translated"&nbsp;to&nbsp;Pythonic&nbsp;data&nbsp;(dictionaries,&nbsp;tuples,&nbsp;instances,&nbsp;ints,<br>
+etc.).&nbsp;By&nbsp;caching&nbsp;the&nbsp;Python&nbsp;data&nbsp;on&nbsp;disk&nbsp;in&nbsp;pickle&nbsp;format,&nbsp;you&nbsp;can<br>
+avoid&nbsp;the&nbsp;expensive&nbsp;translation&nbsp;on&nbsp;subsequent&nbsp;reads&nbsp;of&nbsp;the&nbsp;file.<br>
+&nbsp;<br>
+Two&nbsp;real&nbsp;life&nbsp;cases&nbsp;are&nbsp;MiscUtils.DataTable,&nbsp;which&nbsp;loads&nbsp;and&nbsp;represents<br>
+comma-separated&nbsp;files,&nbsp;and&nbsp;MiddleKit&nbsp;which&nbsp;has&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;model&nbsp;file.<br>
+So&nbsp;for&nbsp;examples&nbsp;on&nbsp;using&nbsp;this&nbsp;module,&nbsp;load&nbsp;up&nbsp;the&nbsp;following&nbsp;files&nbsp;and<br>
+search&nbsp;for&nbsp;"Pickle":<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Webware/MiscUtils/DataTable.py<br>
+&nbsp;&nbsp;&nbsp;&nbsp;MiddleKit/Core/Model.py<br>
+&nbsp;<br>
+The&nbsp;cached&nbsp;file&nbsp;is&nbsp;named&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;original&nbsp;file&nbsp;with<br>
+'.pickle.cache'&nbsp;suffixed.&nbsp;The&nbsp;utility&nbsp;of&nbsp;'.pickle'&nbsp;is&nbsp;to&nbsp;denote&nbsp;the&nbsp;file<br>
+format&nbsp;and&nbsp;the&nbsp;utilty&nbsp;of&nbsp;'.cache'&nbsp;is&nbsp;to&nbsp;provide&nbsp;'*.cache'&nbsp;as&nbsp;a&nbsp;simple<br>
+pattern&nbsp;that&nbsp;can&nbsp;be&nbsp;removed,&nbsp;ignored&nbsp;by&nbsp;backup&nbsp;scripts,&nbsp;etc.<br>
+&nbsp;<br>
+The&nbsp;treatment&nbsp;of&nbsp;the&nbsp;cached&nbsp;file&nbsp;is&nbsp;silent&nbsp;and&nbsp;friendly&nbsp;just&nbsp;like<br>
+Python's&nbsp;approach&nbsp;to&nbsp;.pyc&nbsp;files.&nbsp;If&nbsp;it&nbsp;cannot&nbsp;be&nbsp;read&nbsp;or&nbsp;written&nbsp;for<br>
+various&nbsp;reasons&nbsp;(cache&nbsp;is&nbsp;out&nbsp;of&nbsp;date,&nbsp;permissions&nbsp;are&nbsp;bad,&nbsp;wrong&nbsp;python<br>
+version,&nbsp;etc.),&nbsp;then&nbsp;it&nbsp;will&nbsp;be&nbsp;silently&nbsp;ignored.<br>
+&nbsp;<br>
+&nbsp;<br>
+GRANULARITY<br>
+&nbsp;<br>
+In&nbsp;constructing&nbsp;the&nbsp;test&nbsp;suite,&nbsp;I&nbsp;discovered&nbsp;that&nbsp;if&nbsp;the&nbsp;source&nbsp;file&nbsp;is<br>
+newly&nbsp;written&nbsp;less&nbsp;than&nbsp;1&nbsp;second&nbsp;after&nbsp;the&nbsp;cached&nbsp;file,&nbsp;then&nbsp;the&nbsp;fact<br>
+that&nbsp;the&nbsp;source&nbsp;file&nbsp;is&nbsp;newer&nbsp;will&nbsp;not&nbsp;be&nbsp;detected&nbsp;and&nbsp;the&nbsp;cache&nbsp;will<br>
+still&nbsp;be&nbsp;used.&nbsp;I&nbsp;believe&nbsp;this&nbsp;is&nbsp;a&nbsp;limitation&nbsp;of&nbsp;the&nbsp;granularity&nbsp;of<br>
+os.path.getmtime().&nbsp;If&nbsp;anyone&nbsp;knows&nbsp;of&nbsp;a&nbsp;more&nbsp;granular&nbsp;solution,&nbsp;please<br>
+let&nbsp;me&nbsp;know.<br>
+&nbsp;<br>
+This&nbsp;would&nbsp;only&nbsp;be&nbsp;a&nbsp;problem&nbsp;in&nbsp;programmatic&nbsp;situations&nbsp;where&nbsp;the&nbsp;source<br>
+file&nbsp;was&nbsp;rapidly&nbsp;being&nbsp;written&nbsp;and&nbsp;read.&nbsp;I&nbsp;think&nbsp;that's&nbsp;fairly&nbsp;rare.<br>
+&nbsp;<br>
+&nbsp;<br>
+SEE&nbsp;ALSO<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.python.org/doc/current/lib/module-pickle.html">http://www.python.org/doc/current/lib/module-pickle.html</a></tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleCache.html#PickleCacheReader">PickleCacheReader</a>
+</font></dt><dt><font face="helvetica, arial"><a href="MiscUtils.PickleCache.html#PickleCacheWriter">PickleCacheWriter</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PickleCache">class <strong>PickleCache</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Simple&nbsp;abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;<a href="#PickleCacheReader">PickleCacheReader</a>&nbsp;and&nbsp;<a href="#PickleCacheWriter">PickleCacheWriter</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PickleCache-picklePath"><strong>picklePath</strong></a>(self, filename)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PickleCacheReader">class <strong>PickleCacheReader</strong></a>(<a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleCache.html#PickleCacheReader">PickleCacheReader</a></dd>
+<dd><a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PickleCacheReader-read"><strong>read</strong></a>(self, filename, pickleProtocol<font color="#909090">=None</font>, source<font color="#909090">=None</font>, verbose<font color="#909090">=None</font>)</dt><dd><tt>Read&nbsp;data&nbsp;from&nbsp;pickle&nbsp;cache.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;data&nbsp;from&nbsp;the&nbsp;pickle&nbsp;cache&nbsp;version&nbsp;of&nbsp;the&nbsp;filename,<br>
+if&nbsp;it&nbsp;can&nbsp;read.&nbsp;Otherwise&nbsp;returns&nbsp;None,&nbsp;which&nbsp;also&nbsp;indicates<br>
+that&nbsp;<a href="#-writePickleCache">writePickleCache</a>()&nbsp;should&nbsp;be&nbsp;subsequently&nbsp;called&nbsp;after<br>
+the&nbsp;original&nbsp;file&nbsp;is&nbsp;read.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>:<br>
+<dl><dt><a name="PickleCacheReader-picklePath"><strong>picklePath</strong></a>(self, filename)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PickleCacheWriter">class <strong>PickleCacheWriter</strong></a>(<a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleCache.html#PickleCacheWriter">PickleCacheWriter</a></dd>
+<dd><a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PickleCacheWriter-write"><strong>write</strong></a>(self, data, filename, pickleProtocol<font color="#909090">=None</font>, source<font color="#909090">=None</font>, verbose<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>:<br>
+<dl><dt><a name="PickleCacheWriter-picklePath"><strong>picklePath</strong></a>(self, filename)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleCache.html#PickleCache">PickleCache</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-dump"><strong>dump</strong></a>(...)</dt><dd><tt><a href="#-dump">dump</a>(obj,&nbsp;file,&nbsp;protocol=0)&nbsp;--&nbsp;Write&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;in&nbsp;pickle&nbsp;format&nbsp;to&nbsp;the&nbsp;given&nbsp;file.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;Pickler&nbsp;docstring&nbsp;for&nbsp;the&nbsp;meaning&nbsp;of&nbsp;optional&nbsp;argument&nbsp;proto.</tt></dd></dl>
+ <dl><dt><a name="-load"><strong>load</strong></a>(...)</dt><dd><tt><a href="#-load">load</a>(file)&nbsp;--&nbsp;Load&nbsp;a&nbsp;pickle&nbsp;from&nbsp;the&nbsp;given&nbsp;file</tt></dd></dl>
+ <dl><dt><a name="-readPickleCache"><strong>readPickleCache</strong></a> = read(self, filename, pickleProtocol<font color="#909090">=None</font>, source<font color="#909090">=None</font>, verbose<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> method of <a href="MiscUtils.PickleCache.html#PickleCacheReader">PickleCacheReader</a> instance</font></font></dt><dd><tt>Read&nbsp;data&nbsp;from&nbsp;pickle&nbsp;cache.<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;data&nbsp;from&nbsp;the&nbsp;pickle&nbsp;cache&nbsp;version&nbsp;of&nbsp;the&nbsp;filename,<br>
+if&nbsp;it&nbsp;can&nbsp;read.&nbsp;Otherwise&nbsp;returns&nbsp;None,&nbsp;which&nbsp;also&nbsp;indicates<br>
+that&nbsp;<a href="#-writePickleCache">writePickleCache</a>()&nbsp;should&nbsp;be&nbsp;subsequently&nbsp;called&nbsp;after<br>
+the&nbsp;original&nbsp;file&nbsp;is&nbsp;read.</tt></dd></dl>
+ <dl><dt><a name="-sleep"><strong>sleep</strong></a>(...)</dt><dd><tt><a href="#-sleep">sleep</a>(seconds)<br>
+&nbsp;<br>
+Delay&nbsp;execution&nbsp;for&nbsp;a&nbsp;given&nbsp;number&nbsp;of&nbsp;seconds.&nbsp;&nbsp;The&nbsp;argument&nbsp;may&nbsp;be<br>
+a&nbsp;floating&nbsp;point&nbsp;number&nbsp;for&nbsp;subsecond&nbsp;precision.</tt></dd></dl>
+ <dl><dt><a name="-writePickleCache"><strong>writePickleCache</strong></a> = write(self, data, filename, pickleProtocol<font color="#909090">=None</font>, source<font color="#909090">=None</font>, verbose<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> method of <a href="MiscUtils.PickleCache.html#PickleCacheWriter">PickleCacheWriter</a> instance</font></font></dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>maxPickleProtocol</strong> = 2<br>
+<strong>verbose</strong> = False<br>
+<strong>versionInfo</strong> = (2, 6, 5, 'final', 0)</td></tr></table>
+</body></html>

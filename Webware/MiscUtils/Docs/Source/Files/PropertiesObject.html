@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/PropertiesObject.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+
+<span class="PY_KEYWORD">class</span> WillNotRunError(Exception):
+    <span class="PY_STRING">"""Error for Webware components that will not run."""</span>
+
+
+<span class="PY_KEYWORD">class</span> PropertiesObject(dict):
+    <span class="PY_STRING">"""A Properties Object.
+
+    A PropertiesObject represents, in a dictionary-like fashion, the values
+    found in a Properties.py file. That file is always included with a Webware
+    component to advertise its name, version, status, etc. Note that a Webware
+    component is a Python package that follows additional conventions.
+    Also, the top level Webware directory contains a Properties.py.
+
+    Component properties are often used for:
+      * generation of documentation
+      * runtime examination of components, especially prior to loading
+
+    PropertiesObject provides additional keys:
+      * filename - the filename from which the properties were read
+      * versionString - a nicely printable string of the version
+      * requiredPyVersionString - like versionString,
+        but for requiredPyVersion instead
+      * willRun - 1 if the component will run.
+        So far that means having the right Python version.
+      * willNotRunReason - defined only if willRun is 0,
+        contains a readable error message
+
+    Using a PropertiesObject is better than investigating the Properties.py
+    file directly, because the rules for determining derived keys and any
+    future convenience methods will all be provided here.
+
+    Usage example:
+        from MiscUtils.PropertiesObject import PropertiesObject
+        props = PropertiesObject(filename)
+        for item in props.items():
+            print '%s: %s' % item
+
+    Note: We don't normally suffix a class name with "Object" as we have
+    with this class, however, the name Properties.py is already used in
+    our containing package and all other packages.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init and reading ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, filename=None):
+        dict.__init__(self)
+        <span class="PY_KEYWORD">if</span> filename:
+            self.readFileNamed(filename)
+
+    <span class="PY_KEYWORD">def</span> loadValues(self, *args, **kwargs):
+        self.update(*args, **kwargs)
+        self.cleanPrivateItems()
+
+    <span class="PY_KEYWORD">def</span> readFileNamed(self, filename):
+        results = {}
+        <span class="PY_KEYWORD">exec</span> open(filename) <span class="PY_KEYWORD">in</span> results
+        self.update(results)
+        self.cleanPrivateItems()
+        self.createDerivedItems()
+
+
+    <span class="PY_COMMENT">## Self utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> cleanPrivateItems(self):
+        <span class="PY_STRING">"""Remove items whose keys start with a double underscore, such as __builtins__."""</span>
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self.keys(): <span class="PY_COMMENT"># must use keys() because dict is changed</span>
+            <span class="PY_KEYWORD">if</span> key.startswith(<span class="PY_STRING">'__'</span>):
+                <span class="PY_KEYWORD">del</span> self[key]
+
+    <span class="PY_KEYWORD">def</span> createDerivedItems(self):
+        self.createVersionString()
+        self.createRequiredPyVersionString()
+        self.createWillRun()
+
+    <span class="PY_KEYWORD">def</span> _versionString(self, version):
+        <span class="PY_STRING">"""Return the version number as a string.
+
+        For a sequence containing version information such as (2, 0, 0, 'pre'),
+        this returns a printable string such as '2.0pre'.
+        The micro version number is only excluded from the string if it is zero.
+
+        """</span>
+        ver = map(str, version)
+        numbers, rest = ver[:ver[2] == <span class="PY_STRING">'0'</span> <span class="PY_KEYWORD">and</span> 2 <span class="PY_KEYWORD">or</span> 3], ver[3:]
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'.'</span>.join(numbers) + <span class="PY_STRING">'-'</span>.join(rest)
+
+    <span class="PY_KEYWORD">def</span> createVersionString(self):
+        self[<span class="PY_STRING">'versionString'</span>] = self._versionString(self[<span class="PY_STRING">'version'</span>])
+
+    <span class="PY_KEYWORD">def</span> createRequiredPyVersionString(self):
+        self[<span class="PY_STRING">'requiredPyVersionString'</span>] = self._versionString(self[<span class="PY_STRING">'requiredPyVersion'</span>])
+
+    <span class="PY_KEYWORD">def</span> createWillRun(self):
+        self[<span class="PY_STRING">'willRun'</span>] = False
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_COMMENT"># Invoke each of the checkFoo() methods</span>
+            <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self.willRunKeys():
+                methodName = <span class="PY_STRING">'check'</span> + key[0].upper() + key[1:]
+                method = getattr(self, methodName)
+                method()
+        <span class="PY_KEYWORD">except</span> WillNotRunError, msg:
+            self[<span class="PY_STRING">'willNotRunReason'</span>] = msg
+            <span class="PY_KEYWORD">return</span>
+        self[<span class="PY_STRING">'willRun'</span>] = 1 <span class="PY_COMMENT"># we passed all the tests</span>
+
+    <span class="PY_KEYWORD">def</span> willRunKeys(self):
+        <span class="PY_STRING">"""Return keys to be examined before running the component.
+
+        This returns a set of all keys whose values should be examined in
+        order to determine if the component will run. Used by createWillRun().
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> set((<span class="PY_STRING">'requiredPyVersion'</span>, <span class="PY_STRING">'requiredOpSys'</span>, <span class="PY_STRING">'deniedOpSys'</span>, <span class="PY_STRING">'willRunFunc'</span>))
+
+    <span class="PY_KEYWORD">def</span> checkRequiredPyVersion(self):
+        <span class="PY_KEYWORD">if</span> tuple(sys.version_info) &lt; tuple(self[<span class="PY_STRING">'requiredPyVersion'</span>]):
+            <span class="PY_KEYWORD">raise</span> WillNotRunError(<span class="PY_STRING">'Required Python version is %s,'</span>
+                <span class="PY_STRING">' but actual version is %s.'</span> % (
+                <span class="PY_STRING">'.'</span>.join(map(str, self[<span class="PY_STRING">'requiredPyVersion'</span>])),
+                <span class="PY_STRING">'.'</span>.join(map(str, sys.version_info))))
+
+    <span class="PY_KEYWORD">def</span> checkRequiredOpSys(self):
+        requiredOpSys = self.get(<span class="PY_STRING">'requiredOpSys'</span>)
+        <span class="PY_KEYWORD">if</span> requiredOpSys:
+            <span class="PY_COMMENT"># We accept a string or list of strings</span>
+            <span class="PY_KEYWORD">if</span> isinstance(requiredOpSys, basestring):
+                requiredOpSys = [requiredOpSys]
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.name <span class="PY_KEYWORD">in</span> requiredOpSys:
+                <span class="PY_KEYWORD">raise</span> WillNotRunError(<span class="PY_STRING">'Required operating system is %s,'</span>
+                    <span class="PY_STRING">' but actual operating system is %s.'</span> % (
+                    <span class="PY_STRING">'/'</span>.join(requiredOpSys), os.name))
+
+    <span class="PY_KEYWORD">def</span> checkDeniedOpSys(self):
+        deniedOpSys = self.get(<span class="PY_STRING">'deniedOpSys'</span>)
+        <span class="PY_KEYWORD">if</span> deniedOpSys:
+            <span class="PY_COMMENT"># We accept a string or list of strings</span>
+            <span class="PY_KEYWORD">if</span> isinstance(deniedOpSys, basestring):
+                deniedOpSys = [deniedOpSys]
+            <span class="PY_KEYWORD">if</span> os.name <span class="PY_KEYWORD">in</span> deniedOpSys:
+                <span class="PY_KEYWORD">raise</span> WillNotRunError(<span class="PY_STRING">'Will not run on operating system %s'</span>
+                    <span class="PY_STRING">' and actual operating system is %s.'</span> % (
+                    <span class="PY_STRING">'/'</span>.join(deniedOpSys), os.name))
+
+    <span class="PY_KEYWORD">def</span> checkRequiredSoftware(self):
+        <span class="PY_STRING">"""Not implemented. No op right now."""</span>
+        <span class="PY_COMMENT"># Check required software</span>
+        <span class="PY_COMMENT"># @@ 2001-01-24 ce: TBD</span>
+        <span class="PY_COMMENT"># Issues include:</span>
+        <span class="PY_COMMENT">#  - order of dependencies</span>
+        <span class="PY_COMMENT">#  - circular dependencies</span>
+        <span class="PY_COMMENT">#  - examining Properties and willRun of dependencies</span>
+        reqSoft = self.get(<span class="PY_STRING">'requiredSoftware'</span>)
+        <span class="PY_KEYWORD">if</span> reqSoft:
+            <span class="PY_KEYWORD">for</span> soft <span class="PY_KEYWORD">in</span> reqSoft:
+                <span class="PY_COMMENT"># type, name, version</span>
+                <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> checkWillRunFunc(self):
+        willRunFunc = self.get(<span class="PY_STRING">'willRunFunc'</span>)
+        <span class="PY_KEYWORD">if</span> willRunFunc:
+            whyNotMsg = willRunFunc()
+            <span class="PY_KEYWORD">if</span> whyNotMsg:
+                <span class="PY_KEYWORD">raise</span> WillNotRunError(whyNotMsg)
+</pre>
+<!--footer-->
+
+</body>
+</html>

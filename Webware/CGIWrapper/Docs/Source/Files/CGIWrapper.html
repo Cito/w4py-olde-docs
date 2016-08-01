@@ -1,0 +1,712 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>CGIWrapper/CGIWrapper.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT">#!/usr/bin/env python</span>
+
+<span class="PY_STRING">"""CGIWrapper.py
+
+Webware for Python
+
+See the CGIWrapper.html documentation for more information.
+
+"""</span>
+
+<span class="PY_COMMENT"># We first record the starting time, in case we're being run as a CGI script.</span>
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time, localtime, asctime
+serverStartTime = time()
+
+<span class="PY_COMMENT"># Some imports</span>
+<span class="PY_KEYWORD">import</span> cgi, os, sys, traceback
+<span class="PY_KEYWORD">from</span> random <span class="PY_KEYWORD">import</span> randint
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cStringIO <span class="PY_KEYWORD">import</span> StringIO
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> StringIO <span class="PY_KEYWORD">import</span> StringIO
+
+<span class="PY_KEYWORD">if</span> <span class="PY_STRING">''</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> sys.path:
+    sys.path.insert(0, <span class="PY_STRING">''</span>)
+
+<span class="PY_KEYWORD">from</span> Properties <span class="PY_KEYWORD">import</span> version
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">import</span> WebUtils
+<span class="PY_KEYWORD">except</span> ImportError:
+    sys.path.append(os.path.abspath(<span class="PY_STRING">'..'</span>))
+    <span class="PY_KEYWORD">import</span> WebUtils
+
+<span class="PY_KEYWORD">from</span> WebUtils.HTMLForException <span class="PY_KEYWORD">import</span> HTMLForException
+
+<span class="PY_KEYWORD">from</span> MiscUtils.NamedValueAccess <span class="PY_KEYWORD">import</span> valueForName
+
+
+<span class="PY_KEYWORD">class</span> CGIWrapper(object):
+    <span class="PY_STRING">"""The CGI Wrapper class.
+
+    A CGI wrapper executes a target script and provides various services
+    for both the script and website developer and the administrator.
+
+    See the CGIWrapper.html documentation for full information.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self._config = self.config()
+
+
+    <span class="PY_COMMENT">## Configuration ##</span>
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_STRING">"""Return a dictionary with the default configuration.
+
+        Subclasses could override to customize the values
+        or where they're taken from.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> dict(
+            ScriptsHomeDir = <span class="PY_STRING">'Examples'</span>,
+            ChangeDir = True,
+            ExtraPaths = [],
+            ExtraPathsIndex = 1,
+            LogScripts = True,
+            ScriptLogFilename = <span class="PY_STRING">'Scripts.csv'</span>,
+            ScriptLogColumns = [
+                <span class="PY_STRING">'environ.REMOTE_ADDR'</span>,
+                <span class="PY_STRING">'environ.REQUEST_METHOD'</span>, <span class="PY_STRING">'environ.REQUEST_URI'</span>,
+                <span class="PY_STRING">'responseSize'</span>, <span class="PY_STRING">'scriptName'</span>,
+                <span class="PY_STRING">'serverStartTimeStamp'</span>, <span class="PY_STRING">'serverDuration'</span>,
+                <span class="PY_STRING">'scriptDuration'</span>, <span class="PY_STRING">'errorOccurred'</span>
+            ],
+            ClassNames = [<span class="PY_STRING">''</span>, <span class="PY_STRING">'Page'</span>],
+            ShowDebugInfoOnErrors = True,
+            UserErrorMessage = <span class="PY_STRING">'The site is having technical difficulties'</span>
+                <span class="PY_STRING">' with this page. An error has been logged, and the problem'</span>
+                <span class="PY_STRING">' will be fixed as soon as possible. Sorry!'</span>,
+            LogErrors = True,
+            ErrorLogFilename = <span class="PY_STRING">'Errors.csv'</span>,
+            SaveErrorMessages = True,
+            ErrorMessagesDir = <span class="PY_STRING">'ErrorMsgs'</span>,
+            EmailErrors = False,
+            ErrorEmailServer = <span class="PY_STRING">'localhost'</span>,
+            ErrorEmailHeaders = {
+                <span class="PY_STRING">'From'</span>: <span class="PY_STRING">'webware@mydomain'</span>,
+                <span class="PY_STRING">'To'</span>: [<span class="PY_STRING">'webware@mydomain'</span>],
+                <span class="PY_STRING">'Reply-To'</span>: <span class="PY_STRING">'webware@mydomain'</span>,
+                <span class="PY_STRING">'Content-Type'</span>: <span class="PY_STRING">'text/html'</span>,
+                <span class="PY_STRING">'Subject'</span>: <span class="PY_STRING">'Error'</span>
+            },
+            AdminRemoteAddr = [<span class="PY_STRING">'127.0.0.1'</span>]
+        )
+
+    <span class="PY_KEYWORD">def</span> configFilename(self):
+        <span class="PY_STRING">"""Return the filename of the optional configuration file."""</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'CGIWrapper.config'</span>
+
+    <span class="PY_KEYWORD">def</span> userConfig(self):
+        <span class="PY_STRING">"""Return a dictionary with the user configuration.
+
+        This are overrides found in the optional configuration file,
+        or {} if there is no such file. The config filename is taken
+        from configFilename().
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            f = open(self.configFilename())
+        <span class="PY_KEYWORD">except</span> IOError:
+            <span class="PY_KEYWORD">return</span> {}
+        <span class="PY_KEYWORD">else</span>:
+            config = f.read()
+            config = eval(<span class="PY_STRING">'dict(%s)'</span> % config)
+            f.close()
+            <span class="PY_KEYWORD">assert</span> isinstance(config, dict)
+            <span class="PY_KEYWORD">return</span> config
+
+    <span class="PY_KEYWORD">def</span> config(self):
+        <span class="PY_STRING">"""Return the configuration for the CGIWrapper.
+
+        This is a combination of defaultConfig() and userConfig().
+        This method does no caching.
+
+        """</span>
+        config = self.defaultConfig()
+        config.update(self.userConfig())
+        <span class="PY_KEYWORD">return</span> config
+
+    <span class="PY_KEYWORD">def</span> setting(self, name):
+        <span class="PY_STRING">"""Return the value of a particular setting in the configuration."""</span>
+        <span class="PY_KEYWORD">return</span> self._config[name]
+
+
+    <span class="PY_COMMENT">## Utilities ##</span>
+
+    <span class="PY_KEYWORD">def</span> docType(self):
+        <span class="PY_KEYWORD">return</span> docType()
+
+    <span class="PY_KEYWORD">def</span> makeHeaders(self):
+        <span class="PY_STRING">"""Return a default header dictionary with Content-Type entry."""</span>
+        <span class="PY_KEYWORD">return</span> {<span class="PY_STRING">'Content-Type'</span>: <span class="PY_STRING">'text/html'</span>}
+
+    <span class="PY_KEYWORD">def</span> makeFieldStorage(self):
+        <span class="PY_STRING">"""Return a default field storage object created from the cgi module."""</span>
+        <span class="PY_KEYWORD">return</span> cgi.FieldStorage()
+
+    <span class="PY_KEYWORD">def</span> enhanceThePath(self):
+        <span class="PY_STRING">"""Enhance sys.path according to our configuration."""</span>
+        extraPathsIndex = self.setting(<span class="PY_STRING">'ExtraPathsIndex'</span>)
+        sys.path[extraPathsIndex:extraPathsIndex] = self.setting(<span class="PY_STRING">'ExtraPaths'</span>)
+
+    <span class="PY_KEYWORD">def</span> environ(self):
+        <span class="PY_STRING">"""Get the environment for the request."""</span>
+        <span class="PY_KEYWORD">return</span> self._environ
+
+    <span class="PY_KEYWORD">def</span> requireEnvs(self, names):
+        <span class="PY_STRING">"""Check that given environment variable names exist.
+
+        If they don't, a basic HTML error message is printed and we exit.
+
+        """</span>
+        badNames = [name <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> names <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._environ]
+        <span class="PY_KEYWORD">if</span> badNames:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Content-Type: text/html'</span>
+            <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">print</span> docType()
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&lt;html&gt;&lt;head&gt;&lt;title&gt;Error&lt;/title&gt;&lt;/head&gt;&lt;body&gt;'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&lt;p&gt;ERROR: Missing %s&lt;/p&gt;'</span> % <span class="PY_STRING">', '</span>.join(badNames)
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&lt;/body&gt;&lt;/html&gt;'</span>
+            sys.exit(0)
+
+    <span class="PY_KEYWORD">def</span> scriptPathname(self):
+        <span class="PY_STRING">"""Return the full pathname of the target script.
+
+        Scripts that start with an underscore are special -- they run
+        out of the same directory as the CGI Wrapper and are typically
+        CGI Wrapper support scripts.
+
+        """</span>
+        <span class="PY_COMMENT"># remove the CGI Wrapper's filename part</span>
+        pathname = os.path.split(self._environ[<span class="PY_STRING">'SCRIPT_FILENAME'</span>])[0]
+        filename = self._environ[<span class="PY_STRING">'PATH_INFO'</span>][1:]
+        ext = os.path.splitext(filename)[1]
+        <span class="PY_KEYWORD">if</span> ext:
+            <span class="PY_COMMENT"># Hmmm, some kind of extension like maybe '.html'.</span>
+            <span class="PY_COMMENT"># Leave out the 'ScriptsHomeDir' and leave the extension alone.</span>
+            filename = os.path.join(pathname, filename)
+            self._servingScript = False
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># No extension - we assume a Python CGI script.</span>
+            <span class="PY_KEYWORD">if</span> filename.startswith(<span class="PY_STRING">'_'</span>):
+                <span class="PY_COMMENT"># Underscores denote private scripts packaged with CGI Wrapper,</span>
+                <span class="PY_COMMENT"># such as '_admin.py'.</span>
+                <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'AdminRemoteAddr'</span>):
+                    <span class="PY_COMMENT"># Users with the wrong remote address are redirected</span>
+                    <span class="PY_COMMENT"># to the access denied script.</span>
+                    self.requireEnvs([<span class="PY_STRING">'REMOTE_ADDR'</span>])
+                    remoteAddr = self._environ[<span class="PY_STRING">'REMOTE_ADDR'</span>] + <span class="PY_STRING">'.'</span>
+                    <span class="PY_KEYWORD">for</span> addr <span class="PY_KEYWORD">in</span> self.setting(<span class="PY_STRING">'AdminRemoteAddr'</span>):
+                        <span class="PY_KEYWORD">if</span> remoteAddr.startswith(addr + <span class="PY_STRING">'.'</span>):
+                            <span class="PY_KEYWORD">break</span>
+                    <span class="PY_KEYWORD">else</span>:
+                        filename = <span class="PY_STRING">'_accessDenied'</span>
+                filename = os.path.join(pathname, filename + <span class="PY_STRING">'.py'</span>)
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_COMMENT"># All other scripts are based in the directory named</span>
+                <span class="PY_COMMENT"># by the 'ScriptsHomeDir' setting.</span>
+                filename = os.path.join(pathname,
+                    self.setting(<span class="PY_STRING">'ScriptsHomeDir'</span>), filename + <span class="PY_STRING">'.py'</span>)
+            self._servingScript = True
+        <span class="PY_KEYWORD">return</span> filename
+
+    <span class="PY_KEYWORD">def</span> writeScriptLog(self):
+        <span class="PY_STRING">"""Write an entry to the script log file.
+
+        Uses settings ScriptLogFilename and ScriptLogColumns.
+
+        """</span>
+        filename = self.setting(<span class="PY_STRING">'ScriptLogFilename'</span>)
+        <span class="PY_KEYWORD">if</span> os.path.exists(filename):
+            f = open(filename, <span class="PY_STRING">'a'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            f = open(filename, <span class="PY_STRING">'w'</span>)
+            f.write(<span class="PY_STRING">','</span>.join(self.setting(<span class="PY_STRING">'ScriptLogColumns'</span>)) + <span class="PY_STRING">'\n'</span>)
+        values = []
+        <span class="PY_KEYWORD">for</span> column <span class="PY_KEYWORD">in</span> self.setting(<span class="PY_STRING">'ScriptLogColumns'</span>):
+            value = valueForName(self, column)
+            <span class="PY_KEYWORD">if</span> isinstance(value, float):
+                <span class="PY_COMMENT"># might need more flexibility in the future</span>
+                value = <span class="PY_STRING">'%0.4f'</span> % value
+            <span class="PY_KEYWORD">else</span>:
+                value = str(value)
+            values.append(value)
+        f.write(<span class="PY_STRING">','</span>.join(values) + <span class="PY_STRING">'\n'</span>)
+        f.close()
+
+    <span class="PY_KEYWORD">def</span> version(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'.'</span>.join(map(str, version))
+
+
+    <span class="PY_COMMENT">## Exception handling ##</span>
+
+    <span class="PY_KEYWORD">def</span> handleException(self, excInfo):
+        <span class="PY_STRING">"""Handle an exception in the target script.
+
+        Invoked by self when an exception occurs in the target script.
+        &lt;code&gt;excInfo&lt;/code&gt; is a sys.exc_info()-style tuple of information
+        about the exception.
+
+        """</span>
+        <span class="PY_COMMENT"># Note the duration of the script and time of the exception</span>
+        self._scriptEndTime = time()
+        self.logExceptionToConsole()
+        self.reset()
+        <span class="PY_KEYWORD">print</span> self.htmlErrorPage(
+            showDebugInfo=self.setting(<span class="PY_STRING">'ShowDebugInfoOnErrors'</span>))
+        fullErrorMsg = None
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'SaveErrorMessages'</span>):
+            fullErrorMsg = self.htmlErrorPage(showDebugInfo=True)
+            filename = self.saveHTMLErrorPage(fullErrorMsg)
+        <span class="PY_KEYWORD">else</span>:
+            filename = <span class="PY_STRING">''</span>
+        self.logExceptionToDisk(filename)
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'EmailErrors'</span>):
+            <span class="PY_KEYWORD">if</span> fullErrorMsg <span class="PY_KEYWORD">is</span> None:
+                fullErrorMsg = self.htmlErrorPage(showDebugInfo=True)
+            self.emailException(fullErrorMsg)
+
+    <span class="PY_KEYWORD">def</span> logExceptionToConsole(self, stderr=sys.stderr):
+        <span class="PY_STRING">"""Log an exception in the target script.
+
+        Logs the time, script name and traceback to the console
+        (typically stderr). This usually results in the information
+        appearing in the web server's error log. Used by handleException().
+
+        """</span>
+        <span class="PY_COMMENT"># stderr logging</span>
+        stderr.write(<span class="PY_STRING">'[%s] [error] CGI Wrapper:'</span>
+            <span class="PY_STRING">' Error while executing script %s\n'</span> % (
+            asctime(localtime(self._scriptEndTime)), self._scriptPathname))
+        traceback.print_exc(file=stderr)
+
+    <span class="PY_KEYWORD">def</span> reset(self):
+        <span class="PY_STRING">"""Reset CGI output.
+
+        Used by handleException() to clear out the current CGI output results
+        in preparation of delivering an HTML error message page.
+        Currently resets headers and deletes cookies, if present.
+
+        """</span>
+        <span class="PY_COMMENT"># Set headers to basic text/html. We don't want stray headers</span>
+        <span class="PY_COMMENT"># from a script that failed.</span>
+        self._headers = self.makeHeaders()
+        <span class="PY_COMMENT"># Get rid of cookies, too</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'cookies'</span> <span class="PY_KEYWORD">in</span> self._namespace:
+            <span class="PY_KEYWORD">del</span> self._namespace[<span class="PY_STRING">'cookies'</span>]
+
+    <span class="PY_KEYWORD">def</span> htmlErrorPage(self, showDebugInfo=True):
+        <span class="PY_STRING">"""Return an HTML page explaining that there is an error.
+
+        There could be more options in the future, so using named arguments
+        (e.g. showDebugInfo=False) is recommended. Invoked by handleException().
+
+        """</span>
+        html = [<span class="PY_STRING">'''%s
+&lt;html&gt;
+&lt;title&gt;Error&lt;/title&gt;
+&lt;body text="black" bgcolor="white"&gt;
+%s&lt;p&gt;%s&lt;/p&gt;
+'''</span> % (docType(), htTitle(<span class="PY_STRING">'Error'</span>), self.setting(<span class="PY_STRING">'UserErrorMessage'</span>))]
+
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'ShowDebugInfoOnErrors'</span>):
+            html.append(self.htmlDebugInfo())
+
+        html.append(<span class="PY_STRING">'&lt;/body&gt;&lt;/html&gt;'</span>)
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(html)
+
+    <span class="PY_KEYWORD">def</span> htmlDebugInfo(self):
+        <span class="PY_STRING">"""Return an HTML page with debugging info on the current exception.
+
+        Used by handleException().
+
+        """</span>
+        html = [<span class="PY_STRING">'''
+%s&lt;p&gt;&lt;i&gt;%s&lt;/i&gt;&lt;/p&gt;
+'''</span> % (htTitle(<span class="PY_STRING">'Traceback'</span>), self._scriptPathname)]
+        html.append(HTMLForException())
+        html.extend([
+            htTitle(<span class="PY_STRING">'Misc Info'</span>),
+            htDictionary({
+                <span class="PY_STRING">'time'</span>: asctime(localtime(self._scriptEndTime)),
+                <span class="PY_STRING">'filename'</span>: self._scriptPathname,
+                <span class="PY_STRING">'os.getcwd()'</span>: os.getcwd(),
+                <span class="PY_STRING">'sys.path'</span>: sys.path
+            }),
+            htTitle(<span class="PY_STRING">'Fields'</span>), htDictionary(self._fields),
+            htTitle(<span class="PY_STRING">'Headers'</span>), htDictionary(self._headers),
+            htTitle(<span class="PY_STRING">'Environment'</span>), htDictionary(self._environ, {<span class="PY_STRING">'PATH'</span>: <span class="PY_STRING">';'</span>}),
+            htTitle(<span class="PY_STRING">'Ids'</span>), htTable(osIdTable(), [<span class="PY_STRING">'name'</span>, <span class="PY_STRING">'value'</span>])])
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>.join(html)
+
+    <span class="PY_KEYWORD">def</span> saveHTMLErrorPage(self, html):
+        <span class="PY_STRING">"""Save the given HTML error page for later viewing by the developer.
+
+        Returns the filename used. Invoked by handleException().
+
+        """</span>
+        dir = self.setting(<span class="PY_STRING">'ErrorMessagesDir'</span>)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(dir):
+            os.makedirs(dir)
+        filename = os.path.join(dir, self.htmlErrorPageFilename())
+        <span class="PY_KEYWORD">try</span>:
+            f = open(filename, <span class="PY_STRING">'w'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                f.write(html)
+            <span class="PY_KEYWORD">finally</span>:
+                f.close()
+        <span class="PY_KEYWORD">except</span> IOError:
+            sys.stderr.write(<span class="PY_STRING">'[%s] [error] CGI Wrapper: Cannot save error page (%s)\n'</span>
+                % (asctime(localtime(time())), filename))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> filename
+
+    <span class="PY_KEYWORD">def</span> htmlErrorPageFilename(self):
+        <span class="PY_STRING">"""Construct a filename for an HTML error page.
+
+        This filename does not include the 'ErrorMessagesDir' setting.
+
+        """</span>
+        <span class="PY_COMMENT"># Note: Using the timestamp and a random number is a poor technique</span>
+        <span class="PY_COMMENT"># for filename uniqueness, but it is fast and good enough in practice.</span>
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'Error-%s-%s-%06d.html'</span> % (os.path.split(self._scriptPathname)[1],
+            <span class="PY_STRING">'-'</span>.join(map(<span class="PY_KEYWORD">lambda</span> x: <span class="PY_STRING">'%02d'</span> % x, localtime(self._scriptEndTime)[:6])),
+            randint(0, 999999))
+
+    <span class="PY_KEYWORD">def</span> logExceptionToDisk(self, errorMsgFilename=None, excInfo=None):
+        <span class="PY_STRING">"""Write exception info to the log file.
+
+        Writes a tuple containing (date-time, filename, pathname,
+        exception-name, exception-data, error report filename)
+        to the errors file (typically 'Errors.csv') in CSV format.
+        Invoked by handleException().
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> excInfo:
+            excInfo = sys.exc_info()
+        err, msg = excInfo[:2]
+        <span class="PY_KEYWORD">if</span> isinstance(err, basestring): <span class="PY_COMMENT"># string exception</span>
+            err, msg = <span class="PY_STRING">''</span>, str(msg <span class="PY_KEYWORD">or</span> err)
+        <span class="PY_KEYWORD">else</span>:
+            err, msg = err.__name__, str(msg)
+        logline = (asctime(localtime(self._scriptEndTime)),
+            os.path.split(self._scriptPathname)[1], self._scriptPathname,
+            err, msg, errorMsgFilename <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>)
+        <span class="PY_KEYWORD">def</span> fixElement(element):
+            element = str(element)
+            <span class="PY_KEYWORD">if</span> <span class="PY_STRING">','</span> <span class="PY_KEYWORD">in</span> element <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'"'</span> <span class="PY_KEYWORD">in</span> element:
+                element = element.replace(<span class="PY_STRING">'"'</span>, <span class="PY_STRING">'""'</span>)
+                element = <span class="PY_STRING">'"%s"'</span> % element
+            <span class="PY_KEYWORD">return</span> element
+        logline = map(fixElement, logline)
+        filename = self.setting(<span class="PY_STRING">'ErrorLogFilename'</span>)
+        <span class="PY_KEYWORD">if</span> os.path.exists(filename):
+            f = open(filename, <span class="PY_STRING">'a'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            f = open(filename, <span class="PY_STRING">'w'</span>)
+            f.write(<span class="PY_STRING">'time,filename,pathname,exception name,'</span>
+                <span class="PY_STRING">'exception data,error report filename\n'</span>)
+        f.write(<span class="PY_STRING">','</span>.join(logline) + <span class="PY_STRING">'\n'</span>)
+        f.close()
+
+    <span class="PY_KEYWORD">def</span> emailException(self, html, excInfo=None):
+        <span class="PY_STRING">"""Email an exception."""</span>
+        <span class="PY_COMMENT"># Construct the message</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> excInfo:
+            excInfo = sys.exc_info()
+        headers = self.setting(<span class="PY_STRING">'ErrorEmailHeaders'</span>)
+        msg = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> headers:
+            <span class="PY_KEYWORD">if</span> key != <span class="PY_STRING">'From'</span> <span class="PY_KEYWORD">and</span> key != <span class="PY_STRING">'To'</span>:
+                msg.append(<span class="PY_STRING">'%s: %s\n'</span> % (key, headers[key]))
+        msg.append(<span class="PY_STRING">'\n'</span>)
+        msg.append(html)
+        msg = <span class="PY_STRING">''</span>.join(msg)
+        <span class="PY_COMMENT"># Send the message</span>
+        <span class="PY_KEYWORD">import</span> smtplib
+        server = smtplib.SMTP(self.setting(<span class="PY_STRING">'ErrorEmailServer'</span>))
+        server.set_debuglevel(0)
+        server.sendmail(headers[<span class="PY_STRING">'From'</span>], headers[<span class="PY_STRING">'To'</span>], msg)
+        server.quit()
+
+
+    <span class="PY_COMMENT">## Serve ##</span>
+
+    <span class="PY_KEYWORD">def</span> serve(self, environ=os.environ):
+        <span class="PY_STRING">"""Serve a request."""</span>
+        <span class="PY_COMMENT"># Record the time</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'isMain'</span> <span class="PY_KEYWORD">in</span> globals():
+            self._serverStartTime = serverStartTime
+        <span class="PY_KEYWORD">else</span>:
+            self._serverStartTime = time()
+        self._serverStartTimeStamp = asctime(localtime(self._serverStartTime))
+
+        <span class="PY_COMMENT"># Set up environment</span>
+        self._environ = environ
+
+        <span class="PY_COMMENT"># Ensure that filenames and paths have been provided</span>
+        self.requireEnvs([<span class="PY_STRING">'SCRIPT_FILENAME'</span>, <span class="PY_STRING">'PATH_INFO'</span>])
+
+        <span class="PY_COMMENT"># Set up the namespace</span>
+        self._headers = self.makeHeaders()
+        self._fields = self.makeFieldStorage()
+        self._scriptPathname = self.scriptPathname()
+        self._scriptName = os.path.split(self._scriptPathname)[1]
+
+        self._namespace = dict(
+            headers=self._headers, fields=self._fields,
+            environ=self._environ, wrapper=self)
+        info = self._namespace.copy()
+
+        <span class="PY_COMMENT"># Set up sys.stdout to be captured as a string. This allows scripts</span>
+        <span class="PY_COMMENT"># to set CGI headers at any time, which we then print prior to</span>
+        <span class="PY_COMMENT"># printing the main output. This also allows us to skip on writing</span>
+        <span class="PY_COMMENT"># any of the script's output if there was an error.</span>
+        <span class="PY_COMMENT">#</span>
+        <span class="PY_COMMENT"># This technique was taken from Andrew M. Kuchling's Feb 1998</span>
+        <span class="PY_COMMENT"># WebTechniques article.</span>
+        <span class="PY_COMMENT">#</span>
+        self._realStdout = sys.stdout
+        sys.stdout = StringIO()
+
+        <span class="PY_COMMENT"># Change directories if needed</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'ChangeDir'</span>):
+            origDir = os.getcwd()
+            os.chdir(os.path.split(self._scriptPathname)[0])
+        <span class="PY_KEYWORD">else</span>:
+            origDir = None
+
+        <span class="PY_COMMENT"># A little more setup</span>
+        self._errorOccurred = False
+        self._scriptStartTime = time()
+
+        <span class="PY_COMMENT"># Run the target script</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> self._servingScript:
+                execfile(self._scriptPathname, self._namespace)
+                <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> self.setting(<span class="PY_STRING">'ClassNames'</span>):
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> name:
+                        name = os.path.splitext(self._scriptName)[0]
+                    <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> self._namespace:
+                        <span class="PY_COMMENT"># our hook for class-oriented scripts</span>
+                        <span class="PY_KEYWORD">print</span> self._namespace[name](info).html()
+                        <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                self._headers = {<span class="PY_STRING">'Location'</span>:
+                    os.path.split(self._environ[<span class="PY_STRING">'SCRIPT_NAME'</span>])[0]
+                    + self._environ[<span class="PY_STRING">'PATH_INFO'</span>]}
+
+            <span class="PY_COMMENT"># Note the end time of the script</span>
+            self._scriptEndTime = time()
+            self._scriptDuration = self._scriptEndTime - self._scriptStartTime
+        <span class="PY_KEYWORD">except</span>:
+            <span class="PY_COMMENT"># Note the end time of the script</span>
+            self._scriptEndTime = time()
+            self._scriptDuration = self._scriptEndTime - self._scriptStartTime
+
+            self._errorOccurred = True
+
+            <span class="PY_COMMENT"># Not really an error, if it was sys.exit(0)</span>
+            excInfo = sys.exc_info()
+            <span class="PY_KEYWORD">if</span> excInfo[0] == SystemExit:
+                code = excInfo[1].code
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> code:
+                    self._errorOccurred = False
+
+            <span class="PY_COMMENT"># Clean up</span>
+            <span class="PY_KEYWORD">if</span> self._errorOccurred:
+                <span class="PY_KEYWORD">if</span> origDir:
+                    os.chdir(origDir)
+                    origDir = None
+
+                <span class="PY_COMMENT"># Handle exception</span>
+                self.handleException(sys.exc_info())
+
+        self.deliver()
+
+        <span class="PY_COMMENT"># Restore original directory</span>
+        <span class="PY_KEYWORD">if</span> origDir:
+            os.chdir(origDir)
+
+        <span class="PY_COMMENT"># Note the duration of server processing (as late as we possibly can)</span>
+        self._serverDuration = time() - self._serverStartTime
+
+        <span class="PY_COMMENT"># Log it</span>
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'LogScripts'</span>):
+            self.writeScriptLog()
+
+    <span class="PY_KEYWORD">def</span> deliver(self):
+        <span class="PY_STRING">"""Deliver the HTML.
+
+        This is used for the output that came from the script being served,
+        or from our own error reporting.
+
+        """</span>
+        <span class="PY_COMMENT"># Compile the headers &amp; cookies</span>
+        headers = StringIO()
+        <span class="PY_KEYWORD">for</span> header, value <span class="PY_KEYWORD">in</span> self._headers.items():
+            headers.write(<span class="PY_STRING">"%s: %s\n"</span> % (header, value))
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'cookies'</span> <span class="PY_KEYWORD">in</span> self._namespace:
+            headers.write(str(self._namespace[<span class="PY_STRING">'cookies'</span>]))
+        headers.write(<span class="PY_STRING">'\n'</span>)
+
+        <span class="PY_COMMENT"># Get the string buffer values</span>
+        headersOut = headers.getvalue()
+        stdoutOut = sys.stdout.getvalue()
+
+        <span class="PY_COMMENT"># Compute size</span>
+        self._responseSize = len(headersOut) + len(stdoutOut)
+
+        <span class="PY_COMMENT"># Send to the real stdout</span>
+        self._realStdout.write(headersOut)
+        self._realStdout.write(stdoutOut)
+
+
+<span class="PY_COMMENT">## Misc functions ##</span>
+
+<span class="PY_KEYWORD">def</span> docType():
+    <span class="PY_STRING">"""Return a standard HTML document type"""</span>
+    <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'&lt;!DOCTYPE HTML PUBLIC'</span>
+        <span class="PY_STRING">' "-//W3C//DTD HTML 4.01 Transitional//EN"'</span>
+        <span class="PY_STRING">' "http://www.w3.org/TR/html4/loose.dtd"&gt;'</span>)
+
+<span class="PY_KEYWORD">def</span> htTitle(name):
+    <span class="PY_STRING">"""Return an HTML section title."""</span>
+    <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'&lt;h2 style="color:white;background-color:#993333;'</span>
+        <span class="PY_STRING">'font-size:12pt;padding:1pt;font-weight:bold;'</span>
+        <span class="PY_STRING">'font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif"'</span>
+        <span class="PY_STRING">' align="center"&gt;%s&lt;/h2&gt;\n'</span> % name)
+
+<span class="PY_KEYWORD">def</span> htDictionary(d, addSpace=None):
+    <span class="PY_STRING">"""Returns an HTML table where each row is a key-value pair."""</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> d:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'\n'</span>
+    html = [<span class="PY_STRING">'&lt;table border="0" cellpadding="2" cellspacing="2"&gt;'</span>]
+    <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> sorted(d):
+        value = d[key]
+        <span class="PY_KEYWORD">if</span> addSpace <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> key <span class="PY_KEYWORD">in</span> addSpace:
+            target = addSpace[key]
+            value = (target + <span class="PY_STRING">' '</span>).join(value.split(target))
+        html.append(<span class="PY_STRING">'&lt;tr&gt;&lt;td bgcolor="#BBBBBB"&gt;%s&lt;/td&gt;'</span>
+            <span class="PY_STRING">'&lt;td bgcolor="#EEEEEE"&gt;%s&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;\n'</span> % (key, value))
+    html.append(<span class="PY_STRING">'&lt;/table&gt;'</span>)
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'\n'</span>.join(html)
+
+<span class="PY_KEYWORD">def</span> htTable(listOfDicts, keys=None):
+    <span class="PY_STRING">"""Return an HTML table for a list of dictionaries.
+
+    The listOfDicts parameter is expected to be a list of
+    dictionaries whose keys are always the same. This function
+    returns an HTML string with the contents of the table.
+    If keys is None, the headings are taken from the first row in
+    alphabetical order.
+
+    Returns an empty string if listOfDicts is none or empty.
+
+    Deficiencies: There's no way to influence the formatting or to
+    use column titles that are different from the keys.
+
+    """</span>
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> listOfDicts:
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">''</span>
+    <span class="PY_KEYWORD">if</span> keys <span class="PY_KEYWORD">is</span> None:
+        keys = sorted(listOfDicts[0])
+    html = [<span class="PY_STRING">'&lt;table border="0" cellpadding="2" cellspacing="2"&gt;'</span>]
+    html.append(<span class="PY_STRING">'&lt;tr&gt;'</span>)
+    <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> keys:
+        html.append(<span class="PY_STRING">'&lt;th bgcolor="#BBBBBB"&gt;%s&lt;/th&gt;'</span> % key)
+    html.append(<span class="PY_STRING">'&lt;/tr&gt;'</span>)
+    <span class="PY_KEYWORD">for</span> row <span class="PY_KEYWORD">in</span> listOfDicts:
+        html.append(<span class="PY_STRING">'&lt;tr&gt;'</span>)
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> keys:
+            html.append(<span class="PY_STRING">'&lt;td bgcolor="#EEEEEE"&gt;%s&lt;/td&gt;'</span> % row[key])
+        html.append(<span class="PY_STRING">'&lt;/tr&gt;'</span>)
+    html.append(<span class="PY_STRING">'&lt;/table&gt;'</span>)
+    <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'\n'</span>.join(html)
+
+<span class="PY_KEYWORD">def</span> osIdTable():
+    <span class="PY_STRING">"""Get all OS id information.
+
+    Returns a list of dictionaries containing id information such
+    as uid, gid, etc., all obtained from the os module.
+
+    Dictionary keys are 'name' and 'value'.
+
+    """</span>
+    funcs = [<span class="PY_STRING">'getegid'</span>, <span class="PY_STRING">'geteuid'</span>, <span class="PY_STRING">'getgid'</span>, <span class="PY_STRING">'getpgrp'</span>,
+        <span class="PY_STRING">'getpid'</span>, <span class="PY_STRING">'getppid'</span>, <span class="PY_STRING">'getuid'</span>]
+    table = []
+    <span class="PY_KEYWORD">for</span> funcName <span class="PY_KEYWORD">in</span> funcs:
+        <span class="PY_KEYWORD">if</span> hasattr(os, funcName):
+            value = getattr(os, funcName)()
+            table.append(dict(name=funcName, value=value))
+    <span class="PY_KEYWORD">return</span> table
+
+
+<span class="PY_KEYWORD">def</span> main():
+    stdout = sys.stdout
+    <span class="PY_KEYWORD">try</span>:
+        wrapper = CGIWrapper()
+        wrapper.serve()
+    <span class="PY_KEYWORD">except</span>:
+        <span class="PY_COMMENT"># There is already a fancy exception handler in the CGIWrapper for</span>
+        <span class="PY_COMMENT"># uncaught exceptions from target scripts. However, we should also</span>
+        <span class="PY_COMMENT"># catch exceptions here that might come from the wrapper, including</span>
+        <span class="PY_COMMENT"># ones generated while it's handling exceptions.</span>
+        sys.stderr.write(<span class="PY_STRING">'[%s] [error] CGI Wrapper: Error while executing'</span>
+            <span class="PY_STRING">' script (unknown)\n'</span> % asctime(localtime()))
+        traceback.print_exc(file=sys.stderr)
+        <span class="PY_KEYWORD">if</span> sys.exc_info()[0] != SystemExit:
+            output = traceback.format_exception(*sys.exc_info())
+            output = <span class="PY_STRING">''</span>.join(output)
+            output = output.replace(<span class="PY_STRING">'&amp;'</span>, <span class="PY_STRING">'&amp;amp;'</span>).replace(
+                <span class="PY_STRING">'&lt;'</span>, <span class="PY_STRING">'&amp;lt;'</span>).replace(<span class="PY_STRING">'&gt;'</span>, <span class="PY_STRING">'&amp;gt;'</span>)
+            stdout.write(<span class="PY_STRING">'''Content-Type: text/html
+
+%s
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Error&lt;/title&gt;
+&lt;body&gt;&lt;h2&gt;ERROR&lt;/h2&gt;
+&lt;pre&gt;%s&lt;/pre&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+'''</span> % (docType(), output))
+
+
+<span class="PY_KEYWORD">if</span> __name__ == <span class="PY_STRING">'__main__'</span>:
+    isMain = True
+    main()
+</pre>
+<!--footer-->
+
+</body>
+</html>

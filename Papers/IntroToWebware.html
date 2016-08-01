@@ -1,0 +1,804 @@
+<html>
+
+<head>
+
+	<title>Introduction to Webware for Python</title>
+	<style type=text/css>
+	<!--
+		body {
+			background-color: #FFFFFF;
+		}
+
+		h1 {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		h2 {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		h3 {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		h4 {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+	-->
+	</style>
+
+</head>
+
+
+<body>
+
+<h1>Introduction to Webware for Python</h1>
+
+<p>By Chuck Esterbrook
+
+<p> This paper appeared in the conference proceedings of, and was presented at, the <a href=http://www.python9.org/>9th International Python Conference</a>.
+
+<p> Affiliations: Chuck Esterbrook consults, writes and entrepreneurs using Webware and Python. He can be reached at <a href=mailto:ChuckEsterbrook@yahoo.com>ChuckEsterbrook@yahoo.com</a>
+
+<p> Abstract: After introducing the overall Webware project, we focus on its simple WebKit app server, whose purpose is to serve dynamic content via servlets and provide extensibility hooks.
+
+<p> Keywords: web development, servlet, application server, CGI, Python
+
+<h2>The Search</h2>
+
+<p> Upon deciding to use Python for serious web development, I went in search of something more sophisticated than standard CGI programming. My initial requirements were simplicity, power and performance. My experience has been that object-oriented programming, when done correctly with the correct language (e.g., a dynamic one) supports these requirements. Consequently, OOP also became a requirement.
+
+<p> Regarding simplicity, I expected that as a Python developer I would have an easy time slipping into whatever framework I chose. I expected good APIs, documentation and examples. I wanted easy things to be easy, and difficult things to be manageable, much like Python itself.
+
+<p> And finally, regarding power, I expected to have capabilities out of the box such as persistent serving, session management, cookie manipulation, etc.
+
+<p> While conducting my search I ran across several Python web modules which I found to be lacking in many areas including OOP, completeness, documentation and just overall maturity. While being open source, none of them had the architecture and/or community drive to inspire me to join their camps.
+
+
+<p> Zope was the only semi-mature framework I encountered, but it failed me in several areas. I worked with it daily for three weeks before deciding that I couldn't justify enduring its problems. These included:
+
+<ul>
+	<li> a monolithic architecture
+	<li> yet another language (DTML)
+	<li> awkward integration with Python (requires declarations)
+	<li> no search and replace
+	<li> awkward interface (web browser)
+	<li> locking page definitions and data in an OODB where other tools (such as advanced text editors) couldn't get at them
+	<li> poor documentation
+</ul>
+
+
+<h3>The Decision</h3>
+
+<p> After my Zope experience, I explicitly added "modularity" and "grass roots architecture" to my requirements list.
+
+<p> But by then I had exhausted my possibilities with existing Python tools. I rolled up my sleeves and initiated the "Webware for Python" open source project, hosted at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
+
+<p> My aim was to combine my requirements and web tool experiences with other sources of available information (such as Java and WebObjects) to create the  ultimate web development suite for Python. I also wanted to build an open source community around it in order to increase its breadth and quality (and have some fun too).
+
+<p> Webware components are listed below. The <i>Kit</i> suffix on names indicates an object-oriented framework while <i>Utils</i> indicates a grab-bag of useful classes and functions. The Python Server Pages (PSP) name has no suffix although it certainly qualifies as a kit.
+
+
+<p> <table align=center border=1 cellpadding=2 cellspacing=2 width=100%>
+<tr class=ComponentHeadings> <th nowrap>Component</th> <th nowrap>Py ver</th> <th>Summary</th> </tr>
+<tr valign=top class=ComponentRow1>
+	<td class=NameVersionCell> <span class=Name>CGIWrapper</span> </td>
+	<td> 1.5.2 </td>
+	<td> The CGI Wrapper is a CGI script used to execute other Python CGI scripts. The wrapper provides convenient access to form fields and headers, exception catching, and usage and performance logging. Hooks are provided for cookies and class-based CGI scripts. This is useful if you have legacy CGI scripts. Otherwise, you're best off doing new development with WebKit. </td>
+</tr>
+<tr valign=top class=ComponentRow2>
+	<td class=NameVersionCell> <span class=Name>COMKit</span> </td>
+	<td> 1.5.2 </td>
+	<td> COMKit allows COM objects to be used in the multi-threaded versions of WebKit.  Especially useful for data access using ActiveX Data Objects. Requires Windows and Python win32 extensions. </td>
+</tr>
+<tr valign=top class=ComponentRow1>
+	<td class=NameVersionCell> <span class=Name>FormKit</span> </td>
+	<td> 2.0 </td>
+	<td> FormKit provides an object-oriented framework for the construction, rendering and validation of HTML forms. </td>
+</tr>
+<tr valign=top class=ComponentRow2>
+	<td class=NameVersionCell> <span class=Name>MiddleKit</span> </td>
+	<td> 2.0 </td>
+	<td> For building the "middle tier" of an application server, that is, the domain-specific objects in between the front end and the database/datastore. MiddleKit is roughly analogous to NeXT/Apple's Enterprise Objects and Sun's Enterprise Java Beans. </td>
+</tr>
+<tr valign=top class=ComponentRow1>
+	<td class=NameVersionCell> <span class=Name>MiscUtils</span> </td>
+	<td> 1.5.2 </td>
+	<td> MiscUtils provides support classes and functions to Webware that aren't necessarily web-related and that don't fit into one of the other frameworks. </td>
+</tr>
+<tr valign=top class=ComponentRow2>
+	<td class=NameVersionCell> <span class=Name>Python Server Pages</span> </td>
+	<td> 1.5.2 </td>
+	<td> A Python Server Page (or PSP) is an HTML document with interspersed Python instructions that are interpreted to generate dynamic content. PSP is analogous to PHP, Microsoft's ASP and Sun's JSP. PSP sits on top of (and requires) WebKit and therefore benefits from its features. </td>
+</tr>
+<tr valign=top class=ComponentRow1>
+	<td class=NameVersionCell> <span class=Name>WebKit</span> </td>
+	<td> 1.5.2 </td>
+	<td> WebKit provides Python classes for generating dynamic content from a web-based, server-side application. It is a significantly more powerful alternative to CGI scripts for application-oriented development, while still being nearly as easy to use as CGI. WebKit is analogous to NeXT/Apple's WebObjects and Sun's Servlets.  </td>
+</tr>
+<tr valign=top class=ComponentRow2>
+	<td class=NameVersionCell> <span class=Name>WebUtils</span> </td>
+	<td> 1.5.2 </td>
+	<td> WebUtils contains functions for common web related programming tasks such as encoding/decoding HTML, etc. </td>
+</tr>
+</table>
+
+
+<h2>CGI (or not)</h2>
+
+<p> I started Webware with a CGI Wrapper component which I had built for my prior web work. It was based on a WebTechniques article (<a href=http://www.webtechniques.com/archives/1998/02/kuchling/>http://www.webtechniques.com/archives/1998/02/kuchling/</a>) by Andrew Kuchling, but went further in several areas (as you can expect when you extrapolate from the terse examples required by magazine articles). A description of CGIWrapper can be found in the component table above.
+
+<p> I had already decided, for reasons discussed below, that a more server-oriented approach was preferable over CGI. But I wanted Webware to be able to take care of a large audience of web developers and with CGIWrapper already sitting on my hard drive, I figured a little clean up would be easy.
+
+<p> What I discovered is that there is a thin line between a full featured CGIWrapper and an application server. When I had what I considered a reasonable enough set of features, I fleshed out the TO DO list in the docs and called it a day.
+
+<p> So far, CGIWrapper has received little attention among the Webware community. Most people gravitate to its alternative, WebKit, which is described later.
+
+<p> The major disadvantage of CGIs is that they are launched as a separate process upon every request made to the web server. Launching processes on any operating system is an expensive operation and consequently CGIs can often be slow.
+
+<p> There are two aspects to slow performance. The one that most people focus on in web performance discussions is total throughput. How many transactions (e.g., request-response cycles) can your server handle in a given hour?
+
+<p> The fact is, few people have a website that creates this kind of a problem. Even using CGI, one mediocre machine can crank out hundreds of responses in an hour.
+
+<p> A more important performance requirement is responsiveness: Do your users wait 15 seconds for their pages, or 5? In this case, how many people leave the website, because they can only click through 4 pages per minute rather than 12?
+
+<p> "Browser News" (<a href=http://www.upsdell.com/BrowserNews/stat_des.htm>http://www.upsdell.com/BrowserNews/stat_des.htm</a>) tells us TurboSanta reports (Dec. 1999) that the average home page load time among the Web's top 120 retailers was about five seconds. And eMarketer reports (Nov. 1998) how long people will wait before leaving a site:
+
+<p> <table align=center border=1>
+<tr> <th> Users Waiting </th> <th> Load Time </th> </tr>
+<tr> <td> 84% </td> <td> 10 sec </td> </tr>
+<tr> <td> 51% </td> <td> 15 sec </td> </tr>
+<tr> <td> 26% </td> <td> 20 sec </td> </tr>
+<tr> <td>  5% </td> <td> 30 sec </td> </tr>
+</table>
+
+<p> There are many techniques for avoiding CGI overhead and they all boil down to this: stay resident. That is, the code and data that runs your pages needs to reside in memory as much as possible. When this occurs you avoid the following overhead per request:
+
+<ul>
+   <li>Launch a process</li>
+   <li>Load the interpreter (python)</li>
+   <li>Load the standard modules (os, sys, etc.)</li>
+   <li>Load commonly used modules (MySQLdb, DateTime, etc.)</li>
+   <li>Load the script (MyPage.py)</li>
+   <li>Other initialization (e.g., opening a database connection)</li>
+   <li>Shutdown the process</li>
+</ul>
+
+<p> Admittedly, there is one advantage to CGI scripts: you have to try really hard to suffer from memory leaks or stability problems. This robustness is due to CGI programs being shut down and restarted each time. However, with a great language (Python) and a great framework (WebKit) you can avoid these problems pretty easily.
+
+<p> Another bad side effect of CGI is that by providing a blank structure for your code (e.g., the contents of the CGI script) programmers write what I refer to as "nekkid" code. This is code that doesn't generally have an intelligible structure and rarely makes use of the features and benefits of Object-Oriented Programming (OOP).
+
+<p> As we explore WebKit, we'll see what those benefits are.
+
+
+<h2>WebKit</h2>
+
+<p> By far the most key component of Webware is WebKit, which essentially does only two things:
+
+<ol>
+   <li>Serves dynamic content via servlets</li>
+   <li>Provides hooks for extensibility</li>
+</ol>
+
+<p> The fact that WebKit does only two things is very key to the architecture of Webware. By forcing other components to stand on their own ground, Webware's modularity is guaranteed. To make that approach feasible, WebKit, as a founding component, has to provide explicit features for extensions at multiple levels.
+
+<p> This modularity also encourages component designers to make their components accessible in other ways. For example, the MiddleKit and FormKit components can be used from CGI scripts as well as from WebKit servlets, or from any Python program for that matter.
+
+<p> Yet another benefit is that in a reasonable amount of time, a new developer can "swallow the WebKit pill", begin to realize benefits and see some live results. As the developer sees fit, he or she can then approach additional Webware components to expand their capabilities.
+
+<p> Some steps are required to install WebKit. These steps center around getting the web server and app server to talk to each other. They also include configuration considerations for your site. However, WebKit already includes a mature installation guide so that topic will not be covered in this paper.
+
+<p> Let's start with WebKit servlets and then move on to related objects.
+
+
+<h3>Servlets</h3>
+
+<p> A servlet is a Python object that writes a response for a given request, possibly making use of other objects such as session and application. All of these objects are contained by an umbrella object, called a transaction, which is used for convenience and organization. The whole process is managed by the application object and various classes in the framework. There's quite a bit of machinery to manage requests, responses, threading, monitoring, etc. but the WebKit framework takes care of most it leaving you to just write your servlets and any supporting classes you desire.
+
+<p> Here are key portions of the Servlet interface:
+
+<pre><blockquote>class Servlet(Object):
+
+    ## Request-response cycles ##
+    def awake(self, trans):
+    def respond(self, trans):
+    def sleep(self, trans):
+
+    ## Server side filesystem ##
+    def serverSideDir(self):
+    def serverSidePath(self):
+</blockquote></pre>
+
+
+<p> As a developer that subclasses Servlet, your most immediate responsibility will be to override the respond() method which takes a transaction as an argument. The transaction passed to respond() provides access to the request, response, session and application.
+
+<p> The awake() and sleep() methods can be found in other classes as well. They are described further below.
+
+<p> The serverSideDir() and serverSidePath() methods return the directory location and full pathname, respectively, of the servlet as found on the server. These can be useful in constructing paths relative to the servlet.
+
+<p> Here is the obligatory "Hello, world!" example:
+
+<pre><blockquote>from WebKit.Servlet import Servlet
+
+class Hello(Servlet):
+   def respond(self, trans):
+       trans.response().write('Content-type: text/html\n\nHello, world!\n')
+</blockquote></pre>
+
+<p> This Hello class will be loaded and instantiated by the application. The instance will be cached in memory and used for each request.
+
+
+<h3>HTTPServlet</h3>
+
+<p> The Hyper Text Transfer Protocol (HTTP), determines how web browsers and servers communicate. WebKit's HTTPServlet class provides specific methods for each type of HTTP request:
+
+
+<pre><blockquote>class HTTPServlet(Servlet):
+
+    ## Transactions ##
+    def respondToGet(self, trans):
+    def respondToPost(self, trans):
+    def respondToPut(self, trans):
+    def respondToDelete(self, trans):
+    def respondToOptions(self, trans):
+    def respondToTrace(self, trans):
+</blockquote></pre>
+
+<p> A subclass of HTTPServlet can simply override the appropriate method to handle a particular type of HTTP request, the most common of which are GET and POST.
+
+
+<h3>Page</h3>
+
+<p> While HTTPServlet is somewhat interesting, it adds little to Servlet. In practice, web pages have titles, headers, bodies and footers. Also, there are several conveniences that can be provided for writing output, referring to the request, etc.
+
+<p> The Page class serves this purpose by subclassing HTTPServlet and adding these features. For example, Page assumes a text/html content type, so "Hello, world!" becomes:
+
+<pre><blockquote>from WebKit.Page import Page
+
+class Hello(Page):
+    def writeBody(self):
+        self.writeln('Hello, world!')
+</blockquote></pre>
+
+<p> Note that Page's key method for delivering content is writeHTML() which in turn invokes writeHeader(), writeBody() and writeFooter(). The header and footer that Page provides are sufficient for very basic pages, so the "Hello, world!" example above overrides writeBody().
+
+<p> Key interface portions of Page:
+
+<pre><blockquote>class Page(HTTPServlet):
+
+    ## Access ##
+    def application(self):
+    def transaction(self):
+    def request(self):
+    def response(self):
+    def session(self):
+
+    ## Generating results ##
+    def title(self):
+    def htTitle(self):
+    def htBodyArgs(self):
+    def writeHTML(self):
+    def writeHeader(self):
+    def writeBody(self):
+    def writeFooter(self):
+
+    ## Writing ##
+    def write(self, *args):
+    def writeln(self, *args):
+
+    ## Actions ##
+    def methodNameForAction(self, name):
+    def actions(self):
+    def preAction(self, actionName):
+    def postAction(self, actionName):
+</blockquote></pre>
+
+<p> The first group of methods, under Access, are self convenience methods so that subclasses can write expressions such as self.request() and self.session(). Note that using methods rather than attributes is a key point for subclasses of Page, since some objects are only fetched upon request (e.g., the session).
+
+<p> The next set of methods, under Generating Results, break up the generation of the page into methods so that subclasses can inherit common parts and customize only that which is different.
+
+<p> As a style convention, methods that return an HTML string begin with the letters <b>ht</b> and methods that write content start with <b>write</b>.
+
+<p> Next we have the Writing methods which are also convenience methods to provide for statements such as self.write('Hi'). The writeln() method adds a newline which can be useful for improving the readability of the generated HTML.
+
+<p> Finally, there is the Actions group which allows a developer, on a page with multiple form buttons, to bind each button to a different method. For example, if a page contains buttons such as New, Insert and Edit, these can be made to invoke methods such as new(), insert() and edit(), rather than writeHTML(). More information on using this feature is provided in the WebKit User's Guide.
+
+<p> In practice, most developers use Page rather than Servlet or HTTPServlet.
+
+
+<h3>Stretching the Class Hierarchy Vertically</h3>
+
+<p> A more monolithic approach would have put all three classes, Servlet, HTTPServlet and Page, in one very large class. Instead, the functionality is split out among three classes stacked upon each other. This is sometimes referred to as "stretching the class hierarchy vertically".
+
+<p> An obvious application of this benefit is that developers are free to bypass the Page class and create their own subclass of HTTPServlet. This might be motivated by a very specific purpose in a non-typical website or an opinion that there is a better design for Page.
+
+<p> Another application is the creation of a different kind of app server. Note that WebKit is not even entirely married to HTTP. Consider BXXP, a new protocol framework for Internet applications (<a href=http://www.bxxp.org>http://www.bxxp.org</a>). A new class, BXXPServlet, could be subclassed from Servlet and enjoy the benefit of doing so, which is primarily management by the application, including caching and threading. Additional classes, such as BXXPApplication and BXXPRequest, would be required.
+
+
+<h3>Requests and Responses</h3>
+
+<p> Servlet developers quickly become familiar with the request and response objects, which have the familiar trappings found in other web development environments. These too are broken into Request, HTTPRequest, Response and HTTPResponse. Let's go straight to the practical HTTP interfaces:
+
+<pre><blockquote>class HTTPRequest(Request):
+
+    ## Fields ##
+    def field(self, name, default=Tombstone):
+    def hasField(self, name):
+    def fields(self):
+
+    ## Cookies ##
+    def cookie(self, name, default=Tombstone):
+    def hasCookie(self, name):
+    def cookies(self):
+
+    ## Values ##
+    def value(self, name, default=Tombstone):
+    def hasValue(self, name):
+
+    ## Authentication ##
+    def remoteUser(self):
+
+    ## Remote info ##
+    def remoteAddress(self):
+    def remoteName(self):
+
+    ## Path ##
+    def urlPath(self):
+    def serverSidePath(self):
+    def serverSideDir(self):
+
+    ## Special ##
+    def rawRequest(self):
+    def environ(self):
+</blockquote></pre>
+
+
+<p> The Field methods cover the use of form fields and can be used like so:
+
+<pre><blockquote>req = self.request()
+name = req.field('name')
+age = req.field('age', None)
+</blockquote></pre>
+
+<p> Note that field() requires a name and optionally allows a default value to be specified. If no default is passed, then field() will throw an exception if the named field cannot be found. All methods in Webware that return named objects provide this type of functionality.
+
+<p> The hasField() method returns true if a field with the given name exists while fields() returns the dictionary of all fields. These kinds of methods are also typically provided in other places where objects supply named values.
+
+<p> The Cookie methods provide similar access for HTTP cookies, while the Value methods will return either a form field or a cookie (in that order). More general information on cookies can be found at:
+
+<ul>
+	<li> RFC 2109: <a href=http://www.ietf.org/rfc/rfc2109.txt>http://www.ietf.org/rfc/rfc2109.txt</a>
+	<li> RFC 2068: <a href=http://www.ietf.org/rfc/rfc2068.txt>http://www.ietf.org/rfc/rfc2068.txt</a>
+	<li> Netscape Cookie Spec: <a href=http://home.netscape.com/newsref/std/cookie_spec.html>http://home.netscape.com/newsref/std/cookie_spec.html</a>
+</ul>
+
+<p> The remaining methods provide convenient and often useful information about the request, such as the remote address of the client and the server side path corresponding to the request URL.
+
+<p> The Special methods provide back doors which you hopefully won't need, but can still use. The rawRequest() method returns the basic Python dictionary that was put together to represent the request before any application processing occurred. The environ() method returns the "environment" that was passed in from the web server, from which you may be able to access additional values not found in the HTTPRequest interface. However, when there is a corresponding method, such as remoteUser() or urlPath(), use the method for better portability and consistent semantics.
+
+<p> Key methods of HTTPResponse are:
+
+<pre><blockquote>class HTTPResponse(Response):
+
+    ## Headers ##
+    def header(self, name, default=Tombstone):
+    def hasHeader(self):
+    def setHeader(self, name, value):
+    def addHeader(self, name, value):
+    def headers(self):
+    def clearHeaders(self):
+
+    ## Cookies ##
+    def cookie(self, name):
+    def hasCookie(self, name):
+    def setCookie(self, name, value):
+    def addCookie(self, cookie):
+    def cookies(self):
+    def clearCookies(self):
+
+    ## Status ##
+    def setStatus(self, code):
+
+    ## Special responses ##
+    def sendRedirect(self, url):
+
+    ## Output ##
+    def write(self, string):
+</pre></blockquote>
+
+<p> The Header and Cookie methods provide the obvious accessor methods for HTTP headers and cookies. Besides their basic value, cookie objects have additional attributes such as comment, domain, max age, etc. which can be manipulated through the Cookie class interface before invoking HTTPResponse.addCookie(). However, setting temporary cookies that simply have a name and a value is quite common, so the setCookie() method is provided as convenience for doing so.
+
+<p> Although HTTPResponse provides a write() method, in practice most servlets actually subclass Page and use self.write() rather than self.response().write().
+
+
+<h3>Sessions</h3>
+
+<p> The session object in any web development framework is an object tied to a particular user so that information about that user can be tracked on the server side. Such information could include user preferences, a list of pages they have visited, etc. Typically the session times out, thereby becoming invalid, after some period of inactivity such as an hour.
+
+<p> To use a session in WebKit, one need only ask for it:
+
+<pre><blockquote>sess = self.session()
+sess.setValue('x', 5)
+print sess.value('name')
+</blockquote></pre>
+
+<p> There is nothing HTTP specific about Session, which offers a dozen convenient methods for manipulation and inspection:
+
+<pre><blockquote>class Session:
+
+    ## Access ##
+    def creationTime(self):
+    def lastAccessTime(self):
+    def identifier(self):
+    def isNew(self):
+    def timeout(self):
+    def setTimeout(self, timeout):
+
+    ## Invalidate ##
+    def invalidate(self):
+
+    ## Values ##
+    def value(self, name, default=Tombstone):
+    def hasValue(self, name):
+    def setValue(self, name, value):
+    def delValue(self, name):
+    def values(self):
+
+    ## Transactions ##
+    def awake(self, trans):
+    def respond(self, trans):
+    def sleep(self, trans):
+</blockquote></pre>
+
+<p> WebKit maintains session identity by setting a small cookie on the client. As can be seen from the Session interface, the time out can be controlled on an individual basis, however, the WebKit configuration file sets the default.
+
+<p> Upon receiving a request with an expired session, WebKit can provide the user an error page or simply allow the transaction to continue sans session. This is also controlled via the configuration file. Additionally, there are programmatic hooks (described in the WebKit User's Guide) if a customized action is required.
+
+
+<h3>Other WebKit Usage Topics</h3>
+
+<p> So far the focus has been on the interface and behavior of specific WebKit classes. This section addresses additional topics of interest to the WebKit user.
+
+
+<h4>Where do the print statements go?</h4>
+
+<p> Ordinary Python print statements executed in a servlet will go to the console of the application, e.g., to sys.stdout. This is by explicit design and is incredibly useful for debugging.
+
+<p> For example, if you launch the application server from a console window (also called a <i>terminal window</i> or <i>command prompt</i>), you will see both WebKit's output (mostly start up messages) and yours in that window. If you launch the application server as a daemon or service, the output still goes to sys.stdout and is subject to the conventions used by your operating system in that circumstance.
+
+<p> There is also a configuration for capturing the output of the servlet and placing it at the bottom of the web page. See the WebKit documentation for more information.
+
+
+<h4>Using Inheritance to Construct Websites</h4>
+
+<p> Almost all websites have a common look and feel regarding page parts such as headers, sidebars, footer links, etc. The inheritance feature of object-oriented development lends itself well to this situation.
+
+<p> A typical approach in a WebKit-based site is to create an abstract SitePage class with methods for each of the page parts. All other pages in the site ultimately inherit from SitePage and only override those methods they need to customize. The most typical override will be a method such as writeContent() which would be responsible for the portion of the page surrounded by the header, sidebar and footer.
+
+<p> Further abstract classes can be made for other areas of the site. For example, a "members area" can be set up via a MembersPage class that overrides the writeSidebar() method to provide members-only links.
+
+<p> Besides saving time during construction of the initial site, the inheritance technique makes for easy changes later on. For example, by changing SitePage's writeHeader() method, the entire site is updated.
+
+<p> As a side note, SitePage can also be useful in providing utility methods that are easily available to subclasses. These utility methods could be used to read configuration files, cache database connections, etc.
+
+<p> It's a testament to the power of object-oriented programming that over 20 years after the inception of its modern form, it can be naturally applied to a new medium--the web.
+
+<p> In summary,
+
+<ul>
+   <li> Use inheritance to model the common look and feel of the site.
+   <li> Page parts become methods named writePart().
+   <li> Override methods to customize page parts.
+   <li> Always make a SitePage class for the entire site.
+   <li> Consider what utility methods might be useful in SitePage.
+</ul>
+
+
+<h4>The Awake-Respond-Sleep Cycle</h4>
+
+<p> As seen above, several of the key classes involved in a transaction respond to awake() and sleep(). These methods are invoked as a hook for "per-transaction" initialization and de-initialization. This is especially important for servlets which are reused many times over.
+
+<p> The order of invocation is:
+
+<ol>
+	<li> Awake:
+		<ol>
+			<li> application.awake(trans)
+			<li> transaction.awake()
+			<li> session.awake(trans)
+			<li> servlet.awake(trans)
+		</ol>
+
+	<li> Respond:
+		<ol>
+			<li> application.respond(trans)
+			<li> transaction.respond()
+			<li> session.respond(trans)
+			<li> servlet.respond(trans)
+		</ol>
+
+	<li> Sleep:
+		<ol>
+			<li> servlet.sleep(trans)
+			<li> session.sleep(trans)
+			<li> transaction.sleep()
+			<li> application.sleep(trans)
+		</ol>
+	</li>
+</ol>
+
+<p> In other words, awake() is sent to Application, Transaction, Session and Servlet. Next, respond() is sent in the same order. Finally, sleep() is sent in the reverse order.
+
+<p> Currently, the request and response objects do not partake in the awake-respond-sleep cycle. This could easily be added in the future if the need was demonstrated.
+
+<p> As an example, the awake() method of a servlet could determine the user's theme (e.g., a name that indicates a choice of fonts and colors), save it to a cookie and store it as an attribute for easy access by the rest of the servlet:
+
+<pre><blockquote>class ThemePage(Page):
+
+    def awake(self, trans):
+        Page.awake(self, trans)
+        req = self.request()
+        res = self.response()
+        if req.hasField('theme'):
+            self._theme = req.field('theme')
+        else if req.hasCookie('theme'):
+            self._theme = req.cookie('theme')
+        else:
+            self._theme = None
+        if self._theme:
+            res.setCookie('theme', self._theme)
+            res.cookie('theme').setMaxAge(365*24*60*60) # one year
+</pre></blockquote>
+
+<p> The most likely uses for the sleep() method include:
+
+<ul>
+	<li> Close any resources opened by awake (such as files or temporary database connections)
+	<li> Remove any attributes of the servlet that consume memory and are not useful to cache.
+</ul>
+
+
+<h4>Simple URLs</h4>
+
+<p> WebKit encourages the use of simple URLs that do not contain extensions or "index"-style filenames. For example:
+
+<p> http://host.com/
+<br> http://host.com/PowerSearch
+
+<p> In the first example, WebKit searches for files named index.* and Main.*. If found, the file is loaded and served; otherwise an HTTP 404 Not Found error is returned to the client.
+
+<p> In the second example, WebKit searches for PowerSearch.*. If found, the file is loaded and served according to its extension. The WebKit mechanism for handling extensions is well defined and can be hooked into as described further below.
+
+<p> Besides insulating users of your site from implementation details they don't care about, simple URLs allow you to switch techniques at any time without breaking any referring links or bookmarks. For example, PowerSearch could start as PowerSearch.html, later be rewritten as a PowerSearch.py servlet and again rewritten to be a PowerSearch.psp Python Server Page. The same kind of switches can be made for index.html.
+
+<p> If multiple files match the URL, a warning message is printed to the console and an HTTP 404 File Not Found error is returned to the user. Presumably, the HTTP 404 error is logged by the site's web server.
+
+
+<h4>E-mail Notifications</h4>
+
+<p> When a servlet of any kind throws an exception, WebKit will capture relevant information including the exception, environment variables and request attributes. This information is saved to an error log and e-mailed to the site administrator.
+
+<p> Details on configuring the e-mail server and address are located in the WebKit Installation Guide.
+
+
+<h3>Extending WebKit</h3>
+
+<p> The other design goal for WebKit is to be extensible. There are two primary techniques by which WebKit is extended:
+
+<ul>
+   <li> Plug-ins
+   <li> Servlet factories
+</ul>
+
+
+<h4>Plug-ins</h4>
+
+<p> Upon launching the WebKit app server, several messages are displayed including a list of loaded plug-ins:
+
+<pre><blockquote>
+Loading plug-in: COMKit at ..\COMKit
+Loading plug-in: FormKit at ..\FormKit
+Loading plug-in: MiddleKit at ..\MiddleKit
+Loading plug-in: MiscUtils at ..\MiscUtils
+Loading plug-in: PSP at ..\PSP
+Loading plug-in: WebUtils at ..\WebUtils
+</blockquote></pre>
+
+<p> A plug-in is a software component that provides additional WebKit functionality without having to modify WebKit's source. This increases Webware's modularity and allows users to create their own private libraries of plug-ins that should experience little to no change as new versions of WebKit are released.
+
+<p> Plug-ins often provide additional servlet factories, servlet subclasses, examples and documentation. Ultimately, it is the plug-in author's choice as to what to provide and in what manner.
+
+<p> Plug-ins are ultimately Python packages (see the <a href=http://www.pythonlabs.com/doc/manuals/python2.0/tut/node8.html#SECTION008400000000000000000>Python Tutorial, 6.4: "Packages"</a>)
+
+<p> The plug-in/package must have an __init__.py which must contain this function:
+
+<pre><blockquote>
+def InstallInWebKit(appServer):
+</blockquote></pre>
+
+<p> This function is invoked to take whatever actions are needed to plug the new component into WebKit. For example, the PSP (Python Server Pages) component does the following:
+
+<pre><blockquote>
+from PSPServletFactory import PSPServletFactory
+
+def InstallInWebKit(appServer):
+   app = appServer.application()
+   app.addServletFactory(PSPServletFactory(app))
+</blockquote></pre>
+
+<p> In some cases, a plug-in might not have any special actions to perform. For example, Webware's FormKit really is nothing more than a simple Python package that makes itself available. Its implementation of InstallInWebKit() is "pass".
+
+<p> Plug-ins must contain a Properties.py file in order to advertise their name, version, documentation files, required Python version and synopsis. This information can be used by WebKit to refrain from loading a plug-in which requires a more recent version of Python. The Webware installer also uses this information to generate documentation for each plug-in. In fact, Properties.py is actually a convention of all Webware components, including CGIWrapper and WebKit itself.
+
+<p> Here is an excerpt from PSP/Properties.py:
+
+<blockquote><pre>name = 'Python Server Pages'
+version = (0, 3, 0)
+status = 'beta'
+requiredPyVersion = (1, 5, 2)
+
+synopsis = '''A Python Server Page (or PSP) is an HTML document
+with interspersed Python instructions that are interpreted to
+generate dynamic content. PSP is analogous to PHP, Microsoft's
+ASP and Sun's JSP. PSP sits on top of (and requires) WebKit and
+therefore benefits from its features.'''
+</pre></blockquote>
+
+
+<p> Plug-ins can be displayed through the WebKit administration pages. A typical URL during development is http://localhost/WebKit.cgi/Admin/PlugIns.
+
+<p> The WebKit configuration file specifies how plug-ins are located. The config file allows for specific plug-ins to be named, or for "plug-in directories" to be listed, which are then scanned at launch time. By default, WebKit will load any plug-in residing next to it in the Webware directory.
+
+
+<h4>Servlet Factories</h4>
+
+<p> A servlet factory is an object responsible for creating a servlet instance for a given request. The WebKit application maintains a dictionary which maps extensions (e.g., .html, .py, .psp) to servlet factory instances. When no servlet instance is available to handle a request (either because none have been created or the existing ones are currently busy with other requests), the application will request a new instance from the servlet factory.
+
+<p> Not only does this design lend itself well to continuing the development of WebKit, but it enables plug-ins and applications to provide their own servlet factories for extensions they invent.
+
+<p> The most famous example of this is PSP, which was the first plug-in created for WebKit. PSP enables developers to mix Python code into HTML documents (a la Microsoft's ASP, Java's JSP, and PHP). For this purpose, PSP designates a <b>.psp</b> extension for such files and provides the servlet factory to handle it.
+
+<p> Servlet factory classes must inherit from ServletFactory and override three key methods:
+
+<pre><blockquote>
+def uniqueness(self):
+def extensions(self):
+def createServletForTransaction(self, transaction):
+</blockquote></pre>
+
+<p> The uniqueness() method returns a string to indicate the uniqueness of the servlet factory's servlets, which is important in the context that WebKit creates, caches and reuses servlets. The possible values and their meanings are:
+
+<p> <table align=center border=1>
+<tr> <th> Value </th> <th> Semantics </th> </tr>
+<tr> <td> 'file' </td> <td> A servlet can only be reused for requests that map to the same file. </td> </tr>
+<tr> <td> 'extension' </td> <td> A servlet can be reused for any request whose server side file has the same extension. </td> </tr>
+<tr> <td> 'application' </td> <td> A servlet can be reused for any request. </td> </tr>
+</table>
+
+<p> However, as of WebKit 0.4.1, only file uniqueness is supported.
+
+<p> The extensions() method returns a list of extensions that WebKit uses to decide what factory to use for a request. The extension <b>.*</b> is a special case that is looked for when an extension doesn't directly match a servlet factory. WebKit already includes an UnknownFileTypeServletFactory that advertises this extension in order to serve generic files (such as .html, .gif, etc.).
+
+<p> The createServletForTransaction() method returns a new servlet that will handle the transaction. This method should do no caching (e.g., it should really create the servlet upon each invocation) since caching is done at the Application level.
+
+<p> Note that plug-ins can install new servlet factories by invoking Application.addServletFactory().
+
+
+<h3>Performance</h3>
+
+<p> A basic WebKit servlet performs relatively well (compared to CGI) because it stays resident in memory, ready to serve immediately upon request. A good developer should be able to squeeze even more performance out of servlets, by making smart decisions about what to cache. Common candidates for caching including generated HTML and database connections.
+
+<p> For the benchmarks below, the Colors example from WebKit was chosen. This servlet prints a table of sample colors and their RGB codes ranging over the entire color spectrum. Minor code changes were made as follows:
+
+<ul>
+	<li> Created a CGI version.
+	<li> Created a version that doesn't cache the HTML text of the computed color table.
+	<li> Changed the inheritance to WebKit.Page so that the header and sidebar of ExamplePage are not included. This makes the servlet version even with the CGI version.
+	<li> Reduced the output from 7 printed pages to 2 in order to more closely match the length of a typical web page.
+</ul>
+
+<p> The servlets were run twice, using different <i>adapters</i> for the app server. An <i>adapter</i> is a relatively simple program that shuttles requests and responses between the web server and the app server. The most basic adapter is WebKit.cgi, which operates with any CGI-enabled web server. However, due to the performance issues surrounding CGI, it is also the slowest. Additional adapters are included with WebKit to take advantage of other technologies that allow for persistence of the adapter. These technologies include FastCGI, mod_python, mod_snake and PyWX/AOLServer.
+
+<p> During development, WebKit.cgi (or its cousin OneShot.cgi) are generally sufficient. Upon deployment of a website, a faster adapter can be brought into play to provide substantial performance benefits. Note that switching adapters has no impact on the application code.
+
+<p> The benchmarks were performed on a machine with the following characteristics:
+
+<p><table align=center cellpadding=2 cellspacing=0 border=0>
+<tr> <td> CPU: </td> <td> AMD 700MHz </td> </tr>
+<tr> <td> RAM: </td> <td> 256MB </td> </tr>
+<tr> <td> Drive: </td> <td> Ultra-SCSI II Wide, 7200RPM </td> </tr>
+<tr> <td> Op Sys: </td> <td> Linux Mandrake 7.0 (equiv to RedHat 6.2) </td> </tr>
+<tr> <td> Python: </td> <td> 1.5.2 </td> </tr>
+<tr> <td> Apache: </td> <td> 1.3.x </td> </tr>
+<tr> <td> Webware: </td> <td> 0.5 pre (cvs 1/15/2000) </td> </tr>
+</table>
+
+<p> The Apache benchmark utility was run with 500 hits and a concurrency limit of 5 on the same machine as the web server and app server. This was repeated 5 times for each program, the min and max values were eliminated and the remaining 3 values were averaged to determine the requests per second for each approach.
+
+<p> <table align=center>
+
+<tr> <th> Program </th> <th> Requests/sec </th> </tr>
+<tr> <td colspan=2> <i>CGI:</i> </td> </tr>
+<tr> <td> Colors.cgi </td>  <td> 13.45 </td> </tr>
+<tr> <td colspan=2> <br><i>WebKit + CGI adapter:</i> </td> </tr>
+<tr> <td> Colors.py (no caching)</td>  <td> 7.90 </td> </tr>
+<tr> <td> Colors.py </td>  <td> 9.13 </td> </tr>
+<tr> <td colspan=2> <br><i>WebKit + FastCGI adapter:</i> </td> </tr>
+<tr> <td> Colors.py (no caching) </td>  <td> 30.60 </td> </tr>
+<tr> <td> Colors.py </td>  <td> 64.59 </td> </tr>
+
+</table>
+
+<p> Using WebKit with a stay-resident adapter such as the FastCGI adapter makes a significant difference in performance. Investing some time in this configuration is well worth the effort when delivering a production site.
+
+<p> The fact that servlets run slower when using the CGI adapter is no surprise this configuration endures the overhead of both CGI and the app server simultaneously. However, this configuration is still offered for development and as a least common denominator.
+
+<p> While the benchmarks are interesting, they do not cover several areas which should be explored in the future:
+
+<ul>
+	<li> Run the client on a separate machine to simulate a LAN.
+	<li> Run the client on remote machines connected by cable modem, DSL and analog modem to simulate Internet conditions.
+	<li> Test servlets that use databases whose query results and connections are cached or not.
+	<li> Test other stay-resident adapters.
+	<li> Test various hardware configurations, web servers, Python versions, etc.
+</ul>
+
+<p> Even without the above tests, the current results clearly show that using well designed servlets instead of CGI programs can provide a significant performance improvement.
+
+<h3>Design: The Utility of Objects</h3>
+
+<p> As seen above, WebKit's design centers around the use of objects such as servlets. This enables WebKit to manipulate and manage sites in ways that would not be feasible with plain modules, scripts of "naked" code or collections of functions.
+
+<p> As WebKit has gone through several revisions, substantial improvements have been made to threading, caching, performance, monitoring, etc. These improvements have affected less than 1% of the API that a website developer works with.
+
+<p> The cost for such a well insulated framework is that developers import a superclass and declare a new class. Both these operations are exceptionally easy in Python.
+
+<p> I believe that this is the minimum design that can still be extended to other paradigms like Python Server Pages, without requiring rewrites of user code or an abandonment of various features.
+
+<p> As appropriate, other Webware components also center their design around classes, objects and the insulation of the management of those objects from the developers that create and use them.
+
+
+<h3>After WebKit</h3>
+
+<p> After digesting WebKit, most users find interest in other Webware components. Which one you should learn next depends on your needs. Good choices might include Python Server Pages (PSP) and FormKit. Both of these are pretty easy to learn and applicable to most websites.
+
+
+<h2>Conclusion</h2>
+
+<p> Webware for Python consists of a suite of software components for developing dynamic websites, often called web applications. Modularity is a key design goal which enables users to embrace only as many features as they desire.
+
+<p> The WebKit app server is a founding component of Webware and provides an application server that is:
+
+<ul>
+   <li> easy to use
+   <li> easy to extend
+   <li> high performance
+   <li> object-oriented
+   <li> Python-centric
+</ul>
+
+<hr>
+
+<h3>Staying in Tune</h3>
+
+<p> The Webware page at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a> offers general information, downloads, documentation, related links, etc. The mailing lists are a good way to stay in touch with what's happening. There are different lists depending on your level and type of interest.
+
+
+<h3>Acknowledgements</h3>
+
+<ul>
+	<li> Thanks to Jay Love for joining the project early, adding threading and other features to the app server, and creating Python Server Pages (PSP).
+	<li> Thanks to Geoff Talvola for embracing, testing and contributing to Webware.
+	<li> Thanks to members of the Webware mailing lists for testing and feedback.
+	<li> Thanks to various members of the Python community, including other web projects, for discussions and insights.
+</ul>
+
+
+<h3>Links</h3>
+
+<p> <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>
+
+
+</body>
+
+</html>

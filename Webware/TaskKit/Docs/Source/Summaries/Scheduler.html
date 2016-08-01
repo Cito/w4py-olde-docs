@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of TaskKit.Scheduler</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of TaskKit.Scheduler</h2>
+<p>You can also browse the <a href="../Files/Scheduler.html">complete source file</a>
+or the <a href="../Docs/TaskKit.Scheduler.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Scheduler</span>(Thread):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, daemon=True, exceptionHandler=None)</span>
+
+<span class="line_category">    ## Event Methods ##</span>
+<span class="line_def">    def <span class="name_def">wait</span>(self, seconds=None)</span>
+
+<span class="line_category">    ## Attributes ##</span>
+<span class="line_def">    def <span class="name_def">runningTasks</span>(self)</span>
+<span class="line_def">    def <span class="name_def">running</span>(self, name, default=None)</span>
+<span class="line_def">    def <span class="name_def">hasRunning</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setRunning</span>(self, handle)</span>
+<span class="line_def">    def <span class="name_def">delRunning</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">scheduledTasks</span>(self)</span>
+<span class="line_def">    def <span class="name_def">scheduled</span>(self, name, default=None)</span>
+<span class="line_def">    def <span class="name_def">hasScheduled</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setScheduled</span>(self, handle)</span>
+<span class="line_def">    def <span class="name_def">delScheduled</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">onDemandTasks</span>(self)</span>
+<span class="line_def">    def <span class="name_def">onDemand</span>(self, name, default=None)</span>
+<span class="line_def">    def <span class="name_def">hasOnDemand</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setOnDemand</span>(self, handle)</span>
+<span class="line_def">    def <span class="name_def">delOnDemand</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">nextTime</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setNextTime</span>(self, time)</span>
+<span class="line_def">    def <span class="name_def">isRunning</span>(self)</span>
+
+<span class="line_category">    ## Adding Tasks ##</span>
+<span class="line_def">    def <span class="name_def">addTimedAction</span>(self, time, task, name)</span>
+<span class="line_def">    def <span class="name_def">addActionOnDemand</span>(self, task, name)</span>
+<span class="line_def">    def <span class="name_def">addDailyAction</span>(self, hour, minute, task, name)</span>
+<span class="line_def">    def <span class="name_def">addPeriodicAction</span>(self, start, period, task, name)</span>
+
+<span class="line_category">    ## Task methods ##</span>
+<span class="line_def">    def <span class="name_def">unregisterTask</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">runTaskNow</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">demandTask</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">stopTask</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">stopAllTasks</span>(self)</span>
+<span class="line_def">    def <span class="name_def">disableTask</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">enableTask</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">runTask</span>(self, handle)</span>
+<span class="line_def">    def <span class="name_def">scheduleTask</span>(self, handle)</span>
+
+<span class="line_category">    ## Misc Methods ##</span>
+<span class="line_def">    def <span class="name_def">notifyCompletion</span>(self, handle)</span>
+<span class="line_def">    def <span class="name_def">notifyFailure</span>(self, handle)</span>
+<span class="line_def">    def <span class="name_def">notify</span>(self)</span>
+<span class="line_def">    def <span class="name_def">start</span>(self)</span>
+<span class="line_def">    def <span class="name_def">stop</span>(self)</span>
+
+<span class="line_category">    ## Main Method ##</span>
+<span class="line_def">    def <span class="name_def">run</span>(self)</span>
+
+</pre>
+</body>
+</html>

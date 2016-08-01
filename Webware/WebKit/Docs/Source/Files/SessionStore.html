@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/SessionStore.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""A general session store."""</span>
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cPickle <span class="PY_KEYWORD">import</span> load, dump, HIGHEST_PROTOCOL <span class="PY_KEYWORD">as</span> maxPickleProtocol
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> pickle <span class="PY_KEYWORD">import</span> load, dump, HIGHEST_PROTOCOL <span class="PY_KEYWORD">as</span> maxPickleProtocol
+
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> time
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> AbstractError
+
+
+<span class="PY_KEYWORD">def</span> dumpWithHighestProtocol(obj, f):
+    <span class="PY_STRING">"""Same as pickle.dump, but by default with the highest protocol."""</span>
+    <span class="PY_KEYWORD">return</span> dump(obj, f, maxPickleProtocol)
+
+
+<span class="PY_KEYWORD">class</span> SessionStore(object):
+    <span class="PY_STRING">"""A general session store.
+
+    SessionStores are dictionary-like objects used by Application to
+    store session state. This class is abstract and it's up to the
+    concrete subclass to implement several key methods that determine
+    how sessions are stored (such as in memory, on disk or in a
+    database). We assume that session keys are always strings.
+
+    Subclasses often encode sessions for storage somewhere. In light
+    of that, this class also defines methods encoder(), decoder() and
+    setEncoderDecoder(). The encoder and decoder default to the load()
+    and dump() functions of the cPickle or pickle module. However,
+    using the setEncoderDecoder() method, you can use the functions
+    from marshal (if appropriate) or your own encoding scheme.
+    Subclasses should use encoder() and decoder() (and not
+    pickle.load() and pickle.dump()).
+
+    Subclasses may rely on the attribute self._app to point to the
+    application.
+
+    Subclasses should be named SessionFooStore since Application
+    expects "Foo" to appear for the "SessionStore" setting and
+    automatically prepends Session and appends Store. Currently, you
+    will also need to add another import statement in Application.py.
+    Search for SessionStore and you'll find the place.
+
+    TO DO
+
+      * Should there be a check-in/check-out strategy for sessions to
+        prevent concurrent requests on the same session? If so, that can
+        probably be done at this level (as opposed to pushing the burden
+        on various subclasses).
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, app):
+        <span class="PY_STRING">"""Initialize the session store.
+
+        Subclasses must invoke super.
+
+        """</span>
+        self._app = app
+        self._alwaysSave = app._alwaysSaveSessions
+        self._encoder = dumpWithHighestProtocol
+        self._decoder = load
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> application(self):
+        <span class="PY_STRING">"""Return the application owning the session store."""</span>
+        <span class="PY_KEYWORD">return</span> self._app
+
+
+    <span class="PY_COMMENT">## Dictionary-style access ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_STRING">"""Return the number of sessions in the store.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, key):
+        <span class="PY_STRING">"""Get a session item from the store.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, key, value):
+        <span class="PY_STRING">"""Set a session item, saving it to the store.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, key):
+        <span class="PY_STRING">"""Delete a session item from the store.
+
+        Subclasses are responsible for expiring the session as well.
+        Something along the lines of:
+            session = self[key]
+            if not session.isExpired():
+                session.expiring()
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, key):
+        <span class="PY_STRING">"""Check whether the session store has a given key.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> __iter__(self):
+        <span class="PY_STRING">"""Return an iterator over the stored session keys.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> has_key(self, key):
+        <span class="PY_STRING">"""Check whether the session store has a given key."""</span>
+        <span class="PY_KEYWORD">return</span> key <span class="PY_KEYWORD">in</span> self
+
+    <span class="PY_KEYWORD">def</span> keys(self):
+        <span class="PY_STRING">"""Return a list with the keys of all the stored sessions.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> iterkeys(self):
+        <span class="PY_STRING">"""Return an iterator over the stored session keys."""</span>
+        <span class="PY_KEYWORD">return</span> iter(self)
+
+    <span class="PY_KEYWORD">def</span> clear(self):
+        <span class="PY_STRING">"""Clear the session store, removing all of its items.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> setdefault(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else default (also setting it).
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> pop(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else default (also remove key).
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+
+    <span class="PY_COMMENT">## Application support ##</span>
+
+    <span class="PY_KEYWORD">def</span> storeSession(self, session):
+        <span class="PY_STRING">"""Save potentially changed session in the store.
+
+        Used at the end of transactions.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> storeAllSessions(self):
+        <span class="PY_STRING">"""Permanently save all sessions in the store.
+
+        Used when the application server is shut down.
+
+        Subclasses must implement this method.
+
+        """</span>
+        <span class="PY_KEYWORD">raise</span> AbstractError(self.__class__)
+
+    <span class="PY_KEYWORD">def</span> cleanStaleSessions(self, task=None):
+        <span class="PY_STRING">"""Clean stale sessions.
+
+        Called by the Application to tell this store to clean out all
+        sessions that have exceeded their lifetime.
+
+        """</span>
+        curTime = time()
+        keys = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self.keys():
+            <span class="PY_KEYWORD">try</span>:
+                session = self[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span> <span class="PY_COMMENT"># session was already deleted by some other thread</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    timeout = session.timeout()
+                    <span class="PY_KEYWORD">if</span> timeout <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> (timeout == 0
+                            <span class="PY_KEYWORD">or</span> curTime &gt;= session.lastAccessTime() + timeout):
+                        keys.append(key)
+                <span class="PY_KEYWORD">except</span> AttributeError:
+                    <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Not a Session object: %r'</span> % session)
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> keys:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">del</span> self[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span> <span class="PY_COMMENT"># already deleted by some other thread</span>
+
+
+    <span class="PY_COMMENT">## Convenience methods ##</span>
+
+    <span class="PY_KEYWORD">def</span> get(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else return the default."""</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self[key]
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> items(self):
+        <span class="PY_STRING">"""Return a list with the (key, value) pairs for all sessions."""</span>
+        items = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self:
+            <span class="PY_KEYWORD">try</span>:
+                items.append((key, self[key]))
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_COMMENT"># since we aren't using a lock here, some keys</span>
+                <span class="PY_COMMENT"># could be already deleted again during this loop</span>
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">return</span> items
+
+    <span class="PY_KEYWORD">def</span> values(self):
+        <span class="PY_STRING">"""Return a list with the values of all stored sessions."""</span>
+        values = []
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self:
+            <span class="PY_KEYWORD">try</span>:
+                values.append(self[key])
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">return</span> values
+
+    <span class="PY_KEYWORD">def</span> iteritems(self):
+        <span class="PY_STRING">"""Return an iterator over the (key, value) pairs for all sessions."""</span>
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">yield</span> key, self[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> itervalues(self):
+        <span class="PY_STRING">"""Return an iterator over the stored values of all sessions."""</span>
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">yield</span> self[key]
+            <span class="PY_KEYWORD">except</span> KeyError:
+                <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Encoder/decoder ##</span>
+
+    <span class="PY_KEYWORD">def</span> encoder(self):
+        <span class="PY_STRING">"""Return the value serializer for the store."""</span>
+        <span class="PY_KEYWORD">return</span> self._encoder
+
+    <span class="PY_KEYWORD">def</span> decoder(self):
+        <span class="PY_STRING">"""Return the value deserializer for the store."""</span>
+        <span class="PY_KEYWORD">return</span> self._decoder
+
+    <span class="PY_KEYWORD">def</span> setEncoderDecoder(self, encoder, decoder):
+        <span class="PY_STRING">"""Set the serializer and deserializer for the store."""</span>
+        self._encoder = encoder
+        self._decoder = decoder
+
+
+    <span class="PY_COMMENT">## As a string ##</span>
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_STRING">"""Return string representation of the store like a dictionary."""</span>
+        <span class="PY_KEYWORD">return</span> repr(dict(self.items()))
+</pre>
+<!--footer-->
+
+</body>
+</html>

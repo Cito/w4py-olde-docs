@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/Attr.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> re
+
+<span class="PY_KEYWORD">from</span> ModelObject <span class="PY_KEYWORD">import</span> ModelObject
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiddleDict <span class="PY_KEYWORD">import</span> MiddleDict
+
+
+nameRE = re.compile(<span class="PY_STRING">'^([A-Za-z_][A-Za-z_0-9]*)$'</span>)
+reservedRE = re.compile(<span class="PY_STRING">'allattrs|changed|clone|debugstr|dumpattrs|key|klass'</span>
+    <span class="PY_STRING">'|serialnum|store|valueforattr|valueforkey'</span>, re.I)
+
+
+<span class="PY_KEYWORD">class</span> Attr(MiddleDict, ModelObject):
+    <span class="PY_STRING">"""An Attr represents an attribute of a Klass.
+
+    The Attr objects behave like dictionaries.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, attr):
+        MiddleDict.__init__(self, {})
+        <span class="PY_KEYWORD">for</span> key, value <span class="PY_KEYWORD">in</span> attr.items():
+            <span class="PY_KEYWORD">if</span> key == <span class="PY_STRING">'Attribute'</span>:
+                key = <span class="PY_STRING">'Name'</span>
+            <span class="PY_KEYWORD">if</span> isinstance(value, basestring) <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> value.strip():
+                value = None
+            self[key] = value
+        name = self[<span class="PY_STRING">'Name'</span>]
+        match = nameRE.match(name)
+        <span class="PY_KEYWORD">if</span> match <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">or</span> len(match.groups()) != 1:
+            <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Bad name (%r) for attribute: %r.'</span> % (name, attr))
+        match = reservedRE.match(name)
+        <span class="PY_KEYWORD">if</span> match <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            <span class="PY_KEYWORD">raise</span> ValueError(<span class="PY_STRING">'Reserved name (%r) for attribute: %r.'</span> % (name, attr))
+        self._getPrefix = None
+        self._setPrefix = None
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self[<span class="PY_STRING">'Name'</span>]
+
+    <span class="PY_KEYWORD">def</span> isRequired(self):
+        <span class="PY_STRING">"""Return true if a value is required for this attribute.
+
+        In Python, that means the value cannot be None. In relational theory
+        terms, that means the value cannot be NULL.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.boolForKey(<span class="PY_STRING">'isRequired'</span>)
+
+    <span class="PY_KEYWORD">def</span> setKlass(self, klass):
+        <span class="PY_STRING">"""Set the klass that the attribute belongs to."""</span>
+        self._klass = klass
+
+    <span class="PY_KEYWORD">def</span> klass(self):
+        <span class="PY_STRING">"""Return the klass that this attribute is declared in and, therefore, belongs to."""</span>
+        <span class="PY_KEYWORD">return</span> self._klass
+
+    <span class="PY_KEYWORD">def</span> pyGetName(self):
+        <span class="PY_STRING">"""Return the name that should be used for the Python "get" accessor method for this attribute."""</span>
+        <span class="PY_KEYWORD">if</span> self._getPrefix <span class="PY_KEYWORD">is</span> None:
+            self._computePrefixes()
+        name = self.name()
+        <span class="PY_KEYWORD">if</span> self._getCapped:
+            <span class="PY_KEYWORD">return</span> self._getPrefix + name[0].upper() + name[1:]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._getPrefix + name
+
+    <span class="PY_KEYWORD">def</span> pySetName(self):
+        <span class="PY_STRING">"""Return the name that should be used for the Python "set" accessor method for this attribute."""</span>
+        <span class="PY_KEYWORD">if</span> self._setPrefix <span class="PY_KEYWORD">is</span> None:
+            self._computePrefixes()
+        name = self.name()
+        <span class="PY_KEYWORD">if</span> self._setCapped:
+            <span class="PY_KEYWORD">return</span> self._setPrefix + name[0].upper() + name[1:]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._setPrefix + name
+
+    <span class="PY_KEYWORD">def</span> setting(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the value of a particular configuration setting taken from the model.
+
+        Implementation note: Perhaps a future version should ask the klass and so on up the chain.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.model().setting(name, default)
+
+    <span class="PY_KEYWORD">def</span> model(self):
+        <span class="PY_KEYWORD">return</span> self._klass.klasses()._model
+
+    <span class="PY_KEYWORD">def</span> awakeFromRead(self):
+        <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Warnings ##</span>
+
+    <span class="PY_KEYWORD">def</span> printWarnings(self, out):
+        <span class="PY_KEYWORD">pass</span>
+
+
+    <span class="PY_COMMENT">## Self Util ##</span>
+
+    <span class="PY_KEYWORD">def</span> _computePrefixes(self):
+        style = self.setting(<span class="PY_STRING">'AccessorStyle'</span>, <span class="PY_STRING">'methods'</span>).lower()
+        <span class="PY_KEYWORD">assert</span> style <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'properties'</span>, <span class="PY_STRING">'methods'</span>)
+        <span class="PY_KEYWORD">if</span> style == <span class="PY_STRING">'properties'</span>:
+            self._getPrefix = <span class="PY_STRING">'_get_'</span>
+            self._setPrefix = <span class="PY_STRING">'_set_'</span>
+            self._getCapped = False
+            self._setCapped = False
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># methods</span>
+            self._getPrefix = <span class="PY_STRING">''</span>
+            self._setPrefix = <span class="PY_STRING">'set'</span>
+            self._getCapped = False
+            self._setCapped = True
+</pre>
+<!--footer-->
+
+</body>
+</html>

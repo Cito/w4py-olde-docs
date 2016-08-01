@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiscUtils.PickleRPC</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiscUtils.PickleRPC</h2>
+<p>You can also browse the <a href="../Files/PickleRPC.html">complete source file</a>
+or the <a href="../Docs/MiscUtils.PickleRPC.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">Error</span>(Exception):</span>
+
+
+<span class="line_class">class <span class="name_class">ResponseError</span>(Error):</span>
+
+
+<span class="line_class">class <span class="name_class">ProtocolError</span>(ResponseError, _PE):</span>
+
+
+<span class="line_class">class <span class="name_class">RequestError</span>(Error):</span>
+
+
+<span class="line_class">class <span class="name_class">InvalidContentTypeError</span>(ResponseError):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, headers, content)</span>
+<span class="line_def">    def <span class="name_def">__repr__</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">SafeUnpickler</span>(object):</span>
+<span class="line_def">    def <span class="name_def">allowedGlobals</span>(self)</span>
+<span class="line_def">    def <span class="name_def">findGlobal</span>(self, module, klass)</span>
+<span class="line_def">    def <span class="name_def">load</span>(self, file)</span>
+<span class="line_def">    def <span class="name_def">loads</span>(self, str)</span>
+
+
+<span class="line_class">class <span class="name_class">Server</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, uri, transport=None, verbose=False, binary=True,</span>
+<span class="line_def">    def <span class="name_def">__repr__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">__getattr__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, send, name)</span>
+<span class="line_def">    def <span class="name_def">__getattr__</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">__call__</span>(self, *args, **keywords)</span>
+
+
+<span class="line_class">class <span class="name_class">Transport</span>(SafeUnpickler):</span>
+<span class="line_def">    def <span class="name_def">request</span>(self, host, handler, request_body,</span>
+<span class="line_def">    def <span class="name_def">make_connection</span>(self, host, port=None)</span>
+<span class="line_def">    def <span class="name_def">send_request</span>(self, connection, handler, request_body)</span>
+<span class="line_def">    def <span class="name_def">send_host</span>(self, connection, host)</span>
+<span class="line_def">    def <span class="name_def">send_user_agent</span>(self, connection)</span>
+<span class="line_def">    def <span class="name_def">send_content</span>(self, connection, request_body,</span>
+<span class="line_def">    def <span class="name_def">parse_response</span>(self, f)</span>
+<span class="line_def">    def <span class="name_def">parse_response_gzip</span>(self, f)</span>
+
+
+<span class="line_class">class <span class="name_class">SafeTransport</span>(Transport):</span>
+<span class="line_def">    def <span class="name_def">make_connection</span>(self, host, port=None, key_file=None, cert_file=None)</span>
+
+</pre>
+</body>
+</html>

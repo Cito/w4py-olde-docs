@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PSP/PSPParser.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The PSP parser.
+
+This module handles the actual reading of the characters in the source
+PSP file and checking it for valid psp tokens. When it finds one,
+it calls ParseEventHandler with the characters it found.
+
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
+
+This software is based in part on work done by the Jakarta group.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> StringIO
+
+<span class="PY_KEYWORD">from</span> PSPUtils <span class="PY_KEYWORD">import</span> checkAttributes, PSPParserException
+
+
+checklist = []
+
+<span class="PY_KEYWORD">def</span> checker(method):
+    <span class="PY_STRING">"""Decorator for adding a method to the checklist."""</span>
+    checklist.append(method)
+    <span class="PY_KEYWORD">return</span> method
+
+
+<span class="PY_KEYWORD">class</span> PSPParser(object):
+    <span class="PY_STRING">"""The main PSP parser class.
+
+    The PSPParser class does the actual sniffing through the input file
+    looking for anything we're interested in. Basically, it starts by
+    looking at the code looking for a '&lt;' symbol. It looks at the code by
+    working with a PSPReader object, which handles the current location in
+    the code. When it finds one, it calls a list of checker methods,
+    asking each if it recognizes the characters as its kind of input.
+    When the checker methods look at the characters, if they want it,
+    they go ahead and gobble it up and set up to create it in the servlet
+    when the time comes. When they return, they return true if they accept
+    the character, and the PSPReader object cursor is positioned past the
+    end of the block that the checker method accepted.
+
+    """</span>
+
+    checklist = checklist <span class="PY_COMMENT"># global list of checker methods</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, ctxt):
+        self._reader = ctxt.getReader()
+        self._writer = ctxt.getServletWriter()
+        self._handler = None
+        self.cout = StringIO() <span class="PY_COMMENT"># for dumping HTML that none of the check wants</span>
+        self.tmplStart = None <span class="PY_COMMENT"># marks the start of HTML code</span>
+        self.tmplStop = None <span class="PY_COMMENT"># marks the end of HTML code</span>
+        self.currentFile = self._reader.mark().getFile()
+
+    <span class="PY_KEYWORD">def</span> setEventHandler(self, handler):
+        <span class="PY_STRING">"""Set the handler this parser will use when it finds PSP code."""</span>
+        self._handler = handler
+
+    <span class="PY_KEYWORD">def</span> flushCharData(self, start, stop):
+        <span class="PY_STRING">"""Dump everything to the char data handler.
+
+        Dump all the HTML that we've accumulated over to the character data
+        handler in the event handler object.
+
+        """</span>
+        data = self.cout.getvalue()
+        self.cout.close()
+        <span class="PY_KEYWORD">if</span> data: <span class="PY_COMMENT"># make sure there's something there</span>
+            self._handler.handleCharData(start, stop, data)
+        self.cout = StringIO()
+
+    @checker
+    <span class="PY_KEYWORD">def</span> commentCheck(self, handler, reader):
+        <span class="PY_STRING">"""Comments just get eaten."""</span>
+        <span class="PY_KEYWORD">if</span> reader.matches(<span class="PY_STRING">'&lt;%--'</span>):
+            reader.advance(4)
+            <span class="PY_KEYWORD">if</span> reader.skipUntil(<span class="PY_STRING">'--%&gt;'</span>) <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Comment not terminated'</span>)
+            self.flushCharData(self.tmplStart, self.tmplStop)
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">return</span> False
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkExpression(self, handler, reader):
+        <span class="PY_STRING">"""Look for "expressions" and handle them."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;%='</span>):
+            <span class="PY_KEYWORD">return</span> False
+        reader.advance(3) <span class="PY_COMMENT"># eat the opening tag</span>
+        reader.peekChar()
+        reader.skipSpaces()
+        start = reader.mark()
+        stop = reader.skipUntil(<span class="PY_STRING">'%&gt;'</span>)
+        <span class="PY_KEYWORD">if</span> stop <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Expression not terminated'</span>)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleExpression(start, stop, None)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkDirective(self, handler, reader):
+        <span class="PY_STRING">"""Check for directives; for now we support only page and include."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;%@'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        start = reader.mark()
+        reader.advance(3)
+        reader.skipSpaces()
+        <span class="PY_KEYWORD">for</span> directive <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'page'</span>, <span class="PY_STRING">'include'</span>, <span class="PY_STRING">'taglib'</span>):
+            <span class="PY_KEYWORD">if</span> reader.matches(directive):
+                match = directive
+                <span class="PY_KEYWORD">break</span>
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Invalid directive'</span>)
+        reader.advance(len(match))
+        <span class="PY_COMMENT"># parse the directive attr:val pair dictionary</span>
+        attrs = reader.parseTagAttributes()
+        <span class="PY_KEYWORD">if</span> match == <span class="PY_STRING">'page'</span>:
+            checkAttributes(<span class="PY_STRING">'Page directive'</span>, attrs, ([], set([
+                <span class="PY_STRING">'imports'</span>, <span class="PY_STRING">'extends'</span>, <span class="PY_STRING">'method'</span>,
+                <span class="PY_STRING">'isThreadSafe'</span>, <span class="PY_STRING">'isInstanceSafe'</span>,
+                <span class="PY_STRING">'indentType'</span>, <span class="PY_STRING">'indentSpaces'</span>,
+                <span class="PY_STRING">'gobbleWhitespace'</span>, <span class="PY_STRING">'formatter'</span>])))
+        <span class="PY_KEYWORD">elif</span> match == <span class="PY_STRING">'include'</span>:
+            checkAttributes(<span class="PY_STRING">'Include directive'</span>, attrs, ([<span class="PY_STRING">'file'</span>], []))
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'%s directive not implemented'</span> % match)
+        reader.skipSpaces() <span class="PY_COMMENT"># skip to where we expect a close tag</span>
+        <span class="PY_KEYWORD">if</span> reader.matches(<span class="PY_STRING">'%&gt;'</span>):
+            reader.advance(2) <span class="PY_COMMENT"># advance past it</span>
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Directive not terminated'</span>)
+        stop = reader.mark()
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleDirective(match, start, stop, attrs)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkEndBlock(self, handler, reader):
+        <span class="PY_STRING">"""Check for the end of a block."""</span>
+        start = reader.mark()
+        <span class="PY_KEYWORD">if</span> reader.matches(<span class="PY_STRING">'&lt;%'</span>):
+            reader.advance(2)
+            reader.skipSpaces()
+            <span class="PY_KEYWORD">if</span> reader.matches(<span class="PY_STRING">'end'</span>):
+                reader.advance(3)
+                reader.skipSpaces()
+                <span class="PY_KEYWORD">if</span> reader.matches(<span class="PY_STRING">'%&gt;'</span>):
+                    reader.advance(2)
+                    handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+                    handler.handleEndBlock()
+                    <span class="PY_KEYWORD">return</span> True
+                <span class="PY_KEYWORD">if</span> reader.matches(<span class="PY_STRING">'$%&gt;'</span>):
+                    reader.advance(3)
+                    handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+                    handler.handleEndBlock()
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'INFO: A $ at the end of an end tag does nothing.'</span>
+                    <span class="PY_KEYWORD">return</span> True
+        <span class="PY_COMMENT"># that wasn't it</span>
+        reader.reset(start)
+        <span class="PY_KEYWORD">return</span> False
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkScript(self, handler, reader):
+        <span class="PY_STRING">"""The main thing we're after. Check for embedded scripts."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;%'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        reader.advance(2)
+        <span class="PY_COMMENT"># don't skip as spaces may be significant; leave this for the generator</span>
+        start = reader.mark()
+        <span class="PY_KEYWORD">try</span>:
+            stop = reader.skipUntil(<span class="PY_STRING">'%&gt;'</span>)
+        <span class="PY_KEYWORD">except</span> EOFError:
+            <span class="PY_KEYWORD">raise</span> EOFError(<span class="PY_STRING">"Reached EOF while looking for ending script tag"</span>)
+        <span class="PY_KEYWORD">if</span> stop <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Script not terminated'</span>)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleScript(start, stop, None)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkScriptFile(self, handler, reader):
+        <span class="PY_STRING">"""Check for file level code.
+
+        Check for Python code that should go to the top of the generated module.
+
+        &lt;psp:file&gt;
+            import xyz
+            print 'hi Mome!'
+            def foo(): return 'foo'
+        &lt;/psp:file&gt;
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;psp:file&gt;'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        reader.advance(10)
+        start = reader.mark()
+        <span class="PY_KEYWORD">try</span>:
+            stop = reader.skipUntil(<span class="PY_STRING">'&lt;/psp:file&gt;'</span>)
+            <span class="PY_KEYWORD">if</span> stop <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">raise</span> PSPParserException(
+                    <span class="PY_STRING">'Script not terminated in &lt;psp:file&gt; block'</span>)
+        <span class="PY_KEYWORD">except</span> EOFError:
+            <span class="PY_KEYWORD">raise</span> EOFError(<span class="PY_STRING">'Reached EOF while looking for ending'</span>
+                <span class="PY_STRING">' script tag &lt;/psp:file&gt;'</span>)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleScriptFile(start, stop, None)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkScriptClass(self, handler, reader):
+        <span class="PY_STRING">"""Check for class level code.
+
+        Check for Python code that should go in the class definition.
+
+        &lt;psp:class&gt;
+            def foo(self):
+                return self.dosomething()
+        &lt;/psp:class&gt;
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;psp:class&gt;'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        reader.advance(11)
+        start = reader.mark()
+        <span class="PY_KEYWORD">try</span>:
+            stop = reader.skipUntil(<span class="PY_STRING">'&lt;/psp:class&gt;'</span>)
+            <span class="PY_KEYWORD">if</span> stop <span class="PY_KEYWORD">is</span> None:
+                <span class="PY_KEYWORD">raise</span> PSPParserException(
+                    <span class="PY_STRING">'Script not terminated in &lt;psp:class&gt; block'</span>)
+        <span class="PY_KEYWORD">except</span> EOFError:
+            <span class="PY_KEYWORD">raise</span> EOFError(<span class="PY_STRING">'Reached EOF while looking for ending'</span>
+                <span class="PY_STRING">' script tag &lt;/psp:class&gt;'</span>)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleScriptClass(start, stop, None)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkMethod(self, handler, reader):
+        <span class="PY_STRING">"""Check for class methods defined in the page.
+
+        We only support one format for these,
+        &lt;psp:method name="xxx" params="xxx,xxx"&gt;
+        Then the function body, then &lt;/psp:method&gt;.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;psp:method'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        start = reader.mark()
+        reader.advance(11)
+        attrs = reader.parseTagAttributes()
+        checkAttributes(<span class="PY_STRING">'method'</span>, attrs, ([<span class="PY_STRING">'name'</span>], [<span class="PY_STRING">'params'</span>]))
+        reader.skipSpaces()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&gt;'</span>):
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Expected method declaration close'</span>)
+        reader.advance(1)
+        stop = reader.mark()
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleMethod(start, stop, attrs)
+        start = stop
+        <span class="PY_COMMENT"># skip past the close marker, return the point before the close marker</span>
+        stop = reader.skipUntil(<span class="PY_STRING">'&lt;/psp:method&gt;'</span>)
+        handler.handleMethodEnd(start, stop, attrs)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkInclude(self, handler, reader):
+        <span class="PY_STRING">"""Check for inserting another pages output in this spot."""</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;psp:include'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        reader.advance(12)
+        reader.skipSpaces()
+        attrs = reader.parseTagAttributes()
+        checkAttributes(<span class="PY_STRING">'include'</span>, attrs, ([<span class="PY_STRING">'path'</span>], []))
+        reader.skipSpaces()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&gt;'</span>):
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Include bodies not implemented'</span>)
+        reader.advance(1)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleInclude(attrs, None)
+        <span class="PY_KEYWORD">return</span> True
+
+    @checker
+    <span class="PY_KEYWORD">def</span> checkInsert(self, handler, reader):
+        <span class="PY_STRING">"""Check for straight character dumps.
+
+        No big hurry for this. It's almost the same as the page include
+        directive.  This is only a partial implementation of what JSP does.
+        JSP can pull it from another server, servlet, JSP page, etc.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&lt;psp:insert'</span>):
+            <span class="PY_KEYWORD">return</span> False
+        reader.advance(11)
+        reader.skipSpaces()
+        attrs = reader.parseTagAttributes()
+        checkAttributes(<span class="PY_STRING">'insert'</span>, attrs, ([<span class="PY_STRING">'file'</span>], []))
+        reader.skipSpaces()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> reader.matches(<span class="PY_STRING">'&gt;'</span>):
+            <span class="PY_KEYWORD">raise</span> PSPParserException(<span class="PY_STRING">'Insert bodies not implemented'</span>)
+        reader.advance(1)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleInsert(attrs, None)
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> parse(self, until=None):
+        <span class="PY_STRING">"""Parse the PSP file."""</span>
+        reader = self._reader
+        handler = self._handler
+        noPspElement = False
+        <span class="PY_KEYWORD">while</span> reader.hasMoreInput():
+            <span class="PY_COMMENT"># This is for XML style blocks, which we're not handling yet:</span>
+            <span class="PY_KEYWORD">if</span> until <span class="PY_KEYWORD">and</span> reader.matches(until):
+                <span class="PY_KEYWORD">return</span>
+            <span class="PY_COMMENT"># If the file the reader is working on has changed due to</span>
+            <span class="PY_COMMENT"># a push or pop, flush any char data from the old file:</span>
+            <span class="PY_KEYWORD">if</span> reader.mark().getFile() != self.currentFile:
+                self.flushCharData(self.tmplStart, self.tmplStop)
+                self.currentFile = reader.mark().getFile()
+                self.tmplStart = reader.mark()
+            <span class="PY_KEYWORD">for</span> checkfunc <span class="PY_KEYWORD">in</span> self.checklist:
+                <span class="PY_KEYWORD">if</span> checkfunc(self, handler, reader):
+                    noPspElement = False
+                    <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> noPspElement:
+                    self.tmplStart = reader.mark()
+                    noPspElement = True
+                s = reader.nextContent() <span class="PY_COMMENT"># skip till the next possible tag</span>
+                self.tmplStop = reader.mark() <span class="PY_COMMENT"># mark the end of HTML data</span>
+                self.cout.write(s) <span class="PY_COMMENT"># write out the raw HTML data</span>
+            self.flushCharData(self.tmplStart, self.tmplStop) <span class="PY_COMMENT"># dump the rest</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

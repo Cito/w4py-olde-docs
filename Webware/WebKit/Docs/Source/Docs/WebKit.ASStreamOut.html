@@ -1,0 +1,248 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.ASStreamOut</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.ASStreamOut</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/ASStreamOut.py">/var/www/docs/Webware-1.1.1/WebKit/ASStreamOut.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;defines&nbsp;a&nbsp;class&nbsp;for&nbsp;handling&nbsp;writing&nbsp;reponses.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ASStreamOut.html#ASStreamOut">ASStreamOut</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ASStreamOut.html#ConnectionAbortedError">ConnectionAbortedError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="WebKit.ASStreamOut.html#InvalidCommandSequence">InvalidCommandSequence</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ASStreamOut">class <strong>ASStreamOut</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;a&nbsp;response&nbsp;stream&nbsp;to&nbsp;the&nbsp;client.<br>
+&nbsp;<br>
+The&nbsp;key&nbsp;attributes&nbsp;of&nbsp;this&nbsp;class&nbsp;are:<br>
+&nbsp;<br>
+`_autoCommit`:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;the&nbsp;stream&nbsp;will&nbsp;automatically&nbsp;start&nbsp;sending&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;once&nbsp;it&nbsp;has&nbsp;accumulated&nbsp;`_bufferSize`&nbsp;data.&nbsp;This&nbsp;means&nbsp;that<br>
+&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;will&nbsp;ask&nbsp;the&nbsp;response&nbsp;to&nbsp;commit&nbsp;itself,&nbsp;without&nbsp;developer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interaction.&nbsp;By&nbsp;default,&nbsp;this&nbsp;is&nbsp;set&nbsp;to&nbsp;False.<br>
+`_bufferSize`:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;size&nbsp;of&nbsp;the&nbsp;data&nbsp;buffer.&nbsp;This&nbsp;is&nbsp;only&nbsp;used&nbsp;when&nbsp;autocommit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;True.&nbsp;If&nbsp;not&nbsp;using&nbsp;autocommit,&nbsp;the&nbsp;whole&nbsp;response&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;buffered&nbsp;and&nbsp;sent&nbsp;in&nbsp;one&nbsp;shot&nbsp;when&nbsp;the&nbsp;servlet&nbsp;is&nbsp;done.<br>
+`<a href="#ASStreamOut-flush">flush</a>()`:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Send&nbsp;the&nbsp;accumulated&nbsp;response&nbsp;data&nbsp;now.&nbsp;Will&nbsp;ask&nbsp;the&nbsp;`Response`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;commit&nbsp;if&nbsp;it&nbsp;hasn't&nbsp;already&nbsp;done&nbsp;so.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ASStreamOut-__init__"><strong>__init__</strong></a>(self, autoCommit<font color="#909090">=False</font>, bufferSize<font color="#909090">=8192</font>)</dt></dl>
+
+<dl><dt><a name="ASStreamOut-autoCommit"><strong>autoCommit</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;auto&nbsp;commit&nbsp;mode.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-buffer"><strong>buffer</strong></a>(self)</dt><dd><tt>Return&nbsp;accumulated&nbsp;data&nbsp;which&nbsp;has&nbsp;not&nbsp;yet&nbsp;been&nbsp;flushed.<br>
+&nbsp;<br>
+We&nbsp;want&nbsp;to&nbsp;be&nbsp;able&nbsp;to&nbsp;get&nbsp;at&nbsp;this&nbsp;data&nbsp;without&nbsp;having&nbsp;to&nbsp;call&nbsp;flush<br>
+first,&nbsp;so&nbsp;that&nbsp;we&nbsp;can&nbsp;(for&nbsp;example)&nbsp;integrate&nbsp;automatic&nbsp;HTML&nbsp;validation.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-bufferSize"><strong>bufferSize</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;buffer&nbsp;size.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Try&nbsp;to&nbsp;clear&nbsp;any&nbsp;accumulated&nbsp;response&nbsp;data.<br>
+&nbsp;<br>
+Will&nbsp;fail&nbsp;if&nbsp;the&nbsp;response&nbsp;is&nbsp;already&nbsp;sommitted.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-close"><strong>close</strong></a>(self)</dt><dd><tt>Close&nbsp;this&nbsp;buffer.&nbsp;No&nbsp;more&nbsp;data&nbsp;may&nbsp;be&nbsp;sent.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-closed"><strong>closed</strong></a>(self)</dt><dd><tt>Check&nbsp;whether&nbsp;we&nbsp;are&nbsp;closed&nbsp;to&nbsp;new&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-commit"><strong>commit</strong></a>(self, autoCommit<font color="#909090">=True</font>)</dt><dd><tt>Called&nbsp;by&nbsp;the&nbsp;Response&nbsp;to&nbsp;tell&nbsp;us&nbsp;to&nbsp;go.<br>
+&nbsp;<br>
+If&nbsp;`_autoCommit`&nbsp;is&nbsp;True,&nbsp;then&nbsp;we&nbsp;will&nbsp;be&nbsp;placed&nbsp;into&nbsp;autoCommit&nbsp;mode.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-committed"><strong>committed</strong></a>(self)</dt><dd><tt>Are&nbsp;we&nbsp;committed?</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-flush"><strong>flush</strong></a>(self)</dt><dd><tt>Flush&nbsp;stream.<br>
+&nbsp;<br>
+Send&nbsp;available&nbsp;data&nbsp;as&nbsp;soon&nbsp;as&nbsp;possible,&nbsp;i.e.&nbsp;*now*.<br>
+&nbsp;<br>
+Returns&nbsp;True&nbsp;if&nbsp;we&nbsp;are&nbsp;ready&nbsp;to&nbsp;send,&nbsp;otherwise&nbsp;False&nbsp;(i.e.,<br>
+if&nbsp;the&nbsp;buffer&nbsp;is&nbsp;full&nbsp;enough).</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-needCommit"><strong>needCommit</strong></a>(self)</dt><dd><tt>Request&nbsp;for&nbsp;commitment.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;the&nbsp;`HTTPResponse`&nbsp;instance&nbsp;that&nbsp;is&nbsp;using&nbsp;this&nbsp;instance<br>
+to&nbsp;ask&nbsp;if&nbsp;the&nbsp;response&nbsp;needs&nbsp;to&nbsp;be&nbsp;prepared&nbsp;to&nbsp;be&nbsp;delivered.<br>
+The&nbsp;response&nbsp;should&nbsp;then&nbsp;commit&nbsp;its&nbsp;headers,&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-pop"><strong>pop</strong></a>(self, count)</dt><dd><tt>Remove&nbsp;count&nbsp;bytes&nbsp;from&nbsp;the&nbsp;front&nbsp;of&nbsp;the&nbsp;buffer.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-prepend"><strong>prepend</strong></a>(self, charstr)</dt><dd><tt>Add&nbsp;the&nbsp;attached&nbsp;string&nbsp;to&nbsp;front&nbsp;of&nbsp;the&nbsp;response&nbsp;buffer.<br>
+&nbsp;<br>
+Invalid&nbsp;if&nbsp;we&nbsp;are&nbsp;already&nbsp;committed.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-setAutoCommit"><strong>setAutoCommit</strong></a>(self, autoCommit<font color="#909090">=True</font>)</dt><dd><tt>Set&nbsp;the&nbsp;auto&nbsp;commit&nbsp;mode.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-setBufferSize"><strong>setBufferSize</strong></a>(self, bufferSize<font color="#909090">=8192</font>)</dt><dd><tt>Set&nbsp;the&nbsp;buffer&nbsp;size.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-size"><strong>size</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;current&nbsp;size&nbsp;of&nbsp;the&nbsp;data&nbsp;held&nbsp;here.</tt></dd></dl>
+
+<dl><dt><a name="ASStreamOut-write"><strong>write</strong></a>(self, charstr)</dt><dd><tt>Write&nbsp;a&nbsp;string&nbsp;to&nbsp;the&nbsp;buffer.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ConnectionAbortedError">class <strong>ConnectionAbortedError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Connection&nbsp;aborted&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ASStreamOut.html#ConnectionAbortedError">ConnectionAbortedError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ConnectionAbortedError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ConnectionAbortedError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ConnectionAbortedError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#ConnectionAbortedError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="ConnectionAbortedError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="InvalidCommandSequence">class <strong>InvalidCommandSequence</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Invalid&nbsp;command&nbsp;sequence&nbsp;error<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="WebKit.ASStreamOut.html#InvalidCommandSequence">InvalidCommandSequence</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="InvalidCommandSequence-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#InvalidCommandSequence-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="InvalidCommandSequence-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidCommandSequence-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="InvalidCommandSequence-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>debug</strong> = False</td></tr></table>
+</body></html>

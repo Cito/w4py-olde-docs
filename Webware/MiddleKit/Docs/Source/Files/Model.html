@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/Model.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cPickle <span class="PY_KEYWORD">import</span> load, dump
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> pickle <span class="PY_KEYWORD">import</span> load, dump
+
+<span class="PY_KEYWORD">from</span> MiscUtils.Configurable <span class="PY_KEYWORD">import</span> Configurable
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+
+<span class="PY_KEYWORD">class</span> ModelError(Exception):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, error, line=None):
+        self._line = line
+        self._error = error
+        <span class="PY_KEYWORD">if</span> line <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+            args = (line, error)
+        <span class="PY_KEYWORD">else</span>:
+            args = (error,)
+        Exception.__init__(self, *args)
+
+    <span class="PY_KEYWORD">def</span> setLine(self, line):
+        self._line = line
+
+    <span class="PY_KEYWORD">def</span> printError(self, filename):
+        self.args = (filename,) + self.args
+        <span class="PY_KEYWORD">if</span> self._line:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%s:%d: %s'</span> % (filename, self._line, self._error)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'%s: %s'</span> % (filename, self._error)
+
+
+<span class="PY_KEYWORD">class</span> Model(Configurable):
+    <span class="PY_STRING">"""A Model defines the classes, attributes and enumerations of an application.
+
+    It also provides access to the Python classes that implement these structures
+    for use by other MiddleKit entities including code generators and object stores.
+
+    """</span>
+
+    pickleProtocol = -1 <span class="PY_COMMENT"># highest protocol available</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self,
+            filename=None, classesFilename=None, configFilename=None,
+            customCoreClasses={}, rootModel=None, havePythonClasses=True):
+        Configurable.__init__(self)
+        self._havePythonClasses = havePythonClasses
+        self._filename = None
+        self._configFilename = configFilename <span class="PY_KEYWORD">or</span> <span class="PY_STRING">'Settings.config'</span>
+        self._coreClasses = customCoreClasses
+        self._klasses = None
+        self._name = None
+        self._parents = [] <span class="PY_COMMENT"># e.g., parent models</span>
+        self._pyClassForName = {}
+
+        <span class="PY_COMMENT"># _allModelsByFilename is used to avoid loading the same parent model twice</span>
+        <span class="PY_KEYWORD">if</span> rootModel:
+            self._allModelsByFilename = rootModel._allModelsByFilename
+        <span class="PY_KEYWORD">else</span>:
+            self._allModelsByFilename = {}
+        self._rootModel = rootModel
+
+        <span class="PY_KEYWORD">if</span> filename <span class="PY_KEYWORD">or</span> classesFilename:
+            self.read(filename <span class="PY_KEYWORD">or</span> classesFilename, classesFilename <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None)
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">if</span> self._name <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">if</span> self._filename:
+                self._name = os.path.splitext(os.path.basename(self._filename))[0]
+            <span class="PY_KEYWORD">else</span>:
+                self._name = <span class="PY_STRING">'unnamed-mk-model'</span>
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> setName(self, name):
+        self._name = name
+
+    <span class="PY_KEYWORD">def</span> filename(self):
+        <span class="PY_KEYWORD">return</span> self._filename
+
+    <span class="PY_KEYWORD">def</span> read(self, filename, isClassesFile=False):
+        <span class="PY_KEYWORD">assert</span> self._filename <span class="PY_KEYWORD">is</span> None, <span class="PY_STRING">'Cannot read twice.'</span>
+        <span class="PY_COMMENT"># Assume the .mkmodel extension if none is given</span>
+        <span class="PY_KEYWORD">if</span> os.path.splitext(filename)[1] == <span class="PY_STRING">''</span>:
+            filename += <span class="PY_STRING">'.mkmodel'</span>
+        self._filename = os.path.abspath(filename)
+        self._name = None
+        <span class="PY_KEYWORD">if</span> isClassesFile:
+            self.dontReadParents()
+        <span class="PY_KEYWORD">else</span>:
+            self.readParents() <span class="PY_COMMENT"># the norm</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> isClassesFile:
+                self.readKlassesDirectly(filename)
+            <span class="PY_KEYWORD">else</span>:
+                self.readKlassesInModelDir() <span class="PY_COMMENT"># the norm</span>
+            self.awakeFromRead()
+        <span class="PY_KEYWORD">except</span> ModelError, e:
+            <span class="PY_KEYWORD">print</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error while reading model:'</span>
+            e.printError(filename)
+            <span class="PY_KEYWORD">raise</span>
+
+    <span class="PY_KEYWORD">def</span> readKlassesInModelDir(self):
+        <span class="PY_STRING">"""Read the Classes.csv or Classes.pickle.cache file as appropriate."""</span>
+        path = None
+        csvPath = os.path.join(self._filename, <span class="PY_STRING">'Classes.csv'</span>)
+        <span class="PY_KEYWORD">if</span> os.path.exists(csvPath):
+            path = csvPath
+        xlPath = os.path.join(self._filename, <span class="PY_STRING">'Classes.xls'</span>)
+        <span class="PY_KEYWORD">if</span> os.path.exists(xlPath):
+            path = xlPath
+        <span class="PY_KEYWORD">if</span> path <span class="PY_KEYWORD">is</span> None:
+            open(csvPath) <span class="PY_COMMENT"># to get a properly constructed IOError</span>
+
+        self.readKlassesDirectly(path)
+
+    <span class="PY_KEYWORD">def</span> readKlassesDirectly(self, path):
+        <span class="PY_COMMENT"># read the pickled version of Classes if possible</span>
+        data = None
+        shouldUseCache = self.setting(<span class="PY_STRING">'UsePickledClassesCache'</span>, False)
+        <span class="PY_KEYWORD">if</span> shouldUseCache:
+            <span class="PY_KEYWORD">from</span> MiscUtils.PickleCache <span class="PY_KEYWORD">import</span> readPickleCache, writePickleCache
+            data = readPickleCache(path,
+                pickleProtocol=self.pickleProtocol, source=<span class="PY_STRING">'MiddleKit'</span>)
+
+        <span class="PY_COMMENT"># read the regular file if necessary</span>
+        <span class="PY_KEYWORD">if</span> data <span class="PY_KEYWORD">is</span> None:
+            self.klasses().read(path)
+            <span class="PY_KEYWORD">if</span> shouldUseCache:
+                writePickleCache(self._klasses, path,
+                    pickleProtocol=self.pickleProtocol, source=<span class="PY_STRING">'MiddleKit'</span>)
+        <span class="PY_KEYWORD">else</span>:
+            self._klasses = data
+            self._klasses._model = self
+
+    <span class="PY_KEYWORD">def</span> __getstate__(self):
+        <span class="PY_KEYWORD">raise</span> Exception(<span class="PY_STRING">'Model instances were not designed to be pickled.'</span>)
+
+    <span class="PY_KEYWORD">def</span> awakeFromRead(self):
+        <span class="PY_COMMENT"># create containers for all klasses, uniqued by name</span>
+        byName = {}
+        inOrder = []
+        <span class="PY_KEYWORD">for</span> model <span class="PY_KEYWORD">in</span> reversed(self._searchOrder):
+            <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> model.klasses().klassesInOrder():
+                name = klass.name()
+                <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> byName:
+                    <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> range(len(inOrder)):
+                        <span class="PY_KEYWORD">if</span> inOrder[i].name() == name:
+                            inOrder[i] = klass
+                <span class="PY_KEYWORD">else</span>:
+                    inOrder.append(klass)
+                byName[name] = klass
+        <span class="PY_KEYWORD">assert</span> len(byName) == len(inOrder)
+        <span class="PY_KEYWORD">for</span> name, klass <span class="PY_KEYWORD">in</span> byName.items():
+            <span class="PY_KEYWORD">assert</span> klass <span class="PY_KEYWORD">is</span> self.klass(name)
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> inOrder:
+            <span class="PY_KEYWORD">assert</span> klass <span class="PY_KEYWORD">is</span> self.klass(klass.name())
+        self._allKlassesByName = byName
+        self._allKlassesInOrder = inOrder
+        self._klasses.awakeFromRead(self)
+
+    <span class="PY_KEYWORD">def</span> readParents(self, parentFilenames=None):
+        <span class="PY_STRING">"""Read parent models.
+
+        Reads the parent models of the current model, as specified in the
+        'Inherit' setting. The attributes _parents and _searchOrder are set.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> parentFilenames <span class="PY_KEYWORD">is</span> None:
+            parentFilenames = self.setting(<span class="PY_STRING">'Inherit'</span>, [])
+        <span class="PY_KEYWORD">for</span> filename <span class="PY_KEYWORD">in</span> parentFilenames:
+            filename = os.path.abspath(os.path.join(
+                os.path.dirname(self._filename), filename))
+            <span class="PY_KEYWORD">if</span> filename <span class="PY_KEYWORD">in</span> self._allModelsByFilename:
+                model = self._allModelsByFilename[filename]
+                <span class="PY_KEYWORD">assert</span> model != self._rootModel
+            <span class="PY_KEYWORD">else</span>:
+                model = self.__class__(filename,
+                    customCoreClasses=self._coreClasses,
+                    rootModel=self, havePythonClasses=self._havePythonClasses)
+                self._allModelsByFilename[filename] = model
+            self._parents.append(model)
+
+        <span class="PY_COMMENT"># establish the search order</span>
+        <span class="PY_COMMENT"># algorithm taken from http://www.python.org/2.2/descrintro.html#mro</span>
+        searchOrder = self.allModelsDepthFirstLeftRight()
+
+        <span class="PY_COMMENT"># remove duplicates:</span>
+        searchSet = set()
+        <span class="PY_KEYWORD">for</span> i <span class="PY_KEYWORD">in</span> reversed(range(len(searchOrder))):
+            model = searchOrder[i]
+            <span class="PY_KEYWORD">if</span> model <span class="PY_KEYWORD">in</span> searchSet:
+                <span class="PY_KEYWORD">del</span> searchOrder[i]
+            <span class="PY_KEYWORD">else</span>:
+                searchSet.add(model)
+
+        self._searchOrder = searchOrder
+
+    <span class="PY_KEYWORD">def</span> dontReadParents(self):
+        <span class="PY_STRING">"""Set attributes _parents and _searchOrder.
+
+        Used internally for the rare case of reading class files directly
+        (instead of from a model directory).
+
+        """</span>
+        self._parents = []
+        self._searchOrder = [self]
+
+    <span class="PY_KEYWORD">def</span> allModelsDepthFirstLeftRight(self, parents=None):
+        <span class="PY_STRING">"""Return ordered list of models.
+
+        Returns a list of all models, including self, parents and
+        ancestors, in a depth-first, left-to-right order. Does not
+        remove duplicates (found in inheritance diamonds).
+
+        Mostly useful for readParents() to establish the lookup
+        order regarding model inheritance.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> parents <span class="PY_KEYWORD">is</span> None:
+            parents = []
+        parents.append(self)
+        <span class="PY_KEYWORD">for</span> parent <span class="PY_KEYWORD">in</span> self._parents:
+            parent.allModelsDepthFirstLeftRight(parents)
+        <span class="PY_KEYWORD">return</span> parents
+
+    <span class="PY_KEYWORD">def</span> coreClass(self, className):
+        <span class="PY_STRING">"""Return code class.
+
+        For the given name, returns a class from MiddleKit.Core
+        or the custom set of classes that were passed in via initialization.
+
+        """</span>
+        pyClass = self._coreClasses.get(className)
+        <span class="PY_KEYWORD">if</span> pyClass <span class="PY_KEYWORD">is</span> None:
+            results = {}
+            <span class="PY_KEYWORD">exec</span> <span class="PY_STRING">'import MiddleKit.Core.%s as module'</span>% className <span class="PY_KEYWORD">in</span> results
+            pyClass = getattr(results[<span class="PY_STRING">'module'</span>], className)
+            <span class="PY_KEYWORD">assert</span> isinstance(pyClass, type)
+            self._coreClasses[className] = pyClass
+        <span class="PY_KEYWORD">return</span> pyClass
+
+    <span class="PY_KEYWORD">def</span> coreClassNames(self):
+        <span class="PY_STRING">"""Return a list of model class names found in MiddleKit.Core."""</span>
+        <span class="PY_COMMENT"># a little cheesy, but it does the job:</span>
+        <span class="PY_KEYWORD">import</span> MiddleKit.Core <span class="PY_KEYWORD">as</span> Core
+        <span class="PY_KEYWORD">return</span> Core.__all__
+
+    <span class="PY_KEYWORD">def</span> klasses(self):
+        <span class="PY_STRING">"""Get klasses.
+
+        Returns an instance that inherits from Klasses, using the base
+        classes passed to __init__, if any.
+
+        See also: klass(), allKlassesInOrder(), allKlassesByName()
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._klasses <span class="PY_KEYWORD">is</span> None:
+            Klasses = self.coreClass(<span class="PY_STRING">'Klasses'</span>)
+            self._klasses = Klasses(self)
+        <span class="PY_KEYWORD">return</span> self._klasses
+
+    <span class="PY_KEYWORD">def</span> klass(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Get klass.
+
+        Returns the klass with the given name, searching the parent
+        models if necessary.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> model <span class="PY_KEYWORD">in</span> self._searchOrder:
+            klass = model.klasses().get(name)
+            <span class="PY_KEYWORD">if</span> klass:
+                <span class="PY_KEYWORD">return</span> klass
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">raise</span> KeyError(name)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> default
+
+    <span class="PY_KEYWORD">def</span> allKlassesInOrder(self):
+        <span class="PY_STRING">"""Get klasses in order.
+
+        Returns a sequence of all the klasses in this model, unique by
+        name, including klasses inherited from parent models.
+
+        The order is the order of declaration, top-down.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._allKlassesInOrder
+
+    <span class="PY_KEYWORD">def</span> allKlassesByName(self):
+        <span class="PY_STRING">"""Get klasses by name.
+
+        Returns a dictionary of all the klasses in this model, unique
+        by name, including klasses inherited from parent models.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._allKlassesByName
+
+    <span class="PY_KEYWORD">def</span> allKlassesInDependencyOrder(self):
+        <span class="PY_STRING">"""Get klasses in dependency order.
+
+        Returns a sequence of all the klasses in this model, in an
+        order such that klasses follow the klasses they refer to
+        (via obj ref attributes).
+        The typical use for such an order is to avoid SQL errors
+        about foreign keys referring to tables that do not exist.
+
+        A ModelError is raised if there is a dependency cycle
+        since there can be no definitive order when a cycle exists.
+        You can break cycles by setting Ref=False for some
+        attribute in the cycle.
+
+        """</span>
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._allKlassesInOrder:
+            klass.willBuildDependencies()
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._allKlassesInOrder:
+            klass.buildDependencies()
+        allKlasses = []
+        visited = set()
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._allKlassesInOrder:
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> klass._dependents:
+                <span class="PY_COMMENT"># print '&gt;&gt;', klass.name()</span>
+                klass.recordDependencyOrder(allKlasses, visited)
+        <span class="PY_COMMENT"># The above loop fails to capture classes that are in cycles,</span>
+        <span class="PY_COMMENT"># but in that case there really is no dependency order.</span>
+        <span class="PY_KEYWORD">if</span> len(allKlasses) &lt; len(self._allKlassesInOrder):
+            <span class="PY_KEYWORD">raise</span> ModelError(<span class="PY_STRING">"Cannot determine a dependency order"</span>
+                <span class="PY_STRING">" among the classes due to a cycle. Try setting Ref=0"</span>
+                <span class="PY_STRING">" for one of the attributes to break the cycle."</span>)
+        <span class="PY_KEYWORD">assert</span> len(allKlasses) == len(self._allKlassesInOrder), \
+            <span class="PY_STRING">'%r, %r, %r'</span> % (len(allKlasses), len(self._allKlassesInOrder), allKlasses)
+        <span class="PY_COMMENT"># print '&gt;&gt; allKlassesInDependencyOrder() =', ' '.join([k.name() for k in allKlasses])</span>
+        <span class="PY_KEYWORD">return</span> allKlasses
+
+    <span class="PY_KEYWORD">def</span> pyClassForName(self, name):
+        <span class="PY_STRING">"""Get Python class for name.
+
+        Returns the Python class for the given name, which must be present
+        in the object model. Accounts for self.setting('Package').
+
+        If you already have a reference to the model klass, then you can
+        just ask it for klass.pyClass().
+
+        """</span>
+        pyClass = self._pyClassForName.get(name)
+        <span class="PY_KEYWORD">if</span> pyClass <span class="PY_KEYWORD">is</span> None:
+            results = {}
+            pkg = self.setting(<span class="PY_STRING">'Package'</span>, <span class="PY_STRING">''</span>)
+            <span class="PY_KEYWORD">if</span> pkg:
+                pkg += <span class="PY_STRING">'.'</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">exec</span> <span class="PY_STRING">'import %s%s as module'</span> % (pkg, name) <span class="PY_KEYWORD">in</span> results
+            <span class="PY_KEYWORD">except</span> ImportError, exc:
+                <span class="PY_KEYWORD">raise</span> ModelError(<span class="PY_STRING">"Could not import module for class '%s' due to %r."</span>
+                    <span class="PY_STRING">" If you've added this class recently,"</span>
+                    <span class="PY_STRING">" you need to re-generate your model."</span> % (name, exc.args[0]))
+            pyClass = getattr(results[<span class="PY_STRING">'module'</span>], <span class="PY_STRING">'pyClass'</span>, None)
+            <span class="PY_KEYWORD">if</span> pyClass <span class="PY_KEYWORD">is</span> None:
+                pyClass = getattr(results[<span class="PY_STRING">'module'</span>], name)
+            <span class="PY_COMMENT"># Note: The 'pyClass' variable name that is first looked for is a hook for</span>
+            <span class="PY_COMMENT"># those modules that have replaced the class variable by something else,</span>
+            <span class="PY_COMMENT"># like a function. I did this in a project with a class called UniqueString()</span>
+            <span class="PY_COMMENT"># in order to guarantee uniqueness per string.</span>
+            self._pyClassForName[name] = pyClass
+        <span class="PY_KEYWORD">return</span> pyClass
+
+
+    <span class="PY_COMMENT">## Being configurable ##</span>
+
+    <span class="PY_KEYWORD">def</span> configFilename(self):
+        <span class="PY_KEYWORD">if</span> self._filename <span class="PY_KEYWORD">is</span> None:
+            <span class="PY_KEYWORD">return</span> None
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> os.path.join(self._filename, self._configFilename)
+
+    <span class="PY_KEYWORD">def</span> defaultConfig(self):
+        <span class="PY_KEYWORD">return</span> dict(
+            Threaded = True,
+            ObjRefSuffixes = (<span class="PY_STRING">'ClassId'</span>, <span class="PY_STRING">'ObjId'</span>),
+            UseBigIntObjRefColumns = False,
+            <span class="PY_COMMENT"># SQLLog = {'File': 'stdout'},</span>
+            PreSQL = <span class="PY_STRING">''</span>,
+            PostSQL = <span class="PY_STRING">''</span>,
+            DropStatements = <span class="PY_STRING">'database'</span>, <span class="PY_COMMENT"># database, tables</span>
+            SQLSerialColumnName = <span class="PY_STRING">'serialNum'</span>, <span class="PY_COMMENT"># can use [cC]lassName, _ClassName</span>
+            AccessorStyle = <span class="PY_STRING">'methods'</span>, <span class="PY_COMMENT"># can be 'methods' or 'properties'</span>
+            ExternalEnumsSQLNames = dict(
+                Enable = False,
+                TableName = <span class="PY_STRING">'%(ClassName)s%(AttrName)sEnum'</span>,
+                ValueColName = <span class="PY_STRING">'value'</span>,
+                NameColName = <span class="PY_STRING">'name'</span>,
+            ),
+            <span class="PY_COMMENT"># can use: [cC]lassName, _ClassName, [aA]ttrName, _AttrName.</span>
+            <span class="PY_COMMENT"># "_" prefix means "as is", the others control the case of the first character.</span>
+        )
+
+    <span class="PY_KEYWORD">def</span> usesExternalSQLEnums(self):
+        flag = getattr(self, <span class="PY_STRING">'_usesExternalSQLEnums'</span>, None)
+        <span class="PY_KEYWORD">if</span> flag <span class="PY_KEYWORD">is</span> None:
+            flag = self.setting(<span class="PY_STRING">'ExternalEnumsSQLNames'</span>)[<span class="PY_STRING">'Enable'</span>]
+            self._usesExternalSQLEnums = flag
+        <span class="PY_KEYWORD">return</span> flag
+
+
+    <span class="PY_COMMENT">## Warnings ##</span>
+
+    <span class="PY_KEYWORD">def</span> printWarnings(self, out=None):
+        <span class="PY_KEYWORD">if</span> out <span class="PY_KEYWORD">is</span> None:
+            out = sys.stdout
+        <span class="PY_KEYWORD">if</span> len(self._klasses.klassesInOrder()) &lt; 1:
+            out.write(<span class="PY_STRING">"warning: Model '%s' doesn't contain any class definitions.\n"</span>
+                % self.name())
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self.klasses().klassesInOrder():
+            klass.printWarnings(out)
+</pre>
+<!--footer-->
+
+</body>
+</html>

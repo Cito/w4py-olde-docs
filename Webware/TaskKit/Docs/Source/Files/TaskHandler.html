@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>TaskKit/TaskHandler.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">
+from</span> time <span class="PY_KEYWORD">import</span> time
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Thread
+
+
+<span class="PY_KEYWORD">class</span> TaskHandler(object):
+    <span class="PY_STRING">"""The task handler.
+
+    While the Task class only knows what task to perform with the run()-method,
+    the TaskHandler has all the knowledge about the periodicity of the task.
+    Instances of this class are managed by the Scheduler in the scheduled,
+    running and onDemand dictionaries.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, scheduler, start, period, task, name):
+        self._scheduler = scheduler
+        self._task = task
+        self._name = name
+        self._thread = None
+        self._isRunning = False
+        self._suspend = False
+        self._lastTime = None
+        self._startTime = start
+        self._registerTime = time()
+        self._reregister = True
+        self._rerun = False
+        self._period = abs(period)
+
+
+    <span class="PY_COMMENT">## Scheduling ##</span>
+
+    <span class="PY_KEYWORD">def</span> reset(self, start, period, task, reregister):
+        self._startTime = start
+        self._period = abs(period)
+        self._task = task
+        self._reregister = reregister
+
+    <span class="PY_KEYWORD">def</span> runTask(self):
+        <span class="PY_STRING">"""Run this task in a background thread."""</span>
+        <span class="PY_KEYWORD">if</span> self._suspend:
+            self._scheduler.notifyCompletion(self)
+            <span class="PY_KEYWORD">return</span>
+        self._rerun = False
+        self._thread = Thread(None, self._task._run, self.name(), (self,))
+        self._isRunning = True
+        self._thread.start()
+
+    <span class="PY_KEYWORD">def</span> reschedule(self):
+        <span class="PY_STRING">"""Determine whether this task should be rescheduled.
+
+        Increments the startTime and returns true if this is
+        a periodically executed task.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._period == 0 <span class="PY_KEYWORD">or</span> <span class="PY_KEYWORD">not</span> self._reregister:
+            <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">if</span> self._lastTime - self._startTime &gt; self._period:
+                <span class="PY_COMMENT"># if the time taken to run the task exceeds the period</span>
+                self._startTime = self._lastTime + self._period
+            <span class="PY_KEYWORD">else</span>:
+                self._startTime += self._period
+            <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> notifyCompletion(self):
+        self._isRunning = False
+        self._lastTime = time()
+        self._scheduler.notifyCompletion(self)
+
+    <span class="PY_KEYWORD">def</span> notifyFailure(self):
+        self._isRunning = False
+        self._lastTime = time()
+        self._scheduler.notifyFailure(self)
+
+
+    <span class="PY_COMMENT">## Attributes ##</span>
+
+    <span class="PY_KEYWORD">def</span> isRunning(self):
+        <span class="PY_KEYWORD">return</span> self._isRunning
+
+    <span class="PY_KEYWORD">def</span> runAgain(self):
+        <span class="PY_STRING">"""Determine whether this task should be run again.
+
+        This method lets the Scheduler check to see whether this task should be
+        re-run when it terminates.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._rerun
+
+    <span class="PY_KEYWORD">def</span> isOnDemand(self):
+        <span class="PY_STRING">"""Return True if this task is not scheduled for periodic execution."""</span>
+        <span class="PY_KEYWORD">return</span> self._period == 0
+
+    <span class="PY_KEYWORD">def</span> runOnCompletion(self):
+        <span class="PY_STRING">"""Request that this task be re-run after its current completion.
+
+        Intended for on-demand tasks that are requested by the Scheduler while
+        they are already running.
+
+        """</span>
+        self._rerun = True
+
+    <span class="PY_KEYWORD">def</span> unregister(self):
+        <span class="PY_STRING">"""Request that this task not be kept after its current completion.
+
+        Used to remove a task from the scheduler.
+
+        """</span>
+        self._reregister = False
+        self._rerun = False
+
+    <span class="PY_KEYWORD">def</span> disable(self):
+        <span class="PY_STRING">"""Disable future invocations of this task."""</span>
+        self._suspend = True
+
+    <span class="PY_KEYWORD">def</span> enable(self):
+        <span class="PY_STRING">"""Enable future invocations of this task."""</span>
+        self._suspend = False
+
+    <span class="PY_KEYWORD">def</span> period(self):
+        <span class="PY_STRING">"""Return the period of this task."""</span>
+        <span class="PY_KEYWORD">return</span> self._period
+
+    <span class="PY_KEYWORD">def</span> setPeriod(self, period):
+        <span class="PY_STRING">"""Change the period for this task."""</span>
+        self._period = period
+
+    <span class="PY_KEYWORD">def</span> stop(self):
+        self._isRunning = False
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> startTime(self, newTime=None):
+        <span class="PY_KEYWORD">if</span> newTime:
+            self._startTime = newTime
+        <span class="PY_KEYWORD">return</span> self._startTime
+</pre>
+<!--footer-->
+
+</body>
+</html>

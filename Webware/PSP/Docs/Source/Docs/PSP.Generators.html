@@ -1,0 +1,399 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.Generators</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.Generators</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/Generators.py">/var/www/docs/Webware-1.1.1/PSP/Generators.py</a></font></td></tr></table>
+    <p><tt>Generate&nbsp;Python&nbsp;code&nbsp;from&nbsp;PSP&nbsp;templates.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;holds&nbsp;the&nbsp;classes&nbsp;that&nbsp;generate&nbsp;the&nbsp;Python&nbsp;code&nbsp;resulting<br>
+from&nbsp;the&nbsp;PSP&nbsp;template&nbsp;file.&nbsp;As&nbsp;the&nbsp;parser&nbsp;encounters&nbsp;PSP&nbsp;elements,<br>
+it&nbsp;creates&nbsp;a&nbsp;new&nbsp;Generator&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;for&nbsp;that&nbsp;type&nbsp;of&nbsp;element.<br>
+Each&nbsp;of&nbsp;these&nbsp;elements&nbsp;is&nbsp;put&nbsp;into&nbsp;a&nbsp;list&nbsp;maintained&nbsp;by&nbsp;the<br>
+ParseEventHandler&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;When&nbsp;it&nbsp;comes&nbsp;time&nbsp;to&nbsp;output&nbsp;the&nbsp;source&nbsp;code,<br>
+each&nbsp;generator&nbsp;is&nbsp;called&nbsp;in&nbsp;turn&nbsp;to&nbsp;create&nbsp;its&nbsp;source.<br>
+&nbsp;<br>
+(c)&nbsp;Copyright&nbsp;by&nbsp;Jay&nbsp;Love,&nbsp;2000&nbsp;(mailto:jsliv@jslove.org)<br>
+&nbsp;<br>
+Permission&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;and&nbsp;distribute&nbsp;this&nbsp;software&nbsp;and&nbsp;its<br>
+documentation&nbsp;for&nbsp;any&nbsp;purpose&nbsp;and&nbsp;without&nbsp;fee&nbsp;or&nbsp;royalty&nbsp;is&nbsp;hereby&nbsp;granted,<br>
+provided&nbsp;that&nbsp;the&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;appear&nbsp;in&nbsp;all&nbsp;copies&nbsp;and&nbsp;that<br>
+both&nbsp;that&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;appear&nbsp;in<br>
+supporting&nbsp;documentation&nbsp;or&nbsp;portions&nbsp;thereof,&nbsp;including&nbsp;modifications,<br>
+that&nbsp;you&nbsp;make.<br>
+&nbsp;<br>
+This&nbsp;software&nbsp;is&nbsp;based&nbsp;in&nbsp;part&nbsp;on&nbsp;work&nbsp;done&nbsp;by&nbsp;the&nbsp;Jakarta&nbsp;group.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PSP.BraceConverter.html">PSP.BraceConverter</a><br>
+</td><td width="25%" valign=top><a href="PSP.PSPUtils.html">PSP.PSPUtils</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.Generators.html#CharDataGenerator">CharDataGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#EndBlockGenerator">EndBlockGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#ExpressionGenerator">ExpressionGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#IncludeGenerator">IncludeGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#InsertGenerator">InsertGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#MethodEndGenerator">MethodEndGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#MethodGenerator">MethodGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#ScriptClassGenerator">ScriptClassGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#ScriptFileGenerator">ScriptFileGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="PSP.Generators.html#ScriptGenerator">ScriptGenerator</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="CharDataGenerator">class <strong>CharDataGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;handles&nbsp;standard&nbsp;character&nbsp;output,&nbsp;mostly&nbsp;HTML.<br>
+&nbsp;<br>
+It&nbsp;just&nbsp;dumps&nbsp;it&nbsp;out.&nbsp;Need&nbsp;to&nbsp;handle&nbsp;all&nbsp;the&nbsp;escaping&nbsp;of&nbsp;characters.<br>
+It's&nbsp;just&nbsp;skipped&nbsp;for&nbsp;now.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#CharDataGenerator">CharDataGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="CharDataGenerator-__init__"><strong>__init__</strong></a>(self, chars)</dt></dl>
+
+<dl><dt><a name="CharDataGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="CharDataGenerator-generateChunk"><strong>generateChunk</strong></a>(self, writer, start<font color="#909090">=0</font>, stop<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="CharDataGenerator-mergeData"><strong>mergeData</strong></a>(self, cdGen)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EndBlockGenerator">class <strong>EndBlockGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#EndBlockGenerator">EndBlockGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="EndBlockGenerator-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="EndBlockGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ExpressionGenerator">class <strong>ExpressionGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;handles&nbsp;expression&nbsp;blocks.<br>
+&nbsp;<br>
+It&nbsp;simply&nbsp;outputs&nbsp;the&nbsp;(hopefully)&nbsp;python&nbsp;expression&nbsp;within&nbsp;the&nbsp;block<br>
+wrapped&nbsp;with&nbsp;a&nbsp;_formatter()&nbsp;call.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#ExpressionGenerator">ExpressionGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ExpressionGenerator-__init__"><strong>__init__</strong></a>(self, chars)</dt></dl>
+
+<dl><dt><a name="ExpressionGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GenericGenerator">class <strong>GenericGenerator</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Base&nbsp;class&nbsp;for&nbsp;all&nbsp;the&nbsp;generators<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GenericGenerator-__init__"><strong>__init__</strong></a>(self, ctxt<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IncludeGenerator">class <strong>IncludeGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Handle&nbsp;psp:include&nbsp;directives.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;new&nbsp;version&nbsp;of&nbsp;this&nbsp;directive&nbsp;that&nbsp;actually<br>
+forwards&nbsp;the&nbsp;request&nbsp;to&nbsp;the&nbsp;specified&nbsp;page.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#IncludeGenerator">IncludeGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="IncludeGenerator-__init__"><strong>__init__</strong></a>(self, attrs, param, ctxt)</dt></dl>
+
+<dl><dt><a name="IncludeGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;insert&nbsp;theFunction.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="InsertGenerator">class <strong>InsertGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Include&nbsp;files&nbsp;designated&nbsp;by&nbsp;the&nbsp;psp:insert&nbsp;syntax.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;attribute&nbsp;'static'&nbsp;is&nbsp;set&nbsp;to&nbsp;True&nbsp;or&nbsp;1,&nbsp;we&nbsp;include&nbsp;the&nbsp;file&nbsp;now,<br>
+at&nbsp;compile&nbsp;time.&nbsp;Otherwise,&nbsp;we&nbsp;use&nbsp;a&nbsp;function&nbsp;added&nbsp;to&nbsp;every&nbsp;PSP&nbsp;page<br>
+named&nbsp;__includeFile,&nbsp;which&nbsp;reads&nbsp;the&nbsp;file&nbsp;at&nbsp;run&nbsp;time.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#InsertGenerator">InsertGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="InsertGenerator-__init__"><strong>__init__</strong></a>(self, attrs, param, ctxt)</dt></dl>
+
+<dl><dt><a name="InsertGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MethodEndGenerator">class <strong>MethodEndGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Part&nbsp;of&nbsp;class&nbsp;method&nbsp;generation.<br>
+&nbsp;<br>
+After&nbsp;<a href="#MethodGenerator">MethodGenerator</a>,&nbsp;<a href="#MethodEndGenerator">MethodEndGenerator</a>&nbsp;actually&nbsp;generates<br>
+the&nbsp;code&nbsp;for&nbsp;the&nbsp;method&nbsp;body.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#MethodEndGenerator">MethodEndGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MethodEndGenerator-__init__"><strong>__init__</strong></a>(self, chars, attrs)</dt></dl>
+
+<dl><dt><a name="MethodEndGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MethodGenerator">class <strong>MethodGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Generate&nbsp;class&nbsp;methods&nbsp;defined&nbsp;in&nbsp;the&nbsp;PSP&nbsp;page.<br>
+&nbsp;<br>
+There&nbsp;are&nbsp;two&nbsp;parts&nbsp;to&nbsp;method&nbsp;generation.<br>
+This&nbsp;class&nbsp;handles&nbsp;getting&nbsp;the&nbsp;method&nbsp;name&nbsp;and&nbsp;parameters&nbsp;set&nbsp;up.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#MethodGenerator">MethodGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MethodGenerator-__init__"><strong>__init__</strong></a>(self, chars, attrs)</dt></dl>
+
+<dl><dt><a name="MethodGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ScriptClassGenerator">class <strong>ScriptClassGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Add&nbsp;Python&nbsp;code&nbsp;at&nbsp;the&nbsp;class&nbsp;level.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#ScriptClassGenerator">ScriptClassGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ScriptClassGenerator-__init__"><strong>__init__</strong></a>(self, chars, attrs)</dt></dl>
+
+<dl><dt><a name="ScriptClassGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ScriptFileGenerator">class <strong>ScriptFileGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Add&nbsp;Python&nbsp;code&nbsp;at&nbsp;the&nbsp;file/module&nbsp;level.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#ScriptFileGenerator">ScriptFileGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ScriptFileGenerator-__init__"><strong>__init__</strong></a>(self, chars, attrs)</dt></dl>
+
+<dl><dt><a name="ScriptFileGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ScriptGenerator">class <strong>ScriptGenerator</strong></a>(<a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Generate&nbsp;scripts.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="PSP.Generators.html#ScriptGenerator">ScriptGenerator</a></dd>
+<dd><a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ScriptGenerator-__init__"><strong>__init__</strong></a>(self, chars, attrs)</dt></dl>
+
+<dl><dt><a name="ScriptGenerator-generate"><strong>generate</strong></a>(self, writer, phase<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="PSP.Generators.html#GenericGenerator">GenericGenerator</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ResponseObject</strong> = 'res'</td></tr></table>
+</body></html>

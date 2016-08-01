@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.HTTPExceptions</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.HTTPExceptions</h2>
+<p>You can also browse the <a href="../Files/HTTPExceptions.html">complete source file</a>
+or the <a href="../Docs/WebKit.HTTPExceptions.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">HTTPException</span>(Exception):</span>
+<span class="line_def">    def <span class="name_def">__str__</span>(self)</span>
+
+<span class="line_category">    ## Error codes ##</span>
+<span class="line_def">    def <span class="name_def">code</span>(self)</span>
+<span class="line_def">    def <span class="name_def">codeMessage</span>(self)</span>
+
+<span class="line_category">    ## HTML Description ##</span>
+<span class="line_def">    def <span class="name_def">html</span>(self)</span>
+<span class="line_def">    def <span class="name_def">title</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htTitle</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htBody</span>(self)</span>
+<span class="line_def">    def <span class="name_def">description</span>(self)</span>
+<span class="line_def">    def <span class="name_def">htDescription</span>(self)</span>
+
+<span class="line_category">    ## Misc ##</span>
+<span class="line_def">    def <span class="name_def">headers</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setTransaction</span>(self, trans)</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPMovedPermanently</span>(HTTPException):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, location=None, webkitLocation=None, *args)</span>
+<span class="line_def">    def <span class="name_def">location</span>(self)</span>
+<span class="line_def">    def <span class="name_def">headers</span>(self)</span>
+<span class="line_def">    def <span class="name_def">description</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPTemporaryRedirect</span>(HTTPMovedPermanently):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPBadRequest</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPAuthenticationRequired</span>(HTTPException):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, realm=None, *args)</span>
+<span class="line_def">    def <span class="name_def">headers</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPSessionExpired</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPForbidden</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPNotFound</span>(HTTPException):</span>
+<span class="line_def">    def <span class="name_def">html</span>(self)</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPMethodNotAllowed</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPRequestTimeout</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPConflict</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPUnsupportedMediaType</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPPreconditionFailed</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPServerError</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPNotImplemented</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPServiceUnavailable</span>(HTTPException):</span>
+
+
+<span class="line_class">class <span class="name_class">HTTPInsufficientStorage</span>(HTTPException):</span>
+
+</pre>
+</body>
+</html>

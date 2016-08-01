@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiddleKit/Core/Klasses.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">from</span> ModelObject <span class="PY_KEYWORD">import</span> ModelObject
+<span class="PY_KEYWORD">from</span> Model <span class="PY_KEYWORD">import</span> Model, ModelError
+<span class="PY_KEYWORD">from</span> Klass <span class="PY_KEYWORD">import</span> Klass
+<span class="PY_KEYWORD">from</span> Attr <span class="PY_KEYWORD">import</span> Attr
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+<span class="PY_KEYWORD">from</span> MiscUtils.DataTable <span class="PY_KEYWORD">import</span> DataTable
+<span class="PY_KEYWORD">from</span> MiscUtils.DictForArgs <span class="PY_KEYWORD">import</span> *
+
+
+<span class="PY_KEYWORD">class</span> Klasses(dict, ModelObject):
+    <span class="PY_STRING">"""Collection of class specifications.
+
+    A Klasses object can read a list of class specifications that are
+    stored in a spreadsheet (.csv).
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, model):
+        dict.__init__(self)
+        <span class="PY_KEYWORD">assert</span> isinstance(model, Model)
+        self._model = model
+        self._klasses = []
+        self._filename = None
+        self._name = None
+        self._tableHeadings = None
+        self.initTypeMap()
+
+    <span class="PY_KEYWORD">def</span> classNames(self):
+        <span class="PY_KEYWORD">return</span> [<span class="PY_STRING">'ModelObject'</span>, <span class="PY_STRING">'Klasses'</span>, <span class="PY_STRING">'Klass'</span>, <span class="PY_STRING">'Attr'</span>,
+            <span class="PY_STRING">'BasicTypeAttr'</span>, <span class="PY_STRING">'ObjRefAttr'</span>, <span class="PY_STRING">'EnumAttr'</span>, <span class="PY_STRING">'DateTimeAttr'</span>]
+
+    <span class="PY_KEYWORD">def</span> initTypeMap(self):
+        <span class="PY_STRING">"""Initialize the type map.
+
+        Initializes self._typeNamesToAttrClassNames which maps MiddleKit type
+        names (like int and enum) to the name of the attribute class that would
+        implement them. Mapping to class names rather than actual classes is key,
+        because in __init__, a different set of attribute classes can be passed in.
+
+        """</span>
+        typemap = {}
+        names = <span class="PY_STRING">'bool int long float string enum date time list ObjRef decimal'</span>
+        names = names.split()
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> names:
+            typemap[name] = name.capitalize() + <span class="PY_STRING">'Attr'</span>
+        typemap[<span class="PY_STRING">'datetime'</span>] = <span class="PY_STRING">'DateTimeAttr'</span>
+        self._typeNamesToAttrClassNames = typemap
+
+    <span class="PY_KEYWORD">def</span> assignClassIds(self, generator):
+        <span class="PY_KEYWORD">if</span> self.setting(<span class="PY_STRING">'UseHashForClassIds'</span>, False):
+            <span class="PY_COMMENT"># This is better because class ids will likely stay the same even as</span>
+            <span class="PY_COMMENT"># you change your MiddleKit model. For example, class ids across</span>
+            <span class="PY_COMMENT"># different sandboxes of your application (development, test and</span>
+            <span class="PY_COMMENT"># production) would match up even as you add and remove classes.</span>
+            <span class="PY_COMMENT"># However, renaming classes changes the id!</span>
+            allIds = set()
+            <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._model._allKlassesInOrder:
+                klass.setId(allIds)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">for</span> i, klass <span class="PY_KEYWORD">in</span> enumerate(self._model._allKlassesInOrder):
+                klass.setId(i+1)
+
+
+    <span class="PY_COMMENT">## Accessing ##</span>
+
+    <span class="PY_KEYWORD">def</span> model(self):
+        <span class="PY_KEYWORD">return</span> self._model
+
+    <span class="PY_KEYWORD">def</span> filename(self):
+        <span class="PY_KEYWORD">return</span> self._filename
+
+    <span class="PY_KEYWORD">def</span> klassesInOrder(self):
+        <span class="PY_STRING">"""Return a list of all the Klasses in the order they were declared.
+
+        Do not modify the list.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self._klasses
+
+
+    <span class="PY_COMMENT">## Reading files ##</span>
+
+    <span class="PY_KEYWORD">def</span> read(self, filename):
+        <span class="PY_COMMENT"># @@ 2000-11-24 ce: split into readTable()</span>
+        self._filename = filename
+        <span class="PY_COMMENT"># PickleCache is used at the Model level, so we don't use it here:</span>
+        table = DataTable(filename, usePickleCache=False)
+
+        <span class="PY_COMMENT"># in case we want to look at these later:</span>
+        self._tableHeadings = table.headings()
+
+        <span class="PY_KEYWORD">try</span>:
+            line = 2
+            <span class="PY_KEYWORD">for</span> row <span class="PY_KEYWORD">in</span> table:
+                row = ExpandDictWithExtras(row, dictForArgs=PyDictForArgs)
+                <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> [<span class="PY_STRING">'Class'</span>, <span class="PY_STRING">'Attribute'</span>]:
+                    <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> row:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'ERROR'</span>
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Required key %s not found in row:'</span> % key
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'row:'</span>, row
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'keys:'</span>, row.keys()
+                        <span class="PY_KEYWORD">print</span> row[key] <span class="PY_COMMENT"># throws exception</span>
+                <span class="PY_KEYWORD">if</span> row[<span class="PY_STRING">'Class'</span>]:
+                    pyClass = self._model.coreClass(<span class="PY_STRING">'Klass'</span>)
+                    klass = pyClass(self, row)
+                    self.addKlass(klass)
+                <span class="PY_KEYWORD">else</span>:
+                    name = row[<span class="PY_STRING">'Attribute'</span>]
+                    <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">and</span> name[0] != <span class="PY_STRING">'#'</span> <span class="PY_KEYWORD">and</span> name[-1] != <span class="PY_STRING">':'</span>:
+                        pyClassName = self.pyClassNameForAttrDict(row)
+                        pyClass = self._model.coreClass(pyClassName)
+                        klass.addAttr(pyClass(row))
+                line += 1
+        <span class="PY_KEYWORD">except</span> ModelError, e:
+            e.setLine(line)
+            <span class="PY_KEYWORD">raise</span>
+
+    <span class="PY_KEYWORD">def</span> awakeFromRead(self, model):
+        <span class="PY_STRING">"""Perform further initialization.
+
+        Expected to be invoked by the model.
+
+        """</span>
+        <span class="PY_KEYWORD">assert</span> self._model <span class="PY_KEYWORD">is</span> model
+
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._klasses:
+            supername = klass.supername()
+            <span class="PY_KEYWORD">if</span> supername != <span class="PY_STRING">'MiddleObject'</span>:
+                klass.setSuperklass(self.model().klass(supername))
+
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._klasses:
+            klass.awakeFromRead(self)
+
+    <span class="PY_KEYWORD">def</span> __getstate__(self):
+        <span class="PY_STRING">"""For pickling, remove the back reference to the model that owns self."""</span>
+        <span class="PY_KEYWORD">assert</span> self._model
+        attrs = self.__dict__.copy()
+        <span class="PY_KEYWORD">del</span> attrs[<span class="PY_STRING">'_model'</span>]
+        <span class="PY_KEYWORD">return</span> attrs
+
+
+    <span class="PY_COMMENT">## Adding classes ##</span>
+
+    <span class="PY_KEYWORD">def</span> addKlass(self, klass):
+        <span class="PY_STRING">"""Add a class definition.
+
+        Restrictions: Cannot add two classes with the same name.
+
+        """</span>
+        name = klass.name()
+        <span class="PY_KEYWORD">assert</span> name <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self, <span class="PY_STRING">'Already have %s.'</span> % name
+        self._klasses.append(klass)
+        self[klass.name()] = klass
+        klass.setKlasses(self)
+
+
+    <span class="PY_COMMENT">## Self utility ##</span>
+
+    <span class="PY_KEYWORD">def</span> pyClassNameForAttrDict(self, attrDict):
+        <span class="PY_STRING">"""Return class for attribute definition.
+
+        Given a raw attribute definition (in the form of a dictionary),
+        this method returns the name of the Python class that should be
+        instantiated for it. This method relies primarily on dict['Type'].
+
+        """</span>
+        typeName = attrDict[<span class="PY_STRING">'Type'</span>]
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> typeName:
+            <span class="PY_KEYWORD">if</span> attrDict[<span class="PY_STRING">'Attribute'</span>]:
+                <span class="PY_KEYWORD">raise</span> ModelError(<span class="PY_STRING">"no type specified for attribute '%s'"</span>
+                    % attrDict[<span class="PY_STRING">'Attribute'</span>])
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">raise</span> ModelError(<span class="PY_STRING">'type specifier missing'</span>)
+
+        <span class="PY_COMMENT"># to support "list of &lt;class&gt;":</span>
+        <span class="PY_KEYWORD">if</span> typeName.lower().startswith(<span class="PY_STRING">'list '</span>):
+            typeName = <span class="PY_STRING">'list'</span>
+
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">return</span> self._typeNamesToAttrClassNames[typeName]
+        <span class="PY_KEYWORD">except</span> KeyError:
+            <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'ObjRefAttr'</span>
+
+    <span class="PY_KEYWORD">def</span> setting(self, name, default=NoDefault):
+        <span class="PY_STRING">"""Return the value of a particular configuration setting taken from the model."""</span>
+        <span class="PY_KEYWORD">return</span> self._model.setting(name, default)
+
+
+    <span class="PY_COMMENT">## Debugging ##</span>
+
+    <span class="PY_KEYWORD">def</span> dump(self):
+        <span class="PY_STRING">"""Print each class."""</span>
+        <span class="PY_KEYWORD">for</span> klass <span class="PY_KEYWORD">in</span> self._klasses:
+            <span class="PY_KEYWORD">print</span> klass
+
+    <span class="PY_KEYWORD">def</span> debugString(self):
+        <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'&lt;%s 0x%x model=%r&gt;'</span> % (self.__class__.__name__,
+            id(self), getattr(self, <span class="PY_STRING">'_model'</span>, <span class="PY_STRING">'(none)'</span>))
+</pre>
+<!--footer-->
+
+</body>
+</html>

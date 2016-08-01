@@ -1,0 +1,104 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module WebKit.ImportManager</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="WebKit.html"><font color="#ffffff">WebKit</font></a>.ImportManager</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/WebKit/ImportManager.py">/var/www/docs/Webware-1.1.1/WebKit/ImportManager.py</a></font></td></tr></table>
+    <p><tt><a href="#ImportManager">ImportManager</a><br>
+&nbsp;<br>
+Manages&nbsp;imported&nbsp;modules&nbsp;and&nbsp;protects&nbsp;against&nbsp;concurrent&nbsp;imports.<br>
+&nbsp;<br>
+Keeps&nbsp;lists&nbsp;of&nbsp;all&nbsp;imported&nbsp;Python&nbsp;modules&nbsp;and&nbsp;templates&nbsp;as&nbsp;well&nbsp;as&nbsp;other<br>
+config&nbsp;files&nbsp;used&nbsp;by&nbsp;Webware&nbsp;for&nbsp;Python.&nbsp;For&nbsp;modules&nbsp;which&nbsp;are&nbsp;not&nbsp;directly<br>
+imported,&nbsp;<a href="#ImportManager">ImportManager</a>&nbsp;can&nbsp;use&nbsp;ImportSpy&nbsp;to&nbsp;keep&nbsp;track&nbsp;of&nbsp;them.&nbsp;This&nbsp;can<br>
+be&nbsp;used&nbsp;to&nbsp;detect&nbsp;changes&nbsp;in&nbsp;source&nbsp;files,&nbsp;templates&nbsp;or&nbsp;config&nbsp;files&nbsp;in&nbsp;order<br>
+to&nbsp;reload&nbsp;them&nbsp;automatically&nbsp;by&nbsp;the&nbsp;AutoReloadingAppServer.&nbsp;The&nbsp;use&nbsp;of<br>
+ImportSpy&nbsp;can&nbsp;be&nbsp;suppressed&nbsp;with&nbsp;the``UseImportSpy``&nbsp;setting.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="imp.html">imp</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="WebKit.ImportManager.html#ImportManager">ImportManager</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ImportManager">class <strong>ImportManager</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;import&nbsp;manager.<br>
+&nbsp;<br>
+Keeps&nbsp;track&nbsp;of&nbsp;the&nbsp;Python&nbsp;modules&nbsp;and&nbsp;other&nbsp;system&nbsp;files&nbsp;that&nbsp;have&nbsp;been<br>
+imported&nbsp;and&nbsp;are&nbsp;used&nbsp;by&nbsp;Webware.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ImportManager-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Create&nbsp;import&nbsp;hook.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-activateImportSpy"><strong>activateImportSpy</strong></a>(self)</dt><dd><tt>Activate&nbsp;ImportSpy&nbsp;to&nbsp;keep&nbsp;track&nbsp;of&nbsp;modules&nbsp;loaded&nbsp;elsewhere.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-delModules"><strong>delModules</strong></a>(self, includePythonModules<font color="#909090">=False</font>, excludePrefixes<font color="#909090">=None</font>)</dt><dd><tt>Delete&nbsp;imported&nbsp;modules.<br>
+&nbsp;<br>
+Deletes&nbsp;all&nbsp;the&nbsp;modules&nbsp;that&nbsp;the&nbsp;ImportSpy&nbsp;has&nbsp;ever&nbsp;imported&nbsp;unless<br>
+they&nbsp;are&nbsp;part&nbsp;of&nbsp;WebKit.&nbsp;This&nbsp;in&nbsp;support&nbsp;of&nbsp;DebugAppServer's&nbsp;useful<br>
+(yet&nbsp;imperfect)&nbsp;support&nbsp;for&nbsp;AutoReload.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-fileList"><strong>fileList</strong></a>(self, update<font color="#909090">=True</font>)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;tracked&nbsp;files.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-fileUpdated"><strong>fileUpdated</strong></a>(self, filename, update<font color="#909090">=True</font>, getmtime<font color="#909090">=&lt;function getmtime&gt;</font>)</dt><dd><tt>Check&nbsp;whether&nbsp;file&nbsp;has&nbsp;been&nbsp;updated.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-load_module"><strong>load_module</strong></a>(self, name, file, filename, info)</dt><dd><tt>Replaces&nbsp;imp.load_module.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-notifyOfNewFiles"><strong>notifyOfNewFiles</strong></a>(self, hook)</dt><dd><tt>Register&nbsp;notification&nbsp;hook.<br>
+&nbsp;<br>
+Called&nbsp;by&nbsp;someone&nbsp;else&nbsp;to&nbsp;register&nbsp;that&nbsp;they'd&nbsp;like&nbsp;to&nbsp;be&nbsp;know<br>
+when&nbsp;a&nbsp;new&nbsp;file&nbsp;is&nbsp;imported.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-recordFile"><strong>recordFile</strong></a>(self, filename, isfile<font color="#909090">=&lt;function isfile&gt;</font>)</dt><dd><tt>Record&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-recordModule"><strong>recordModule</strong></a>(self, mod, isfile<font color="#909090">=&lt;function isfile&gt;</font>)</dt><dd><tt>Record&nbsp;a&nbsp;module.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-recordModules"><strong>recordModules</strong></a>(self, moduleNames<font color="#909090">=None</font>)</dt><dd><tt>Record&nbsp;a&nbsp;list&nbsp;of&nbsp;modules&nbsp;(or&nbsp;all&nbsp;modules).</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-updatedFile"><strong>updatedFile</strong></a>(self, update<font color="#909090">=True</font>, getmtime<font color="#909090">=&lt;function getmtime&gt;</font>)</dt><dd><tt>Check&nbsp;whether&nbsp;one&nbsp;of&nbsp;the&nbsp;files&nbsp;has&nbsp;been&nbsp;updated.</tt></dd></dl>
+
+<dl><dt><a name="ImportManager-watchFile"><strong>watchFile</strong></a>(self, path, modname<font color="#909090">=None</font>, getmtime<font color="#909090">=&lt;function getmtime&gt;</font>)</dt><dd><tt>Add&nbsp;more&nbsp;files&nbsp;to&nbsp;watch&nbsp;without&nbsp;importing&nbsp;them.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="ImportManager-find_module"><strong>find_module</strong></a>(name, path<font color="#909090">=None</font>)</dt><dd><tt>Replaces&nbsp;imp.find_module.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

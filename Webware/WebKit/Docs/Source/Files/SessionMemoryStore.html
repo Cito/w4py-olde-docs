@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/SessionMemoryStore.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""Session store in memory."""</span>
+
+<span class="PY_KEYWORD">from</span> MiscUtils <span class="PY_KEYWORD">import</span> NoDefault
+
+<span class="PY_KEYWORD">from</span> SessionStore <span class="PY_KEYWORD">import</span> SessionStore
+<span class="PY_KEYWORD">from</span> SessionFileStore <span class="PY_KEYWORD">import</span> SessionFileStore
+
+
+<span class="PY_KEYWORD">class</span> SessionMemoryStore(SessionStore):
+    <span class="PY_STRING">"""Stores the session in memory as a dictionary.
+
+    This is fast and secure when you have one, persistent app server.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, app, restoreFiles=True):
+        <span class="PY_STRING">"""Initialize the session memory store.
+
+        If restoreFiles is true, and sessions have been saved to file,
+        the store will be initialized from these files.
+
+        """</span>
+        SessionStore.__init__(self, app)
+        self._store = {}
+        <span class="PY_KEYWORD">if</span> restoreFiles:
+            filestore = SessionFileStore(app)
+            <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> filestore:
+                <span class="PY_KEYWORD">try</span>:
+                    self[key] = filestore[key]
+                <span class="PY_KEYWORD">except</span> Exception:
+                    app.handleException()
+            filestore.clear()
+
+
+    <span class="PY_COMMENT">## Access ##</span>
+
+    <span class="PY_KEYWORD">def</span> __len__(self):
+        <span class="PY_STRING">"""Return the number of sessions in the store."""</span>
+        <span class="PY_KEYWORD">return</span> len(self._store)
+
+    <span class="PY_KEYWORD">def</span> __getitem__(self, key):
+        <span class="PY_STRING">"""Get a session item from the store."""</span>
+        <span class="PY_KEYWORD">return</span> self._store[key]
+
+    <span class="PY_KEYWORD">def</span> __setitem__(self, key, value):
+        <span class="PY_STRING">"""Set a session item, saving it to the store."""</span>
+        value.setDirty(False)
+        self._store[key] = value
+
+    <span class="PY_KEYWORD">def</span> __delitem__(self, key):
+        <span class="PY_STRING">"""Delete a session item from the store."""</span>
+        session = self[key]
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> session.isExpired():
+            session.expiring()
+        <span class="PY_KEYWORD">del</span> self._store[key]
+
+    <span class="PY_KEYWORD">def</span> __contains__(self, key):
+        <span class="PY_STRING">"""Check whether the session store has a given key."""</span>
+        <span class="PY_KEYWORD">return</span> key <span class="PY_KEYWORD">in</span> self._store
+
+    <span class="PY_KEYWORD">def</span> __iter__(self):
+        <span class="PY_STRING">"""Return an iterator over the stored session keys."""</span>
+        <span class="PY_KEYWORD">return</span> iter(self._store)
+
+    <span class="PY_KEYWORD">def</span> keys(self):
+        <span class="PY_STRING">"""Return a list with the keys of all the stored sessions."""</span>
+        <span class="PY_KEYWORD">return</span> self._store.keys()
+
+    <span class="PY_KEYWORD">def</span> clear(self):
+        <span class="PY_STRING">"""Clear the session store, removing all of its items."""</span>
+        self._store.clear()
+
+    <span class="PY_KEYWORD">def</span> setdefault(self, key, default=None):
+        <span class="PY_STRING">"""Return value if key available, else default (also setting it)."""</span>
+        <span class="PY_COMMENT"># note that setdefault() is atomic, so no locking is needed</span>
+        <span class="PY_KEYWORD">return</span> self._store.setdefault(key, default)
+
+    <span class="PY_KEYWORD">def</span> pop(self, key, default=NoDefault):
+        <span class="PY_STRING">"""Return value if key available, else default (also remove key)."""</span>
+        <span class="PY_COMMENT"># note that pop() is atomic, so no locking is needed</span>
+        <span class="PY_KEYWORD">if</span> default <span class="PY_KEYWORD">is</span> NoDefault:
+            <span class="PY_KEYWORD">return</span> self._store.pop(key)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._store.pop(key, default)
+
+
+    <span class="PY_COMMENT">## Application support ##</span>
+
+    <span class="PY_KEYWORD">def</span> storeSession(self, session):
+        <span class="PY_STRING">"""Save already potentially changed session in the store."""</span>
+        <span class="PY_KEYWORD">if</span> self._alwaysSave <span class="PY_KEYWORD">or</span> session.isDirty():
+            key = session.identifier()
+            <span class="PY_KEYWORD">if</span> key <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self <span class="PY_KEYWORD">or</span> self[key] <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> session:
+                self[key] = session
+
+    <span class="PY_KEYWORD">def</span> storeAllSessions(self):
+        <span class="PY_STRING">"""Permanently save all sessions in the store."""</span>
+        filestore = SessionFileStore(self._app)
+        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> self:
+            filestore[key] = self[key]
+</pre>
+<!--footer-->
+
+</body>
+</html>

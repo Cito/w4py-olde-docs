@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of UserKit.UserManager</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of UserKit.UserManager</h2>
+<p>You can also browse the <a href="../Files/UserManager.html">complete source file</a>
+or the <a href="../Docs/UserKit.UserManager.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">UserManager</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, userClass=None)</span>
+<span class="line_def">    def <span class="name_def">shutDown</span>(self)</span>
+
+<span class="line_category">    ## Settings ##</span>
+<span class="line_def">    def <span class="name_def">userClass</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setUserClass</span>(self, userClass)</span>
+<span class="line_def">    def <span class="name_def">modifiedUserTimeout</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setModifiedUserTimeout</span>(self, value)</span>
+<span class="line_def">    def <span class="name_def">cachedUserTimeout</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setCachedUserTimeout</span>(self, value)</span>
+<span class="line_def">    def <span class="name_def">activeUserTimeout</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setActiveUserTimeout</span>(self, value)</span>
+
+<span class="line_category">    ## Basic user access ##</span>
+<span class="line_def">    def <span class="name_def">createUser</span>(self, name, password, userClass=None)</span>
+<span class="line_def">    def <span class="name_def">addUser</span>(self, user)</span>
+<span class="line_def">    def <span class="name_def">userForSerialNum</span>(self, serialNum, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">userForExternalId</span>(self, externalId, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">userForName</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">users</span>(self)</span>
+<span class="line_def">    def <span class="name_def">numActiveUsers</span>(self)</span>
+<span class="line_def">    def <span class="name_def">activeUsers</span>(self)</span>
+<span class="line_def">    def <span class="name_def">inactiveUsers</span>(self)</span>
+
+<span class="line_category">    ## Logging in and out ##</span>
+<span class="line_def">    def <span class="name_def">login</span>(self, user, password)</span>
+<span class="line_def">    def <span class="name_def">logout</span>(self, user)</span>
+<span class="line_def">    def <span class="name_def">loginSerialNum</span>(self, serialNum, password)</span>
+<span class="line_def">    def <span class="name_def">loginExternalId</span>(self, externalId, password)</span>
+<span class="line_def">    def <span class="name_def">loginName</span>(self, userName, password)</span>
+
+<span class="line_category">    ## Cached ##</span>
+<span class="line_def">    def <span class="name_def">clearCache</span>(self)</span>
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/ParamFactory.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""ParamFactory.py
+
+A factory for creating cached, parametrized class instances.
+
+"""</span>
+
+<span class="PY_KEYWORD">from</span> threading <span class="PY_KEYWORD">import</span> Lock
+
+
+<span class="PY_KEYWORD">class</span> ParamFactory(object):
+
+    <span class="PY_KEYWORD">def</span> __init__(self, klass, **extraMethods):
+        self.lock = Lock()
+        self.cache = {}
+        self.klass = klass
+        <span class="PY_KEYWORD">for</span> name, func <span class="PY_KEYWORD">in</span> extraMethods.items():
+            setattr(self, name, func)
+
+    <span class="PY_KEYWORD">def</span> __call__(self, *args):
+        self.lock.acquire()
+        <span class="PY_KEYWORD">if</span> args <span class="PY_KEYWORD">in</span> self.cache:
+            self.lock.release()
+            <span class="PY_KEYWORD">return</span> self.cache[args]
+        value = self.klass(*args)
+        self.cache[args] = value
+        self.lock.release()
+        <span class="PY_KEYWORD">return</span> value
+
+    <span class="PY_KEYWORD">def</span> allInstances(self):
+        <span class="PY_KEYWORD">return</span> self.cache.values()
+</pre>
+<!--footer-->
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/HTTPServlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""HTTP servlets"""</span>
+
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> gmtime, strftime
+
+<span class="PY_KEYWORD">from</span> Servlet <span class="PY_KEYWORD">import</span> Servlet
+
+
+<span class="PY_KEYWORD">class</span> HTTPServlet(Servlet):
+    <span class="PY_STRING">"""A HTTP servlet.
+
+    HTTPServlet implements the respond() method to invoke methods such as
+    respondToGet() and respondToPut() depending on the type of HTTP request.
+    Example HTTP request methods are GET, POST, HEAD, etc.
+    Subclasses implement HTTP method FOO in the Python method respondToFoo.
+    Unsupported methods return a "501 Not Implemented" status.
+
+    Note that HTTPServlet inherits awake() and respond() methods from
+    Servlet and that subclasses may make use of these.
+
+    See also: Servlet
+
+    FUTURE
+      * Document methods (take hints from Java HTTPServlet documentation)
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        Servlet.__init__(self)
+        self._methodForRequestType = {} <span class="PY_COMMENT"># a cache; see respond()</span>
+
+
+    <span class="PY_COMMENT">## Transactions ##</span>
+
+    <span class="PY_KEYWORD">def</span> respond(self, trans):
+        <span class="PY_STRING">"""Respond to a request.
+
+        Invokes the appropriate respondToSomething() method depending on the
+        type of request (e.g., GET, POST, PUT, ...).
+
+        """</span>
+        request = trans.request()
+        httpMethodName = request.method()
+        <span class="PY_COMMENT"># For GET and HEAD, handle the HTTP If-Modified-Since header:</span>
+        <span class="PY_COMMENT"># if the object's last modified time is the same</span>
+        <span class="PY_COMMENT"># as the IMS header, we're done.</span>
+        <span class="PY_KEYWORD">if</span> httpMethodName <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'GET'</span>, <span class="PY_STRING">'HEAD'</span>):
+            lm = self.lastModified(trans)
+            <span class="PY_KEYWORD">if</span> lm:
+                lm = strftime(<span class="PY_STRING">'%a, %d %b %Y %H:%M:%S GMT'</span>, gmtime(lm))
+                trans.response().setHeader(<span class="PY_STRING">'Last-Modified'</span>, lm)
+                ims = request.environ(
+                    ).get(<span class="PY_STRING">'HTTP_IF_MODIFIED_SINCE'</span>) <span class="PY_KEYWORD">or</span> request.environ(
+                    ).get(<span class="PY_STRING">'IF_MODIFIED_SINCE'</span>)
+                <span class="PY_KEYWORD">if</span> ims <span class="PY_KEYWORD">and</span> ims.split(<span class="PY_STRING">';'</span>, 1)[0] == lm:
+                    trans.response().setStatus(304, <span class="PY_STRING">'Not Modified'</span>)
+                    <span class="PY_KEYWORD">return</span>
+        method = self._methodForRequestType.get(httpMethodName)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> method:
+            methName = <span class="PY_STRING">'respondTo'</span> + httpMethodName.capitalize()
+            method = getattr(self, methName, self.notImplemented)
+            self._methodForRequestType[httpMethodName] = method
+        method(trans)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> notImplemented(trans):
+        trans.response().setStatus(501, <span class="PY_STRING">'Not Implemented'</span>)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> lastModified(trans):
+        <span class="PY_STRING">"""Get time of last modification.
+
+        Return this object's Last-Modified time (as a float),
+        or None (meaning don't know or not applicable).
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> None
+
+    <span class="PY_KEYWORD">def</span> respondToHead(self, trans):
+        <span class="PY_STRING">"""Respond to a HEAD request.
+
+        A correct but inefficient implementation.
+
+        """</span>
+        res = trans.response()
+        w = res.write
+        res.write = <span class="PY_KEYWORD">lambda</span> *args: None
+        self.respondToGet(trans)
+        res.write = w
+</pre>
+<!--footer-->
+
+</body>
+</html>

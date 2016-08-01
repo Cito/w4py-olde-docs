@@ -1,0 +1,724 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.PickleRPC</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.PickleRPC</strong></big></big> (version 1)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/PickleRPC.py">/var/www/docs/Webware-1.1.1/MiscUtils/PickleRPC.py</a></font></td></tr></table>
+    <p><tt>PickleRPC.py<br>
+&nbsp;<br>
+PickleRPC&nbsp;provides&nbsp;a&nbsp;<a href="#Server">Server</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;for&nbsp;connection&nbsp;to&nbsp;Pickle-RPC&nbsp;servers<br>
+for&nbsp;the&nbsp;purpose&nbsp;of&nbsp;making&nbsp;requests&nbsp;and&nbsp;receiving&nbsp;the&nbsp;responses.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;from&nbsp;MiscUtils.PickleRPC&nbsp;import&nbsp;<a href="#Server">Server</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;server&nbsp;=&nbsp;<a href="#Server">Server</a>('<a href="http://localhost:8080/Examples/PickleRPCExample">http://localhost:8080/Examples/PickleRPCExample</a>')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;server.multiply(10,20)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;200<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;server.add(10,20)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;30<br>
+&nbsp;<br>
+&nbsp;<br>
+See&nbsp;also:&nbsp;<a href="#Server">Server</a>,&nbsp;Webkit.PickleRPCServlet,&nbsp;WebKit.Examples.PickleRPCExample<br>
+&nbsp;<br>
+&nbsp;<br>
+UNDER&nbsp;THE&nbsp;HOOD<br>
+&nbsp;<br>
+Requests&nbsp;look&nbsp;like&nbsp;this:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'version':&nbsp;&nbsp;&nbsp;&nbsp;1,&nbsp;&nbsp;#&nbsp;default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'action':&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'call',&nbsp;#&nbsp;default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'methodName':&nbsp;'NAME',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'args':&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(A,&nbsp;B,&nbsp;...),&nbsp;#&nbsp;default&nbsp;=&nbsp;(,)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'keywords':&nbsp;&nbsp;&nbsp;{'A':&nbsp;A,&nbsp;'B':&nbsp;B,&nbsp;...}&nbsp;#&nbsp;default&nbsp;=&nbsp;{}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Only&nbsp;'methodName'&nbsp;is&nbsp;required&nbsp;since&nbsp;that&nbsp;is&nbsp;the&nbsp;only&nbsp;key&nbsp;without&nbsp;a<br>
+default&nbsp;value.<br>
+&nbsp;<br>
+Responses&nbsp;look&nbsp;like&nbsp;this:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'timeReceived':&nbsp;N,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'timeReponded':&nbsp;M,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'value':&nbsp;V,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'exception':&nbsp;E,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'requestError':&nbsp;E,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+TimeReceived&nbsp;is&nbsp;the&nbsp;time&nbsp;the&nbsp;initial&nbsp;request&nbsp;was&nbsp;received.<br>
+TimeResponded&nbsp;is&nbsp;the&nbsp;time&nbsp;at&nbsp;which&nbsp;the&nbsp;response&nbsp;was&nbsp;finished,&nbsp;as<br>
+close&nbsp;to&nbsp;transmission&nbsp;as&nbsp;possible.&nbsp;The&nbsp;times&nbsp;are&nbsp;expressed&nbsp;as<br>
+number&nbsp;of&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch,&nbsp;e.g.,&nbsp;time.time().<br>
+&nbsp;<br>
+Value&nbsp;is&nbsp;whatever&nbsp;the&nbsp;method&nbsp;happened&nbsp;to&nbsp;return.<br>
+&nbsp;<br>
+<a href="exceptions.html#Exception">Exception</a>&nbsp;may&nbsp;be&nbsp;'occurred'&nbsp;to&nbsp;indicate&nbsp;that&nbsp;an&nbsp;exception<br>
+occurred,&nbsp;the&nbsp;specific&nbsp;exception,&nbsp;such&nbsp;as&nbsp;"KeyError:&nbsp;foo"&nbsp;or&nbsp;the<br>
+entire&nbsp;traceback&nbsp;(as&nbsp;a&nbsp;string),&nbsp;at&nbsp;the&nbsp;discretion&nbsp;of&nbsp;the&nbsp;server.<br>
+It&nbsp;will&nbsp;always&nbsp;be&nbsp;a&nbsp;non-empty&nbsp;string&nbsp;if&nbsp;it&nbsp;is&nbsp;present.<br>
+&nbsp;<br>
+<a href="#RequestError">RequestError</a>&nbsp;is&nbsp;an&nbsp;exception&nbsp;such&nbsp;as&nbsp;"Missing&nbsp;method<br>
+in&nbsp;request."&nbsp;(with&nbsp;no&nbsp;traceback)&nbsp;that&nbsp;indicates&nbsp;a&nbsp;problem&nbsp;with&nbsp;the<br>
+actual&nbsp;request&nbsp;received&nbsp;by&nbsp;the&nbsp;Pickle-RPC&nbsp;server.<br>
+&nbsp;<br>
+Value,&nbsp;exception&nbsp;and&nbsp;requestError&nbsp;are&nbsp;all&nbsp;exclusive&nbsp;to&nbsp;each&nbsp;other.<br>
+&nbsp;<br>
+&nbsp;<br>
+SECURITY<br>
+&nbsp;<br>
+Pickle&nbsp;RPC&nbsp;uses&nbsp;the&nbsp;<a href="#SafeUnpickler">SafeUnpickler</a>&nbsp;class&nbsp;(in&nbsp;this&nbsp;module)&nbsp;to<br>
+prevent&nbsp;unpickling&nbsp;of&nbsp;unauthorized&nbsp;classes.&nbsp;&nbsp;By&nbsp;default,&nbsp;it<br>
+doesn't&nbsp;allow&nbsp;_any_&nbsp;classes&nbsp;to&nbsp;be&nbsp;unpickled.&nbsp;&nbsp;You&nbsp;can&nbsp;override<br>
+allowedGlobals()&nbsp;or&nbsp;findGlobal()&nbsp;in&nbsp;a&nbsp;subclass&nbsp;as&nbsp;needed&nbsp;to<br>
+allow&nbsp;specific&nbsp;class&nbsp;instances&nbsp;to&nbsp;be&nbsp;unpickled.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;both&nbsp;<a href="#Transport">Transport</a>&nbsp;in&nbsp;this&nbsp;module&nbsp;and&nbsp;PickleRPCServlet&nbsp;in<br>
+WebKit&nbsp;are&nbsp;derived&nbsp;from&nbsp;<a href="#SafeUnpickler">SafeUnpickler</a>.<br>
+&nbsp;<br>
+&nbsp;<br>
+CREDIT<br>
+&nbsp;<br>
+The&nbsp;implementation&nbsp;of&nbsp;this&nbsp;module&nbsp;was&nbsp;taken&nbsp;directly&nbsp;from&nbsp;Python&nbsp;2.2's<br>
+xmlrpclib&nbsp;and&nbsp;then&nbsp;transformed&nbsp;from&nbsp;XML-orientation&nbsp;to&nbsp;Pickle-orientation.<br>
+&nbsp;<br>
+The&nbsp;zlib&nbsp;compression&nbsp;was&nbsp;adapted&nbsp;from&nbsp;code&nbsp;by&nbsp;Skip&nbsp;Montanaro&nbsp;that&nbsp;I&nbsp;found<br>
+here:&nbsp;<a href="http://manatee.mojam.com/~skip/python/">http://manatee.mojam.com/~skip/python/</a></tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="zlib.html">zlib</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#Transport">Transport</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#SafeTransport">SafeTransport</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#Server">Server</a>
+</font></dt><dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#Server">Server</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#Error">Error</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#RequestError">RequestError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#InvalidContentTypeError">InvalidContentTypeError</a>
+</font></dt><dt><font face="helvetica, arial"><a href="MiscUtils.PickleRPC.html#ProtocolError">ProtocolError</a>(<a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a>, <a href="xmlrpclib.html#ProtocolError">xmlrpclib.ProtocolError</a>)
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Error">class <strong>Error</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;abstract&nbsp;exception/error&nbsp;class&nbsp;for&nbsp;all&nbsp;PickleRPC&nbsp;errors.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#Error">Error</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="Error-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#Error-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="Error-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="Error-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="Error-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="Error-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="Error-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="Error-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="Error-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Error-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="Error-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#Error-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="Error-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="InvalidContentTypeError">class <strong>InvalidContentTypeError</strong></a>(<a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Invalid&nbsp;content&nbsp;type&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#InvalidContentTypeError">InvalidContentTypeError</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#Error">Error</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="InvalidContentTypeError-__init__"><strong>__init__</strong></a>(self, headers, content)</dt></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__str__"><strong>__str__</strong></a> = <a href="#InvalidContentTypeError-__repr__">__repr__</a>(self)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleRPC.html#Error">Error</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#InvalidContentTypeError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="InvalidContentTypeError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidContentTypeError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidContentTypeError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidContentTypeError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidContentTypeError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidContentTypeError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InvalidContentTypeError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ProtocolError">class <strong>ProtocolError</strong></a>(<a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a>, <a href="xmlrpclib.html#ProtocolError">xmlrpclib.ProtocolError</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>RPC&nbsp;protocol&nbsp;error.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#ProtocolError">ProtocolError</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#Error">Error</a></dd>
+<dd><a href="xmlrpclib.html#ProtocolError">xmlrpclib.ProtocolError</a></dd>
+<dd><a href="xmlrpclib.html#Error">xmlrpclib.Error</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleRPC.html#Error">Error</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="xmlrpclib.html#ProtocolError">xmlrpclib.ProtocolError</a>:<br>
+<dl><dt><a name="ProtocolError-__init__"><strong>__init__</strong></a>(self, url, errcode, errmsg, headers)</dt></dl>
+
+<dl><dt><a name="ProtocolError-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="xmlrpclib.html#Error">xmlrpclib.Error</a>:<br>
+<dl><dt><a name="ProtocolError-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ProtocolError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ProtocolError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ProtocolError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ProtocolError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ProtocolError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ProtocolError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RequestError">class <strong>RequestError</strong></a>(<a href="MiscUtils.PickleRPC.html#Error">Error</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Errors&nbsp;originally&nbsp;raised&nbsp;by&nbsp;the&nbsp;server&nbsp;complaining&nbsp;about&nbsp;malformed&nbsp;requests.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#RequestError">RequestError</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#Error">Error</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleRPC.html#Error">Error</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="RequestError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#RequestError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="RequestError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RequestError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="RequestError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#RequestError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="RequestError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ResponseError">class <strong>ResponseError</strong></a>(<a href="MiscUtils.PickleRPC.html#Error">Error</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Unhandled&nbsp;exceptions&nbsp;raised&nbsp;when&nbsp;the&nbsp;server&nbsp;was&nbsp;computing&nbsp;a&nbsp;response.<br>
+&nbsp;<br>
+These&nbsp;will&nbsp;indicate&nbsp;errors&nbsp;such&nbsp;as:<br>
+&nbsp;&nbsp;*&nbsp;exception&nbsp;in&nbsp;the&nbsp;actual&nbsp;target&nbsp;method&nbsp;on&nbsp;the&nbsp;server<br>
+&nbsp;&nbsp;*&nbsp;malformed&nbsp;responses<br>
+&nbsp;&nbsp;*&nbsp;non&nbsp;"200&nbsp;OK"&nbsp;status&nbsp;code&nbsp;responses<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#ResponseError">ResponseError</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#Error">Error</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleRPC.html#Error">Error</a>:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="ResponseError-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;x.__class__.__doc__&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ResponseError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ResponseError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ResponseError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ResponseError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#ResponseError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="ResponseError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SafeTransport">class <strong>SafeTransport</strong></a>(<a href="MiscUtils.PickleRPC.html#Transport">Transport</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Handle&nbsp;an&nbsp;HTTPS&nbsp;transaction&nbsp;to&nbsp;a&nbsp;Pickle-RPC&nbsp;server.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#SafeTransport">SafeTransport</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#Transport">Transport</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SafeTransport-make_connection"><strong>make_connection</strong></a>(self, host, port<font color="#909090">=None</font>, key_file<font color="#909090">=None</font>, cert_file<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;an&nbsp;HTTPS&nbsp;connection&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;a&nbsp;host&nbsp;descriptor.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.PickleRPC.html#Transport">Transport</a>:<br>
+<dl><dt><a name="SafeTransport-parse_response"><strong>parse_response</strong></a>(self, f)</dt><dd><tt>Read&nbsp;response&nbsp;from&nbsp;input&nbsp;file&nbsp;and&nbsp;parse&nbsp;it.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-parse_response_gzip"><strong>parse_response_gzip</strong></a>(self, f)</dt><dd><tt>Read&nbsp;response&nbsp;from&nbsp;input&nbsp;file,&nbsp;decompress&nbsp;it,&nbsp;and&nbsp;parse&nbsp;it.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-request"><strong>request</strong></a>(self, host, handler, request_body, verbose<font color="#909090">=False</font>, binary<font color="#909090">=False</font>, compressed<font color="#909090">=False</font>, acceptCompressedResponse<font color="#909090">=False</font>)</dt><dd><tt>Issue&nbsp;a&nbsp;Pickle-RPC&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-send_content"><strong>send_content</strong></a>(self, connection, request_body, binary<font color="#909090">=False</font>, compressed<font color="#909090">=False</font>, acceptCompressedResponse<font color="#909090">=False</font>)</dt><dd><tt>Send&nbsp;content.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-send_host"><strong>send_host</strong></a>(self, connection, host)</dt><dd><tt>Send&nbsp;host&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-send_request"><strong>send_request</strong></a>(self, connection, handler, request_body)</dt><dd><tt>Send&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-send_user_agent"><strong>send_user_agent</strong></a>(self, connection)</dt><dd><tt>Send&nbsp;user-agent&nbsp;header.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="MiscUtils.PickleRPC.html#Transport">Transport</a>:<br>
+<dl><dt><strong>user_agent</strong> = 'PickleRPC/1 (by http://www.webwareforpython.org)'</dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a>:<br>
+<dl><dt><a name="SafeTransport-allowedGlobals"><strong>allowedGlobals</strong></a>(self)</dt><dd><tt>Allowed&nbsp;class&nbsp;names.<br>
+&nbsp;<br>
+Must&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;(moduleName,&nbsp;klassName)&nbsp;tuples&nbsp;for&nbsp;all<br>
+classes&nbsp;that&nbsp;you&nbsp;want&nbsp;to&nbsp;allow&nbsp;to&nbsp;be&nbsp;unpickled.<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;[('datetime',&nbsp;'date')]<br>
+allows&nbsp;datetime.date&nbsp;instances&nbsp;to&nbsp;be&nbsp;unpickled.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-findGlobal"><strong>findGlobal</strong></a>(self, module, klass)</dt><dd><tt>Find&nbsp;class&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-load"><strong>load</strong></a>(self, file)</dt><dd><tt>Unpickle&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="SafeTransport-loads"><strong>loads</strong></a>(self, str)</dt><dd><tt>Unpickle&nbsp;a&nbsp;string.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SafeUnpickler">class <strong>SafeUnpickler</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Safe&nbsp;unpickler.<br>
+&nbsp;<br>
+For&nbsp;security&nbsp;reasons,&nbsp;we&nbsp;don't&nbsp;want&nbsp;to&nbsp;allow&nbsp;just&nbsp;anyone&nbsp;to&nbsp;unpickle<br>
+anything.&nbsp;&nbsp;That&nbsp;can&nbsp;cause&nbsp;arbitrary&nbsp;code&nbsp;to&nbsp;be&nbsp;executed.<br>
+So&nbsp;this&nbsp;<a href="#SafeUnpickler">SafeUnpickler</a>&nbsp;base&nbsp;class&nbsp;is&nbsp;used&nbsp;to&nbsp;control&nbsp;what&nbsp;can&nbsp;be&nbsp;unpickled.<br>
+By&nbsp;default&nbsp;it&nbsp;doesn't&nbsp;let&nbsp;you&nbsp;unpickle&nbsp;any&nbsp;class&nbsp;instances&nbsp;at&nbsp;all,<br>
+but&nbsp;you&nbsp;can&nbsp;create&nbsp;subclass&nbsp;that&nbsp;overrides&nbsp;<a href="#SafeUnpickler-allowedGlobals">allowedGlobals</a>().<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;the&nbsp;PickleRPCServlet&nbsp;class&nbsp;in&nbsp;WebKit&nbsp;is&nbsp;derived&nbsp;from&nbsp;this&nbsp;class<br>
+and&nbsp;uses&nbsp;its&nbsp;<a href="#SafeUnpickler-load">load</a>()&nbsp;and&nbsp;<a href="#SafeUnpickler-loads">loads</a>()&nbsp;methods&nbsp;to&nbsp;do&nbsp;all&nbsp;unpickling.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SafeUnpickler-allowedGlobals"><strong>allowedGlobals</strong></a>(self)</dt><dd><tt>Allowed&nbsp;class&nbsp;names.<br>
+&nbsp;<br>
+Must&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;(moduleName,&nbsp;klassName)&nbsp;tuples&nbsp;for&nbsp;all<br>
+classes&nbsp;that&nbsp;you&nbsp;want&nbsp;to&nbsp;allow&nbsp;to&nbsp;be&nbsp;unpickled.<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;[('datetime',&nbsp;'date')]<br>
+allows&nbsp;datetime.date&nbsp;instances&nbsp;to&nbsp;be&nbsp;unpickled.</tt></dd></dl>
+
+<dl><dt><a name="SafeUnpickler-findGlobal"><strong>findGlobal</strong></a>(self, module, klass)</dt><dd><tt>Find&nbsp;class&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="SafeUnpickler-load"><strong>load</strong></a>(self, file)</dt><dd><tt>Unpickle&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="SafeUnpickler-loads"><strong>loads</strong></a>(self, str)</dt><dd><tt>Unpickle&nbsp;a&nbsp;string.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Server">class <strong>Server</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>uri&nbsp;[,options]&nbsp;-&gt;&nbsp;a&nbsp;logical&nbsp;connection&nbsp;to&nbsp;an&nbsp;XML-RPC&nbsp;server<br>
+&nbsp;<br>
+uri&nbsp;is&nbsp;the&nbsp;connection&nbsp;point&nbsp;on&nbsp;the&nbsp;server,&nbsp;given&nbsp;as<br>
+scheme://host/target.<br>
+&nbsp;<br>
+The&nbsp;standard&nbsp;implementation&nbsp;always&nbsp;supports&nbsp;the&nbsp;"http"&nbsp;scheme.<br>
+If&nbsp;SSL&nbsp;socket&nbsp;support&nbsp;is&nbsp;available,&nbsp;it&nbsp;also&nbsp;supports&nbsp;"https".<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;target&nbsp;part&nbsp;and&nbsp;the&nbsp;slash&nbsp;preceding&nbsp;it&nbsp;are&nbsp;both&nbsp;omitted,<br>
+"/PickleRPC"&nbsp;is&nbsp;assumed.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;module&nbsp;doc&nbsp;string&nbsp;for&nbsp;more&nbsp;information.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Server-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt><dd><tt>Magic&nbsp;method&nbsp;dispatcher.<br>
+&nbsp;<br>
+Note:&nbsp;to&nbsp;call&nbsp;a&nbsp;remote&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;an&nbsp;non-standard&nbsp;name,<br>
+use&nbsp;result&nbsp;getattr(server,&nbsp;"strange-python-name")(args)</tt></dd></dl>
+
+<dl><dt><a name="Server-__init__"><strong>__init__</strong></a>(self, uri, transport<font color="#909090">=None</font>, verbose<font color="#909090">=False</font>, binary<font color="#909090">=True</font>, compressRequest<font color="#909090">=True</font>, acceptCompressedResponse<font color="#909090">=True</font>)</dt><dd><tt>Establish&nbsp;a&nbsp;"logical"&nbsp;server&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="Server-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Server-__str__"><strong>__str__</strong></a> = <a href="#Server-__repr__">__repr__</a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><strong>ServerProxy</strong> = <a name="ServerProxy">class Server</a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>uri&nbsp;[,options]&nbsp;-&gt;&nbsp;a&nbsp;logical&nbsp;connection&nbsp;to&nbsp;an&nbsp;XML-RPC&nbsp;server<br>
+&nbsp;<br>
+uri&nbsp;is&nbsp;the&nbsp;connection&nbsp;point&nbsp;on&nbsp;the&nbsp;server,&nbsp;given&nbsp;as<br>
+scheme://host/target.<br>
+&nbsp;<br>
+The&nbsp;standard&nbsp;implementation&nbsp;always&nbsp;supports&nbsp;the&nbsp;"http"&nbsp;scheme.<br>
+If&nbsp;SSL&nbsp;socket&nbsp;support&nbsp;is&nbsp;available,&nbsp;it&nbsp;also&nbsp;supports&nbsp;"https".<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;target&nbsp;part&nbsp;and&nbsp;the&nbsp;slash&nbsp;preceding&nbsp;it&nbsp;are&nbsp;both&nbsp;omitted,<br>
+"/PickleRPC"&nbsp;is&nbsp;assumed.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;module&nbsp;doc&nbsp;string&nbsp;for&nbsp;more&nbsp;information.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Server-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt><dd><tt>Magic&nbsp;method&nbsp;dispatcher.<br>
+&nbsp;<br>
+Note:&nbsp;to&nbsp;call&nbsp;a&nbsp;remote&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;an&nbsp;non-standard&nbsp;name,<br>
+use&nbsp;result&nbsp;getattr(server,&nbsp;"strange-python-name")(args)</tt></dd></dl>
+
+<dl><dt><a name="Server-__init__"><strong>__init__</strong></a>(self, uri, transport<font color="#909090">=None</font>, verbose<font color="#909090">=False</font>, binary<font color="#909090">=True</font>, compressRequest<font color="#909090">=True</font>, acceptCompressedResponse<font color="#909090">=True</font>)</dt><dd><tt>Establish&nbsp;a&nbsp;"logical"&nbsp;server&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="Server-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Server-__str__"><strong>__str__</strong></a> = <a href="#Server-__repr__">__repr__</a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Transport">class <strong>Transport</strong></a>(<a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Handle&nbsp;an&nbsp;HTTP&nbsp;transaction&nbsp;to&nbsp;a&nbsp;Pickle-RPC&nbsp;server.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="MiscUtils.PickleRPC.html#Transport">Transport</a></dd>
+<dd><a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Transport-make_connection"><strong>make_connection</strong></a>(self, host, port<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;an&nbsp;HTTP&nbsp;connection&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;a&nbsp;host&nbsp;descriptor.</tt></dd></dl>
+
+<dl><dt><a name="Transport-parse_response"><strong>parse_response</strong></a>(self, f)</dt><dd><tt>Read&nbsp;response&nbsp;from&nbsp;input&nbsp;file&nbsp;and&nbsp;parse&nbsp;it.</tt></dd></dl>
+
+<dl><dt><a name="Transport-parse_response_gzip"><strong>parse_response_gzip</strong></a>(self, f)</dt><dd><tt>Read&nbsp;response&nbsp;from&nbsp;input&nbsp;file,&nbsp;decompress&nbsp;it,&nbsp;and&nbsp;parse&nbsp;it.</tt></dd></dl>
+
+<dl><dt><a name="Transport-request"><strong>request</strong></a>(self, host, handler, request_body, verbose<font color="#909090">=False</font>, binary<font color="#909090">=False</font>, compressed<font color="#909090">=False</font>, acceptCompressedResponse<font color="#909090">=False</font>)</dt><dd><tt>Issue&nbsp;a&nbsp;Pickle-RPC&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="Transport-send_content"><strong>send_content</strong></a>(self, connection, request_body, binary<font color="#909090">=False</font>, compressed<font color="#909090">=False</font>, acceptCompressedResponse<font color="#909090">=False</font>)</dt><dd><tt>Send&nbsp;content.</tt></dd></dl>
+
+<dl><dt><a name="Transport-send_host"><strong>send_host</strong></a>(self, connection, host)</dt><dd><tt>Send&nbsp;host&nbsp;header.</tt></dd></dl>
+
+<dl><dt><a name="Transport-send_request"><strong>send_request</strong></a>(self, connection, handler, request_body)</dt><dd><tt>Send&nbsp;request.</tt></dd></dl>
+
+<dl><dt><a name="Transport-send_user_agent"><strong>send_user_agent</strong></a>(self, connection)</dt><dd><tt>Send&nbsp;user-agent&nbsp;header.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>user_agent</strong> = 'PickleRPC/1 (by http://www.webwareforpython.org)'</dl>
+
+<hr>
+Methods inherited from <a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a>:<br>
+<dl><dt><a name="Transport-allowedGlobals"><strong>allowedGlobals</strong></a>(self)</dt><dd><tt>Allowed&nbsp;class&nbsp;names.<br>
+&nbsp;<br>
+Must&nbsp;return&nbsp;a&nbsp;list&nbsp;of&nbsp;(moduleName,&nbsp;klassName)&nbsp;tuples&nbsp;for&nbsp;all<br>
+classes&nbsp;that&nbsp;you&nbsp;want&nbsp;to&nbsp;allow&nbsp;to&nbsp;be&nbsp;unpickled.<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;[('datetime',&nbsp;'date')]<br>
+allows&nbsp;datetime.date&nbsp;instances&nbsp;to&nbsp;be&nbsp;unpickled.</tt></dd></dl>
+
+<dl><dt><a name="Transport-findGlobal"><strong>findGlobal</strong></a>(self, module, klass)</dt><dd><tt>Find&nbsp;class&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="Transport-load"><strong>load</strong></a>(self, file)</dt><dd><tt>Unpickle&nbsp;a&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="Transport-loads"><strong>loads</strong></a>(self, str)</dt><dd><tt>Unpickle&nbsp;a&nbsp;string.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="MiscUtils.PickleRPC.html#SafeUnpickler">SafeUnpickler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-StringIO"><strong>StringIO</strong></a>(...)</dt><dd><tt><a href="#-StringIO">StringIO</a>([s])&nbsp;--&nbsp;Return&nbsp;a&nbsp;StringIO-like&nbsp;stream&nbsp;for&nbsp;reading&nbsp;or&nbsp;writing</tt></dd></dl>
+ <dl><dt><a name="-Unpickler"><strong>Unpickler</strong></a>(...)</dt><dd><tt><a href="#-Unpickler">Unpickler</a>(file)&nbsp;--&nbsp;Create&nbsp;an&nbsp;unpickler.</tt></dd></dl>
+ <dl><dt><a name="-dumps"><strong>dumps</strong></a>(...)</dt><dd><tt><a href="#-dumps">dumps</a>(obj,&nbsp;protocol=0)&nbsp;--&nbsp;Return&nbsp;a&nbsp;string&nbsp;containing&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;in&nbsp;pickle&nbsp;format.<br>
+&nbsp;<br>
+See&nbsp;the&nbsp;Pickler&nbsp;docstring&nbsp;for&nbsp;the&nbsp;meaning&nbsp;of&nbsp;optional&nbsp;argument&nbsp;proto.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__version__</strong> = 1</td></tr></table>
+</body></html>

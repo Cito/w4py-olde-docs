@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/Cookie.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_KEYWORD">import</span> imp
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">from</span> MiscUtils.Funcs <span class="PY_KEYWORD">import</span> positiveId
+
+<span class="PY_COMMENT"># Import Python's standard Cookie module as CookieEngine.</span>
+<span class="PY_COMMENT"># We have to do some work since it has the same name as we do.</span>
+<span class="PY_COMMENT"># So we'll strip out anything from the path that might cause us to import</span>
+<span class="PY_COMMENT"># from the WebKit directory, then import Cookie using that restricted path</span>
+<span class="PY_COMMENT"># -- that ought to ensure that we're using Python's module.</span>
+thisDir = os.path.abspath(os.path.dirname(__file__))
+path = [dir <span class="PY_KEYWORD">for</span> dir <span class="PY_KEYWORD">in</span> sys.path
+    <span class="PY_KEYWORD">if</span> dir <span class="PY_KEYWORD">and</span> dir != os.curdir <span class="PY_KEYWORD">and</span> os.path.abspath(dir) != thisDir]
+file, pathname, description = imp.find_module(<span class="PY_STRING">'Cookie'</span>, path)
+<span class="PY_KEYWORD">try</span>:
+    CookieEngine = imp.load_module(<span class="PY_STRING">'Cookie'</span>, file, pathname, description)
+<span class="PY_KEYWORD">finally</span>:
+    <span class="PY_KEYWORD">if</span> file:
+        file.close()
+
+
+<span class="PY_KEYWORD">class</span> Cookie(object):
+    <span class="PY_STRING">"""Delicious cookies.
+
+    Cookie is used to create cookies that have additional attributes
+    beyond their value.
+
+    Note that web browsers don't typically send any information with
+    the cookie other than its value. Therefore `HTTPRequest.cookie`
+    simply returns a value such as an integer or a string.
+
+    When the server sends cookies back to the browser, it can send
+    a cookie that simply has a value, or the cookie can be
+    accompanied by various attributes (domain, path, max-age, ...)
+    as described in `RFC 2109`_. Therefore, in HTTPResponse,
+    `setCookie` can take either an instance of the Cookie class,
+    as defined in this module, or a value.
+
+    Note that Cookies values get pickled (see the `pickle` module),
+    so you can set and get cookies that are integers, lists,
+    dictionaries, etc.
+
+    .. _`RFC 2109`: ftp://ftp.isi.edu/in-notes/rfc2109.txt
+
+    """</span>
+
+    <span class="PY_COMMENT"># Future</span>
+    <span class="PY_COMMENT">#</span>
+    <span class="PY_COMMENT"># * This class should provide error checking in the setFoo()</span>
+    <span class="PY_COMMENT">#   methods. Or maybe our internal Cookie implementation</span>
+    <span class="PY_COMMENT">#   already does that?</span>
+    <span class="PY_COMMENT"># * This implementation is probably not as efficient as it</span>
+    <span class="PY_COMMENT">#   should be, [a] it works and [b] the interface is stable.</span>
+    <span class="PY_COMMENT">#   We can optimize later.</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, name, value):
+        <span class="PY_STRING">"""Create a cookie.
+
+        Properties other than `name` and `value` are set with methods.
+
+        """</span>
+
+        self._cookies = CookieEngine.SimpleCookie()
+        self._name = name
+        self._value = value
+        self._cookies[name] = value
+        self._cookie = self._cookies[name]
+
+    <span class="PY_KEYWORD">def</span> __repr__(self):
+        <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'%s(id=0x%x, name=%r, domain=%r, '</span>
+            <span class="PY_STRING">'path=%r, value=%r, expires=%r, maxAge=%r)'</span> % (
+            self.__class__.__name__, positiveId(self),
+            self.name(), self.domain(),
+            self.path(), self.value(), self.expires(), self.maxAge()))
+
+
+    <span class="PY_COMMENT">## Accessors ##</span>
+
+    <span class="PY_KEYWORD">def</span> comment(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'comment'</span>]
+
+    <span class="PY_KEYWORD">def</span> domain(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'domain'</span>]
+
+    <span class="PY_KEYWORD">def</span> maxAge(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'max-age'</span>]
+
+    <span class="PY_KEYWORD">def</span> expires(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'expires'</span>]
+
+    <span class="PY_KEYWORD">def</span> name(self):
+        <span class="PY_KEYWORD">return</span> self._name
+
+    <span class="PY_KEYWORD">def</span> path(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'path'</span>]
+
+    <span class="PY_KEYWORD">def</span> isSecure(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'secure'</span>]
+
+    <span class="PY_KEYWORD">def</span> value(self):
+        <span class="PY_KEYWORD">return</span> self._value
+
+    <span class="PY_KEYWORD">def</span> version(self):
+        <span class="PY_KEYWORD">return</span> self._cookie[<span class="PY_STRING">'version'</span>]
+
+
+    <span class="PY_COMMENT">## Setters ##</span>
+
+    <span class="PY_KEYWORD">def</span> setComment(self, comment):
+        self._cookie[<span class="PY_STRING">'comment'</span>] = comment
+
+    <span class="PY_KEYWORD">def</span> setDomain(self, domain):
+        self._cookie[<span class="PY_STRING">'domain'</span>] = domain
+
+    <span class="PY_KEYWORD">def</span> setExpires(self, expires):
+        self._cookie[<span class="PY_STRING">'expires'</span>] = expires
+
+    <span class="PY_KEYWORD">def</span> setMaxAge(self, maxAge):
+        self._cookie[<span class="PY_STRING">'max-age'</span>] = maxAge
+
+    <span class="PY_KEYWORD">def</span> setPath(self, path):
+        self._cookie[<span class="PY_STRING">'path'</span>] = path
+
+    <span class="PY_KEYWORD">def</span> setSecure(self, secure=True):
+        self._cookie[<span class="PY_STRING">'secure'</span>] = secure
+
+    <span class="PY_KEYWORD">def</span> setValue(self, value):
+        self._value = value
+        self._cookies[self._name] = value
+
+    <span class="PY_KEYWORD">def</span> setVersion(self, version):
+        self._cookie[<span class="PY_STRING">'version'</span>] = version
+
+
+    <span class="PY_COMMENT">## Misc ##</span>
+
+    <span class="PY_KEYWORD">def</span> delete(self):
+        <span class="PY_STRING">"""Delete a cookie.
+
+        When sent, this should delete the cookie from the user's
+        browser, by making it empty, expiring it in the past,
+        and setting its max-age to 0. One of these will delete
+        the cookie for any browser (which one actually works
+        depends on the browser).
+
+        """</span>
+        self._value = <span class="PY_STRING">''</span>
+        self._cookie[<span class="PY_STRING">'expires'</span>] = <span class="PY_STRING">"Mon, 01-Jan-1900 00:00:00 GMT"</span>
+        self._cookie[<span class="PY_STRING">'max-age'</span>] = 0
+
+    <span class="PY_KEYWORD">def</span> headerValue(self):
+        <span class="PY_STRING">"""Return header value.
+
+        Returns a string with the value that should be used
+        in the HTTP headers.
+
+        """</span>
+        items = self._cookies.items()
+        <span class="PY_KEYWORD">assert</span> len(items) == 1
+        <span class="PY_KEYWORD">return</span> items[0][1].OutputString()
+</pre>
+<!--footer-->
+
+</body>
+</html>

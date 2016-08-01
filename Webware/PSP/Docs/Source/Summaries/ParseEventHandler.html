@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of PSP.ParseEventHandler</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of PSP.ParseEventHandler</h2>
+<p>You can also browse the <a href="../Files/ParseEventHandler.html">complete source file</a>
+or the <a href="../Docs/PSP.ParseEventHandler.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">ParseEventHandler</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, ctxt, parser)</span>
+<span class="line_def">    def <span class="name_def">addGenerator</span>(self, gen)</span>
+<span class="line_def">    def <span class="name_def">handleExpression</span>(self, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">handleCharData</span>(self, start, stop, chars)</span>
+<span class="line_def">    def <span class="name_def">handleComment</span>(self, start, stop)</span>
+<span class="line_def">    def <span class="name_def">handleInclude</span>(self, attrs, param)</span>
+<span class="line_def">    def <span class="name_def">handleInsert</span>(self, attrs, param)</span>
+<span class="line_def">    def <span class="name_def">importHandler</span>(self, imports, start, stop)</span>
+<span class="line_def">    def <span class="name_def">extendsHandler</span>(self, bc, start, stop)</span>
+<span class="line_def">    def <span class="name_def">mainMethodHandler</span>(self, method, start, stop)</span>
+<span class="line_def">    def <span class="name_def">threadSafeHandler</span>(self, value, start, stop)</span>
+<span class="line_def">    def <span class="name_def">instanceSafeHandler</span>(self, value, start, stop)</span>
+<span class="line_def">    def <span class="name_def">indentTypeHandler</span>(self, type, start, stop)</span>
+<span class="line_def">    def <span class="name_def">indentSpacesHandler</span>(self, amount, start, stop)</span>
+<span class="line_def">    def <span class="name_def">gobbleWhitespaceHandler</span>(self, value, start, stop)</span>
+<span class="line_def">    def <span class="name_def">formatterHandler</span>(self, value, start, stop)</span>
+<span class="line_def">    def <span class="name_def">handleDirective</span>(self, directive, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">handleScript</span>(self, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">handleScriptFile</span>(self, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">handleScriptClass</span>(self, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">handleEndBlock</span>(self)</span>
+<span class="line_def">    def <span class="name_def">handleMethod</span>(self, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">handleMethodEnd</span>(self, start, stop, attrs)</span>
+<span class="line_def">    def <span class="name_def">beginProcessing</span>(self)</span>
+<span class="line_def">    def <span class="name_def">endProcessing</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setTemplateInfo</span>(self, start, stop)</span>
+<span class="line_def">    def <span class="name_def">generateHeader</span>(self)</span>
+<span class="line_def">    def <span class="name_def">generateDeclarations</span>(self)</span>
+<span class="line_def">    def <span class="name_def">generateInitPSP</span>(self)</span>
+<span class="line_def">    def <span class="name_def">generateMainMethod</span>(self)</span>
+<span class="line_def">    def <span class="name_def">generateFooter</span>(self)</span>
+<span class="line_def">    def <span class="name_def">generateAll</span>(self, phase)</span>
+<span class="line_def">    def <span class="name_def">optimizeCharData</span>(self)</span>
+<span class="line_def">    def <span class="name_def">gobbleWhitespace</span>(self)</span>
+<span class="line_def">def <span class="name_def">checkForTextHavingOnlyGivenChars</span>(text, ws=None)</span>
+
+</pre>
+</body>
+</html>

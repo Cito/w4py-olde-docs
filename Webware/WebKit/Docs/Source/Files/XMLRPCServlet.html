@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/XMLRPCServlet.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""XML-RPC servlet base class
+
+Written by Geoffrey Talvola
+
+See Examples/XMLRPCExample.py for sample usage.
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">import</span> traceback
+<span class="PY_KEYWORD">import</span> xmlrpclib
+
+<span class="PY_KEYWORD">from</span> RPCServlet <span class="PY_KEYWORD">import</span> RPCServlet
+
+
+<span class="PY_KEYWORD">class</span> XMLRPCServlet(RPCServlet):
+    <span class="PY_STRING">"""XMLRPCServlet is a base class for XML-RPC servlets.
+
+    See Examples/XMLRPCExample.py for sample usage.
+
+    For more Pythonic convenience at the cost of language independence,
+    see PickleRPCServlet.
+
+    """</span>
+
+    <span class="PY_COMMENT"># Set to False if you do not want to allow None to be marshalled</span>
+    <span class="PY_COMMENT"># as part of a response.</span>
+    allow_none = True
+
+    <span class="PY_KEYWORD">def</span> respondToPost(self, transaction):
+        <span class="PY_STRING">"""Respond to a Post request.
+
+        This is similar to the xmlrpcserver.py example from the xmlrpc
+        library distribution, only it's been adapted to work within a
+        WebKit servlet.
+
+        """</span>
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_COMMENT"># get arguments</span>
+            data = transaction.request().rawInput(rewind=1).read()
+            encoding = _getXmlDeclAttr(data, <span class="PY_STRING">"encoding"</span>)
+            params, method = xmlrpclib.loads(data)
+
+            <span class="PY_COMMENT"># generate response</span>
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_COMMENT"># This first test helps us to support PythonWin, which uses</span>
+                <span class="PY_COMMENT"># repeated calls to __methods__.__getitem__ to determine the</span>
+                <span class="PY_COMMENT"># allowed methods of an object.</span>
+                <span class="PY_KEYWORD">if</span> method == <span class="PY_STRING">'__methods__.__getitem__'</span>:
+                    response = self.exposedMethods()[params[0]]
+                <span class="PY_KEYWORD">else</span>:
+                    response = self.call(method, *params)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(response, tuple):
+                    response = (response,)
+            <span class="PY_KEYWORD">except</span> xmlrpclib.Fault, fault:
+                response = xmlrpclib.dumps(fault, encoding=encoding,
+                    allow_none=self.allow_none)
+                self.sendOK(<span class="PY_STRING">'text/xml'</span>, response, transaction)
+                self.handleException(transaction)
+            <span class="PY_KEYWORD">except</span> Exception, e:
+                fault = self.resultForException(e, transaction)
+                response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault),
+                    encoding=encoding, allow_none=self.allow_none)
+                self.sendOK(<span class="PY_STRING">'text/xml'</span>, response, transaction)
+                self.handleException(transaction)
+            <span class="PY_KEYWORD">except</span>: <span class="PY_COMMENT"># if it's a string exception, this gets triggered</span>
+                fault = self.resultForException(sys.exc_info()[0], transaction)
+                response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault),
+                    encoding=encoding, allow_none=self.allow_none)
+                self.sendOK(<span class="PY_STRING">'text/xml'</span>, response, transaction)
+                self.handleException(transaction)
+            <span class="PY_KEYWORD">else</span>:
+                response = xmlrpclib.dumps(response, methodresponse=1,
+                    encoding=encoding, allow_none=self.allow_none)
+                self.sendOK(<span class="PY_STRING">'text/xml'</span>, response, transaction)
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_COMMENT"># internal error, report as HTTP server error</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'XMLRPCServlet internal error'</span>
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">''</span>.join(traceback.format_exception(
+                sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
+            transaction.response().setStatus(500, <span class="PY_STRING">'Server Error'</span>)
+            self.handleException(transaction)
+
+
+<span class="PY_COMMENT"># Helper functions:</span>
+
+<span class="PY_KEYWORD">def</span> _getXmlDeclAttr(xml, attName):
+    <span class="PY_STRING">"""Get attribute value from xml declaration (&lt;?xml ... ?&gt;)."""</span>
+    s = xml[6 : xml.find(<span class="PY_STRING">"?&gt;"</span>)] <span class="PY_COMMENT"># 'version = "1.0" encoding = "Cp1251"'</span>
+    p = s.find(attName)
+    <span class="PY_KEYWORD">if</span> p &lt; 0:
+        <span class="PY_KEYWORD">return</span> None
+    s = s[p + len(attName):] <span class="PY_COMMENT"># '= "Cp1251"'</span>
+    s = s[s.find(<span class="PY_STRING">'='</span>) + 1:].strip() <span class="PY_COMMENT"># '"Cp1251"'</span>
+    <span class="PY_KEYWORD">return</span> s[1:s.find(s[0], 1)] <span class="PY_COMMENT"># 'Cp1251'</span>
+</pre>
+<!--footer-->
+
+</body>
+</html>

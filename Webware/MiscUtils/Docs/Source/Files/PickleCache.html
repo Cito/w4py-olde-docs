@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MiscUtils/PickleCache.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""PickleCache.py
+
+PickleCache provides tools for keeping fast-loading cached versions of
+files so that subsequent loads are faster. This is similar to how Python
+silently caches .pyc files next to .py files.
+
+The typical scenario is that you have a type of text file that gets
+"translated" to Pythonic data (dictionaries, tuples, instances, ints,
+etc.). By caching the Python data on disk in pickle format, you can
+avoid the expensive translation on subsequent reads of the file.
+
+Two real life cases are MiscUtils.DataTable, which loads and represents
+comma-separated files, and MiddleKit which has an object model file.
+So for examples on using this module, load up the following files and
+search for "Pickle":
+    Webware/MiscUtils/DataTable.py
+    MiddleKit/Core/Model.py
+
+The cached file is named the same as the original file with
+'.pickle.cache' suffixed. The utility of '.pickle' is to denote the file
+format and the utilty of '.cache' is to provide '*.cache' as a simple
+pattern that can be removed, ignored by backup scripts, etc.
+
+The treatment of the cached file is silent and friendly just like
+Python's approach to .pyc files. If it cannot be read or written for
+various reasons (cache is out of date, permissions are bad, wrong python
+version, etc.), then it will be silently ignored.
+
+
+GRANULARITY
+
+In constructing the test suite, I discovered that if the source file is
+newly written less than 1 second after the cached file, then the fact
+that the source file is newer will not be detected and the cache will
+still be used. I believe this is a limitation of the granularity of
+os.path.getmtime(). If anyone knows of a more granular solution, please
+let me know.
+
+This would only be a problem in programmatic situations where the source
+file was rapidly being written and read. I think that's fairly rare.
+
+
+SEE ALSO
+    http://www.python.org/doc/current/lib/module-pickle.html
+
+"""</span>
+
+verbose = False
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> sys
+<span class="PY_KEYWORD">from</span> time <span class="PY_KEYWORD">import</span> sleep
+<span class="PY_KEYWORD">from</span> pprint <span class="PY_KEYWORD">import</span> pprint
+<span class="PY_KEYWORD">try</span>:
+    <span class="PY_KEYWORD">from</span> cPickle <span class="PY_KEYWORD">import</span> load, dump, HIGHEST_PROTOCOL <span class="PY_KEYWORD">as</span> maxPickleProtocol
+<span class="PY_KEYWORD">except</span> ImportError:
+    <span class="PY_KEYWORD">from</span> pickle <span class="PY_KEYWORD">import</span> load, dump, HIGHEST_PROTOCOL <span class="PY_KEYWORD">as</span> maxPickleProtocol
+
+<span class="PY_COMMENT"># force version_info into a simple tuple in Python &gt;= 2.7</span>
+versionInfo = tuple(sys.version_info)
+
+
+<span class="PY_KEYWORD">class</span> PickleCache(object):
+    <span class="PY_STRING">"""Simple abstract base class for PickleCacheReader and PickleCacheWriter."""</span>
+
+    _verbose = verbose
+
+    <span class="PY_KEYWORD">def</span> picklePath(self, filename):
+        <span class="PY_KEYWORD">return</span> filename + <span class="PY_STRING">'.pickle.cache'</span>
+
+
+<span class="PY_KEYWORD">class</span> PickleCacheReader(PickleCache):
+
+    <span class="PY_KEYWORD">def</span> read(self, filename,
+            pickleProtocol=None, source=None, verbose=None):
+        <span class="PY_STRING">"""Read data from pickle cache.
+
+        Returns the data from the pickle cache version of the filename,
+        if it can read. Otherwise returns None, which also indicates
+        that writePickleCache() should be subsequently called after
+        the original file is read.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> pickleProtocol <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">or</span> pickleProtocol &lt; 0:
+            pickleProtocol = maxPickleProtocol
+        <span class="PY_KEYWORD">if</span> verbose <span class="PY_KEYWORD">is</span> None:
+            v = self._verbose
+        <span class="PY_KEYWORD">else</span>:
+            v = verbose
+        <span class="PY_KEYWORD">if</span> v:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; PickleCacheReader.read() - verbose is on'</span>
+        <span class="PY_KEYWORD">assert</span> filename
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(filename):
+            <span class="PY_KEYWORD">if</span> v:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cannot find %r.'</span> % filename
+            open(filename) <span class="PY_COMMENT"># to get a properly constructed IOError</span>
+
+        shouldDeletePickle = False
+        data = None
+
+        picklePath = self.picklePath(filename)
+        <span class="PY_KEYWORD">if</span> os.path.exists(picklePath):
+            <span class="PY_KEYWORD">if</span> os.path.getmtime(picklePath) &lt; os.path.getmtime(filename):
+                <span class="PY_KEYWORD">if</span> v:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cache is out of date.'</span>
+                shouldDeletePickle = True
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">if</span> v:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'About to open for read %r.'</span> % picklePath
+                    file = open(picklePath, <span class="PY_STRING">'rb'</span>)
+                <span class="PY_KEYWORD">except</span> IOError, e:
+                    <span class="PY_KEYWORD">if</span> v:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Cannot open cache file: %s: %s.'</span> % (
+                            e.__class__.__name__, e)
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">try</span>:
+                        <span class="PY_KEYWORD">if</span> v:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'about to load'</span>
+                        d = load(file)
+                    <span class="PY_KEYWORD">except</span> EOFError:
+                        <span class="PY_KEYWORD">if</span> v:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'EOFError - not loading'</span>
+                        shouldDeletePickle = True
+                    <span class="PY_KEYWORD">except</span> Exception, exc:
+                        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'WARNING: %s: %s: %s'</span> % (self.__class__.__name__,
+                            exc.__class__.__name__, exc)
+                        shouldDeletePickle = True
+                    <span class="PY_KEYWORD">else</span>:
+                        file.close()
+                        <span class="PY_KEYWORD">if</span> v:
+                            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Finished reading.'</span>
+                        <span class="PY_KEYWORD">assert</span> isinstance(d, dict), <span class="PY_STRING">'type=%r dict=%r'</span> % (type(d), d)
+                        <span class="PY_KEYWORD">for</span> key <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'source'</span>, <span class="PY_STRING">'data'</span>, <span class="PY_STRING">'pickle protocol'</span>, <span class="PY_STRING">'python version'</span>):
+                            <span class="PY_KEYWORD">assert</span> key <span class="PY_KEYWORD">in</span> d, key
+                        <span class="PY_KEYWORD">if</span> source <span class="PY_KEYWORD">and</span> d[<span class="PY_STRING">'source'</span>] != source:
+                            <span class="PY_KEYWORD">if</span> v:
+                                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Not from required source (%s): %s.'</span> % (
+                                    source, d[<span class="PY_STRING">'source'</span>])
+                            shouldDeletePickle = True
+                        <span class="PY_KEYWORD">elif</span> d[<span class="PY_STRING">'pickle protocol'</span>] != pickleProtocol:
+                            <span class="PY_KEYWORD">if</span> v:
+                                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Pickle protocol (%i) does not match expected (%i).'</span> % (
+                                    d[<span class="PY_STRING">'pickle protocol'</span>], pickleProtocol)
+                            shouldDeletePickle = True
+                        <span class="PY_KEYWORD">elif</span> d[<span class="PY_STRING">'python version'</span>] != versionInfo:
+                            <span class="PY_KEYWORD">if</span> v:
+                                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Python version %s does not match current %s.'</span> % (
+                                    d[<span class="PY_STRING">'python version'</span>], versionInfo)
+                            shouldDeletePickle = True
+                        <span class="PY_KEYWORD">else</span>:
+                            <span class="PY_KEYWORD">if</span> v:
+                                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'All tests pass, accepting data.'</span>
+                                <span class="PY_KEYWORD">if</span> v &gt; 1:
+                                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Display full dict:'</span>
+                                    pprint(d)
+                            data = d[<span class="PY_STRING">'data'</span>]
+
+        <span class="PY_COMMENT"># Delete the pickle file if suggested by previous conditions</span>
+        <span class="PY_KEYWORD">if</span> shouldDeletePickle:
+            <span class="PY_KEYWORD">try</span>:
+                <span class="PY_KEYWORD">if</span> v:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Attempting to remove pickle cache file.'</span>
+                os.remove(picklePath)
+            <span class="PY_KEYWORD">except</span> OSError, exc:
+                <span class="PY_KEYWORD">if</span> v:
+                    <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Failed to remove: %s: %s'</span> % (
+                        exc.__class__.__name__, exc)
+
+        <span class="PY_KEYWORD">if</span> v:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Done reading data.'</span>
+            <span class="PY_KEYWORD">print</span>
+
+        <span class="PY_KEYWORD">return</span> data
+
+
+<span class="PY_KEYWORD">class</span> PickleCacheWriter(PickleCache):
+
+    _writeSleepInterval = 0.1
+
+    <span class="PY_KEYWORD">def</span> write(self, data, filename,
+            pickleProtocol=None, source=None, verbose=None):
+        <span class="PY_KEYWORD">if</span> pickleProtocol <span class="PY_KEYWORD">is</span> None <span class="PY_KEYWORD">or</span> pickleProtocol &lt; 0:
+            pickleProtocol = maxPickleProtocol
+        <span class="PY_KEYWORD">if</span> verbose <span class="PY_KEYWORD">is</span> None:
+            v = self._verbose
+        <span class="PY_KEYWORD">else</span>:
+            v = verbose
+        <span class="PY_KEYWORD">if</span> v:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'&gt;&gt; PickleCacheWriter.write() - verbose is on.'</span>
+        <span class="PY_KEYWORD">assert</span> filename
+        sourceTimestamp = os.path.getmtime(filename)
+
+        picklePath = self.picklePath(filename)
+        d = {
+            <span class="PY_STRING">'source'</span>: source,
+            <span class="PY_STRING">'python version'</span>: versionInfo,
+            <span class="PY_STRING">'pickle protocol'</span>: pickleProtocol,
+            <span class="PY_STRING">'data'</span>: data,
+        }
+        <span class="PY_KEYWORD">if</span> v &gt; 1:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Display full dict:'</span>
+            pprint(d)
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">if</span> v:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'About to open for write %r.'</span> % picklePath
+            pickleFile = open(picklePath, <span class="PY_STRING">'wb'</span>)
+        <span class="PY_KEYWORD">except</span> IOError, e:
+            <span class="PY_KEYWORD">if</span> v:
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'error. not writing. %s: %s'</span> % (
+                    e.__class__.__name__, e)
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">while</span> 1:
+                dump(d, pickleFile, pickleProtocol)
+                pickleFile.close()
+                <span class="PY_COMMENT"># Make sure the cache has a newer timestamp, otherwise the cache</span>
+                <span class="PY_COMMENT"># will just get ignored and rewritten next time.</span>
+                <span class="PY_KEYWORD">if</span> os.path.getmtime(picklePath) == sourceTimestamp:
+                    <span class="PY_KEYWORD">if</span> v:
+                        <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">'Timestamps are identical, sleeping'</span>
+                            <span class="PY_STRING">' %0.2f seconds.'</span> % self._writeSleepInterval)
+                    sleep(self._writeSleepInterval)
+                    pickleFile = open(picklePath, <span class="PY_STRING">'wb'</span>)
+                <span class="PY_KEYWORD">else</span>:
+                    <span class="PY_KEYWORD">break</span>
+
+        <span class="PY_KEYWORD">if</span> v:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Done writing data.'</span>
+            <span class="PY_KEYWORD">print</span>
+
+
+<span class="PY_COMMENT"># Define module level convenience functions:</span>
+_reader = PickleCacheReader()
+readPickleCache = _reader.read
+_writer = PickleCacheWriter()
+writePickleCache = _writer.write
+</pre>
+<!--footer-->
+
+</body>
+</html>

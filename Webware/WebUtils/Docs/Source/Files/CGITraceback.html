@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebUtils/CGITraceback.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""More comprehensive traceback formatting for Python scripts.
+
+Original version know as cgitb written By Ka-Ping Yee &lt;ping@lfw.org&gt;
+Modified for Webware by Ian Bicking &lt;ianb@colorstudy.com&gt;
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> inspect, keyword, linecache, pydoc, os, sys, tokenize
+<span class="PY_KEYWORD">from</span> types <span class="PY_KEYWORD">import</span> MethodType
+
+
+pyhtml = pydoc.html
+escape = pyhtml.escape
+
+
+DefaultOptions = {
+    <span class="PY_STRING">'table'</span>: <span class="PY_STRING">'background-color:#F0F0F0'</span>,
+    <span class="PY_STRING">'default'</span>: <span class="PY_STRING">'color:#000000'</span>,
+    <span class="PY_STRING">'row.location'</span>: <span class="PY_STRING">'color:#000099'</span>,
+    <span class="PY_STRING">'row.code'</span>: <span class="PY_STRING">'color:#990000'</span>,
+    <span class="PY_STRING">'header'</span>: <span class="PY_STRING">'color:#FFFFFF;background-color:#999999'</span>,
+    <span class="PY_STRING">'subheader'</span>: <span class="PY_STRING">'color:#000000;background-color:#F0F0F0;font-size:10pt'</span>,
+    <span class="PY_STRING">'code.accent'</span>: <span class="PY_STRING">'background-color:#FFFFCC'</span>,
+    <span class="PY_STRING">'code.unaccent'</span>: <span class="PY_STRING">'color:#999999;font-size:10pt'</span>,
+}
+
+
+<span class="PY_KEYWORD">def</span> breaker():
+    <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'&lt;body style="background-color:#F0F0FF"&gt;'</span> +
+        <span class="PY_STRING">'&lt;span style="color:#F0F0FF;font-size:small"&gt; &gt; &lt;/font&gt; '</span> +
+        <span class="PY_STRING">'&lt;/table&gt;'</span> * 5)
+
+
+<span class="PY_KEYWORD">def</span> html(context=5, options=None):
+    <span class="PY_KEYWORD">if</span> options:
+        opt = DefaultOptions.copy()
+        opt.update(options)
+    <span class="PY_KEYWORD">else</span>:
+        opt = DefaultOptions
+
+    etype, evalue = sys.exc_info()[:2]
+    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> isinstance(etype, basestring):
+        etype = etype.__name__
+    inspect_trace = inspect.trace(context)
+
+    pyver = <span class="PY_STRING">'Python '</span> + sys.version.split(None, 1)[0] + <span class="PY_STRING">'&lt;br&gt;'</span> + sys.executable
+    javascript = <span class="PY_STRING">"""
+    &lt;script type="text/javascript" language="JavaScript"&gt;&lt;!--
+    function tag(s) { return '&lt;'+s+'&gt;'; }
+    function popup_repr(title, value) {
+        w = window.open('', '_blank',
+            'directories=no,height=240,width=480,location=no,menubar=yes,'
+            +'resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        if (!w) return true;
+        w.document.open();
+        w.document.write(tag('html')+tag('head')
+            +tag('title')+title+tag('/title')+tag('/head')
+            +tag('body bgcolor="#ffffff"')+tag('h3')+title+':'+tag('/h3')
+            +tag('p')+tag('code')+value+tag('/code')+tag('/p')+tag('form')+
+            tag('input type="button" onClick="window.close()" value="Close"')
+            +tag('/form')+tag('/body')+tag('/html'));
+        w.document.close();
+        return false;
+    }
+    // --&gt;
+    &lt;/script&gt;
+    """</span>
+
+    traceback_summary = []
+
+    <span class="PY_KEYWORD">for</span> frame, file, lnum, func, lines, index <span class="PY_KEYWORD">in</span> reversed(inspect_trace):
+        <span class="PY_KEYWORD">if</span> file:
+            file = os.path.abspath(file)
+        <span class="PY_KEYWORD">else</span>:
+            file = <span class="PY_STRING">'not found'</span>
+        traceback_summary.append(<span class="PY_STRING">'&lt;a href="#%s:%d" style="%s"&gt;%s&lt;/a&gt;:'</span>
+            <span class="PY_STRING">'&lt;tt style="font-family:Courier,sans-serif"&gt;%s&lt;/tt&gt;'</span>
+            % (file.replace(<span class="PY_STRING">'/'</span>, <span class="PY_STRING">'-'</span>).replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'-'</span>), lnum,
+                opt[<span class="PY_STRING">'header'</span>], os.path.splitext(os.path.basename(file))[0],
+                (<span class="PY_STRING">"%5i"</span> % lnum).replace(<span class="PY_STRING">' '</span>, <span class="PY_STRING">'&amp;nbsp;'</span>)))
+
+    head = (<span class="PY_STRING">'&lt;table width="100%%" style="%s" cellspacing="0" cellpadding="2" border="0"&gt;'</span>
+        <span class="PY_STRING">'&lt;tr&gt;&lt;td valign="top" align="left"&gt;'</span>
+        <span class="PY_STRING">'&lt;strong style="font-size:x-large"&gt;%s&lt;/strong&gt;: %s&lt;/td&gt;'</span>
+        <span class="PY_STRING">'&lt;td rowspan="2" valign="top" align="right"&gt;%s&lt;/td&gt;&lt;/tr&gt;'</span>
+        <span class="PY_STRING">'&lt;tr&gt;&lt;td valign="top" bgcolor="#ffffff"&gt;\n'</span>
+        <span class="PY_STRING">'&lt;p style="%s"&gt;A problem occurred while running a Python script.&lt;/p&gt;'</span>
+        <span class="PY_STRING">'&lt;p style="%s"&gt;Here is the sequence of function calls leading up to'</span>
+        <span class="PY_STRING">' the error, with the most recent (innermost) call first.&lt;/p&gt;\n'</span>
+        <span class="PY_STRING">'&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;\n'</span>
+        % (opt[<span class="PY_STRING">'header'</span>], etype, escape(str(evalue)),
+        <span class="PY_STRING">'&lt;br&gt;\n'</span>.join(traceback_summary), opt[<span class="PY_STRING">'default'</span>], opt[<span class="PY_STRING">'default'</span>]))
+
+    indent = <span class="PY_STRING">'&lt;tt&gt;&lt;small&gt;%s&lt;/small&gt;&amp;nbsp;&lt;/tt&gt;'</span> % (<span class="PY_STRING">'&amp;nbsp;'</span> * 5)
+    traceback = []
+    <span class="PY_KEYWORD">for</span> frame, file, lnum, func, lines, index <span class="PY_KEYWORD">in</span> reversed(inspect_trace):
+        <span class="PY_KEYWORD">if</span> file:
+            file = os.path.abspath(file)
+        <span class="PY_KEYWORD">else</span>:
+            file = <span class="PY_STRING">'not found'</span>
+        <span class="PY_KEYWORD">try</span>:
+            file_list = file.split(<span class="PY_STRING">'/'</span>)
+            display_file = <span class="PY_STRING">'/'</span>.join(
+                file_list[file_list.index(<span class="PY_STRING">'Webware'</span>) + 1:])
+        <span class="PY_KEYWORD">except</span> ValueError:
+            display_file = file
+        <span class="PY_KEYWORD">if</span> display_file[-3:] == <span class="PY_STRING">'.py'</span>:
+            display_file = display_file[:-3]
+        link = <span class="PY_STRING">'&lt;a name="%s:%d"&gt;&lt;/a&gt;&lt;a href="file:%s"&gt;%s&lt;/a&gt;'</span> % (
+            file.replace(<span class="PY_STRING">'/'</span>, <span class="PY_STRING">'-'</span>).replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'-'</span>),
+            lnum, file.replace(<span class="PY_STRING">'\\'</span>, <span class="PY_STRING">'/'</span>), escape(display_file))
+        args, varargs, varkw, locals = inspect.getargvalues(frame)
+        <span class="PY_KEYWORD">if</span> func == <span class="PY_STRING">'?'</span>:
+            call = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">else</span>:
+            call = <span class="PY_STRING">'in &lt;strong&gt;%s&lt;/strong&gt;'</span> % func + inspect.formatargvalues(
+                args, varargs, varkw, locals,
+                formatvalue=<span class="PY_KEYWORD">lambda</span> value: <span class="PY_STRING">'='</span> + html_repr(value))
+
+        names = []
+        dotted = [0, []]
+        <span class="PY_KEYWORD">def</span> tokeneater(type, token, start, end, line, names=names, dotted=dotted):
+            <span class="PY_KEYWORD">if</span> type == tokenize.OP <span class="PY_KEYWORD">and</span> token == <span class="PY_STRING">'.'</span>:
+                dotted[0] = 1
+            <span class="PY_KEYWORD">if</span> type == tokenize.NAME <span class="PY_KEYWORD">and</span> token <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> keyword.kwlist:
+                <span class="PY_KEYWORD">if</span> dotted[0]:
+                    dotted[0] = 0
+                    dotted[1].append(token)
+                    <span class="PY_KEYWORD">if</span> token <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> names:
+                        names.append(dotted[1][:])
+                <span class="PY_KEYWORD">elif</span> token <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> names:
+                    <span class="PY_KEYWORD">if</span> token != <span class="PY_STRING">'self'</span>:
+                        names.append(token)
+                    dotted[1] = [token]
+            <span class="PY_KEYWORD">if</span> type == tokenize.NEWLINE:
+                <span class="PY_KEYWORD">raise</span> IndexError
+        <span class="PY_KEYWORD">def</span> linereader(file=file, lnum=[lnum]):
+            line = linecache.getline(file, lnum[0])
+            lnum[0] += 1
+            <span class="PY_KEYWORD">return</span> line
+
+        <span class="PY_KEYWORD">try</span>:
+            tokenize.tokenize(linereader, tokeneater)
+        <span class="PY_KEYWORD">except</span> IndexError:
+            <span class="PY_KEYWORD">pass</span>
+        lvals = []
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> names:
+            <span class="PY_KEYWORD">if</span> isinstance(name, list):
+                <span class="PY_KEYWORD">if</span> name[0] <span class="PY_KEYWORD">in</span> locals <span class="PY_KEYWORD">or</span> name[0] <span class="PY_KEYWORD">in</span> frame.f_globals:
+                    name_list, name = name, name[0]
+                    <span class="PY_KEYWORD">if</span> name_list[0] <span class="PY_KEYWORD">in</span> locals:
+                        value = locals[name_list[0]]
+                    <span class="PY_KEYWORD">else</span>:
+                        value = frame.f_globals[name_list[0]]
+                        name = <span class="PY_STRING">'&lt;em&gt;global&lt;/em&gt; %s'</span> % name
+                    <span class="PY_KEYWORD">for</span> subname <span class="PY_KEYWORD">in</span> name_list[1:]:
+                        <span class="PY_KEYWORD">if</span> hasattr(value, subname):
+                            value = getattr(value, subname)
+                            name += <span class="PY_STRING">'.'</span> + subname
+                        <span class="PY_KEYWORD">else</span>:
+                            name += <span class="PY_STRING">'.'</span> + <span class="PY_STRING">'(unknown: %s)'</span> % subname
+                            <span class="PY_KEYWORD">break</span>
+                    name = <span class="PY_STRING">'&lt;strong&gt;%s&lt;/strong&gt;'</span> % name
+                    <span class="PY_KEYWORD">if</span> isinstance(value, MethodType):
+                        value = None
+                    <span class="PY_KEYWORD">else</span>:
+                        value = html_repr(value)
+            <span class="PY_KEYWORD">elif</span> name <span class="PY_KEYWORD">in</span> frame.f_code.co_varnames:
+                <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> locals:
+                    value = html_repr(locals[name])
+                <span class="PY_KEYWORD">else</span>:
+                    value = <span class="PY_STRING">'&lt;em&gt;undefined&lt;/em&gt;'</span>
+                name = <span class="PY_STRING">'&lt;strong&gt;%s&lt;/strong&gt;'</span> % name
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">if</span> name <span class="PY_KEYWORD">in</span> frame.f_globals:
+                    value = html_repr(frame.f_globals[name])
+                <span class="PY_KEYWORD">else</span>:
+                    value = <span class="PY_STRING">'&lt;em&gt;undefined&lt;/em&gt;'</span>
+                name = <span class="PY_STRING">'&lt;em&gt;global&lt;/em&gt; &lt;strong&gt;%s&lt;/strong&gt;'</span> % name
+            <span class="PY_KEYWORD">if</span> value <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+                lvals.append(<span class="PY_STRING">'%s&amp;nbsp;= %s'</span> % (name, value))
+        <span class="PY_KEYWORD">if</span> lvals:
+            lvals = <span class="PY_STRING">', '</span>.join(lvals)
+            lvals = indent + <span class="PY_STRING">'&lt;span style="%s"&gt;%s&lt;/span&gt;&lt;br&gt;\n'</span> % (
+                opt[<span class="PY_STRING">'code.unaccent'</span>], lvals)
+        <span class="PY_KEYWORD">else</span>:
+            lvals = <span class="PY_STRING">''</span>
+
+        level = (<span class="PY_STRING">'&lt;br&gt;&lt;table width="100%%" style="%s"'</span>
+            <span class="PY_STRING">' cellspacing="0" cellpadding="2" border="0"&gt;'</span>
+            <span class="PY_STRING">'&lt;tr&gt;&lt;td&gt;%s %s&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;'</span>
+            % (opt[<span class="PY_STRING">'subheader'</span>], link, call))
+        excerpt = []
+        <span class="PY_KEYWORD">try</span>:
+            i = lnum - index
+        <span class="PY_KEYWORD">except</span> TypeError:
+            i = lnum
+        lines = lines <span class="PY_KEYWORD">or</span> [<span class="PY_STRING">'file not found'</span>]
+        <span class="PY_KEYWORD">for</span> line <span class="PY_KEYWORD">in</span> lines:
+            number = <span class="PY_STRING">'&amp;nbsp;'</span> * (5-len(str(i))) + str(i)
+            number = <span class="PY_STRING">'&lt;span style="%s"&gt;%s&lt;/span&gt;'</span> % (
+                opt[<span class="PY_STRING">'code.unaccent'</span>], number)
+            line = <span class="PY_STRING">'&lt;tt&gt;%s&amp;nbsp;%s&lt;/tt&gt;'</span> % (
+                number, pyhtml.preformat(line))
+            <span class="PY_KEYWORD">if</span> i == lnum:
+                line = (<span class="PY_STRING">'&lt;table width="100%%" style="%s"'</span>
+                    <span class="PY_STRING">' cellspacing="0" cellpadding="0" border="0"&gt;'</span>
+                    <span class="PY_STRING">'&lt;tr&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;'</span>
+                    % (opt[<span class="PY_STRING">'code.accent'</span>], line))
+            excerpt.append(<span class="PY_STRING">'\n'</span> + line)
+            <span class="PY_KEYWORD">if</span> i == lnum:
+                excerpt.append(lvals)
+            i += 1
+        traceback.append(level + <span class="PY_STRING">'\n'</span>.join(excerpt))
+
+    exception = <span class="PY_STRING">'&lt;p&gt;&lt;strong&gt;%s&lt;/strong&gt;: %s\n'</span> % (etype, escape(str(evalue)))
+    attribs = []
+    <span class="PY_KEYWORD">if</span> evalue <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+        <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> dir(evalue):
+            <span class="PY_KEYWORD">if</span> name.startswith(<span class="PY_STRING">'__'</span>):
+                <span class="PY_KEYWORD">continue</span>
+            value = html_repr(getattr(evalue, name))
+            attribs.append(<span class="PY_STRING">'&lt;br&gt;%s%s&amp;nbsp;= %s\n'</span> % (indent, name, value))
+    <span class="PY_KEYWORD">return</span> (javascript + head + <span class="PY_STRING">''</span>.join(traceback)
+        + exception + <span class="PY_STRING">''</span>.join(attribs) + <span class="PY_STRING">'&lt;/p&gt;\n'</span>)
+
+
+<span class="PY_KEYWORD">def</span> handler():
+    <span class="PY_KEYWORD">print</span> breaker()
+    <span class="PY_KEYWORD">print</span> html()
+
+
+<span class="PY_KEYWORD">def</span> html_repr(value):
+    html_repr_instance = pyhtml._repr_instance
+    enc_value = pyhtml.repr(value)
+    <span class="PY_KEYWORD">if</span> len(enc_value) &gt; html_repr_instance.maxstring:
+        plain_value = escape(repr(value))
+        <span class="PY_KEYWORD">return</span> (<span class="PY_STRING">'%s &lt;a href="#" onClick="return popup_repr('</span>
+            <span class="PY_STRING">"'Full representation','%s')"</span>
+            <span class="PY_STRING">'" title="Full representation"&gt;(complete)&lt;/a&gt;'</span> % (enc_value,
+            escape(plain_value).replace(<span class="PY_STRING">"'"</span>, <span class="PY_STRING">"\\'"</span>).replace(<span class="PY_STRING">'"'</span>, <span class="PY_STRING">'&amp;quot;'</span>)))
+    <span class="PY_KEYWORD">else</span>:
+        <span class="PY_KEYWORD">return</span> enc_value
+</pre>
+<!--footer-->
+
+</body>
+</html>

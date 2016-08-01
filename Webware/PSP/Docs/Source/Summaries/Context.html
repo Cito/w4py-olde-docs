@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of PSP.Context</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of PSP.Context</h2>
+<p>You can also browse the <a href="../Files/Context.html">complete source file</a>
+or the <a href="../Docs/PSP.Context.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">PSPContext</span>(object):</span>
+<span class="line_def">    def <span class="name_def">getClassPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getReader</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getWriter</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getOutputDirectory</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getServletClassName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getFullClassName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getPythonFileName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getPythonFileEncoding</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setPSPReader</span>(self, reader)</span>
+<span class="line_def">    def <span class="name_def">setServletWriter</span>(self, writer)</span>
+<span class="line_def">    def <span class="name_def">setPythonFileName</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setPythonFileEncoding</span>(self, encoding)</span>
+
+
+<span class="line_class">class <span class="name_class">PSPCLContext</span>(PSPContext):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, pspfile)</span>
+<span class="line_def">    def <span class="name_def">getClassPath</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getReader</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getServletWriter</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getOutputDirectory</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getServletClassName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getFullClassName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getPythonFileName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getPythonFileEncoding</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getPspFileName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">getFullPspFileName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setPSPReader</span>(self, reader)</span>
+<span class="line_def">    def <span class="name_def">setServletWriter</span>(self, writer)</span>
+<span class="line_def">    def <span class="name_def">setPythonFileName</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">setPythonFileEncoding</span>(self, encoding)</span>
+<span class="line_def">    def <span class="name_def">setClassName</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">resolveRelativeURI</span>(self, uri)</span>
+<span class="line_def">    def <span class="name_def">getBaseUri</span>(self)</span>
+
+</pre>
+</body>
+</html>

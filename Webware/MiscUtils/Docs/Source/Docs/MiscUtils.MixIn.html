@@ -1,0 +1,64 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module MiscUtils.MixIn</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="MiscUtils.html"><font color="#ffffff">MiscUtils</font></a>.MixIn</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/MiscUtils/MixIn.py">/var/www/docs/Webware-1.1.1/MiscUtils/MixIn.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-MixIn"><strong>MixIn</strong></a>(pyClass, mixInClass, makeAncestor<font color="#909090">=False</font>, mixInSuperMethods<font color="#909090">=False</font>)</dt><dd><tt>Mixes&nbsp;in&nbsp;the&nbsp;attributes&nbsp;of&nbsp;the&nbsp;mixInClass&nbsp;into&nbsp;the&nbsp;pyClass.<br>
+&nbsp;<br>
+These&nbsp;attributes&nbsp;are&nbsp;typically&nbsp;methods&nbsp;(but&nbsp;don't&nbsp;have&nbsp;to&nbsp;be).<br>
+Note&nbsp;that&nbsp;private&nbsp;attributes,&nbsp;denoted&nbsp;by&nbsp;a&nbsp;double&nbsp;underscore,<br>
+are&nbsp;not&nbsp;mixed&nbsp;in.&nbsp;Collisions&nbsp;are&nbsp;resolved&nbsp;by&nbsp;the&nbsp;mixInClass'<br>
+attribute&nbsp;overwriting&nbsp;the&nbsp;pyClass'.&nbsp;This&nbsp;gives&nbsp;mix-ins&nbsp;the&nbsp;power<br>
+to&nbsp;override&nbsp;the&nbsp;behavior&nbsp;of&nbsp;the&nbsp;pyClass.<br>
+&nbsp;<br>
+After&nbsp;using&nbsp;<a href="#-MixIn">MixIn</a>(),&nbsp;instances&nbsp;of&nbsp;the&nbsp;pyClass&nbsp;will&nbsp;respond&nbsp;to<br>
+the&nbsp;messages&nbsp;of&nbsp;the&nbsp;mixInClass.<br>
+&nbsp;<br>
+An&nbsp;assertion&nbsp;fails&nbsp;if&nbsp;you&nbsp;try&nbsp;to&nbsp;mix&nbsp;in&nbsp;a&nbsp;class&nbsp;with&nbsp;itself.<br>
+&nbsp;<br>
+The&nbsp;pyClass&nbsp;will&nbsp;be&nbsp;given&nbsp;a&nbsp;new&nbsp;attribute&nbsp;mixInsForCLASSNAME<br>
+which&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;mixInClass'&nbsp;that&nbsp;have&nbsp;ever&nbsp;been&nbsp;installed,<br>
+in&nbsp;the&nbsp;order&nbsp;they&nbsp;were&nbsp;installed.&nbsp;You&nbsp;may&nbsp;find&nbsp;this&nbsp;useful<br>
+for&nbsp;inspection&nbsp;and&nbsp;debugging.<br>
+&nbsp;<br>
+You&nbsp;are&nbsp;advised&nbsp;to&nbsp;install&nbsp;your&nbsp;mix-ins&nbsp;at&nbsp;the&nbsp;start&nbsp;up<br>
+of&nbsp;your&nbsp;program,&nbsp;prior&nbsp;to&nbsp;the&nbsp;creation&nbsp;of&nbsp;any&nbsp;objects.<br>
+This&nbsp;approach&nbsp;will&nbsp;result&nbsp;in&nbsp;less&nbsp;headaches.&nbsp;But&nbsp;like&nbsp;most&nbsp;things<br>
+in&nbsp;Python,&nbsp;you're&nbsp;free&nbsp;to&nbsp;do&nbsp;whatever&nbsp;you're&nbsp;willing&nbsp;to&nbsp;live&nbsp;with.&nbsp;:-)<br>
+&nbsp;<br>
+There&nbsp;is&nbsp;a&nbsp;bitchin'&nbsp;article&nbsp;in&nbsp;the&nbsp;Linux&nbsp;Journal,&nbsp;April&nbsp;2001,<br>
+"Using&nbsp;Mix-ins&nbsp;with&nbsp;Python"&nbsp;by&nbsp;Chuck&nbsp;Esterbrook,<br>
+which&nbsp;gives&nbsp;a&nbsp;thorough&nbsp;treatment&nbsp;of&nbsp;this&nbsp;topic.<br>
+&nbsp;<br>
+An&nbsp;example,&nbsp;that&nbsp;resides&nbsp;in&nbsp;Webware,&nbsp;is&nbsp;MiddleKit.Core.ModelUser.py,<br>
+which&nbsp;install&nbsp;mix-ins&nbsp;for&nbsp;SQL&nbsp;adapters.&nbsp;Search&nbsp;for&nbsp;"<a href="#-MixIn">MixIn</a>(".<br>
+&nbsp;<br>
+If&nbsp;makeAncestor&nbsp;is&nbsp;1,&nbsp;then&nbsp;a&nbsp;different&nbsp;technique&nbsp;is&nbsp;employed:<br>
+the&nbsp;mixInClass&nbsp;is&nbsp;made&nbsp;the&nbsp;first&nbsp;base&nbsp;class&nbsp;of&nbsp;the&nbsp;pyClass.<br>
+You&nbsp;probably&nbsp;don't&nbsp;need&nbsp;to&nbsp;use&nbsp;this&nbsp;and&nbsp;if&nbsp;you&nbsp;do,&nbsp;be&nbsp;aware&nbsp;that&nbsp;your<br>
+mix-in&nbsp;can&nbsp;no&nbsp;longer&nbsp;override&nbsp;attributes/methods&nbsp;in&nbsp;pyClass.<br>
+&nbsp;<br>
+If&nbsp;mixInSuperMethods&nbsp;is&nbsp;1,&nbsp;then&nbsp;support&nbsp;will&nbsp;be&nbsp;enabled&nbsp;for&nbsp;you&nbsp;to<br>
+be&nbsp;able&nbsp;to&nbsp;call&nbsp;the&nbsp;original&nbsp;or&nbsp;"parent"&nbsp;method&nbsp;from&nbsp;the&nbsp;mixed-in&nbsp;method.<br>
+This&nbsp;is&nbsp;done&nbsp;like&nbsp;so:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;MyMixInClass(object):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;foo(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyMixInClass.mixInSuperFoo(self)&nbsp;#&nbsp;call&nbsp;the&nbsp;original&nbsp;method<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;now&nbsp;do&nbsp;whatever&nbsp;you&nbsp;want</tt></dd></dl>
+</td></tr></table>
+</body></html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of MiddleKit/Core.Model</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of MiddleKit/Core.Model</h2>
+<p>You can also browse the <a href="../Files/Model.html">complete source file</a>
+or the <a href="../Docs/MiddleKit/Core.Model.html">generated documentation</a>.</p>
+<pre>
+
+<span class="line_class">class <span class="name_class">ModelError</span>(Exception):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, error, line=None)</span>
+<span class="line_def">    def <span class="name_def">setLine</span>(self, line)</span>
+<span class="line_def">    def <span class="name_def">printError</span>(self, filename)</span>
+
+
+<span class="line_class">class <span class="name_class">Model</span>(Configurable):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self,</span>
+<span class="line_def">    def <span class="name_def">name</span>(self)</span>
+<span class="line_def">    def <span class="name_def">setName</span>(self, name)</span>
+<span class="line_def">    def <span class="name_def">filename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">read</span>(self, filename, isClassesFile=False)</span>
+<span class="line_def">    def <span class="name_def">readKlassesInModelDir</span>(self)</span>
+<span class="line_def">    def <span class="name_def">readKlassesDirectly</span>(self, path)</span>
+<span class="line_def">    def <span class="name_def">__getstate__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">awakeFromRead</span>(self)</span>
+<span class="line_def">    def <span class="name_def">readParents</span>(self, parentFilenames=None)</span>
+<span class="line_def">    def <span class="name_def">dontReadParents</span>(self)</span>
+<span class="line_def">    def <span class="name_def">allModelsDepthFirstLeftRight</span>(self, parents=None)</span>
+<span class="line_def">    def <span class="name_def">coreClass</span>(self, className)</span>
+<span class="line_def">    def <span class="name_def">coreClassNames</span>(self)</span>
+<span class="line_def">    def <span class="name_def">klasses</span>(self)</span>
+<span class="line_def">    def <span class="name_def">klass</span>(self, name, default=NoDefault)</span>
+<span class="line_def">    def <span class="name_def">allKlassesInOrder</span>(self)</span>
+<span class="line_def">    def <span class="name_def">allKlassesByName</span>(self)</span>
+<span class="line_def">    def <span class="name_def">allKlassesInDependencyOrder</span>(self)</span>
+<span class="line_def">    def <span class="name_def">pyClassForName</span>(self, name)</span>
+
+<span class="line_category">    ## Being configurable ##</span>
+<span class="line_def">    def <span class="name_def">configFilename</span>(self)</span>
+<span class="line_def">    def <span class="name_def">defaultConfig</span>(self)</span>
+<span class="line_def">    def <span class="name_def">usesExternalSQLEnums</span>(self)</span>
+
+<span class="line_category">    ## Warnings ##</span>
+<span class="line_def">    def <span class="name_def">printWarnings</span>(self, out=None)</span>
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,206 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module UserKit.UserManager</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="UserKit.html"><font color="#ffffff">UserKit</font></a>.UserManager</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/UserKit/UserManager.py">/var/www/docs/Webware-1.1.1/UserKit/UserManager.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;abstract&nbsp;<a href="#UserManager">UserManager</a>&nbsp;class.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="UserKit.UserManager.html#UserManager">UserManager</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UserManager">class <strong>UserManager</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;base&nbsp;class&nbsp;for&nbsp;all&nbsp;user&nbsp;manager&nbsp;classes.<br>
+&nbsp;<br>
+A&nbsp;<a href="#UserManager">UserManager</a>&nbsp;manages&nbsp;a&nbsp;set&nbsp;of&nbsp;users&nbsp;including&nbsp;authentication,<br>
+indexing&nbsp;and&nbsp;persistence.&nbsp;Keep&nbsp;in&nbsp;mind&nbsp;that&nbsp;<a href="#UserManager">UserManager</a>&nbsp;is&nbsp;abstract;<br>
+you&nbsp;will&nbsp;always&nbsp;use&nbsp;one&nbsp;of&nbsp;the&nbsp;concrete&nbsp;subclasses&nbsp;(but&nbsp;please&nbsp;read<br>
+the&nbsp;rest&nbsp;of&nbsp;this&nbsp;docstring):<br>
+&nbsp;&nbsp;*&nbsp;UserManagerToFile<br>
+&nbsp;&nbsp;*&nbsp;UserManagerToMiddleKit<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;create&nbsp;a&nbsp;user&nbsp;through&nbsp;the&nbsp;manager&nbsp;(preferred):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user&nbsp;=&nbsp;manager.<a href="#UserManager-createUser">createUser</a>(name,&nbsp;password)<br>
+&nbsp;<br>
+Or&nbsp;directly&nbsp;through&nbsp;the&nbsp;user&nbsp;class:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user&nbsp;=&nbsp;RoleUser(manager,&nbsp;name,&nbsp;password)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;manager.<a href="#UserManager-addUser">addUser</a>(user)<br>
+&nbsp;<br>
+The&nbsp;manager&nbsp;tracks&nbsp;users&nbsp;by&nbsp;whether&nbsp;or&nbsp;not&nbsp;they&nbsp;are&nbsp;"active"<br>
+(e.g.,&nbsp;logged&nbsp;in)&nbsp;and&nbsp;indexes&nbsp;them&nbsp;by:<br>
+&nbsp;&nbsp;*&nbsp;user&nbsp;serial&nbsp;number<br>
+&nbsp;&nbsp;*&nbsp;external&nbsp;user&nbsp;id<br>
+&nbsp;&nbsp;*&nbsp;user&nbsp;name<br>
+&nbsp;<br>
+These&nbsp;methods&nbsp;provide&nbsp;access&nbsp;to&nbsp;the&nbsp;users&nbsp;by&nbsp;these&nbsp;keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-userForSerialNum">userForSerialNum</a>(self,&nbsp;serialNum,&nbsp;default=NoDefault)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-userForExternalId">userForExternalId</a>(self,&nbsp;extId,&nbsp;default=NoDefault)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-userForName">userForName</a>(self,&nbsp;name,&nbsp;default=NoDefault)<br>
+&nbsp;<br>
+<a href="#UserManager">UserManager</a>&nbsp;provides&nbsp;convenient&nbsp;methods&nbsp;for&nbsp;iterating&nbsp;through&nbsp;the<br>
+various&nbsp;users.&nbsp;Each&nbsp;method&nbsp;returns&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;in&nbsp;a<br>
+for&nbsp;loop&nbsp;and&nbsp;asked&nbsp;for&nbsp;its&nbsp;len():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-users">users</a>(self)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-activeUsers">activeUsers</a>(self)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-inactiveUsers">inactiveUsers</a>(self)<br>
+&nbsp;<br>
+You&nbsp;can&nbsp;authenticate&nbsp;a&nbsp;user&nbsp;by&nbsp;passing&nbsp;the&nbsp;user&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;attempted<br>
+password&nbsp;to&nbsp;<a href="#UserManager-login">login</a>().&nbsp;If&nbsp;the&nbsp;authentication&nbsp;is&nbsp;successful,&nbsp;then&nbsp;<a href="#UserManager-login">login</a>()<br>
+returns&nbsp;the&nbsp;User,&nbsp;otherwise&nbsp;it&nbsp;returns&nbsp;None:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user&nbsp;=&nbsp;mgr.<a href="#UserManager-userForExternalId">userForExternalId</a>(externalId)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;mgr.<a href="#UserManager-login">login</a>(user,&nbsp;password):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doSomething()<br>
+&nbsp;<br>
+As&nbsp;a&nbsp;convenience,&nbsp;you&nbsp;can&nbsp;authenticate&nbsp;by&nbsp;passing&nbsp;the&nbsp;serialNum,<br>
+externalId&nbsp;or&nbsp;name&nbsp;of&nbsp;the&nbsp;user:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-loginSerialNum">loginSerialNum</a>(self,&nbsp;serialNum,&nbsp;password):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-loginExternalId">loginExternalId</a>(self,&nbsp;externalId,&nbsp;password):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-loginName">loginName</a>(self,&nbsp;userName,&nbsp;password):<br>
+&nbsp;<br>
+The&nbsp;user&nbsp;will&nbsp;automatically&nbsp;log&nbsp;out&nbsp;after&nbsp;a&nbsp;period&nbsp;of&nbsp;inactivity<br>
+(see&nbsp;below),&nbsp;or&nbsp;you&nbsp;can&nbsp;make&nbsp;it&nbsp;happen&nbsp;with:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#UserManager-logout">logout</a>(self,&nbsp;user):<br>
+&nbsp;<br>
+There&nbsp;are&nbsp;three&nbsp;user&nbsp;states&nbsp;that&nbsp;are&nbsp;important&nbsp;to&nbsp;the&nbsp;manager:<br>
+&nbsp;&nbsp;*&nbsp;modified<br>
+&nbsp;&nbsp;*&nbsp;cached<br>
+&nbsp;&nbsp;*&nbsp;authenticated&nbsp;or&nbsp;"active"<br>
+&nbsp;<br>
+A&nbsp;modified&nbsp;user&nbsp;is&nbsp;one&nbsp;whose&nbsp;data&nbsp;has&nbsp;changed&nbsp;and&nbsp;eventually&nbsp;requires<br>
+storage&nbsp;to&nbsp;a&nbsp;persistent&nbsp;location.&nbsp;A&nbsp;cached&nbsp;user&nbsp;is&nbsp;a&nbsp;user&nbsp;whose&nbsp;data<br>
+resides&nbsp;in&nbsp;memory&nbsp;(regardless&nbsp;of&nbsp;the&nbsp;other&nbsp;states).&nbsp;An&nbsp;active&nbsp;user<br>
+has&nbsp;been&nbsp;authenticated&nbsp;(e.g.,&nbsp;their&nbsp;username&nbsp;and&nbsp;password&nbsp;were&nbsp;checked)<br>
+and&nbsp;has&nbsp;not&nbsp;yet&nbsp;logged&nbsp;out&nbsp;or&nbsp;timed&nbsp;out.<br>
+&nbsp;<br>
+The&nbsp;manager&nbsp;keeps&nbsp;three&nbsp;timeouts,&nbsp;expressed&nbsp;in&nbsp;minutes,&nbsp;to:<br>
+&nbsp;&nbsp;*&nbsp;save&nbsp;modified&nbsp;users&nbsp;after&nbsp;a&nbsp;period&nbsp;of&nbsp;time&nbsp;following&nbsp;the&nbsp;first<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unsaved&nbsp;modification<br>
+&nbsp;&nbsp;*&nbsp;push&nbsp;users&nbsp;out&nbsp;of&nbsp;memory&nbsp;after&nbsp;a&nbsp;period&nbsp;of&nbsp;inactivity<br>
+&nbsp;&nbsp;*&nbsp;deactive&nbsp;(e.g.,&nbsp;log&nbsp;out)&nbsp;users&nbsp;after&nbsp;a&nbsp;period&nbsp;of&nbsp;inactivity<br>
+&nbsp;<br>
+The&nbsp;methods&nbsp;for&nbsp;managing&nbsp;these&nbsp;values&nbsp;deal&nbsp;with&nbsp;the&nbsp;timeouts&nbsp;as<br>
+number-of-minutes.&nbsp;The&nbsp;default&nbsp;values&nbsp;and&nbsp;the&nbsp;methods&nbsp;are:<br>
+&nbsp;&nbsp;*&nbsp;20&nbsp;&nbsp;<a href="#UserManager-modifiedUserTimeout">modifiedUserTimeout</a>()&nbsp;&nbsp;<a href="#UserManager-setModifiedUserTimeout">setModifiedUserTimeout</a>()<br>
+&nbsp;&nbsp;*&nbsp;20&nbsp;&nbsp;<a href="#UserManager-cachedUserTimeout">cachedUserTimeout</a>()&nbsp;&nbsp;&nbsp;&nbsp;<a href="#UserManager-setCachedUserTimeout">setCachedUserTimeout</a>()<br>
+&nbsp;&nbsp;*&nbsp;20&nbsp;&nbsp;<a href="#UserManager-activeUserTimeout">activeUserTimeout</a>()&nbsp;&nbsp;&nbsp;&nbsp;<a href="#UserManager-setActiveUserTimeout">setActiveUserTimeout</a>()<br>
+&nbsp;<br>
+Subclasses&nbsp;of&nbsp;<a href="#UserManager">UserManager</a>&nbsp;provide&nbsp;persistence&nbsp;such&nbsp;as&nbsp;to&nbsp;the&nbsp;file<br>
+system&nbsp;or&nbsp;a&nbsp;MiddleKit&nbsp;store.&nbsp;Subclasses&nbsp;must&nbsp;implement&nbsp;all&nbsp;methods<br>
+that&nbsp;raise&nbsp;AbstractError's.&nbsp;Subclasses&nbsp;typically&nbsp;override&nbsp;(while&nbsp;still<br>
+invoking&nbsp;super)&nbsp;<a href="#UserManager-addUser">addUser</a>().<br>
+&nbsp;<br>
+Subclasses&nbsp;should&nbsp;ensure&nbsp;"uniqueness"&nbsp;of&nbsp;users.&nbsp;For&nbsp;example,&nbsp;invoking<br>
+any&nbsp;of&nbsp;the&nbsp;userForSomething()&nbsp;methods&nbsp;repeatedly&nbsp;should&nbsp;always&nbsp;return<br>
+the&nbsp;same&nbsp;user&nbsp;instance&nbsp;for&nbsp;a&nbsp;given&nbsp;key.&nbsp;Without&nbsp;uniqueness,&nbsp;consistency<br>
+issues&nbsp;could&nbsp;arise&nbsp;with&nbsp;users&nbsp;that&nbsp;are&nbsp;modified.<br>
+&nbsp;<br>
+Please&nbsp;read&nbsp;the&nbsp;method&nbsp;docstrings&nbsp;and&nbsp;other&nbsp;class&nbsp;documentation&nbsp;to<br>
+fully&nbsp;understand&nbsp;UserKit.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="UserManager-__init__"><strong>__init__</strong></a>(self, userClass<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="UserManager-activeUserTimeout"><strong>activeUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManager-activeUsers"><strong>activeUsers</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;active&nbsp;users.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-addUser"><strong>addUser</strong></a>(self, user)</dt></dl>
+
+<dl><dt><a name="UserManager-cachedUserTimeout"><strong>cachedUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManager-clearCache"><strong>clearCache</strong></a>(self)</dt><dd><tt>Clear&nbsp;the&nbsp;cache&nbsp;of&nbsp;the&nbsp;manager.<br>
+&nbsp;<br>
+Use&nbsp;with&nbsp;extreme&nbsp;caution.&nbsp;If&nbsp;your&nbsp;program&nbsp;maintains&nbsp;a&nbsp;reference<br>
+to&nbsp;a&nbsp;user&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;but&nbsp;the&nbsp;manager&nbsp;loads&nbsp;in&nbsp;a&nbsp;new&nbsp;copy&nbsp;later&nbsp;on,<br>
+then&nbsp;consistency&nbsp;problems&nbsp;could&nbsp;occur.<br>
+&nbsp;<br>
+The&nbsp;most&nbsp;popular&nbsp;use&nbsp;of&nbsp;this&nbsp;method&nbsp;is&nbsp;in&nbsp;the&nbsp;regression&nbsp;test&nbsp;suite.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-createUser"><strong>createUser</strong></a>(self, name, password, userClass<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;a&nbsp;newly&nbsp;created&nbsp;user&nbsp;that&nbsp;is&nbsp;added&nbsp;to&nbsp;the&nbsp;manager.<br>
+&nbsp;<br>
+If&nbsp;userClass&nbsp;is&nbsp;not&nbsp;specified,&nbsp;the&nbsp;manager's&nbsp;default&nbsp;user&nbsp;class<br>
+is&nbsp;instantiated.&nbsp;This&nbsp;not&nbsp;imply&nbsp;that&nbsp;the&nbsp;user&nbsp;is&nbsp;logged&nbsp;in.<br>
+This&nbsp;method&nbsp;invokes&nbsp;<a href="#UserManager-addUser">addUser</a>().<br>
+&nbsp;<br>
+See&nbsp;also:&nbsp;<a href="#UserManager-userClass">userClass</a>(),&nbsp;<a href="#UserManager-setUserClass">setUserClass</a>()</tt></dd></dl>
+
+<dl><dt><a name="UserManager-inactiveUsers"><strong>inactiveUsers</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManager-login"><strong>login</strong></a>(self, user, password)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;if&nbsp;the&nbsp;login&nbsp;is&nbsp;successful,&nbsp;otherwise&nbsp;return&nbsp;None.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-loginExternalId"><strong>loginExternalId</strong></a>(self, externalId, password)</dt></dl>
+
+<dl><dt><a name="UserManager-loginName"><strong>loginName</strong></a>(self, userName, password)</dt></dl>
+
+<dl><dt><a name="UserManager-loginSerialNum"><strong>loginSerialNum</strong></a>(self, serialNum, password)</dt></dl>
+
+<dl><dt><a name="UserManager-logout"><strong>logout</strong></a>(self, user)</dt></dl>
+
+<dl><dt><a name="UserManager-modifiedUserTimeout"><strong>modifiedUserTimeout</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="UserManager-numActiveUsers"><strong>numActiveUsers</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;active&nbsp;users,&nbsp;e.g.,&nbsp;users&nbsp;that&nbsp;are&nbsp;logged&nbsp;in.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-setActiveUserTimeout"><strong>setActiveUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="UserManager-setCachedUserTimeout"><strong>setCachedUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="UserManager-setModifiedUserTimeout"><strong>setModifiedUserTimeout</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="UserManager-setUserClass"><strong>setUserClass</strong></a>(self, userClass)</dt><dd><tt>Set&nbsp;the&nbsp;userClass,&nbsp;which&nbsp;cannot&nbsp;be&nbsp;None&nbsp;and&nbsp;must&nbsp;inherit&nbsp;from&nbsp;User.<br>
+&nbsp;<br>
+See&nbsp;also:&nbsp;<a href="#UserManager-userClass">userClass</a>().</tt></dd></dl>
+
+<dl><dt><a name="UserManager-shutDown"><strong>shutDown</strong></a>(self)</dt><dd><tt>Perform&nbsp;any&nbsp;tasks&nbsp;necessary&nbsp;to&nbsp;shut&nbsp;down&nbsp;the&nbsp;user&nbsp;manager.<br>
+&nbsp;<br>
+Subclasses&nbsp;may&nbsp;override&nbsp;and&nbsp;must&nbsp;invoke&nbsp;super&nbsp;as&nbsp;their&nbsp;*last*&nbsp;step.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-userClass"><strong>userClass</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;userClass,&nbsp;which&nbsp;is&nbsp;used&nbsp;by&nbsp;createUser.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;value&nbsp;is&nbsp;UserKit.User.User.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-userForExternalId"><strong>userForExternalId</strong></a>(self, externalId, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;with&nbsp;the&nbsp;given&nbsp;external&nbsp;id.<br>
+&nbsp;<br>
+The&nbsp;user&nbsp;record&nbsp;is&nbsp;pulled&nbsp;into&nbsp;memory&nbsp;if&nbsp;needed.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-userForName"><strong>userForName</strong></a>(self, name, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;with&nbsp;the&nbsp;given&nbsp;name.<br>
+&nbsp;<br>
+The&nbsp;user&nbsp;record&nbsp;is&nbsp;pulled&nbsp;into&nbsp;memory&nbsp;if&nbsp;needed.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-userForSerialNum"><strong>userForSerialNum</strong></a>(self, serialNum, default<font color="#909090">=&lt;class 'MiscUtils.NoDefault'&gt;</font>)</dt><dd><tt>Return&nbsp;the&nbsp;user&nbsp;with&nbsp;the&nbsp;given&nbsp;serialNum.<br>
+&nbsp;<br>
+The&nbsp;user&nbsp;record&nbsp;is&nbsp;pulled&nbsp;into&nbsp;memory&nbsp;if&nbsp;needed.</tt></dd></dl>
+
+<dl><dt><a name="UserManager-users"><strong>users</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;users&nbsp;(regardless&nbsp;of&nbsp;login&nbsp;status).</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

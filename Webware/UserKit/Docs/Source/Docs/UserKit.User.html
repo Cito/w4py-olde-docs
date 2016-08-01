@@ -1,0 +1,94 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module UserKit.User</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="UserKit.html"><font color="#ffffff">UserKit</font></a>.User</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/UserKit/User.py">/var/www/docs/Webware-1.1.1/UserKit/User.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;basic&nbsp;<a href="#User">User</a>&nbsp;class.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="UserKit.User.html#User">User</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="User">class <strong>User</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;base&nbsp;class&nbsp;for&nbsp;a&nbsp;UserKit&nbsp;<a href="#User">User</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="User-__init__"><strong>__init__</strong></a>(self, manager<font color="#909090">=None</font>, name<font color="#909090">=None</font>, password<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="User-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-creationTime"><strong>creationTime</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-externalId"><strong>externalId</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-isActive"><strong>isActive</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-lastAccessTime"><strong>lastAccessTime</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-lastLoginTime"><strong>lastLoginTime</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-login"><strong>login</strong></a>(self, password, fromMgr<font color="#909090">=0</font>)</dt><dd><tt>Return&nbsp;self&nbsp;if&nbsp;the&nbsp;login&nbsp;is&nbsp;successful&nbsp;and&nbsp;None&nbsp;otherwise.</tt></dd></dl>
+
+<dl><dt><a name="User-logout"><strong>logout</strong></a>(self, fromMgr<font color="#909090">=False</font>)</dt></dl>
+
+<dl><dt><a name="User-manager"><strong>manager</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-name"><strong>name</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-password"><strong>password</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-serialNum"><strong>serialNum</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="User-setManager"><strong>setManager</strong></a>(self, manager)</dt><dd><tt>Set&nbsp;the&nbsp;manager,&nbsp;which&nbsp;can&nbsp;only&nbsp;be&nbsp;done&nbsp;once.</tt></dd></dl>
+
+<dl><dt><a name="User-setName"><strong>setName</strong></a>(self, name)</dt><dd><tt>Set&nbsp;the&nbsp;name,&nbsp;which&nbsp;can&nbsp;only&nbsp;be&nbsp;done&nbsp;once.</tt></dd></dl>
+
+<dl><dt><a name="User-setPassword"><strong>setPassword</strong></a>(self, password)</dt></dl>
+
+<dl><dt><a name="User-setSerialNum"><strong>setSerialNum</strong></a>(self, serialNum)</dt></dl>
+
+<dl><dt><a name="User-wasAccessed"><strong>wasAccessed</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+</td></tr></table>
+</body></html>

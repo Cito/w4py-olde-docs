@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>UserKit/HierRole.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""The HierRole class."""</span>
+
+<span class="PY_KEYWORD">from</span> Role <span class="PY_KEYWORD">import</span> Role
+
+
+<span class="PY_KEYWORD">class</span> HierRole(Role):
+    <span class="PY_STRING">"""HierRole is a hierarchical role.
+
+    It points to its parent roles. The hierarchy cannot have cycles.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, name, description=None, superRoles=[]):
+        Role.__init__(self, name, description)
+        <span class="PY_KEYWORD">for</span> role <span class="PY_KEYWORD">in</span> superRoles:
+            <span class="PY_KEYWORD">assert</span> isinstance(role, Role)
+        self._superRoles = superRoles[:]
+
+    <span class="PY_KEYWORD">def</span> playsRole(self, role):
+        <span class="PY_STRING">"""Check whether the receiving role plays the role that is passed in.
+
+        This implementation provides for the inheritance that HierRole supports.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self == role:
+            <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">for</span> superRole <span class="PY_KEYWORD">in</span> self._superRoles:
+            <span class="PY_KEYWORD">if</span> superRole.playsRole(role):
+                <span class="PY_KEYWORD">return</span> True
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> False
+</pre>
+<!--footer-->
+
+</body>
+</html>

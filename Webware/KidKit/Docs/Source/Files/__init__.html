@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>KidKit/__init__.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_COMMENT"># KidKit</span>
+<span class="PY_COMMENT"># Webware for Python</span>
+<span class="PY_COMMENT"># See Docs/index.html</span>
+
+<span class="PY_KEYWORD">def</span> InstallInWebKit(appServer):
+    app = appServer.application()
+    <span class="PY_KEYWORD">from</span> WebKit.PlugIn <span class="PY_KEYWORD">import</span> PlugInError
+    <span class="PY_KEYWORD">try</span>:
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">from</span> KidKit.Properties <span class="PY_KEYWORD">import</span> requiredSoftware
+        <span class="PY_KEYWORD">except</span> ImportError:
+            <span class="PY_KEYWORD">raise</span> PlugInError(<span class="PY_STRING">'Cannot determine required software.'</span>)
+        <span class="PY_KEYWORD">for</span> soft <span class="PY_KEYWORD">in</span> requiredSoftware:
+            <span class="PY_KEYWORD">if</span> soft[<span class="PY_STRING">'name'</span>] == <span class="PY_STRING">'kid'</span>:
+                requiredKidVersion = soft[<span class="PY_STRING">'version'</span>]
+                <span class="PY_KEYWORD">break</span>
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">raise</span> PlugInError(<span class="PY_STRING">'Cannot determine required Kid version.'</span>)
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">import</span> kid
+        <span class="PY_KEYWORD">except</span> ImportError:
+            <span class="PY_KEYWORD">raise</span> PlugInError(
+                <span class="PY_STRING">'Cannot import Kid. This needs to be installed to use KidKit.'</span>)
+        <span class="PY_KEYWORD">try</span>:
+            kidVersion = tuple(map(<span class="PY_KEYWORD">lambda</span> s:
+                    int(<span class="PY_STRING">'0'</span> + <span class="PY_STRING">''</span>.join(filter(<span class="PY_KEYWORD">lambda</span> c: c.isdigit(), s))),
+                kid.__version__.split(<span class="PY_STRING">'.'</span>, 3)[:3]))
+        <span class="PY_KEYWORD">except</span> ImportError:
+            <span class="PY_KEYWORD">raise</span> PlugInError(<span class="PY_STRING">'Cannot determine Kid version.'</span>)
+        <span class="PY_KEYWORD">if</span> kidVersion &lt; requiredKidVersion:
+            <span class="PY_KEYWORD">raise</span> PlugInError(
+                <span class="PY_STRING">'KidKit needs at least Kid version %s (installed is %s).'</span>
+                % (<span class="PY_STRING">'.'</span>.join(map(str, requiredKidVersion)),
+                    <span class="PY_STRING">'.'</span>.join(map(str, kidVersion))))
+        <span class="PY_KEYWORD">try</span>:
+            <span class="PY_KEYWORD">from</span> KidServletFactory <span class="PY_KEYWORD">import</span> KidServletFactory
+            app.addServletFactory(KidServletFactory(app))
+        <span class="PY_KEYWORD">except</span> Exception:
+            <span class="PY_KEYWORD">from</span> traceback <span class="PY_KEYWORD">import</span> print_exc
+            print_exc()
+            <span class="PY_KEYWORD">raise</span> PlugInError(<span class="PY_STRING">'Cannot install Kid servlet factory.'</span>)
+    <span class="PY_KEYWORD">except</span> PlugInError, e:
+        <span class="PY_KEYWORD">print</span> e
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"KidKit will not be loaded, '.kid' extension will be ignored."</span>
+        <span class="PY_COMMENT"># We need to disable the '.kid' extension because otherwise the kid</span>
+        <span class="PY_COMMENT"># templates would be delivered as ordinary files (security problem).</span>
+        e = app.setting(<span class="PY_STRING">'ExtensionsToIgnore'</span>, [])
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'.kid'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> e:
+            e.append(<span class="PY_STRING">'.kid'</span>)
+            app.setSetting(<span class="PY_STRING">'ExtensionsToIgnore'</span>, e)
+        e = app.setting(<span class="PY_STRING">'FilesToHide'</span>, [])
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'*.kid'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> e:
+            e.append(<span class="PY_STRING">'*.kid'</span>)
+            app.setSetting(<span class="PY_STRING">'FilesToHide'</span>, e)
+        <span class="PY_KEYWORD">from</span> WebKit.URLParser <span class="PY_KEYWORD">import</span> initParser
+        initParser(app)
+</pre>
+<!--footer-->
+
+</body>
+</html>

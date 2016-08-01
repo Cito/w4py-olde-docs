@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Summary of WebKit.URLParser</title>
+<style type="text/css">
+<!--
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 3pt; }
+pre { background: #EEF; padding: 3pt; }
+.line_class { color: #446; line-height: 14pt; }
+.line_category { color: #008; line-height: 14pt; }
+.line_def { color: #224; line-height: 12pt;}
+.name_class { color: #000; font-weight: bold; text-decoration: underline; }
+.name_def { color: #000; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<h2>Summary of WebKit.URLParser</h2>
+<p>You can also browse the <a href="../Files/URLParser.html">complete source file</a>
+or the <a href="../Docs/WebKit.URLParser.html">generated documentation</a>.</p>
+<pre><span class="line_def">def <span class="name_def">application</span>()</span>
+
+
+<span class="line_class">class <span class="name_class">URLParser</span>(object):</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">findServletForTransaction</span>(self, trans)</span>
+
+
+<span class="line_class">class <span class="name_class">ContextParser</span>(URLParser):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, app)</span>
+
+<span class="line_category">    ## Context handling ##</span>
+<span class="line_def">    def <span class="name_def">resolveDefaultContext</span>(self, name, dest)</span>
+<span class="line_def">    def <span class="name_def">addContext</span>(self, name, dir)</span>
+<span class="line_def">    def <span class="name_def">absContextPath</span>(self, path)</span>
+
+<span class="line_category">    ## Parsing ##</span>
+<span class="line_def">    def <span class="name_def">parse</span>(self, trans, requestPath)</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, path)</span>
+
+<span class="line_category">    ## Parsing ##</span>
+<span class="line_def">    def <span class="name_def">parse</span>(self, trans, requestPath)</span>
+<span class="line_def">    def <span class="name_def">filenamesForBaseName</span>(self, baseName)</span>
+<span class="line_def">    def <span class="name_def">shouldServeFile</span>(self, filename)</span>
+<span class="line_def">    def <span class="name_def">parseIndex</span>(self, trans, requestPath)</span>
+<span class="line_def">    def <span class="name_def">initModule</span>(self)</span>
+<span class="line_def">    def <span class="name_def">parseInit</span>(self, trans, requestPath)</span>
+
+
+<span class="line_class">class <span class="name_class">URLParameterParser</span>(URLParser):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self, fileParser=None)</span>
+
+<span class="line_category">    ## Parsing ##</span>
+<span class="line_def">    def <span class="name_def">parse</span>(self, trans, requestPath)</span>
+<span class="line_def">    def <span class="name_def">parseHook</span>(trans, requestPath, hook)</span>
+
+
+<span class="line_class">class <span class="name_class">ServletFactoryManagerClass</span>(object):</span>
+
+<span class="line_category">    ## Init ##</span>
+<span class="line_def">    def <span class="name_def">__init__</span>(self)</span>
+<span class="line_def">    def <span class="name_def">reset</span>(self)</span>
+
+<span class="line_category">    ## Manager ##</span>
+<span class="line_def">    def <span class="name_def">addServletFactory</span>(self, factory)</span>
+<span class="line_def">    def <span class="name_def">factoryForFile</span>(self, path)</span>
+<span class="line_def">    def <span class="name_def">servletForFile</span>(self, trans, path)</span>
+
+
+<span class="line_category">## Global Init ##</span>
+<span class="line_def">def <span class="name_def">initApp</span>(app)</span>
+<span class="line_def">def <span class="name_def">initParser</span>(app)</span>
+
+</pre>
+</body>
+</html>

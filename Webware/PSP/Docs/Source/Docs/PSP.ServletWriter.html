@@ -1,0 +1,98 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.ServletWriter</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.ServletWriter</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/ServletWriter.py">/var/www/docs/Webware-1.1.1/PSP/ServletWriter.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;holds&nbsp;the&nbsp;actual&nbsp;file&nbsp;writer&nbsp;class.<br>
+&nbsp;<br>
+(c)&nbsp;Copyright&nbsp;by&nbsp;Jay&nbsp;Love,&nbsp;2000&nbsp;(mailto:jsliv@jslove.org)<br>
+&nbsp;<br>
+Permission&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;and&nbsp;distribute&nbsp;this&nbsp;software&nbsp;and&nbsp;its<br>
+documentation&nbsp;for&nbsp;any&nbsp;purpose&nbsp;and&nbsp;without&nbsp;fee&nbsp;or&nbsp;royalty&nbsp;is&nbsp;hereby&nbsp;granted,<br>
+provided&nbsp;that&nbsp;the&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;appear&nbsp;in&nbsp;all&nbsp;copies&nbsp;and&nbsp;that<br>
+both&nbsp;that&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;appear&nbsp;in<br>
+supporting&nbsp;documentation&nbsp;or&nbsp;portions&nbsp;thereof,&nbsp;including&nbsp;modifications,<br>
+that&nbsp;you&nbsp;make.<br>
+&nbsp;<br>
+This&nbsp;software&nbsp;is&nbsp;based&nbsp;in&nbsp;part&nbsp;on&nbsp;work&nbsp;done&nbsp;by&nbsp;the&nbsp;Jakarta&nbsp;group.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.ServletWriter.html#ServletWriter">ServletWriter</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ServletWriter">class <strong>ServletWriter</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;file&nbsp;creates&nbsp;the&nbsp;servlet&nbsp;source&nbsp;code.<br>
+&nbsp;<br>
+Well,&nbsp;it&nbsp;writes&nbsp;it&nbsp;out&nbsp;to&nbsp;a&nbsp;file&nbsp;at&nbsp;least.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ServletWriter-__init__"><strong>__init__</strong></a>(self, ctxt)</dt></dl>
+
+<dl><dt><a name="ServletWriter-close"><strong>close</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ServletWriter-indent"><strong>indent</strong></a>(self, s)</dt><dd><tt>Indent&nbsp;the&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-popIndent"><strong>popIndent</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ServletWriter-printChars"><strong>printChars</strong></a>(self, s)</dt><dd><tt>Just&nbsp;prints&nbsp;what&nbsp;its&nbsp;given.</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-printComment"><strong>printComment</strong></a>(self, start, stop, chars)</dt></dl>
+
+<dl><dt><a name="ServletWriter-printIndent"><strong>printIndent</strong></a>(self)</dt><dd><tt>Just&nbsp;prints&nbsp;tabs.</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-printList"><strong>printList</strong></a>(self, strlist)</dt><dd><tt>Prints&nbsp;a&nbsp;list&nbsp;of&nbsp;strings&nbsp;with&nbsp;indentation&nbsp;and&nbsp;a&nbsp;newline.</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-printMultiLn"><strong>printMultiLn</strong></a>(self, s)</dt></dl>
+
+<dl><dt><a name="ServletWriter-println"><strong>println</strong></a>(self, line<font color="#909090">=None</font>)</dt><dd><tt>Print&nbsp;with&nbsp;indentation&nbsp;and&nbsp;a&nbsp;newline&nbsp;if&nbsp;none&nbsp;supplied.</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-pushIndent"><strong>pushIndent</strong></a>(self)</dt><dd><tt>this&nbsp;is&nbsp;very&nbsp;key,&nbsp;have&nbsp;to&nbsp;think&nbsp;more&nbsp;about&nbsp;it</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-quoteString"><strong>quoteString</strong></a>(self, s)</dt><dd><tt>Escape&nbsp;the&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="ServletWriter-setIndentSpaces"><strong>setIndentSpaces</strong></a>(self, amt)</dt></dl>
+
+<dl><dt><a name="ServletWriter-setIndentType"><strong>setIndentType</strong></a>(self, type)</dt></dl>
+
+<dl><dt><a name="ServletWriter-setIndention"><strong>setIndention</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

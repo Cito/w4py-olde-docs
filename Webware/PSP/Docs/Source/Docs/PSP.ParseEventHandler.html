@@ -1,0 +1,208 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PSP.ParseEventHandler</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="PSP.html"><font color="#ffffff">PSP</font></a>.ParseEventHandler</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/var/www/docs/Webware-1.1.1/PSP/ParseEventHandler.py">/var/www/docs/Webware-1.1.1/PSP/ParseEventHandler.py</a></font></td></tr></table>
+    <p><tt>Event&nbsp;handler&nbsp;for&nbsp;parsing&nbsp;PSP&nbsp;tokens.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;is&nbsp;called&nbsp;when&nbsp;the&nbsp;Parser&nbsp;encounters&nbsp;psp&nbsp;tokens.<br>
+It&nbsp;creates&nbsp;a&nbsp;generator&nbsp;to&nbsp;handle&nbsp;the&nbsp;PSP&nbsp;token.&nbsp;When&nbsp;the&nbsp;PSP<br>
+source&nbsp;file&nbsp;is&nbsp;fully&nbsp;parsed,&nbsp;this&nbsp;module&nbsp;calls&nbsp;all&nbsp;of&nbsp;the<br>
+generators&nbsp;in&nbsp;turn&nbsp;to&nbsp;output&nbsp;their&nbsp;source&nbsp;code.<br>
+&nbsp;<br>
+(c)&nbsp;Copyright&nbsp;by&nbsp;Jay&nbsp;Love,&nbsp;2000&nbsp;(mailto:jsliv@jslove.org)<br>
+&nbsp;<br>
+Permission&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;and&nbsp;distribute&nbsp;this&nbsp;software&nbsp;and&nbsp;its<br>
+documentation&nbsp;for&nbsp;any&nbsp;purpose&nbsp;and&nbsp;without&nbsp;fee&nbsp;or&nbsp;royalty&nbsp;is&nbsp;hereby&nbsp;granted,<br>
+provided&nbsp;that&nbsp;the&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;appear&nbsp;in&nbsp;all&nbsp;copies&nbsp;and&nbsp;that<br>
+both&nbsp;that&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;appear&nbsp;in<br>
+supporting&nbsp;documentation&nbsp;or&nbsp;portions&nbsp;thereof,&nbsp;including&nbsp;modifications,<br>
+that&nbsp;you&nbsp;make.<br>
+&nbsp;<br>
+This&nbsp;software&nbsp;is&nbsp;based&nbsp;in&nbsp;part&nbsp;on&nbsp;work&nbsp;done&nbsp;by&nbsp;the&nbsp;Jakarta&nbsp;group.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PSP.BraceConverter.html">PSP.BraceConverter</a><br>
+</td><td width="25%" valign=top><a href="PSP.PSPUtils.html">PSP.PSPUtils</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="PSP.ParseEventHandler.html#ParseEventHandler">ParseEventHandler</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ParseEventHandler">class <strong>ParseEventHandler</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;a&nbsp;key&nbsp;class.<br>
+&nbsp;<br>
+It&nbsp;implements&nbsp;the&nbsp;handling&nbsp;of&nbsp;all&nbsp;the&nbsp;parsing&nbsp;elements.<br>
+Note:&nbsp;This&nbsp;files&nbsp;JSP&nbsp;cousin&nbsp;is&nbsp;called&nbsp;ParseEventListener,<br>
+I&nbsp;don't&nbsp;know&nbsp;why,&nbsp;but&nbsp;Handler&nbsp;seemed&nbsp;more&nbsp;appropriate&nbsp;to&nbsp;me.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ParseEventHandler-__init__"><strong>__init__</strong></a>(self, ctxt, parser)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-addGenerator"><strong>addGenerator</strong></a>(self, gen)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-beginProcessing"><strong>beginProcessing</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-endProcessing"><strong>endProcessing</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-extendsHandler"><strong>extendsHandler</strong></a>(self, bc, start, stop)</dt><dd><tt>Extends&nbsp;is&nbsp;a&nbsp;page&nbsp;directive.<br>
+&nbsp;<br>
+It&nbsp;sets&nbsp;the&nbsp;base&nbsp;class&nbsp;(or&nbsp;multiple&nbsp;base&nbsp;classes)&nbsp;for&nbsp;the&nbsp;class<br>
+that&nbsp;this&nbsp;class&nbsp;will&nbsp;generate.&nbsp;The&nbsp;choice&nbsp;of&nbsp;base&nbsp;class&nbsp;affects<br>
+the&nbsp;choice&nbsp;of&nbsp;a&nbsp;method&nbsp;to&nbsp;override&nbsp;with&nbsp;the&nbsp;BaseMethod&nbsp;page&nbsp;directive.<br>
+The&nbsp;default&nbsp;base&nbsp;class&nbsp;is&nbsp;PSPPage.&nbsp;PSPPage&nbsp;inherits&nbsp;from&nbsp;Page.py.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-formatterHandler"><strong>formatterHandler</strong></a>(self, value, start, stop)</dt><dd><tt>Set&nbsp;an&nbsp;alternate&nbsp;formatter&nbsp;function&nbsp;to&nbsp;use&nbsp;instead&nbsp;of&nbsp;str().</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-generateAll"><strong>generateAll</strong></a>(self, phase)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-generateDeclarations"><strong>generateDeclarations</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-generateFooter"><strong>generateFooter</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-generateHeader"><strong>generateHeader</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-generateInitPSP"><strong>generateInitPSP</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-generateMainMethod"><strong>generateMainMethod</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-gobbleWhitespace"><strong>gobbleWhitespace</strong></a>(self)</dt><dd><tt>Gobble&nbsp;up&nbsp;whitespace.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;looks&nbsp;for&nbsp;a&nbsp;character&nbsp;block&nbsp;between&nbsp;two&nbsp;PSP&nbsp;blocks<br>
+that&nbsp;contains&nbsp;only&nbsp;whitespace.&nbsp;If&nbsp;it&nbsp;finds&nbsp;one,&nbsp;it&nbsp;deletes&nbsp;it.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;necessary&nbsp;so&nbsp;that&nbsp;a&nbsp;write()&nbsp;line&nbsp;can't&nbsp;sneek&nbsp;in&nbsp;between<br>
+a&nbsp;if/else,&nbsp;try/except&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-gobbleWhitespaceHandler"><strong>gobbleWhitespaceHandler</strong></a>(self, value, start, stop)</dt><dd><tt>Declare&nbsp;whether&nbsp;whitespace&nbsp;between&nbsp;script&nbsp;tags&nbsp;are&nbsp;gobble&nbsp;up.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleCharData"><strong>handleCharData</strong></a>(self, start, stop, chars)</dt><dd><tt>Flush&nbsp;character&nbsp;data&nbsp;into&nbsp;a&nbsp;CharGen.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleComment"><strong>handleComment</strong></a>(self, start, stop)</dt><dd><tt>Comments&nbsp;get&nbsp;swallowed&nbsp;into&nbsp;nothing.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleDirective"><strong>handleDirective</strong></a>(self, directive, start, stop, attrs)</dt><dd><tt>Flush&nbsp;any&nbsp;template&nbsp;data&nbsp;into&nbsp;a&nbsp;CharGen&nbsp;and&nbsp;then&nbsp;create&nbsp;a&nbsp;new&nbsp;DirectiveGen.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleEndBlock"><strong>handleEndBlock</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-handleExpression"><strong>handleExpression</strong></a>(self, start, stop, attrs)</dt><dd><tt>Flush&nbsp;any&nbsp;template&nbsp;data&nbsp;into&nbsp;a&nbsp;CharGen&nbsp;and&nbsp;then&nbsp;create&nbsp;a&nbsp;new&nbsp;ExpressionGen.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleInclude"><strong>handleInclude</strong></a>(self, attrs, param)</dt><dd><tt>This&nbsp;is&nbsp;for&nbsp;includes&nbsp;of&nbsp;the&nbsp;form&nbsp;&lt;psp:include&nbsp;...&gt;<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;essentially&nbsp;forwards&nbsp;the&nbsp;request&nbsp;to&nbsp;the&nbsp;specified<br>
+URL&nbsp;and&nbsp;includes&nbsp;that&nbsp;output.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleInsert"><strong>handleInsert</strong></a>(self, attrs, param)</dt><dd><tt>This&nbsp;is&nbsp;for&nbsp;includes&nbsp;of&nbsp;the&nbsp;form&nbsp;&lt;psp:insert&nbsp;...&gt;<br>
+&nbsp;<br>
+This&nbsp;type&nbsp;of&nbsp;include&nbsp;is&nbsp;not&nbsp;parsed,&nbsp;it&nbsp;is&nbsp;just&nbsp;inserted&nbsp;in&nbsp;the&nbsp;output&nbsp;stream.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleMethod"><strong>handleMethod</strong></a>(self, start, stop, attrs)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-handleMethodEnd"><strong>handleMethodEnd</strong></a>(self, start, stop, attrs)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-handleScript"><strong>handleScript</strong></a>(self, start, stop, attrs)</dt><dd><tt>Handle&nbsp;scripting&nbsp;elements</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleScriptClass"><strong>handleScriptClass</strong></a>(self, start, stop, attrs)</dt><dd><tt>Python&nbsp;script&nbsp;that&nbsp;goes&nbsp;at&nbsp;the&nbsp;class&nbsp;level</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-handleScriptFile"><strong>handleScriptFile</strong></a>(self, start, stop, attrs)</dt><dd><tt>Python&nbsp;script&nbsp;that&nbsp;goes&nbsp;at&nbsp;the&nbsp;file/module&nbsp;level</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-importHandler"><strong>importHandler</strong></a>(self, imports, start, stop)</dt></dl>
+
+<dl><dt><a name="ParseEventHandler-indentSpacesHandler"><strong>indentSpacesHandler</strong></a>(self, amount, start, stop)</dt><dd><tt>Set&nbsp;number&nbsp;of&nbsp;spaces&nbsp;used&nbsp;to&nbsp;indent&nbsp;in&nbsp;generated&nbsp;source.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-indentTypeHandler"><strong>indentTypeHandler</strong></a>(self, type, start, stop)</dt><dd><tt>Declare&nbsp;whether&nbsp;tabs&nbsp;are&nbsp;used&nbsp;to&nbsp;indent&nbsp;source&nbsp;code.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-instanceSafeHandler"><strong>instanceSafeHandler</strong></a>(self, value, start, stop)</dt><dd><tt>Handle&nbsp;isInstanceSafe.<br>
+&nbsp;<br>
+isInstanceSafe&nbsp;tells&nbsp;the&nbsp;Servlet&nbsp;engine&nbsp;whether&nbsp;it&nbsp;is&nbsp;safe<br>
+to&nbsp;use&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;instances&nbsp;of&nbsp;this&nbsp;page&nbsp;multiple&nbsp;times.<br>
+The&nbsp;default&nbsp;is&nbsp;"yes".<br>
+&nbsp;<br>
+Saying&nbsp;"no"&nbsp;here&nbsp;hurts&nbsp;performance.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-mainMethodHandler"><strong>mainMethodHandler</strong></a>(self, method, start, stop)</dt><dd><tt>BaseMethod&nbsp;is&nbsp;a&nbsp;page&nbsp;directive.<br>
+&nbsp;<br>
+It&nbsp;sets&nbsp;the&nbsp;class&nbsp;method&nbsp;that&nbsp;the&nbsp;main&nbsp;body&nbsp;of&nbsp;this&nbsp;PSP&nbsp;page<br>
+over-rides.&nbsp;The&nbsp;default&nbsp;is&nbsp;WriteHTML.&nbsp;This&nbsp;value&nbsp;should&nbsp;be&nbsp;set<br>
+to&nbsp;either&nbsp;WriteHTML&nbsp;or&nbsp;writeBody.&nbsp;See&nbsp;the&nbsp;PSPPage.py&nbsp;and&nbsp;Page.py<br>
+servlet&nbsp;classes&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-optimizeCharData"><strong>optimizeCharData</strong></a>(self)</dt><dd><tt>Optimize&nbsp;the&nbsp;CharData.<br>
+&nbsp;<br>
+Too&nbsp;many&nbsp;char&nbsp;data&nbsp;generators&nbsp;make&nbsp;the&nbsp;servlet&nbsp;slow.<br>
+If&nbsp;the&nbsp;current&nbsp;Generator&nbsp;and&nbsp;the&nbsp;next&nbsp;are&nbsp;both&nbsp;CharData&nbsp;type,<br>
+merge&nbsp;their&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-setTemplateInfo"><strong>setTemplateInfo</strong></a>(self, start, stop)</dt><dd><tt>Mark&nbsp;non&nbsp;code&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="ParseEventHandler-threadSafeHandler"><strong>threadSafeHandler</strong></a>(self, value, start, stop)</dt><dd><tt>Handle&nbsp;isThreadSage.<br>
+&nbsp;<br>
+isThreadSafe&nbsp;is&nbsp;a&nbsp;page&nbsp;directive.<br>
+The&nbsp;value&nbsp;can&nbsp;be&nbsp;"yes"&nbsp;or&nbsp;"no".<br>
+Default&nbsp;is&nbsp;no&nbsp;because&nbsp;the&nbsp;default&nbsp;base&nbsp;class,<br>
+Page.py,&nbsp;isn't&nbsp;thread&nbsp;safe.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>aspace</strong> = ' '</dl>
+
+<dl><dt><strong>defaults</strong> = {'BASE_CLASS': 'WebKit.Page', 'BASE_METHOD': 'writeHTML', 'formatter': 'str', 'gobbleWhitespace': True, 'imports': {'filename': 'classes'}, 'indent': 4, 'instanceSafe': 'yes', 'threadSafe': 'no'}</dl>
+
+<dl><dt><strong>directiveHandlers</strong> = {'BaseClass': &lt;function extendsHandler&gt;, 'extends': &lt;function extendsHandler&gt;, 'formatter': &lt;function formatterHandler&gt;, 'gobbleWhitespace': &lt;function gobbleWhitespaceHandler&gt;, 'import': &lt;function importHandler&gt;, 'imports': &lt;function importHandler&gt;, 'indentSpaces': &lt;function indentSpacesHandler&gt;, 'indentType': &lt;function indentTypeHandler&gt;, 'isInstanceSafe': &lt;function instanceSafeHandler&gt;, 'isThreadSafe': &lt;function threadSafeHandler&gt;, ...}</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-checkForTextHavingOnlyGivenChars"><strong>checkForTextHavingOnlyGivenChars</strong></a>(text, ws<font color="#909090">=None</font>)</dt><dd><tt>Checks&nbsp;whether&nbsp;text&nbsp;contains&nbsp;only&nbsp;whitespace&nbsp;(or&nbsp;other&nbsp;chars).<br>
+&nbsp;<br>
+Does&nbsp;the&nbsp;given&nbsp;text&nbsp;contain&nbsp;anything&nbsp;other&nbsp;than&nbsp;the&nbsp;ws&nbsp;characters?<br>
+Return&nbsp;true&nbsp;if&nbsp;text&nbsp;is&nbsp;only&nbsp;ws&nbsp;characters.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ResponseObject</strong> = 'res'</td></tr></table>
+</body></html>

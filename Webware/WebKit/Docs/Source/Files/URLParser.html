@@ -1,0 +1,920 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>WebKit/URLParser.py</title>
+<!--css-->
+
+<style type="text/css">
+<!--
+body{ background: #EEF;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
+.PY_KEYWORD{ color: #00C; font-weight: bold; }
+.PY_COMMENT{ color: #008; }
+.PY_PARAMETER{ color: #C00; }
+.PY_IDENTIFIER{ color: #C00; font-weight: bold; }
+.PY_STRING{ color: #080; }
+-->
+</style>
+</head>
+<body>
+<!--header-->
+
+<!--script-->
+<pre><span class="PY_STRING">"""URLParser
+
+URL parsing is done through objects which are subclasses of the `URLParser`
+class. `Application` delegates most of the URL parsing to these objects.
+
+Application has a single "root" URL parser, which is used to parse all URLs.
+This parser then can pass the request on to other parsers, usually taking off
+parts of the URL with each step.
+
+This root parser is generally `ContextParser`, which is instantiated and set
+up by `Application` (accessible through `Application.rootURLParser`).
+
+"""</span>
+
+<span class="PY_KEYWORD">import</span> os
+<span class="PY_KEYWORD">import</span> re
+<span class="PY_KEYWORD">import</span> sys
+
+<span class="PY_KEYWORD">from</span> warnings <span class="PY_KEYWORD">import</span> warn
+
+<span class="PY_KEYWORD">from</span> HTTPExceptions <span class="PY_KEYWORD">import</span> HTTPNotFound, HTTPMovedPermanently
+<span class="PY_KEYWORD">from</span> MiscUtils.ParamFactory <span class="PY_KEYWORD">import</span> ParamFactory
+<span class="PY_KEYWORD">from</span> WebUtils.Funcs <span class="PY_KEYWORD">import</span> urlDecode
+
+debug = False
+
+<span class="PY_COMMENT"># Legal characters for use in a module name -- used when turning</span>
+<span class="PY_COMMENT"># an entire path into a module name.</span>
+_moduleNameRE = re.compile(<span class="PY_STRING">'[^a-zA-Z_]'</span>)
+
+_globalApplication = None
+
+<span class="PY_KEYWORD">def</span> application():
+    <span class="PY_STRING">"""Returns the global Application."""</span>
+    <span class="PY_KEYWORD">return</span> _globalApplication
+
+
+<span class="PY_KEYWORD">class</span> URLParser(object):
+    <span class="PY_STRING">"""URLParser is the base class for all URL parsers.
+
+    Though its functionality is sparse, it may be expanded in the future.
+    Subclasses should implement a `parse` method, and may also want to
+    implement an `__init__` method with arguments that control how the
+    parser works (for instance, passing a starting path for the parser)
+
+    The `parse` method is where most of the work is done. It takes two
+    arguments -- the transaction and the portion of the URL that is still to
+    be parsed. The transaction may (and usually is) modified along the way.
+    The URL is passed through so that you can take pieces off the front,
+    and then pass the reduced URL to another parser. The method should return
+    a servlet (never None).
+
+    If you cannot find a servlet, or some other (somewhat) expected error
+    occurs, you should raise an exception. HTTPNotFound probably being the
+    most interesting.
+
+    """</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> findServletForTransaction(self, trans):
+        <span class="PY_STRING">"""Returns a servlet for the transaction.
+
+        This is the top-level entry point, below it `parse` is used.
+
+        """</span>
+        <span class="PY_KEYWORD">return</span> self.parse(trans, trans.request().urlPath())
+
+
+<span class="PY_KEYWORD">class</span> ContextParser(URLParser):
+    <span class="PY_STRING">"""Find the context of a request.
+
+    ContextParser uses the ``Application.config`` context settings to find
+    the context of the request.  It then passes the request to a FileParser
+    rooted in the context path.
+
+    The context is the first element of the URL, or if no context matches
+    that then it is the ``default`` context (and the entire URL is passed
+    to the default context's FileParser).
+
+    There is generally only one ContextParser, which can be found as
+    ``application.rootURLParser()``.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, app):
+        <span class="PY_STRING">"""Create ContextParser.
+
+        ContextParser is usually created by Application, which
+        passes all requests to it.
+
+        In __init__ we take the ``Contexts`` setting from
+        Application.config and parse it slightly.
+
+        """</span>
+        URLParser.__init__(self)
+        <span class="PY_COMMENT"># Need to set this here because we need for initialization, during</span>
+        <span class="PY_COMMENT"># which AppServer.globalAppServer.application() doesn't yet exist:</span>
+        self._app = app
+        self._imp = app._imp
+        <span class="PY_COMMENT"># self._context will be a dictionary of context names and context</span>
+        <span class="PY_COMMENT"># directories.  It is set by `addContext`.</span>
+        self._contexts = {}
+        <span class="PY_COMMENT"># add all contexts except the default, which we save until the end</span>
+        contexts = app.setting(<span class="PY_STRING">'Contexts'</span>)
+        defaultContext = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">for</span> name, dir <span class="PY_KEYWORD">in</span> contexts.items():
+            dir = os.path.normpath(dir) <span class="PY_COMMENT"># for Windows</span>
+            <span class="PY_KEYWORD">if</span> name == <span class="PY_STRING">'default'</span>:
+                defaultContext = dir
+            <span class="PY_KEYWORD">else</span>:
+                name = <span class="PY_STRING">'/'</span>.join(filter(<span class="PY_KEYWORD">lambda</span> x: x, name.split(<span class="PY_STRING">'/'</span>)))
+                self.addContext(name, dir)
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> defaultContext:
+            <span class="PY_COMMENT"># If no default context has been specified, and there is a unique</span>
+            <span class="PY_COMMENT"># context not built into Webware, use it as the default context.</span>
+            <span class="PY_KEYWORD">for</span> name <span class="PY_KEYWORD">in</span> contexts:
+                <span class="PY_KEYWORD">if</span> name.endswith(<span class="PY_STRING">'/Docs'</span>) <span class="PY_KEYWORD">or</span> name <span class="PY_KEYWORD">in</span> (
+                        <span class="PY_STRING">'Admin'</span>, <span class="PY_STRING">'Docs'</span>, <span class="PY_STRING">'Examples'</span>,  <span class="PY_STRING">'MKBrowser'</span>, <span class="PY_STRING">'Testing'</span>):
+                    <span class="PY_KEYWORD">continue</span>
+                <span class="PY_KEYWORD">if</span> defaultContext:
+                    defaultContext = None
+                    <span class="PY_KEYWORD">break</span>
+                <span class="PY_KEYWORD">else</span>:
+                    defaultContext = name
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> defaultContext:
+                <span class="PY_COMMENT"># otherwise, try using the following contexts if available</span>
+                <span class="PY_KEYWORD">for</span> defaultContext <span class="PY_KEYWORD">in</span> (<span class="PY_STRING">'Default'</span>, <span class="PY_STRING">'Examples'</span>, <span class="PY_STRING">'Docs'</span>):
+                    <span class="PY_KEYWORD">if</span> defaultContext <span class="PY_KEYWORD">in</span> contexts:
+                        <span class="PY_KEYWORD">break</span>
+                <span class="PY_KEYWORD">else</span>: <span class="PY_COMMENT"># if not available, refuse the tempatation to guess</span>
+                    <span class="PY_KEYWORD">raise</span> KeyError(<span class="PY_STRING">"No default context has been specified."</span>)
+        <span class="PY_KEYWORD">if</span> defaultContext <span class="PY_KEYWORD">in</span> self._contexts:
+            self._defaultContext = defaultContext
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">for</span> name, dir <span class="PY_KEYWORD">in</span> self._contexts.items():
+                <span class="PY_KEYWORD">if</span> defaultContext == dir:
+                    self._defaultContext = name
+                    <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                self.addContext(<span class="PY_STRING">'default'</span>, defaultContext)
+                self._defaultContext = <span class="PY_STRING">'default'</span>
+
+
+    <span class="PY_COMMENT">## Context handling ##</span>
+
+    <span class="PY_KEYWORD">def</span> resolveDefaultContext(self, name, dest):
+        <span class="PY_STRING">"""Find default context.
+
+        Figure out if the default context refers to an existing context,
+        the same directory as an existing context, or a unique directory.
+
+        Returns the name of the context that the default context refers to,
+        or 'default' if the default context is unique.
+
+        """</span>
+        contexts = self._contexts
+        contextDirs = {}
+        <span class="PY_COMMENT"># make a list of existing context paths</span>
+        <span class="PY_KEYWORD">for</span> name, path <span class="PY_KEYWORD">in</span> contexts.items():
+            <span class="PY_KEYWORD">if</span> name != <span class="PY_STRING">'default'</span>:
+                contextDirs[self.absContextPath(path)] = name
+        <span class="PY_KEYWORD">if</span> dest <span class="PY_KEYWORD">in</span> contexts:
+            <span class="PY_COMMENT"># The default context refers to another context,</span>
+            <span class="PY_COMMENT"># not a unique context.  Return the name of that context.</span>
+            <span class="PY_KEYWORD">return</span> dest
+        <span class="PY_KEYWORD">elif</span> self.absContextPath(dest) <span class="PY_KEYWORD">in</span> contextDirs:
+            <span class="PY_COMMENT"># The default context has the same directory</span>
+            <span class="PY_COMMENT"># as another context, so it's still not unique</span>
+            <span class="PY_KEYWORD">return</span> contextDirs[self.absContextPath(dest)]
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># The default context has no other name</span>
+            <span class="PY_KEYWORD">return</span> <span class="PY_STRING">'default'</span>
+
+    <span class="PY_KEYWORD">def</span> addContext(self, name, dir):
+        <span class="PY_STRING">"""Add a context to the system.
+
+        The context will be imported as a package, going by `name`,
+        from the given directory. The directory doesn't have to match
+        the context name.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> name == <span class="PY_STRING">'default'</span>:
+            dest = self.resolveDefaultContext(name, dir)
+            self._defaultContext = dest
+            <span class="PY_KEYWORD">if</span> dest != <span class="PY_STRING">'default'</span>:
+                <span class="PY_COMMENT"># in this case default refers to an existing context, so</span>
+                <span class="PY_COMMENT"># there's not much to do</span>
+                <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Default context aliases to: %s'</span> % (dest)
+                <span class="PY_KEYWORD">return</span>
+
+        e = None
+        <span class="PY_KEYWORD">try</span>:
+            importAsName = name
+            localDir, packageName = os.path.split(dir)
+            <span class="PY_KEYWORD">if</span> importAsName <span class="PY_KEYWORD">in</span> sys.modules:
+                mod = sys.modules[importAsName]
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">try</span>:
+                    res = self._imp.find_module(packageName, [localDir])
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> res:
+                        <span class="PY_KEYWORD">raise</span> ImportError
+                <span class="PY_KEYWORD">except</span> ImportError, e:
+                    <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> str(e):
+                        e = <span class="PY_STRING">'Could not import package'</span>
+                    <span class="PY_COMMENT"># Maybe this happened because it had been forgotten</span>
+                    <span class="PY_COMMENT"># to add the __init__.py file. So we try to create one:</span>
+                    <span class="PY_KEYWORD">if</span> os.path.exists(dir):
+                        f = os.path.join(dir, <span class="PY_STRING">'__init__.py'</span>)
+                        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> os.path.exists(f):
+                            <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"Creating __init__.py file"</span>
+                                <span class="PY_STRING">" for context '%s'"</span> % name)
+                            <span class="PY_KEYWORD">try</span>:
+                                open(f, <span class="PY_STRING">'w'</span>).write(
+                                    <span class="PY_STRING">'# Auto-generated by WebKit'</span> + os.linesep)
+                            <span class="PY_KEYWORD">except</span> Exception:
+                                <span class="PY_KEYWORD">print</span> (<span class="PY_STRING">"Error: __init__.py file"</span>
+                                    <span class="PY_STRING">" could not be created."</span>)
+                            <span class="PY_KEYWORD">else</span>:
+                                res = self._imp.find_module(packageName,
+                                    [localDir])
+                                <span class="PY_KEYWORD">if</span> res:
+                                    e = None
+                    <span class="PY_KEYWORD">if</span> e:
+                        <span class="PY_KEYWORD">raise</span>
+                mod = self._imp.load_module(name, *res)
+        <span class="PY_KEYWORD">except</span> (ImportError, TypeError), e:
+            <span class="PY_COMMENT"># TypeError can be raised by imp.load_module()</span>
+            <span class="PY_COMMENT"># when the context path does not exist</span>
+            <span class="PY_KEYWORD">pass</span>
+        <span class="PY_KEYWORD">if</span> e:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Error loading context: %s: %s: dir=%s'</span> % (name, e, dir)
+            <span class="PY_KEYWORD">return</span>
+
+        <span class="PY_KEYWORD">if</span> hasattr(mod, <span class="PY_STRING">'contextInitialize'</span>):
+            <span class="PY_COMMENT"># @@ gat 2003-07-23: switched back to old method</span>
+            <span class="PY_COMMENT"># of passing application as first parameter</span>
+            <span class="PY_COMMENT"># to contextInitialize for backward compatibility</span>
+            result = mod.contextInitialize(application(),
+                os.path.normpath(os.path.join(os.getcwd(), dir)))
+            <span class="PY_COMMENT"># @@: funny hack...?</span>
+            <span class="PY_KEYWORD">if</span> result <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'ContentLocation'</span> <span class="PY_KEYWORD">in</span> result:
+                dir = result[<span class="PY_STRING">'ContentLocation'</span>]
+
+        <span class="PY_KEYWORD">print</span> <span class="PY_STRING">'Loading context: %s at %s'</span> % (name, dir)
+        self._contexts[name] = dir
+
+    <span class="PY_KEYWORD">def</span> absContextPath(self, path):
+        <span class="PY_STRING">"""Get absolute context path.
+
+        Resolves relative paths, which are assumed to be relative to the
+        Application's serverSidePath (the working directory).
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> os.path.isabs(path):
+            <span class="PY_KEYWORD">return</span> path
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_KEYWORD">return</span> self._app.serverSidePath(path)
+
+
+    <span class="PY_COMMENT">## Parsing ##</span>
+
+    <span class="PY_KEYWORD">def</span> parse(self, trans, requestPath):
+        <span class="PY_STRING">"""Parse request.
+
+        Get the context name, and dispatch to a FileParser rooted
+        in the context's path.
+
+        The context name and file path are stored in the request (accessible
+        through `Request.serverSidePath` and `Request.contextName`).
+
+        """</span>
+        <span class="PY_COMMENT"># This is a hack... should probably go in the Transaction class:</span>
+        trans._fileParserInitSeen = {}
+        <span class="PY_COMMENT"># If there is no path, redirect to the root path:</span>
+        req = trans.request()
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> requestPath:
+            p = req.servletPath() + <span class="PY_STRING">'/'</span>
+            q = req.queryString()
+            <span class="PY_KEYWORD">if</span> q:
+                p += <span class="PY_STRING">"?"</span> + q
+            <span class="PY_KEYWORD">raise</span> HTTPMovedPermanently(location=p)
+        <span class="PY_COMMENT"># Determine the context name:</span>
+        <span class="PY_KEYWORD">if</span> req._absolutepath:
+            contextName = self._defaultContext
+        <span class="PY_KEYWORD">else</span>:
+            context = filter(None, requestPath.split(<span class="PY_STRING">'/'</span>))
+            <span class="PY_KEYWORD">if</span> requestPath.endswith(<span class="PY_STRING">'/'</span>):
+                context.append(<span class="PY_STRING">''</span>)
+            parts = []
+            <span class="PY_KEYWORD">while</span> context:
+                contextName = <span class="PY_STRING">'/'</span>.join(context)
+                <span class="PY_KEYWORD">if</span> contextName <span class="PY_KEYWORD">in</span> self._contexts:
+                    <span class="PY_KEYWORD">break</span>
+                parts.insert(0, context.pop())
+            <span class="PY_KEYWORD">if</span> context:
+                <span class="PY_KEYWORD">if</span> parts:
+                    parts.insert(0, <span class="PY_STRING">''</span>)
+                    requestPath = <span class="PY_STRING">'/'</span>.join(parts)
+                <span class="PY_KEYWORD">else</span>:
+                    requestPath = <span class="PY_STRING">''</span>
+            <span class="PY_KEYWORD">else</span>:
+                contextName = self._defaultContext
+        context = self._contexts[contextName]
+        req._serverSideContextPath = context
+        req._contextName = contextName
+        fpp = FileParser(context)
+        <span class="PY_KEYWORD">return</span> fpp.parse(trans, requestPath)
+
+
+<span class="PY_KEYWORD">class</span> _FileParser(URLParser):
+    <span class="PY_STRING">"""Parse requests to the filesystem.
+
+    FileParser dispatches to servlets in the filesystem, as well as providing
+    hooks to override the FileParser.
+
+    FileParser objects are threadsafe. A factory function is used to cache
+    FileParser instances, so for any one path only a single FileParser instance
+    will exist.  The `_FileParser` class is the real class, and `FileParser` is
+    a factory that either returns an existant _FileParser object, or creates a
+    new one if none exists.
+
+    FileParser uses several settings from ``Application.config``, which are
+    persistent over the life of the application. These are set up in the
+    function `initApp`, as class variables. They cannot be set when the module
+    is loaded, because the Application is not yet set up, so `initApp` is
+    called in `Application.__init__`.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, path):
+        <span class="PY_STRING">"""Create a FileParser.
+
+        Each parsed directory has a FileParser instance associated with it
+        (``self._path``).
+
+        """</span>
+        URLParser.__init__(self)
+        self._path = path
+        self._initModule = None
+
+
+    <span class="PY_COMMENT">## Parsing ##</span>
+
+    <span class="PY_KEYWORD">def</span> parse(self, trans, requestPath):
+        <span class="PY_STRING">"""Return the servlet.
+
+        __init__ files will be used for various hooks
+        (see `parseInit` for more).
+
+        If the next part of the URL is a directory, it calls
+        ``FileParser(dirPath).parse(trans, restOfPath)`` where ``restOfPath``
+        is `requestPath` with the first section of the path removed (the part
+        of the path that this FileParser just handled).
+
+        This uses `fileNamesForBaseName` to find files in its directory.
+        That function has several functions to define what files are ignored,
+        hidden, etc.  See its documentation for more information.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> debug:
+            <span class="PY_KEYWORD">print</span> <span class="PY_STRING">"FP(%r) parses %r"</span> % (self._path, requestPath)
+
+        req = trans.request()
+
+        <span class="PY_KEYWORD">if</span> req._absolutepath:
+            name = req._fsPath
+            restPart = req._extraURLPath
+
+        <span class="PY_KEYWORD">else</span>:
+            <span class="PY_COMMENT"># First decode the URL, since we are dealing with filenames here:</span>
+            requestPath = urlDecode(requestPath)
+
+            result = self.parseInit(trans, requestPath)
+            <span class="PY_KEYWORD">if</span> result <span class="PY_KEYWORD">is</span> <span class="PY_KEYWORD">not</span> None:
+                <span class="PY_KEYWORD">return</span> result
+
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> requestPath <span class="PY_KEYWORD">or</span> requestPath == <span class="PY_STRING">'/'</span>:
+                <span class="PY_KEYWORD">return</span> self.parseIndex(trans, requestPath)
+
+            <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> requestPath.startswith(<span class="PY_STRING">'/'</span>):
+                <span class="PY_KEYWORD">raise</span> HTTPNotFound(<span class="PY_STRING">"Invalid path info: %s"</span> % requestPath)
+
+            parts = requestPath[1:].split(<span class="PY_STRING">'/'</span>, 1)
+            nextPart = parts[0]
+            restPart = len(parts) &gt; 1 <span class="PY_KEYWORD">and</span> <span class="PY_STRING">'/'</span> + parts[1] <span class="PY_KEYWORD">or</span> <span class="PY_STRING">''</span>
+
+            baseName = os.path.join(self._path, nextPart)
+            <span class="PY_KEYWORD">if</span> restPart <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> self._extraPathInfo:
+                names = [baseName]
+            <span class="PY_KEYWORD">else</span>:
+                names = self.filenamesForBaseName(baseName)
+
+            <span class="PY_KEYWORD">if</span> len(names) &gt; 1:
+                warn(<span class="PY_STRING">"More than one file matches %s in %s: %s"</span>
+                    % (requestPath, self._path, names))
+                <span class="PY_KEYWORD">raise</span> HTTPNotFound(<span class="PY_STRING">"Page is ambiguous"</span>)
+            <span class="PY_KEYWORD">elif</span> <span class="PY_KEYWORD">not</span> names:
+                <span class="PY_KEYWORD">return</span> self.parseIndex(trans, requestPath)
+
+            name = names[0]
+            <span class="PY_KEYWORD">if</span> os.path.isdir(name):
+                <span class="PY_COMMENT"># directories are dispatched to FileParsers</span>
+                <span class="PY_COMMENT"># rooted in that directory</span>
+                fpp = FileParser(name)
+                <span class="PY_KEYWORD">return</span> fpp.parse(trans, restPart)
+
+            req._extraURLPath = restPart
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> self._extraPathInfo <span class="PY_KEYWORD">and</span> restPart:
+            <span class="PY_KEYWORD">raise</span> HTTPNotFound(<span class="PY_STRING">"Invalid extra path info: %s"</span> % restPart)
+
+        req._serverSidePath = name
+
+        <span class="PY_KEYWORD">return</span> ServletFactoryManager.servletForFile(trans, name)
+
+    <span class="PY_KEYWORD">def</span> filenamesForBaseName(self, baseName):
+        <span class="PY_STRING">"""Find all files for a given base name.
+
+        Given a path, like ``/a/b/c``, searches for files in ``/a/b``
+        that start with ``c``.  The final name may include an extension,
+        which is less ambiguous; though if you ask for file.html,
+        and file.html.py exists, that file will be returned.
+
+        The files are filtered according to the settings ``FilesToHide``,
+        ``FilesToServe``, ``ExtensionsToIgnore`` and ``ExtensionsToServe``.
+        See the shouldServeFile() method for details on these settings.
+
+        All files that start with the given base name are returned
+        as a list. When the base name itself is part of the list or
+        when extensions are prioritized and such an extension is found
+        in the list, then the list will be reduced to only that entry.
+
+        Some settings are used to control the prioritization of filenames.
+        All settings are in ``Application.config``:
+
+        UseCascadingExtensions:
+            If true, then extensions will be prioritized.  So if
+            extension ``.tmpl`` shows up in ExtensionCascadeOrder
+            before ``.html``, then even if filenames with both
+            extensions exist, only the .tmpl file will be returned.
+        ExtensionCascadeOrder:
+            A list of extensions, ordered by priority.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'*'</span> <span class="PY_KEYWORD">in</span> baseName:
+            <span class="PY_KEYWORD">return</span> []
+
+        fileStart = os.path.basename(baseName)
+        dirName = os.path.dirname(baseName)
+        filenames = []
+        <span class="PY_KEYWORD">for</span> filename <span class="PY_KEYWORD">in</span> os.listdir(dirName):
+            <span class="PY_KEYWORD">if</span> filename.startswith(<span class="PY_STRING">'.'</span>):
+                <span class="PY_KEYWORD">continue</span>
+            <span class="PY_KEYWORD">elif</span> filename == fileStart:
+                <span class="PY_KEYWORD">if</span> self.shouldServeFile(filename):
+                    <span class="PY_KEYWORD">return</span> [os.path.join(dirName, filename)]
+            <span class="PY_KEYWORD">elif</span> (filename.startswith(fileStart)
+                    <span class="PY_KEYWORD">and</span> os.path.splitext(filename)[0] == fileStart):
+                <span class="PY_KEYWORD">if</span> self.shouldServeFile(filename):
+                    filenames.append(os.path.join(dirName, filename))
+
+        <span class="PY_KEYWORD">if</span> self._useCascading <span class="PY_KEYWORD">and</span> len(filenames) &gt; 1:
+            <span class="PY_KEYWORD">for</span> extension <span class="PY_KEYWORD">in</span> self._cascadeOrder:
+                <span class="PY_KEYWORD">if</span> baseName + extension <span class="PY_KEYWORD">in</span> filenames:
+                    <span class="PY_KEYWORD">return</span> [baseName + extension]
+
+        <span class="PY_KEYWORD">return</span> filenames
+
+    <span class="PY_KEYWORD">def</span> shouldServeFile(self, filename):
+        <span class="PY_STRING">"""Check if the file with the given filename should be served.
+
+        Some settings are used to control the filtering of filenames.
+        All settings are in ``Application.config``:
+
+        FilesToHide:
+            These files will be ignored, and even given a full
+            extension will not be used.  Takes a glob.
+        FilesToServe:
+            If set, *only* files matching these globs will be
+            served, all other files will be ignored.
+        ExtensionsToIgnore:
+            Files with these extensions will be ignored, but if a
+            complete filename (with extension) is given the file
+            *will* be served (unlike FilesToHide).  Extensions are
+            in the form ``".py"``
+        ExtensionsToServe:
+            If set, only files with these extensions will be
+            served.  Like FilesToServe, only doesn't use globs.
+
+        """</span>
+        ext = os.path.splitext(filename)[1]
+        <span class="PY_KEYWORD">if</span> ext <span class="PY_KEYWORD">in</span> self._toIgnore:
+            <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">if</span> self._toServe <span class="PY_KEYWORD">and</span> ext <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._toServe:
+            <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">for</span> regex <span class="PY_KEYWORD">in</span> self._filesToHideRegexes:
+            <span class="PY_KEYWORD">if</span> regex.match(filename):
+                <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">if</span> self._filesToServeRegexes:
+            <span class="PY_KEYWORD">for</span> regex <span class="PY_KEYWORD">in</span> self._filesToServeRegexes:
+                <span class="PY_KEYWORD">if</span> regex.match(filename):
+                    <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">else</span>:
+                <span class="PY_KEYWORD">return</span> False
+        <span class="PY_KEYWORD">return</span> True
+
+    <span class="PY_KEYWORD">def</span> parseIndex(self, trans, requestPath):
+        <span class="PY_STRING">"""Return index servlet.
+
+        Return the servlet for a directory index (i.e., ``Main`` or
+        ``index``).  When `parse` encounters a directory and there's nothing
+        left in the URL, or when there is something left and no file matches
+        it, then it will try `parseIndex` to see if there's an index file.
+
+        That means that if ``/a/b/c`` is requested, and in ``/a`` there's no
+        file or directory matching ``b``, then it'll look for an index file
+        (like ``Main.py``), and that servlet will be returned. In fact, if
+        no ``a`` was found, and the default context had an index (like
+        ``index.html``) then that would be called with ``/a/b/c`` as
+        `HTTPRequest.extraURLPath`.  If you don't want that to occur, you
+        should raise an HTTPNotFound in your no-extra-url-path-taking servlets.
+
+        The directory names are based off the ``Application.config`` setting
+        ``DirectoryFile``, which is a list of base names, by default
+        ``["Main", "index", "main", "Index"]``, which are searched in order.
+        A file with any extension is allowed, so the index can be an HTML file,
+        a PSP file, a Kid template, a Python servlet, etc.
+
+        """</span>
+        req = trans.request()
+        <span class="PY_COMMENT"># If requestPath is empty, then we're missing the trailing slash:</span>
+        <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> requestPath:
+            p = req.serverURL() + <span class="PY_STRING">'/'</span>
+            q = req.queryString()
+            <span class="PY_KEYWORD">if</span> q:
+                p += <span class="PY_STRING">"?"</span> + q
+            <span class="PY_KEYWORD">raise</span> HTTPMovedPermanently(location=p)
+        <span class="PY_KEYWORD">if</span> requestPath == <span class="PY_STRING">'/'</span>:
+            requestPath = <span class="PY_STRING">''</span>
+        <span class="PY_KEYWORD">for</span> directoryFile <span class="PY_KEYWORD">in</span> self._directoryFile:
+            basename = os.path.join(self._path, directoryFile)
+            names = self.filenamesForBaseName(basename)
+            <span class="PY_KEYWORD">if</span> len(names) &gt; 1 <span class="PY_KEYWORD">and</span> self._useCascading:
+                <span class="PY_KEYWORD">for</span> ext <span class="PY_KEYWORD">in</span> self._cascadeOrder:
+                    <span class="PY_KEYWORD">if</span> basename + ext <span class="PY_KEYWORD">in</span> names:
+                        names = [basename + ext]
+                        <span class="PY_KEYWORD">break</span>
+            <span class="PY_KEYWORD">if</span> len(names) &gt; 1:
+                warn(<span class="PY_STRING">"More than one file matches the index file %s in %s: %s"</span>
+                    % (directoryFile, self._path, names))
+                <span class="PY_KEYWORD">raise</span> HTTPNotFound(<span class="PY_STRING">"Index page is ambiguous"</span>)
+            <span class="PY_KEYWORD">if</span> names:
+                <span class="PY_KEYWORD">if</span> requestPath <span class="PY_KEYWORD">and</span> <span class="PY_KEYWORD">not</span> self._extraPathInfo:
+                    <span class="PY_KEYWORD">raise</span> HTTPNotFound
+                req._serverSidePath = names[0]
+                req._extraURLPath = requestPath
+                <span class="PY_KEYWORD">return</span> ServletFactoryManager.servletForFile(trans, names[0])
+        <span class="PY_KEYWORD">raise</span> HTTPNotFound(<span class="PY_STRING">"Index page not found"</span>)
+
+    <span class="PY_KEYWORD">def</span> initModule(self):
+        <span class="PY_STRING">"""Get the __init__ module object for this FileParser's directory."""</span>
+        path = self._path
+        <span class="PY_COMMENT"># if this directory is a context, return the context package</span>
+        <span class="PY_KEYWORD">for</span> context, dir <span class="PY_KEYWORD">in</span> self._app.contexts().items():
+            <span class="PY_KEYWORD">if</span> dir == path:
+                <span class="PY_COMMENT"># avoid reloading of the context package</span>
+                <span class="PY_KEYWORD">return</span> sys.modules.get(context)
+        name = <span class="PY_STRING">'WebKit_Cache_'</span> + _moduleNameRE.sub(<span class="PY_STRING">'_'</span>, path)
+        <span class="PY_KEYWORD">try</span>:
+            file, path, desc = self._imp.find_module(<span class="PY_STRING">'__init__'</span>, [path])
+            <span class="PY_KEYWORD">return</span> self._imp.load_module(name, file, path, desc)
+        <span class="PY_KEYWORD">except</span> (ImportError, TypeError):
+            <span class="PY_KEYWORD">pass</span>
+
+    <span class="PY_KEYWORD">def</span> parseInit(self, trans, requestPath):
+        <span class="PY_STRING">"""Parse the __init__ file.
+
+        Returns the resulting servlet, or None if no __init__ hooks were found.
+
+        Hooks are put in by defining special functions or objects in your
+        __init__, with specific names:
+
+        `urlTransactionHook`:
+            A function that takes one argument (the transaction).
+            The return value from the function is ignored.  You
+            can modify the transaction with this function, though.
+
+        `urlRedirect`:
+            A dictionary.  Keys in the dictionary are source
+            URLs, the value is the path to redirect to, or a
+            `URLParser` object to which the transaction should
+            be delegated.
+
+            For example, if the URL is ``/a/b/c``, and we've already
+            parsed ``/a`` and are looking for ``b/c``, and we fine
+            `urlRedirect`` in a.__init__, then we'll look for a key
+            ``b`` in the dictionary.  The value will be a directory
+            we should continue to (say, ``/destpath/``).  We'll
+            then look for ``c`` in ``destpath``.
+
+            If a key '' (empty string) is in the dictionary, then
+            if no more specific key is found all requests will
+            be redirected to that path.
+
+            Instead of a string giving a path to redirect to, you
+            can also give a URLParser object, so that some portions
+            of the path are delegated to different parsers.
+
+            If no matching key is found, and there is no '' key,
+            then parsing goes on as usual.
+
+        `SubParser`:
+            This should be a class object.  It will be instantiated,
+            and then `parse` will be called with it, delegating to
+            this instance.  When instantiated, it will be passed
+            *this* FileParser instance; the parser can use this to
+            return control back to the FileParser after doing whatever
+            it wants to do.
+
+            You may want to use a line like this to handle the names::
+
+                from ParserX import ParserX as SubParser
+
+        `urlParser`:
+            This should be an already instantiated URLParser-like
+            object.  `parse(trans, requestPath)` will be called
+            on this instance.
+
+        `urlParserHook`:
+            Like `urlParser`, except the method
+            `parseHook(trans, requestPath, fileParser)` will
+            be called, where fileParser is this FileParser instance.
+
+        `urlJoins`:
+            Either a single path, or a list of paths.  You can also
+            use URLParser objects, like with `urlRedirect`.
+
+            Each of these paths (or parsers) will be tried in
+            order.  If it raises HTTPNotFound, then the next path
+            will be tried, ending with the current path.
+
+            Paths are relative to the current directory.  If you
+            don't want the current directory to be a last resort,
+            you can include '.' in the joins.
+
+        """</span>
+        <span class="PY_KEYWORD">if</span> self._initModule <span class="PY_KEYWORD">is</span> None:
+            self._initModule = self.initModule()
+        mod = self._initModule
+
+        seen = trans._fileParserInitSeen.setdefault(self._path, set())
+
+        <span class="PY_KEYWORD">if</span> (<span class="PY_STRING">'urlTransactionHook'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> seen
+                <span class="PY_KEYWORD">and</span> hasattr(mod, <span class="PY_STRING">'urlTransactionHook'</span>)):
+            seen.add(<span class="PY_STRING">'urlTransactionHook'</span>)
+            mod.urlTransactionHook(trans)
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'urlRedirect'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> seen <span class="PY_KEYWORD">and</span> hasattr(mod, <span class="PY_STRING">'urlRedirect'</span>):
+            <span class="PY_COMMENT"># @@: do we need this shortcircuit?</span>
+            seen.add(<span class="PY_STRING">'urlRedirect'</span>)
+            <span class="PY_KEYWORD">try</span>:
+                nextPart, restPath = requestPath[1:].split(<span class="PY_STRING">'/'</span>, 1)
+                restPath = <span class="PY_STRING">'/'</span> + restPath
+            <span class="PY_KEYWORD">except</span> ValueError:
+                nextPart = requestPath[1:]
+                restPath = <span class="PY_STRING">''</span>
+            <span class="PY_KEYWORD">if</span> nextPart <span class="PY_KEYWORD">in</span> mod.urlRedirect:
+                redirTo = mod.urlRedirect[nextPart]
+                redirPath = restPath
+            <span class="PY_KEYWORD">elif</span> <span class="PY_STRING">''</span> <span class="PY_KEYWORD">in</span> mod.urlRedirect:
+                redirTo = mod.urlRedirect[<span class="PY_STRING">''</span>]
+                redirPath = restPath
+            <span class="PY_KEYWORD">else</span>:
+                redirTo = None
+            <span class="PY_KEYWORD">if</span> redirTo:
+                <span class="PY_KEYWORD">if</span> isinstance(redirTo, basestring):
+                    fpp = FileParser(os.path.join(self._path, redirTo))
+                <span class="PY_KEYWORD">else</span>:
+                    fpp = redirTo
+                <span class="PY_KEYWORD">return</span> fpp.parse(trans, redirPath)
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'SubParser'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> seen <span class="PY_KEYWORD">and</span> hasattr(mod, <span class="PY_STRING">'SubParser'</span>):
+            seen.add(<span class="PY_STRING">'SubParser'</span>)
+            pp = mod.SubParser(self)
+            <span class="PY_KEYWORD">return</span> pp.parse(trans, requestPath)
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'urlParser'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> seen <span class="PY_KEYWORD">and</span> hasattr(mod, <span class="PY_STRING">'urlParser'</span>):
+            seen.add(<span class="PY_STRING">'urlParser'</span>)
+            pp = mod.urlParser
+            <span class="PY_KEYWORD">return</span> pp.parse(trans, requestPath)
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'urlParserHook'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> seen <span class="PY_KEYWORD">and</span> hasattr(mod, <span class="PY_STRING">'urlParserHook'</span>):
+            seen.add(<span class="PY_STRING">'urlParserHook'</span>)
+            pp = mod.urlParserHook
+            <span class="PY_KEYWORD">return</span> pp.parseHook(trans, requestPath, self)
+
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'urlJoins'</span> <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> seen <span class="PY_KEYWORD">and</span> hasattr(mod, <span class="PY_STRING">'urlJoins'</span>):
+            seen.add(<span class="PY_STRING">'urlJoins'</span>)
+            joinPath = mod.urlJoins
+            <span class="PY_KEYWORD">if</span> isinstance(joinPath, basestring):
+                joinPath = [joinPath]
+            <span class="PY_KEYWORD">for</span> path <span class="PY_KEYWORD">in</span> joinPath:
+                path = os.path.join(self._path, path)
+                <span class="PY_KEYWORD">if</span> isinstance(path, basestring):
+                    parser = FileParser(os.path.join(self._path, path))
+                <span class="PY_KEYWORD">else</span>:
+                    parser = path
+                <span class="PY_KEYWORD">try</span>:
+                    <span class="PY_KEYWORD">return</span> parser.parse(trans, requestPath)
+                <span class="PY_KEYWORD">except</span> HTTPNotFound:
+                    <span class="PY_KEYWORD">pass</span>
+
+        <span class="PY_KEYWORD">return</span> None
+
+FileParser = ParamFactory(_FileParser)
+
+
+<span class="PY_KEYWORD">class</span> URLParameterParser(URLParser):
+    <span class="PY_STRING">"""Strips named parameters out of the URL.
+
+    E.g. in ``/path/SID=123/etc`` the ``SID=123`` will be removed from the URL,
+    and a field will be set in the request (so long as no field by that name
+    already exists -- if a field does exist the variable is thrown away).
+    These are put in the place of GET or POST variables.
+
+    It should be put in an __init__, like::
+
+        from WebKit.URLParser import URLParameterParser
+        urlParserHook = URLParameterParser()
+
+    Or (slightly less efficient):
+
+        from WebKit.URLParser import URLParameterParser as SubParser
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self, fileParser=None):
+        self._fileParser = fileParser
+
+
+    <span class="PY_COMMENT">## Parsing ##</span>
+
+    <span class="PY_KEYWORD">def</span> parse(self, trans, requestPath):
+        <span class="PY_STRING">"""Delegates to `parseHook`."""</span>
+        <span class="PY_KEYWORD">return</span> self.parseHook(trans, requestPath, self._fileParser)
+
+    @staticmethod
+    <span class="PY_KEYWORD">def</span> parseHook(trans, requestPath, hook):
+        <span class="PY_STRING">"""Munges the path.
+
+        The `hook` is the FileParser object that originally called this --
+        we just want to strip stuff out of the URL and then give it back to
+        the FileParser instance, which can actually find the servlet.
+
+        """</span>
+        parts = requestPath.split(<span class="PY_STRING">'/'</span>)
+        result = []
+        req = trans.request()
+        <span class="PY_KEYWORD">for</span> part <span class="PY_KEYWORD">in</span> parts:
+            <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'='</span> <span class="PY_KEYWORD">in</span> part:
+                name, value = part.split(<span class="PY_STRING">'='</span>, 1)
+                <span class="PY_KEYWORD">if</span> <span class="PY_KEYWORD">not</span> req.hasField(name):
+                    req.setField(name, value)
+            <span class="PY_KEYWORD">else</span>:
+                result.append(part)
+        <span class="PY_KEYWORD">return</span> hook.parse(trans, <span class="PY_STRING">'/'</span>.join(result))
+
+
+<span class="PY_KEYWORD">class</span> ServletFactoryManagerClass(object):
+    <span class="PY_STRING">"""Manage servlet factories.
+
+    This singleton (called `ServletFactoryManager`) collects and manages
+    all the servlet factories that are installed.
+
+    See `addServletFactory` for adding new factories, and `servletForFile`
+    for getting the factories back.
+
+    """</span>
+
+
+    <span class="PY_COMMENT">## Init ##</span>
+
+    <span class="PY_KEYWORD">def</span> __init__(self):
+        self.reset()
+
+    <span class="PY_KEYWORD">def</span> reset(self):
+        self._factories = []
+        self._factoryExtensions = {}
+
+
+    <span class="PY_COMMENT">## Manager ##</span>
+
+    <span class="PY_KEYWORD">def</span> addServletFactory(self, factory):
+        <span class="PY_STRING">"""Add a new servlet factory.
+
+        Servlet factories can add themselves with::
+
+            ServletFactoryManager.addServletFactory(factory)
+
+        The factory must have an `extensions` method, which should
+        return a list of extensions that the factory handles (like
+        ``['.ht']``).  The special extension ``.*`` will match any
+        file if no other factory is found.  See `ServletFactory`
+        for more information.
+
+        """</span>
+
+        self._factories.append(factory)
+        <span class="PY_KEYWORD">for</span> ext <span class="PY_KEYWORD">in</span> factory.extensions():
+            <span class="PY_KEYWORD">assert</span> ext <span class="PY_KEYWORD">not</span> <span class="PY_KEYWORD">in</span> self._factoryExtensions, (
+                <span class="PY_STRING">"Extension %s for factory %s was already used by factory %s"</span>
+                % (repr(ext), factory.__name__,
+                    self._factoryExtensions[ext].__name__))
+            self._factoryExtensions[ext] = factory
+
+    <span class="PY_KEYWORD">def</span> factoryForFile(self, path):
+        <span class="PY_STRING">"""Get a factory for a filename."""</span>
+        ext = os.path.splitext(path)[1]
+        <span class="PY_KEYWORD">if</span> ext <span class="PY_KEYWORD">in</span> self._factoryExtensions:
+            <span class="PY_KEYWORD">return</span> self._factoryExtensions[ext]
+        <span class="PY_KEYWORD">if</span> <span class="PY_STRING">'.*'</span> <span class="PY_KEYWORD">in</span> self._factoryExtensions:
+            <span class="PY_KEYWORD">return</span> self._factoryExtensions[<span class="PY_STRING">'.*'</span>]
+        <span class="PY_KEYWORD">raise</span> HTTPNotFound
+
+    <span class="PY_KEYWORD">def</span> servletForFile(self, trans, path):
+        <span class="PY_STRING">"""Get a servlet for a filename and transaction.
+
+        Uses `factoryForFile` to find the factory, which
+        creates the servlet.
+
+        """</span>
+        factory = self.factoryForFile(path)
+        <span class="PY_KEYWORD">return</span> factory.servletForTransaction(trans)
+
+ServletFactoryManager = ServletFactoryManagerClass()
+
+
+<span class="PY_COMMENT">## Global Init ##</span>
+
+<span class="PY_KEYWORD">def</span> initApp(app):
+    <span class="PY_STRING">"""Initialize the application.
+
+    Installs the proper servlet factories, and gets some settings from
+    Application.config. Also saves the application in _globalApplication
+    for future calls to the application() function.
+
+    This needs to be called before any of the URLParser-derived classes
+    are instantiated.
+
+    """</span>
+    <span class="PY_KEYWORD">global</span> _globalApplication
+    _globalApplication = app
+    <span class="PY_KEYWORD">from</span> UnknownFileTypeServlet <span class="PY_KEYWORD">import</span> UnknownFileTypeServletFactory
+    <span class="PY_KEYWORD">from</span> ServletFactory <span class="PY_KEYWORD">import</span> PythonServletFactory
+
+    ServletFactoryManager.reset()
+    <span class="PY_KEYWORD">for</span> factory <span class="PY_KEYWORD">in</span> [UnknownFileTypeServletFactory, PythonServletFactory]:
+        ServletFactoryManager.addServletFactory(factory(app))
+
+    initParser(app)
+
+<span class="PY_KEYWORD">def</span> initParser(app):
+    <span class="PY_STRING">"""Initialize the FileParser Class."""</span>
+    cls = _FileParser
+    cls._app = app
+    cls._imp = app._imp
+    cls._contexts = app.contexts
+    cls._filesToHideRegexes = []
+    cls._filesToServeRegexes = []
+    <span class="PY_KEYWORD">from</span> fnmatch <span class="PY_KEYWORD">import</span> translate <span class="PY_KEYWORD">as</span> fnTranslate
+    <span class="PY_KEYWORD">for</span> pattern <span class="PY_KEYWORD">in</span> app.setting(<span class="PY_STRING">'FilesToHide'</span>):
+        cls._filesToHideRegexes.append(re.compile(fnTranslate(pattern)))
+    <span class="PY_KEYWORD">for</span> pattern <span class="PY_KEYWORD">in</span> app.setting(<span class="PY_STRING">'FilesToServe'</span>):
+        cls._filesToServeRegexes.append(re.compile(fnTranslate(pattern)))
+    cls._toIgnore = app.setting(<span class="PY_STRING">'ExtensionsToIgnore'</span>)
+    cls._toServe = app.setting(<span class="PY_STRING">'ExtensionsToServe'</span>)
+    cls._useCascading = app.setting(<span class="PY_STRING">'UseCascadingExtensions'</span>)
+    cls._cascadeOrder = app.setting(<span class="PY_STRING">'ExtensionCascadeOrder'</span>)
+    cls._directoryFile = app.setting(<span class="PY_STRING">'DirectoryFile'</span>)
+    cls._extraPathInfo = app.setting(<span class="PY_STRING">'ExtraPathInfo'</span>)
+</pre>
+<!--footer-->
+
+</body>
+</html>
