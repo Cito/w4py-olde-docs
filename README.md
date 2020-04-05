@@ -4,6 +4,6 @@ Webware for Python is a suite of Python packages and tools for developing object
 
 Webware for Python is well proven and platform-independent. It is compatible with multiple web servers, database servers and operating systems.
 
-This GitHub repository serves as an archive for the old [code repository](https://github.com/Cito/w4py-olde-docs/tree/master) and the [online docs](https://cito.github.io/w4py-olde-docs/) as of version 1.1.1.
+This GitHub repository serves as an archive for the old [code repository](https://github.com/WebwareForPython/w4py-olde-docs/tree/master) and the [online docs](https://webwareforpython.github.io/w4py-olde-docs/) as of version 1.1.1.
 
-Note that [Webware for Python](https://cito.github.io/w4py) is still maintained, but this Repository has been frozen in 2015 and will not be updated any more.
+Note that [Webware for Python](https://webwareforpython.github.io/w4py) is still maintained, but this Repository has been frozen in 2015 and will not be updated any more.
